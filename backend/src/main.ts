@@ -7,8 +7,7 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
-import { Request, Response } from 'express';
-import * as express from 'express';
+import { Request, Response, NextFunction } from 'express';
 
 async function bootstrap() {
   // const app = await NestFactory.create(AppModule);
@@ -38,7 +37,10 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
 
   app.useStaticAssets(join(__dirname, '..', 'public'));
-  app.use((req: Request, res: Response) => {
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
     res.sendFile(join(__dirname, '..', 'public', 'index.html'));
   });
 

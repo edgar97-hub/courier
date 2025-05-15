@@ -29,7 +29,10 @@ async function bootstrap() {
     const document = swagger_1.SwaggerModule.createDocument(app, config);
     swagger_1.SwaggerModule.setup('docs', app, document);
     app.useStaticAssets((0, path_1.join)(__dirname, '..', 'public'));
-    app.use((req, res) => {
+    app.use((req, res, next) => {
+        if (req.path.startsWith('/api')) {
+            return next();
+        }
         res.sendFile((0, path_1.join)(__dirname, '..', 'public', 'index.html'));
     });
     await app.listen(configservice.get('PORT') ?? 3000);
