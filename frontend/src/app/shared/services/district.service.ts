@@ -5,7 +5,8 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root',
 })
 export class DistrictService {
-  readonly API_URL = 'http://localhost:8000/api/districts';
+  // readonly API_URL = 'http://localhost:8000/api/districts';
+  readonly API_URL = 'http://161.132.41.184:8000/api/districts';
 
   unsubscribe: any | null = null;
 

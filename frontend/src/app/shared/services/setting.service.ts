@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root',
 })
 export class SettingService {
-  readonly API_URL = 'http://localhost:8000/api/settings';
+  readonly API_URL = 'http://161.132.41.184:8000/api/settings';
 
   unsubscribe: any | null = null;
 

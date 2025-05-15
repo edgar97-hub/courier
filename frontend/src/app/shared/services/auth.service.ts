@@ -7,7 +7,8 @@ import { User } from '../models/user';
   providedIn: 'root',
 })
 export class AuthService {
-  readonly API_URL = 'http://localhost:8000/api/auth/login';
+  // readonly API_URL = 'http://localhost:8000/api/auth/login';
+  readonly API_URL = 'http://161.132.41.184:8000/api/auth/login';
 
   user = signal<User | null>(null);
 

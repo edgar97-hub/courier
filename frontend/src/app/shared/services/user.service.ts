@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root',
 })
 export class UserService {
-  readonly API_URL = 'http://localhost:8000/api/users';
+  readonly API_URL = 'http://161.132.41.184:8000/api/users';
 
   unsubscribe: any | null = null;
 
