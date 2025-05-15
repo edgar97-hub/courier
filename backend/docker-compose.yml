@@ -11,3 +11,13 @@ services:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - 5433:5432
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - '8080:80'
+    environment:
+      PGADMIN_DEFAULT_EMAIL: edgar@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: Yi48}dv6C;qz
+    depends_on:
+      - codrr_pg
