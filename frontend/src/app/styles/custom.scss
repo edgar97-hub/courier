@@ -1,0 +1,19 @@
+.cdk-drop-list-dragging {
+  opacity: 0.5;
+
+  border-left: 5px solid var(--mat-sys-outline);
+  padding-left: 8px;
+}
+
+.mat-drawer-inner-container {
+  scrollbar-width: thin;
+}
+
+::view-transition-old(.widget),
+::view-transition-new(.widget) {
+  height: 100%;
+}
+
+.mat-elevation-z3 {
+  box-shadow: var(--mat-sys-level2);
+}

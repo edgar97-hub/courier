@@ -1,0 +1,34 @@
+@use "@angular/material" as mat;
+
+html {
+  color-scheme: light;
+  @include mat.theme(
+    (
+      color: mat.$azure-palette,
+      typography: Inter,
+    )
+  );
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+mat-form-field {
+  display: block !important;
+
+  @include mat.theme(
+    (
+      density: -2,
+    )
+  );
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: Inter, "Helvetica Neue", sans-serif;
+}

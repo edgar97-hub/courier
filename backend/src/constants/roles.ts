@@ -1,0 +1,13 @@
+export enum ROLES {
+  // BASIC = 'BASIC',
+  // CREATOR = 'CREATOR',
+  ADMIN = 'ADMIN',
+  CUSTOMER = 'CUSTOMER',
+  MOTORIZED = 'MOTORIZED',
+}
+
+export enum ACCESS_LEVEL {
+  DEVELOPER = 30,
+  MANTEINER = 40,
+  OWNER = 50,
+}
