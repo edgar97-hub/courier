@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, Generated, OneToMany } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { ROLES } from '../../constants/roles';
 import { IUser } from '../../interfaces/user.interface';
@@ -15,6 +15,10 @@ export class UsersEntity extends BaseEntity implements IUser {
 
   // @Column()
   // age: number;
+
+  @Column({ unique: true })
+  @Generated('increment')
+  code: number;
 
   @Column({ unique: true })
   email: string;

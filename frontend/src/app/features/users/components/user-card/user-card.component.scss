@@ -1,0 +1,45 @@
+.user-card {
+  margin-bottom: 20px;
+  transition: box-shadow 0.3s ease-in-out;
+
+  &:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.user-avatar {
+  background-color: #e0e0e0; // Un color de fondo para el avatar
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  mat-icon {
+    font-size: 40px; // Tamaño del icono
+    height: 40px;
+    width: 40px;
+  }
+}
+
+mat-card-content p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+mat-card-actions {
+  padding: 8px 16px !important; // Material a veces necesita !important para overrides
+}
+
+.company-info,
+.address-info {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+
+  h4 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 0.9em;
+    color: #757575;
+  }
+}

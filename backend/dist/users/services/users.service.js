@@ -36,13 +36,11 @@ let UsersService = class UsersService {
     }
     async findUsers() {
         try {
-            const users = await this.userRepository.find();
-            if (users.length === 0) {
-                throw new error_manager_1.ErrorManager({
-                    type: 'BAD_REQUEST',
-                    message: 'No se encontro resultado',
-                });
-            }
+            const users = await this.userRepository.find({
+                order: {
+                    code: 'ASC',
+                },
+            });
             return users;
         }
         catch (error) {
@@ -54,8 +52,6 @@ let UsersService = class UsersService {
             const user = (await this.userRepository
                 .createQueryBuilder('user')
                 .where({ id })
-                .leftJoinAndSelect('user.projectsIncludes', 'projectsIncludes')
-                .leftJoinAndSelect('projectsIncludes.project', 'project')
                 .getOne());
             if (!user) {
                 throw new error_manager_1.ErrorManager({
@@ -94,6 +90,9 @@ let UsersService = class UsersService {
         try {
             if (body.password) {
                 body.password = await bcrypt.hash(body.password, Number(process.env.HASH_SALT));
+            }
+            else {
+                delete body.password;
             }
             const user = await this.userRepository.update(id, body);
             if (user.affected === 0) {

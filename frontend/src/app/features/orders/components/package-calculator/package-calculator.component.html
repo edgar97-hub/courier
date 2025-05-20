@@ -1,0 +1,113 @@
+<div [formGroup]="packageFormGroup" class="package-calculator-container">
+  <h3 class="section-subtitle">Tamaño del paquete</h3>
+  <mat-radio-group
+    formControlName="package_size_type"
+    aria-label="Seleccione el tipo de tamaño del paquete"
+  >
+    <mat-radio-button value="standard" class="package-option">{{
+      standardPackageLabel()
+    }}</mat-radio-button>
+    <mat-radio-button value="custom" class="package-option"
+      >Otros tamaños : Calcular</mat-radio-button
+    >
+  </mat-radio-group>
+
+  <div
+    *ngIf="packageFormGroup.get('package_size_type')?.value === 'custom'"
+    class="custom-dimensions-grid"
+  >
+    <mat-form-field appearance="outline">
+      <mat-label>Ancho (cm)</mat-label>
+      <input
+        matInput
+        type="number"
+        formControlName="package_width_cm"
+        placeholder="Ingrese el ancho"
+      />
+      <mat-error
+        *ngIf="packageFormGroup.get('package_width_cm')?.hasError('required')"
+        >Ancho es requerido</mat-error
+      >
+      <mat-error
+        *ngIf="packageFormGroup.get('package_width_cm')?.hasError('min')"
+        >Valor debe ser positivo</mat-error
+      >
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Largo (cm)</mat-label>
+      <input
+        matInput
+        type="number"
+        formControlName="package_length_cm"
+        placeholder="Ingrese el largo"
+      />
+      <mat-error
+        *ngIf="packageFormGroup.get('package_length_cm')?.hasError('required')"
+        >Largo es requerido</mat-error
+      >
+      <mat-error
+        *ngIf="packageFormGroup.get('package_length_cm')?.hasError('min')"
+        >Valor debe ser positivo</mat-error
+      >
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Alto (cm)</mat-label>
+      <input
+        matInput
+        type="number"
+        formControlName="package_height_cm"
+        placeholder="Ingrese el alto"
+      />
+      <mat-error
+        *ngIf="packageFormGroup.get('package_height_cm')?.hasError('required')"
+        >Alto es requerido</mat-error
+      >
+      <mat-error
+        *ngIf="packageFormGroup.get('package_height_cm')?.hasError('min')"
+        >Valor debe ser positivo</mat-error
+      >
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Peso (kg)</mat-label>
+      <input
+        matInput
+        type="number"
+        formControlName="package_weight_kg"
+        placeholder="Ingrese el peso"
+      />
+      <mat-error
+        *ngIf="packageFormGroup.get('package_weight_kg')?.hasError('required')"
+        >Peso es requerido</mat-error
+      >
+      <mat-error
+        *ngIf="packageFormGroup.get('package_weight_kg')?.hasError('min')"
+        >Valor debe ser positivo</mat-error
+      >
+    </mat-form-field>
+
+    <div class="calculate-button-container">
+      <button
+        mat-flat-button
+        color="accent"
+        type="button"
+        (click)="onCalculateCustomCost()"
+        [disabled]="isCalculating()"
+      >
+        <mat-progress-spinner
+          *ngIf="isCalculating()"
+          mode="indeterminate"
+          diameter="20"
+          class="button-spinner"
+        ></mat-progress-spinner>
+        {{ isCalculating() ? "Calculando..." : "CALCULAR" }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="maxDimensions$ | async as maxDims" class="max-dimensions-info">
+    <p>{{ maxDims.info_text }}</p>
+  </div>
+</div>

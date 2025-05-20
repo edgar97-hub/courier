@@ -20,6 +20,11 @@ let UsersEntity = class UsersEntity extends base_entity_1.BaseEntity {
 exports.UsersEntity = UsersEntity;
 __decorate([
     (0, typeorm_1.Column)({ unique: true }),
+    (0, typeorm_1.Generated)('increment'),
+    __metadata("design:type", Number)
+], UsersEntity.prototype, "code", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ unique: true }),
     __metadata("design:type", String)
 ], UsersEntity.prototype, "email", void 0);
 __decorate([

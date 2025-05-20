@@ -1,30 +1,29 @@
 import { inject } from '@angular/core';
 import { CanMatchFn, Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 
 export function redirectLoginIfNotAuthenticated(): CanMatchFn {
-  return async (route) => {
+  return async () => {
     const router = inject(Router);
+    const authService = inject(AuthService);
 
-    const user = await inject(AuthService).getAuthState();
-
-    if (!user) {
+    if (authService.isAuthenticated()) {
+      return true;
+    } else {
       return router.parseUrl('/login');
     }
-
-    return true;
   };
 }
 
 export function redirectDashboardIfAuthenticated(): CanMatchFn {
-  return async (route) => {
+  return () => {
     const router = inject(Router);
+    const authService = inject(AuthService);
 
-    const user = await inject(AuthService).getAuthState();
-    if (!user) {
+    if (authService.isAuthenticated()) {
+      return router.parseUrl('/dashboard');
+    } else {
       return true;
     }
-
-    return router.parseUrl('/orders');
   };
 }

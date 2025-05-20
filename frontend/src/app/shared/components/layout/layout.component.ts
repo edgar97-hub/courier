@@ -21,7 +21,7 @@ import { AppStore } from '../../../app.store';
   ],
   template: `
     <app-header [(collapsed)]="collapsed" />
-    @if (appStore.loading()) {
+    @if (appStore.isLoading()) {
     <mat-progress-bar class="absolute! top-[64px] z-10" mode="indeterminate" />
     }
     <mat-sidenav-container>

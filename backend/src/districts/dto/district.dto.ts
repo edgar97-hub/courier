@@ -16,8 +16,19 @@ export class DistrictDTO {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsString()
-  price: string;
+  weight_from: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  weight_to: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  price: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  isStandard: boolean;
 }
 
 export class DistrictUpdateDTO {
@@ -28,6 +39,17 @@ export class DistrictUpdateDTO {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsString()
-  price: string;
+  weight_from: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  weight_to: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  price: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  isStandard: boolean;
 }

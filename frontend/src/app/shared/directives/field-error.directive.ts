@@ -40,15 +40,16 @@ export class FieldErrorDirective {
     // Default error messages
     const errorMessages: { [key: string]: string | ((error: any) => string) } =
       {
-        required: 'This field is required',
-        email: 'Please enter a valid email address',
-        min: (error) => `Value must be greater than or equal to ${error.min}`,
-        max: (error) => `Value must be less than or equal to ${error.max}`,
+        required: 'Este campo es obligatorio',
+        email:
+          'Por favor, introduce una dirección de correo electrónico válida',
+        min: (error) => `El valor debe ser mayor o igual a ${error.min}`,
+        max: (error) => `El valor debe ser menor o igual a ${error.max}`,
         minlength: (error) =>
-          `Must be at least ${error.requiredLength} characters`,
+          `debe ser al menos ${error.requiredLength} characters`,
         maxlength: (error) =>
-          `Cannot be more than ${error.requiredLength} characters`,
-        pattern: 'Please enter a valid value',
+          `No puede ser más que ${error.requiredLength} characters`,
+        pattern: 'Por favor, introduzca un valor válido',
       };
 
     const errorMessage = errorMessages[errorKey];

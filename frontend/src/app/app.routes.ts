@@ -6,61 +6,72 @@ import {
 
 export const routes: Routes = [
   {
-    path: '',
-    pathMatch: 'full',
-    redirectTo: 'dashboard',
-  },
-  {
     path: 'login',
-    loadComponent: () => import('./features/login/login.component'),
-    canActivate: [redirectDashboardIfAuthenticated()],
+    loadComponent: () =>
+      import('./features/login/pages/login-page/login-page.component').then(
+        (m) => m.LoginPageComponent
+      ),
+    canMatch: [redirectDashboardIfAuthenticated],
+    title: 'Log In',
   },
   {
-    path: '',
+    path: 'register',
+    loadComponent: () =>
+      import(
+        './features/auth/pages/register-page/register-page.component'
+      ).then((m) => m.RegisterPageComponent),
+    canMatch: [redirectDashboardIfAuthenticated],
+    title: 'Register',
+  },
+  {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import(
+        './features/auth/pages/forgot-password-page/forgot-password-page.component'
+      ).then((m) => m.ForgotPasswordPageComponent),
+    canMatch: [redirectDashboardIfAuthenticated],
+    title: 'Forgot Password',
+  },
+  {
+    path: 'configuracion',
     loadComponent: () =>
       import('../app/shared/components/layout/layout.component'),
     canActivate: [redirectLoginIfNotAuthenticated()],
     children: [
       {
         path: 'users',
-        loadComponent: () => import('../app/pages/users/table.component'),
+        loadChildren: () =>
+          import('./features/users/users.routes').then((m) => m.USERS_ROUTES),
+
+        title: 'Users Management',
+        canActivate: [redirectLoginIfNotAuthenticated()],
       },
       {
-        path: 'districts',
-        loadComponent: () => import('../app/pages/distritos/table.component'),
+        path: 'settings',
+        loadComponent: () =>
+          import(
+            './features/settings/pages/settings-page/settings-page.component'
+          ).then((m) => m.SettingsPageComponent),
       },
+      {
+        path: 'shipping-rates',
+        loadComponent: () => import('./features/tarifasEnvío/table.component'),
+      },
+    ],
+  },
+  {
+    path: 'orders',
+    loadComponent: () =>
+      import('../app/shared/components/layout/layout.component'),
+    canActivate: [redirectLoginIfNotAuthenticated()],
+    children: [
       {
         path: 'orders',
-        loadComponent: () =>
-          import('../app/features/dashboard/dashboard.component'),
+        loadChildren: () =>
+          import('./features/orders/orders.routes').then(
+            (m) => m.ORDERS_ROUTES
+          ),
       },
-      {
-        path: 'setting',
-        loadComponent: () => import('../app/pages/settings/table.component'),
-      },
-      // {
-      //   path: 'dashboard',
-      //   loadComponent: () =>
-      //     import('../app/features/dashboard/dashboard.component'),
-      // },
-      // {
-      //   path: 'content',
-      //   loadChildren: () => import('../app/features/content/content.routes'),
-      // },
-      // {
-      //   path: 'components',
-      //   loadChildren: () =>
-      //     import('../app/features/components/components.routes'),
-      // },
-      // {
-      //   path: 'comments',
-      //   loadComponent: () =>
-      //     import('../app/features/comments/comments.component'),
-      // },
-      // {
-      //   path: 'forms',
-      //   loadChildren: () => import('../app/features/forms/forms.routes'),
-      // },
     ],
   },
 ];

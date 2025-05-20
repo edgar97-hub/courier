@@ -17,8 +17,8 @@ import { AppStore } from '../../../../app.store';
           collapsed() ? 'h-0! opacity-0' : ''
         }}"
       >
-        <h2 class="text-lg">{{ appStore.user()?.name ?? 'User' }}</h2>
-        <p class="text-sm">{{ appStore.user()?.role }}</p>
+        <h2 class="text-lg">{{ appStore.currentUser()?.username ?? 'User' }}</h2>
+        <p class="text-sm">{{ appStore.currentUser()?.rol }}</p>
       </div>
     </div>
   `,

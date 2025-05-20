@@ -22,7 +22,11 @@ export class DistrictsService {
 
   public async findUsers(): Promise<DistrictsEntity[]> {
     try {
-      const users: DistrictsEntity[] = await this.userRepository.find();
+      const users: DistrictsEntity[] = await this.userRepository.find({
+        order: {
+          code: 'ASC',
+        },
+      });
       // if (users.length === 0) {
       //   throw new ErrorManager({
       //     type: 'BAD_REQUEST',

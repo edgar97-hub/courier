@@ -1,0 +1,49 @@
+.full-width {
+  width: 100%;
+  margin-bottom: 16px ;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 0.9em;
+}
+
+.forgot-password-link {
+  //   color: mat.get-theme-color(
+  //     theme.$primary-palette,
+  //     default
+  //   ); // Usar color primario del tema
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.login-button {
+  padding: 10px 0;
+  font-size: 1.1em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+// Asegúrate de importar tu tema de Angular Material en un archivo SCSS global
+// o al menos tener acceso a las paletas de colores si usas `mat.get-theme-color`.
+// Por ejemplo, en tu styles.scss:
+// @use '@angular/material' as mat;
+// @include mat.core();
+// $my-app-primary: mat.define-palette(mat.$indigo-palette);
+// $my-app-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+// $my-app-theme: mat.define-light-theme((
+//   color: (
+//     primary: $my-app-primary,
+//     accent: $my-app-accent,
+//   )
+// ));
+// @include mat.all-component-themes($my-app-theme);
+//
+// Y luego en tu login-form.component.scss podrías importar:
+// @use '@angular/material' as mat;
+// @use 'path/to/your/global/theme-definition' as theme;

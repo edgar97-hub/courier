@@ -1,0 +1,50 @@
+<div class="page-content-wrapper">
+  <div class="page-title-bar">
+    <h1 class="page-title">Listado de pedidos Lima</h1>
+    <div class="breadcrumbs">
+      <!-- Ejemplo de Breadcrumbs (puedes hacerlo más dinámico) -->
+      <a routerLink="/">Inicio</a> /
+      <span>Listado de pedidos Lima</span>
+    </div>
+  </div>
+
+  <app-order-filters
+    (filtersChanged)="onFiltersChanged($event)"
+  ></app-order-filters>
+
+  <div class="table-controls-bar">
+    <div class="records-info">
+      <!-- Esto se podría hacer más dinámico con el paginador -->
+      <!-- Mostrando registros del X al Y de un total de Z registros -->
+    </div>
+    <div class="actions-group">
+      <!-- Botón de Acciones Masivas (ejemplo con mat-menu) -->
+      <button
+        mat-stroked-button
+        color="primary"
+        [matMenuTriggerFor]="massiveActionsMenu"
+      >
+        Acciones Masivas <mat-icon>arrow_drop_down</mat-icon>
+      </button>
+      <mat-menu #massiveActionsMenu="matMenu">
+        <button mat-menu-item (click)="handleMassiveActions('export_excel')">
+          Exportar a Excel
+        </button>
+        <button mat-menu-item (click)="handleMassiveActions('print_selected')">
+          Imprimir Seleccionados
+        </button>
+        <!-- Más acciones -->
+      </mat-menu>
+    </div>
+  </div>
+
+  <app-order-table
+    [orders]="orders"
+    [isLoading]="isLoading"
+    [totalCount]="totalOrderCount"
+    [pageSize]="currentPageSize"
+    [pageIndex]="currentPageIndex"
+    (pageChanged)="onPageChanged($event)"
+    (sortChanged)="onSortChanged($event)"
+  ></app-order-table>
+</div>

@@ -21,8 +21,8 @@ let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
     }
-    async login({ username, password }) {
-        const userValidate = await this.authService.validateUser(username, password);
+    async login({ email, password }) {
+        const userValidate = await this.authService.validateUser(email, password);
         if (!userValidate) {
             throw new common_1.UnauthorizedException('Data not valid');
         }

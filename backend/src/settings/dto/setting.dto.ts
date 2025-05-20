@@ -10,43 +10,90 @@ import {
 
 export class SettingDTO {
   @ApiProperty()
-  @IsNotEmpty()
   @IsString()
   business_name: string;
 
   @ApiProperty()
-  @IsNotEmpty()
   @IsString()
   address: string;
 
   @ApiProperty()
-  @IsNotEmpty()
   @IsString()
   phone_number: string;
 
   @ApiProperty()
-  @IsNotEmpty()
   @IsString()
   logo_url: string;
+
+  @ApiProperty()
+  @IsString()
+  terms_conditions_url: string;
+
+  @ApiProperty()
+  standard_measurements_width: number;
+
+  @ApiProperty()
+  standard_measurements_length: number;
+
+  @ApiProperty()
+  standard_measurements_height: number;
+
+  @ApiProperty()
+  standard_measurements_weight: number;
+
+  @ApiProperty()
+  maximum_measurements_width: number;
+
+  @ApiProperty()
+  maximum_measurements_length: number;
+
+  @ApiProperty()
+  maximum_measurements_height: number;
+
+  @ApiProperty()
+  maximum_measurements_weight: number;
+
+  @ApiProperty()
+  volumetric_factor: number;
 }
 
 export class SettingUpdateDTO {
   @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
   business_name: string;
 
   @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
   address: string;
 
   @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
   phone_number: string;
 
   @ApiProperty()
-  @IsString()
   logo_url: string;
+
+  @ApiProperty()
+  standard_measurements_width: number;
+
+  @ApiProperty()
+  standard_measurements_length: number;
+
+  @ApiProperty()
+  standard_measurements_height: number;
+
+  @ApiProperty()
+  standard_measurements_weight: number;
+
+  @ApiProperty()
+  maximum_measurements_width: number;
+
+  @ApiProperty()
+  maximum_measurements_length: number;
+
+  @ApiProperty()
+  maximum_measurements_height: number;
+
+  @ApiProperty()
+  maximum_measurements_weight: number;
+
+  @ApiProperty()
+  volumetric_factor: number;
 }

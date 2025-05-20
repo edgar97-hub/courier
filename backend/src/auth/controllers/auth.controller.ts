@@ -15,11 +15,8 @@ import { AuthService } from '../services/auth.service';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
   @Post('login')
-  async login(@Body() { username, password }: AuthDTO) {
-    const userValidate = await this.authService.validateUser(
-      username,
-      password,
-    );
+  async login(@Body() { email, password }: AuthDTO) {
+    const userValidate = await this.authService.validateUser(email, password);
     if (!userValidate) {
       throw new UnauthorizedException('Data not valid');
     }

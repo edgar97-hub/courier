@@ -1,0 +1,36 @@
+<div class="login-page-wrapper">
+  <mat-card class="login-card">
+    <mat-card-header class="login-card-header">
+      <mat-card-title>¡Bienvenido de nuevo!</mat-card-title>
+      <!-- <mat-card-subtitle
+        >Por favor, inicia sesión para continuar</mat-card-subtitle
+      > -->
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Usamos la señal isLoading del AuthStore directamente en la plantilla -->
+      <div *ngIf="appStore.isLoading()" class="spinner-overlay">
+        <mat-progress-spinner
+          mode="indeterminate"
+          diameter="50"
+        ></mat-progress-spinner>
+      </div>
+      <app-login-form
+        (loginSubmit)="onLogin($event)"
+        [isLoading]="appStore.isLoading()"
+      ></app-login-form>
+
+      <!-- Opcional: Mostrar el error del store -->
+      <!--
+      <div *ngIf="authStore.error()" class="error-message mat-error">
+        {{ authStore.error() }}
+      </div>
+      -->
+    </mat-card-content>
+
+    <mat-card-actions class="login-card-actions">
+      <p>¿No tienes una cuenta?<a routerLink="/register">Inscribirse</a></p>
+      <p><a routerLink="/forgot-password">¿Has olvidado tu contraseña?</a></p>
+    </mat-card-actions>
+  </mat-card>
+</div>

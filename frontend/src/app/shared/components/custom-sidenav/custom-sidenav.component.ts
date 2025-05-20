@@ -40,8 +40,6 @@ import SidenavHeaderComponent from './sidenav-header/sidenav-header.component';
 })
 export class CustomSidenavComponent {
   appStore = inject(AppStore);
-
   collapsed = input<boolean>(false);
-
   menuItems = menuItems;
 }

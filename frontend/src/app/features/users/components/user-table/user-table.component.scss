@@ -1,0 +1,77 @@
+.table-container {
+  margin: 20px;
+  overflow: auto; // Para tablas anchas en pantallas pequeñas
+  border-radius: 8px; // Bordes redondeados para un look moderno
+  background-color: #fff; // Fondo blanco para la tabla
+}
+
+.table-header {
+  padding: 16px;
+  display: flex;
+  justify-content: space-between; // Si tuvieras más elementos como un botón de crear
+  align-items: center;
+  background-color: #f5f5f5; // Un fondo sutil para el header
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.filter-field {
+  width: 100%; // O un ancho específico
+  max-width: 400px; // Limita el ancho del campo de filtro
+  font-size: 0.9em;
+}
+
+.user-data-table {
+  width: 100%;
+}
+
+// Estilos para las celdas y cabeceras para un look más limpio
+th.mat-header-cell,
+td.mat-cell {
+  padding: 12px 16px; // Ajusta el padding
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: #e0e0e0; // Línea divisoria más sutil
+}
+
+th.mat-header-cell {
+  font-weight: 500; // Un poco más de peso para las cabeceras
+  color: #333; // Color de texto más oscuro para cabeceras
+  background-color: #fafafa; // Fondo ligeramente diferente para cabeceras
+}
+
+tr.mat-row:hover {
+  background-color: #f9f9f9; // Hover sutil en las filas
+}
+
+tr.mat-row:nth-child(even) {
+  // background-color: #fcfcfc; // Alternar color de filas (opcional)
+}
+
+.mat-mdc-paginator {
+  // Estilos específicos para el paginador de Material 15+
+  background-color: #f5f5f5;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+// Contenedor para el spinner de carga
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px;
+  min-height: 200px; // Para que el spinner no haga saltar la tabla
+}
+
+.no-data-message {
+  text-align: center;
+  padding: 30px;
+  color: #757575;
+  font-style: italic;
+}
+
+// Estilos para los botones de acción para que no estén muy pegados
+td.mat-cell button.mat-icon-button {
+  margin-right: 4px;
+}

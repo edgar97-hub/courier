@@ -32,7 +32,11 @@ let DistrictsService = class DistrictsService {
     }
     async findUsers() {
         try {
-            const users = await this.userRepository.find();
+            const users = await this.userRepository.find({
+                order: {
+                    code: 'ASC',
+                },
+            });
             return users;
         }
         catch (error) {

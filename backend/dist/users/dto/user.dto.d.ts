@@ -10,7 +10,7 @@ export declare class UserDTO {
 export declare class UserUpdateDTO {
     email: string;
     username: string;
-    password: string;
+    password?: string;
     role: ROLES;
 }
 export declare class UserToProjectDTO {

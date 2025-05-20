@@ -1,0 +1,17 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>Gestión de usuarios</h1>
+    <button mat-flat-button color="primary" (click)="navigateToCreate()">
+      <mat-icon>add_circle_outline</mat-icon>
+      Crear nuevo usuario
+    </button>
+  </div>
+
+  <app-user-table
+    [users]="(users$ | async) || []"
+    [isLoading]="(isLoading$ | async) ?? false"
+    (viewUser)="handleViewUser($event)"
+    (editUser)="handleEditUser($event)"
+    (deleteUser)="handleDeleteUser($event)"
+  ></app-user-table>
+</div>

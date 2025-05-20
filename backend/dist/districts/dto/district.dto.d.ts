@@ -1,8 +1,14 @@
 export declare class DistrictDTO {
     name: string;
-    price: string;
+    weight_from: number;
+    weight_to: number;
+    price: number;
+    isStandard: boolean;
 }
 export declare class DistrictUpdateDTO {
     name: string;
-    price: string;
+    weight_from: number;
+    weight_to: number;
+    price: number;
+    isStandard: boolean;
 }

@@ -24,7 +24,7 @@ import { AppStore } from '../../../app.store';
         <mat-icon>dark_mode</mat-icon>
         }
       </button>
-      @if (appStore.user(); as user) {
+      @if (appStore.currentUser(); as user) {
       <button mat-icon-button [mat-menu-trigger-for]="profileMenu">
         <!-- <img
           [src]="user.photoUrl"

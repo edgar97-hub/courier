@@ -1,0 +1,90 @@
+.login-page-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; // Ocupa toda la altura de la vista
+  background-color: #f0f2f5; // Un color de fondo suave para la página
+  padding: 20px;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px; // Ancho máximo de la tarjeta de login
+  padding: 24px; // Padding interno generoso
+  border-radius: 8px; // Bordes redondeados
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); // Sombra más pronunciada
+}
+
+.login-card-header {
+  text-align: center;
+  margin-bottom: 24px;
+
+  mat-card-title {
+    font-size: 2em; // Título más grande
+    font-weight: 500;
+    color: #3f51b5; // Color primario de Material
+    margin-bottom: 8px;
+  }
+
+  mat-card-subtitle {
+    font-size: 1em;
+    color: #757575;
+  }
+}
+
+.card-content {
+  border: 1px solid black;
+  display: flex;
+  flex-direction: column;
+  gap: 2;
+}
+
+.spinner-overlay {
+  position: absolute; // Para superponer el spinner
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8); // Fondo semitransparente
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10; // Para que esté por encima del formulario
+  border-radius: 8px; // Mantener bordes redondeados
+}
+
+.login-card-actions {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0; // Separador sutil
+  font-size: 0.9em;
+
+  p {
+    margin: 0;
+    color: #555;
+  }
+
+  a {
+    // color: mat.get-theme-color(theme.$primary-palette, default);
+    font-weight: 500;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Estilo para el snackbar de error (opcional, puede ir en styles.scss global)
+// ::ng-deep .error-snackbar {
+//   background-color: #d32f2f; // Un rojo de error
+//   color: white;
+// }
+// ::ng-deep .error-snackbar .mat-mdc-button.mat-mdc-button-base {
+//   color: white !important;
+// }

@@ -5,7 +5,7 @@ import { AuthBody } from '../interfaces/auth.interface';
 export class AuthDTO implements AuthBody {
   @ApiProperty()
   @IsNotEmpty()
-  username: string;
+  email: string;
 
   @ApiProperty()
   @IsNotEmpty()

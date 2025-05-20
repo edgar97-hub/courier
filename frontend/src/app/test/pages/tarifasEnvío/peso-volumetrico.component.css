@@ -1,0 +1,27 @@
+:host {
+  background-color: #1e1e1e;
+  color: white;
+  display: block;
+  padding: 20px;
+  font-family: sans-serif;
+}
+
+.check-item {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.checkmark::before {
+  content: "✓";
+  color: #8fd694;
+  margin-right: 8px;
+  font-size: 1.2em;
+}
+
+.formula {
+  text-align: center;
+  font-size: 1.3em;
+  margin-bottom: 20px;
+}

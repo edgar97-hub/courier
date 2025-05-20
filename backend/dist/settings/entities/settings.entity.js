@@ -28,9 +28,49 @@ __decorate([
     __metadata("design:type", String)
 ], SettingsEntity.prototype, "phone_number", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true, default: '' }),
     __metadata("design:type", String)
 ], SettingsEntity.prototype, "logo_url", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true, default: '' }),
+    __metadata("design:type", String)
+], SettingsEntity.prototype, "terms_conditions_url", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false, type: 'float', default: 0.0 }),
+    __metadata("design:type", Number)
+], SettingsEntity.prototype, "standard_measurements_width", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false, type: 'float', default: 0.0 }),
+    __metadata("design:type", Number)
+], SettingsEntity.prototype, "standard_measurements_height", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false, type: 'float', default: 0.0 }),
+    __metadata("design:type", Number)
+], SettingsEntity.prototype, "standard_measurements_length", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false, type: 'float', default: 0.0 }),
+    __metadata("design:type", Number)
+], SettingsEntity.prototype, "standard_measurements_weight", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false, type: 'float', default: 0.0 }),
+    __metadata("design:type", Number)
+], SettingsEntity.prototype, "maximum_measurements_width", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false, type: 'float', default: 0.0 }),
+    __metadata("design:type", Number)
+], SettingsEntity.prototype, "maximum_measurements_height", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false, type: 'float', default: 0.0 }),
+    __metadata("design:type", Number)
+], SettingsEntity.prototype, "maximum_measurements_length", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false, type: 'float', default: 0.0 }),
+    __metadata("design:type", Number)
+], SettingsEntity.prototype, "maximum_measurements_weight", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false, type: 'float', default: 0.0 }),
+    __metadata("design:type", Number)
+], SettingsEntity.prototype, "volumetric_factor", void 0);
 exports.SettingsEntity = SettingsEntity = __decorate([
     (0, typeorm_1.Entity)({ name: 'settings' })
 ], SettingsEntity);

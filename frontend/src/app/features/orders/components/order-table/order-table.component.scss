@@ -1,0 +1,111 @@
+.table-wrapper {
+  position: relative; // Para el spinner overlay
+  overflow: auto; // Para scroll horizontal si la tabla es muy ancha
+  border-radius: 8px;
+  background-color: #fff;
+  margin-top: 16px; // Espacio después de los filtros
+}
+
+.spinner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  border-radius: 8px;
+}
+
+.orders-table {
+  width: 100%;
+}
+
+// Estilo para cabeceras de tabla
+th.mat-header-cell {
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.67); // Un gris oscuro para el texto
+  background-color: #f5f5f5; // Fondo sutil para las cabeceras
+  padding: 12px 16px;
+  border-bottom: 2px solid #e0e0e0; // Línea inferior más marcada
+}
+
+// Estilo para celdas de datos
+td.mat-cell {
+  padding: 10px 16px;
+  border-bottom: 1px solid #efefef; // Línea divisoria muy sutil
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.data-row:hover {
+  background-color: #f0f8ff; // Un hover azulado muy claro
+}
+
+.align-right {
+  text-align: right;
+  justify-content: flex-end; // Para el contenido de la cabecera
+}
+
+.actions-column-header {
+  text-align: center !important;
+}
+.actions-cell {
+  text-align: center;
+  white-space: nowrap; // Evita que los botones se rompan en múltiples líneas
+  button {
+    margin: 0 4px; // Pequeño espacio entre botones de acción
+  }
+}
+
+.no-data-cell {
+  text-align: center;
+  padding: 40px;
+  font-style: italic;
+  color: #757575;
+}
+
+.mat-mdc-paginator {
+  // Estilos para el nuevo paginador de Material v15+
+  background-color: #f5f5f5;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  color: rgba(0, 0, 0, 0.67);
+}
+
+.truncate-text {
+  max-width: 150px; // Ajusta según necesites
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Estilos para los badges de estado (ejemplos)
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px; // Más redondeado
+  font-size: 0.8em;
+  font-weight: 500;
+  text-transform: capitalize;
+  display: inline-block; // Para que el padding funcione bien
+  color: #fff; // Color de texto por defecto para badges
+}
+
+.status-pending {
+  background-color: #ffc107; // Amarillo
+  color: #333;
+}
+.status-in-transit {
+  background-color: #17a2b8; // Azul info
+}
+.status-delivered {
+  background-color: #28a745; // Verde éxito
+}
+.status-cancelled {
+  background-color: #dc3545; // Rojo peligro
+}
+.status-on-hold {
+  background-color: #6c757d; // Gris secundario
+}

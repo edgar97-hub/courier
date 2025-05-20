@@ -5,7 +5,7 @@ export interface PayloadToken {
     role: ROLES;
 }
 export interface AuthBody {
-    username: string;
+    email: string;
     password: string;
 }
 export interface AuthResponse {

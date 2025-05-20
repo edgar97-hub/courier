@@ -1,0 +1,20 @@
+<div class="page-container form-page-container">
+  <div class="page-header">
+    <button
+      mat-icon-button
+      routerLink="/users"
+      matTooltip="Back to User List"
+      aria-label="Back to user list"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>Create New User</h1>
+  </div>
+  <app-user-form
+    [userToEdit]="null"
+    (formSubmit)="handleFormSubmit($event)"
+    (formCancel)="handleFormCancel()"
+    [isLoading]="!!(isSubmitting$ | async)"
+  ></app-user-form>
+  <!-- El snackbar de error es manejado por el Effect (o por la suscripción a error$ en el .ts) -->
+</div>

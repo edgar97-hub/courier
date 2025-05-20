@@ -1,0 +1,158 @@
+<div class="page-container settings-container">
+  <div class="page-header">
+    <h1>Configuración de la aplicación</h1>
+  </div>
+
+  <div *ngIf="isLoadingInitialData" class="spinner-overlay">
+    <mat-progress-spinner
+      mode="indeterminate"
+      diameter="60"
+    ></mat-progress-spinner>
+  </div>
+
+  <mat-card *ngIf="!isLoadingInitialData && settingsForm" class="settings-card">
+    <mat-card-content>
+      <form [formGroup]="settingsForm" (ngSubmit)="onSaveSettings()">
+        <h2>Nombre del negocio</h2>
+        <!-- ... Campos de Business Name, Address, Phone Number como antes ... -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nombre de la empresa</mat-label>
+          <input matInput formControlName="business_name" required />
+          <mat-icon matSuffix>storefront</mat-icon>
+          <mat-error
+            *ngIf="settingsForm.get('business_name')?.hasError('required')"
+          >
+            Se requiere el nombre de la empresa.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Direccón</mat-label>
+          <input matInput formControlName="address" />
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="flex-field">
+            <mat-label>Telefono</mat-label>
+            <input matInput formControlName="phone_number" />
+            <mat-icon matSuffix>phone</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <h2>Marca y aspectos legales</h2>
+        <div class="logo-section file-upload-section">
+          <p class="mat-body-1 section-subtitle">Logotipo de empresa</p>
+          <div class="logo-preview-container">
+            <img
+              [src]="logoPreviewUrl || 'assets/placeholder-logo.png'"
+              alt="Vista previa del logotipo"
+              class="logo-preview"
+            />
+          </div>
+          <input
+            type="file"
+            (change)="onLogoFileSelected($event)"
+            #logoUploadInput
+            accept="image/png, image/jpeg, image/svg+xml"
+            style="display: none"
+          />
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="logoUploadInput.click()"
+            class="upload-button"
+          >
+            <mat-icon>cloud_upload</mat-icon>
+            {{
+              selectedLogoFile
+                ? "Change Logo (" + selectedLogoFile.name + ")"
+                : "Subir nuevo logotipo"
+            }}
+          </button>
+          <p class="mat-caption hint">Recomendado: PNG, JPG, SVG. Max 2MB.</p>
+        </div>
+
+        <!-- --- NUEVA SECCIÓN PARA TÉRMINOS Y CONDICIONES PDF --- -->
+        <div class="terms-pdf-section file-upload-section">
+          <!-- Clase común para estilos -->
+          <p class="mat-body-1 section-subtitle">
+            Términos y condiciones (PDF)
+          </p>
+          <div class="current-file-info">
+            <ng-container *ngIf="currentTermsUrl; else noTermsFile">
+              Archivo actual:
+              <a [href]="currentTermsUrl" target="_blank" class="file-link">{{
+                currentTermsUrl.split("/").pop() || "View Terms"
+              }}</a>
+            </ng-container>
+            <ng-template #noTermsFile>
+              <span class="no-file-text"
+                >Aún no se ha cargado ningún PDF de Términos y
+                Condiciones.</span
+              >
+            </ng-template>
+          </div>
+
+          <input
+            type="file"
+            (change)="onTermsFileSelected($event)"
+            #termsUploadInput
+            accept="application/pdf"
+            style="display: none"
+          />
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="termsUploadInput.click()"
+            class="upload-button"
+          >
+            <mat-icon>cloud_upload</mat-icon>
+            {{
+              selectedTermsFile
+                ? "Change PDF (" + selectedTermsFile.name + ")"
+                : "Subir nuevo PDF"
+            }}
+          </button>
+          <p class="mat-caption hint" *ngIf="!selectedTermsFile">
+            Sube un archivo PDF con tus términos y condiciones.
+          </p>
+          <p class="mat-caption hint" *ngIf="selectedTermsFile">
+            Selected: {{ selectedTermsFile.name }}
+          </p>
+        </div>
+        <!-- El campo terms_conditions_url del formulario es solo para almacenar la URL final. -->
+        <!-- No es editable directamente por el usuario si solo se actualiza mediante subida. -->
+        <!-- Si quieres permitir pegar una URL existente Y subir un archivo, la lógica sería más compleja -->
+        <!-- <mat-form-field
+          appearance="outline"
+          class="full-width"
+          style="display: none"
+        >
+          <mat-label>Terms & Conditions URL (auto-filled)</mat-label>
+          <input matInput formControlName="terms_conditions_url" readonly />
+        </mat-form-field> -->
+        <!-- --- FIN NUEVA SECCIÓN --- -->
+
+        <mat-card-actions align="end" class="form-actions">
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="onDiscardChanges()"
+            [disabled]="isSaving || !settingsForm.dirty"
+          >
+            Descartar cambios
+          </button>
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="isSaving || settingsForm.invalid || !settingsForm.dirty"
+          >
+            <mat-icon>save</mat-icon>
+            {{ isSaving ? "Guardando..." : "Guardar configuracion" }}
+          </button>
+        </mat-card-actions>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

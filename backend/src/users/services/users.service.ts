@@ -30,13 +30,17 @@ export class UsersService {
 
   public async findUsers(): Promise<UsersEntity[]> {
     try {
-      const users: UsersEntity[] = await this.userRepository.find();
-      if (users.length === 0) {
-        throw new ErrorManager({
-          type: 'BAD_REQUEST',
-          message: 'No se encontro resultado',
-        });
-      }
+      const users: UsersEntity[] = await this.userRepository.find({
+        order: {
+          code: 'ASC',
+        },
+      });
+      // if (users.length === 0) {
+      //   throw new ErrorManager({
+      //     type: 'BAD_REQUEST',
+      //     message: 'No se encontro resultado',
+      //   });
+      // }
       return users;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
@@ -74,8 +78,8 @@ export class UsersService {
       const user: UsersEntity = (await this.userRepository
         .createQueryBuilder('user')
         .where({ id })
-        .leftJoinAndSelect('user.projectsIncludes', 'projectsIncludes')
-        .leftJoinAndSelect('projectsIncludes.project', 'project')
+        // .leftJoinAndSelect('user.projectsIncludes', 'projectsIncludes')
+        // .leftJoinAndSelect('projectsIncludes.project', 'project')
         .getOne()) as any;
       if (!user) {
         throw new ErrorManager({
@@ -121,6 +125,8 @@ export class UsersService {
           body.password,
           Number(process.env.HASH_SALT),
         );
+      } else {
+        delete body.password;
       }
 
       const user: UpdateResult = await this.userRepository.update(id, body);

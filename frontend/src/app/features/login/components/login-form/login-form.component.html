@@ -1,0 +1,65 @@
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Correo</mat-label>
+    <input
+      matInput
+      formControlName="email"
+      type="email"
+      placeholder="pat@example.com"
+      required
+    />
+    <mat-icon matSuffix>email</mat-icon>
+    <mat-error *ngIf="email?.hasError('required')"
+      >Se requiere correo
+    </mat-error>
+    <mat-error *ngIf="email?.hasError('email')"
+      >Por favor, introduce una dirección de correo electrónico
+      válida</mat-error
+    >
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Password</mat-label>
+    <input
+      matInput
+      formControlName="password"
+      [type]="hidePassword ? 'password' : 'text'"
+      required
+    />
+    <button
+      mat-icon-button
+      matSuffix
+      (click)="hidePassword = !hidePassword"
+      type="button"
+      [attr.aria-label]="'Hide password'"
+      [attr.aria-pressed]="hidePassword"
+    >
+      <mat-icon>{{ hidePassword ? "visibility_off" : "visibility" }}</mat-icon>
+    </button>
+    <mat-error *ngIf="password?.hasError('required')"
+      >Se requiere contraseña</mat-error
+    >
+    <mat-error *ngIf="password?.hasError('minlength')"
+      >La contraseña debe tener al menos 6 caracteres.</mat-error
+    >
+  </mat-form-field>
+
+  <!-- <div class="form-actions">
+    <mat-checkbox formControlName="rememberMe" color="primary"
+      >Remember me</mat-checkbox
+    >
+    <a routerLink="/forgot-password" class="forgot-password-link"
+      >Forgot password?</a
+    >
+  </div> -->
+
+  <button
+    mat-flat-button
+    color="primary"
+    class="full-width login-button"
+    type="submit"
+    [disabled]="isLoading || loginForm.invalid"
+  >
+    {{ isLoading ? "Iniciando sesión..." : "Iniciar sesión" }}
+  </button>
+</form>

@@ -61,23 +61,50 @@ export const menuItems: MenuItem[] = [
   {
     icon: 'format_list_bulleted',
     label: 'Configuración',
-    route: '',
+    route: 'configuracion',
     subItems: [
       {
         icon: 'settings_applications',
         label: 'Empresa - Sucursal',
-        route: 'setting',
+        route: 'settings',
       },
       {
         icon: 'group',
         label: 'Usuarios',
         route: 'users',
       },
+      // {
+      //   icon: 'list_alt',
+      //   label: 'Datos del cliente',
+      //   route: 'customer-data',
+      // },
       {
-        icon: 'list_alt',
-        label: 'Distritos',
-        route: 'districts',
+        icon: 'settings_applications',
+        label: 'Tarifas de Envío',
+        route: 'shipping-rates',
       },
+    ],
+  },
+  {
+    icon: 'format_list_bulleted',
+    label: 'Pedidos',
+    route: 'orders',
+    subItems: [
+      {
+        icon: 'add',
+        label: 'Nuevo Pedido',
+        route: '/orders/create',
+      },
+      {
+        icon: 'shopping_basket',
+        label: 'Pedidos',
+        route: 'orders',
+      },
+      // {
+      //   icon: 'settings_applications',
+      //   label: 'Tarifas de Envío',
+      //   route: 'shipping-rates',
+      // },
     ],
   },
   // {
@@ -90,14 +117,14 @@ export const menuItems: MenuItem[] = [
   //   label: 'Content',
   //   route: 'content',
   // },
-  {
-    icon: 'shopping_basket',
-    label: 'Pedidos',
-    route: 'forms',
-  },
-  {
-    icon: 'calculate',
-    label: 'Calculadora',
-    route: 'content',
-  },
+  // {
+  //   icon: 'shopping_basket',
+  //   label: 'Pedidos',
+  //   route: 'forms',
+  // },
+  // {
+  //   icon: 'calculate',
+  //   label: 'Calculadora',
+  //   route: 'content',
+  // },
 ];

@@ -1,0 +1,62 @@
+.temporary-orders-container {
+  margin-top: 30px;
+  padding: 16px;
+  background-color: #fff; // Fondo blanco para la tabla
+  border-radius: 8px;
+}
+
+.list-title {
+  font-size: 1.3em;
+  font-weight: 500;
+  color: #fff; // Color de texto como en la imagen
+  background-color: #dc3545; // Color rojo como en la imagen
+  padding: 10px 16px;
+  margin: -16px -16px 16px -16px; // Para que ocupe el ancho del padding del contenedor
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.temporary-orders-table {
+  width: 100%;
+}
+
+th.mat-header-cell {
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.67);
+  background-color: #f8f9fa; // Un fondo muy claro para las cabeceras
+  padding: 10px 12px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+td.mat-cell {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e9ecef;
+  color: rgba(0, 0, 0, 0.87);
+  font-size: 0.9em;
+}
+
+.align-right {
+  text-align: right;
+  justify-content: flex-end;
+}
+
+.actions-column-header,
+.actions-cell {
+  text-align: center !important;
+}
+
+.truncate-text {
+  max-width: 120px; // Ajusta según el contenido típico
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block; // Necesario para que max-width funcione con text-overflow
+  vertical-align: middle; // Alinear con iconos si los hubiera
+}
+
+.no-orders-message {
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+  color: #6c757d;
+}

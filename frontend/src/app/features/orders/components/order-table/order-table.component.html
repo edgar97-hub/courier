@@ -1,0 +1,108 @@
+<div class="table-wrapper mat-elevation-z2"> <!-- Añadida clase table-wrapper y elevación -->
+  <div *ngIf="isLoading" class="spinner-overlay">
+    <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+  </div>
+
+  <table mat-table [dataSource]="dataSource" matSort (matSortChange)="sortChanged.emit($event)" class="orders-table" aria-label="List of orders">
+
+    <!-- ID Column -->
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+      <td mat-cell *matCellDef="let order">{{ order.id }}</td>
+    </ng-container>
+
+    <!-- Type Column -->
+    <ng-container matColumnDef="type">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
+      <td mat-cell *matCellDef="let order">{{ order.type }}</td>
+    </ng-container>
+
+    <!-- Recipient Name Column -->
+    <ng-container matColumnDef="recipient_name">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Destinatario</th>
+      <td mat-cell *matCellDef="let order" class="truncate-text" [matTooltip]="order.recipient_name">{{ order.recipient_name }}</td>
+    </ng-container>
+
+    <!-- Recipient Phone Column -->
+    <ng-container matColumnDef="recipient_phone">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Teléfono</th>
+      <td mat-cell *matCellDef="let order">{{ order.recipient_phone }}</td>
+    </ng-container>
+
+    <!-- District Column -->
+    <ng-container matColumnDef="district">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Distrito</th>
+      <td mat-cell *matCellDef="let order">{{ order.district }}</td>
+    </ng-container>
+
+    <!-- Registration Date Column -->
+    <ng-container matColumnDef="registration_date">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>F. Registro</th>
+      <td mat-cell *matCellDef="let order">{{ order.registration_date | date:'dd/MM/yyyy HH:mm' }}</td>
+    </ng-container>
+
+    <!-- Delivery Date Column -->
+    <ng-container matColumnDef="delivery_date">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>F. Entrega</th>
+      <td mat-cell *matCellDef="let order">{{ order.delivery_date ? (order.delivery_date | date:'dd/MM/yyyy HH:mm') : '-' }}</td>
+    </ng-container>
+
+    <!-- Status Column -->
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+      <td mat-cell *matCellDef="let order">
+        <!-- <span class="status-badge" [ngClass]="'status-' + order.status.toLowerCase().replace(/\s+/g, '-')"> -->
+        <span class="status-badge" [ngClass]="'status-' + order.status.toLowerCase()">
+          {{ order.status  }} <!-- Podrías usar un pipe aquí: order.status | orderStatusPipe -->
+        </span>
+      </td>
+    </ng-container>
+
+    <!-- Amount to Collect Column -->
+    <ng-container matColumnDef="amount_to_collect">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header class="align-right">Cobrar</th>
+      <td mat-cell *matCellDef="let order" class="align-right">{{ order.amount_to_collect | currency:'PEN':'S/ ':'1.2-2' }}</td>
+    </ng-container>
+
+    <!-- Service Amount Column -->
+    <ng-container matColumnDef="service_amount">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header class="align-right">Monto Servicio</th>
+      <td mat-cell *matCellDef="let order" class="align-right">{{ order.service_amount | currency:'PEN':'S/ ':'1.2-2' }}</td>
+    </ng-container>
+
+    <!-- Actions Column -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef class="actions-column-header">Acciones</th>
+      <td mat-cell *matCellDef="let order" class="actions-cell">
+        <button mat-icon-button color="primary" (click)="onViewDetails(order)" matTooltip="Ver Detalles">
+          <mat-icon>visibility</mat-icon>
+        </button>
+        <!-- <button mat-icon-button color="accent" (click)="onEditOrder(order)" matTooltip="Editar Pedido">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" (click)="onDeleteOrder(order)" matTooltip="Eliminar Pedido">
+          <mat-icon>delete_outline</mat-icon>
+        </button> -->
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row"></tr>
+
+    <tr class="mat-row" *matNoDataRow>
+      <td class="" mat-cell [attr.colspan]="displayedColumns.length" class="no-data-cell">
+        Ningún dato disponible en esta tabla.
+      </td>
+    </tr>
+  </table>
+
+  <mat-paginator
+    [length]="totalCount"
+    [pageSize]="pageSize"
+    [pageIndex]="pageIndex"
+    [pageSizeOptions]="[5, 10, 25, 100]"
+    (page)="pageChanged.emit($event)"
+    showFirstLastButtons
+    aria-label="Seleccione página de pedidos">
+  </mat-paginator>
+</div>

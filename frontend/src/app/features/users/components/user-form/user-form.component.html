@@ -1,0 +1,86 @@
+<mat-card>
+  <!-- <mat-card-title class="full-width-field">{{
+    userToEdit ? "Edit User" : "Create New User"
+  }}</mat-card-title> -->
+
+  <mat-card-content>
+    <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width-field">
+          <mat-label>Username</mat-label>
+          <input
+            matInput
+            formControlName="username"
+            autocomplete="off"
+            required
+          />
+          <mat-error
+            *ngIf="username?.invalid && (username?.dirty || username?.touched)"
+          >
+            Username is required.
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width-field">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" type="email" required />
+        <mat-error
+          *ngIf="email?.errors?.['required'] && (email?.dirty || email?.touched)"
+        >
+          Email is required.
+        </mat-error>
+        <mat-error
+          *ngIf="email?.errors?.['email'] && (email?.dirty || email?.touched)"
+        >
+          Please enter a valid email address.
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width-field">
+        <mat-label>contraseña</mat-label>
+        <input
+          matInput
+          [type]="hidePassword() ? 'password' : 'text'"
+          placeholder="Ingrese su contraseña"
+          formControlName="password"
+          autocomplete="new-password"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          (click)="hidePassword.set(!hidePassword())"
+          type="button"
+        >
+          <mat-icon>{{
+            hidePassword() ? "visibility_off" : "visibility"
+          }}</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width-field">
+        <mat-label>Rol</mat-label>
+        <mat-select formControlName="role">
+          <mat-option value="ADMIN">Administrador</mat-option>
+          <mat-option value="MOTORIZED">Motorizado</mat-option>
+          <mat-option value="CUSTOMER">Cliente</mat-option>
+        </mat-select>
+        <mat-error appFieldError></mat-error>
+      </mat-form-field>
+
+      <mat-card-actions align="end" class="mat-card-actions">
+        <button mat-stroked-button type="button" (click)="onCancel()">
+          Cancelar
+        </button>
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          [disabled]="isLoading || userForm.invalid"
+        >
+          {{ isLoading ? "Saving..." : userToEdit ? "Actualizar" : "Guardar" }}
+        </button>
+      </mat-card-actions>
+    </form>
+  </mat-card-content>
+</mat-card>

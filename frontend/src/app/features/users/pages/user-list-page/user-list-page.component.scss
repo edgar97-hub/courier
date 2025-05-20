@@ -1,0 +1,25 @@
+.page-container {
+  padding: 24px;
+  background-color: #f9f9f9; // Un fondo muy sutil para la página
+  min-height: calc(100vh - 64px); // Asumiendo un toolbar de 64px
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+
+  h1 {
+    margin: 0;
+    font-size: 2em; // Más grande
+    font-weight: 500; // Un poco de peso
+    color: #3f51b5; // Color primario de Material
+  }
+
+  button {
+    font-weight: 500;
+  }
+}
