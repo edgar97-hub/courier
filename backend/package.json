@@ -19,13 +19,14 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "orm:init": "typeorm-ts-node-esm -d ./src/config/data.source.ts",
-    "m:gen:dev": "export NODE_ENV=develop && npm run orm:init migration:generate",
-    "m:run:dev": "export NODE_ENV=develop && npm run orm:init migration:run",
+    "typeorm": "typeorm-ts-node-esm -d ./src/config/data.source.ts",
+    "m:gen:dev": "export NODE_ENV=develop && npm run typeorm migration:generate",
+    "m:run:dev": "export NODE_ENV=develop && npm run typeorm migration:run",
     "m:gen": "export NODE_ENV=production && npm run orm:init migration:generate",
     "m:run": "export NODE_ENV=production && npm run orm:init migration:run",
-    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
-    "m:gen:dev_": "NODE_ENV=develop npm run typeorm -- migration:generate src/migrations/init -d src/config/data.source.ts",
-    "m:run:dev_": "NODE_ENV=develop npm run typeorm -- migration:run -d src/config/data.source.ts"
+    "typeorm_": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
+    "m:gen:dev_": "NODE_ENV=develop npm run typeorm_ -- migration:generate src/migrations/init -d src/config/data.source.ts",
+    "m:run:dev_": "NODE_ENV=develop npm run typeorm_ -- migration:run -d src/config/data.source.ts"
   },
   "dependencies": {
     "@nestjs/axios": "^4.0.0",
