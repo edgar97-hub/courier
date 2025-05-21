@@ -1,62 +1,161 @@
+// .temporary-orders-container {
+//   margin-top: 30px;
+//   padding: 16px;
+//   background-color: #fff; // Fondo blanco para la tabla
+//   border-radius: 8px;
+// }
+
+// .list-title {
+//   font-size: 1.3em;
+//   font-weight: 500;
+//   color: #fff; // Color de texto como en la imagen
+//   background-color: #dc3545; // Color rojo como en la imagen
+//   padding: 10px 16px;
+//   margin: -16px -16px 16px -16px; // Para que ocupe el ancho del padding del contenedor
+//   border-top-left-radius: 8px;
+//   border-top-right-radius: 8px;
+// }
+
+// .temporary-orders-table {
+//   width: 100%;
+// }
+
+// th.mat-header-cell {
+//   font-weight: 500;
+//   color: rgba(0, 0, 0, 0.67);
+//   background-color: #f8f9fa; // Un fondo muy claro para las cabeceras
+//   padding: 10px 12px;
+//   border-bottom: 1px solid #dee2e6;
+// }
+
+// td.mat-cell {
+//   padding: 8px 12px;
+//   border-bottom: 1px solid #e9ecef;
+//   color: rgba(0, 0, 0, 0.87);
+//   font-size: 0.9em;
+// }
+
+// .align-right {
+//   text-align: right;
+//   justify-content: flex-end;
+// }
+
+// .actions-column-header,
+// .actions-cell {
+//   text-align: center !important;
+// }
+
+// .truncate-text {
+//   max-width: 120px; // Ajusta según el contenido típico
+//   white-space: nowrap;
+//   overflow: hidden;
+//   text-overflow: ellipsis;
+//   display: inline-block; // Necesario para que max-width funcione con text-overflow
+//   vertical-align: middle; // Alinear con iconos si los hubiera
+// }
+
+// .no-orders-message {
+//   text-align: center;
+//   padding: 20px;
+//   font-style: italic;
+//   color: #6c757d;
+// }
+
+.table-responsive-wrapper {
+  background-color: #6c757d !important;
+  overflow: auto;
+}
+
 .temporary-orders-container {
   margin-top: 30px;
-  padding: 16px;
-  background-color: #fff; // Fondo blanco para la tabla
+  padding: 0; // Quitar padding si la tabla va a tener su propio borde y fondo
+  background-color: #fff;
   border-radius: 8px;
+  overflow: hidden; // Importante si la tabla es más ancha que el contenedor
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24); // Sombra más definida
 }
 
 .list-title {
-  font-size: 1.3em;
+  font-size: 1.2em; // Un poco más pequeño para no dominar tanto
   font-weight: 500;
-  color: #fff; // Color de texto como en la imagen
-  background-color: #dc3545; // Color rojo como en la imagen
-  padding: 10px 16px;
-  margin: -16px -16px 16px -16px; // Para que ocupe el ancho del padding del contenedor
+  color: #fff;
+  background-color: #d32f2f; // Un rojo más estándar de Material para error/alerta
+  padding: 12px 16px;
+  margin: 0; // Quitar márgenes negativos si el padding está en 0 en el contenedor
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 }
 
 .temporary-orders-table {
   width: 100%;
+  border-collapse: collapse; // Ayuda a controlar bordes
+}
+
+th.mat-header-cell,
+td.mat-cell {
+  padding: 10px 12px; // Ajusta el padding para más espacio
+  border-bottom: 1px solid #e0e0e0; // Línea divisoria más sutil
+  vertical-align: middle; // Alinear contenido verticalmente
+  text-align: left; // Alinear texto a la izquierda por defecto
 }
 
 th.mat-header-cell {
   font-weight: 500;
-  color: rgba(0, 0, 0, 0.67);
-  background-color: #f8f9fa; // Un fondo muy claro para las cabeceras
-  padding: 10px 12px;
-  border-bottom: 1px solid #dee2e6;
+  color: rgba(0, 0, 0, 0.75); // Un poco más oscuro
+  background-color: #f5f5f5; // Fondo muy sutil para cabeceras
+  white-space: nowrap; // Evitar que las cabeceras se rompan
 }
 
 td.mat-cell {
-  padding: 8px 12px;
-  border-bottom: 1px solid #e9ecef;
   color: rgba(0, 0, 0, 0.87);
   font-size: 0.9em;
 }
 
-.align-right {
-  text-align: right;
-  justify-content: flex-end;
+// --- ESTILOS ESPECÍFICOS POR COLUMNA PARA CONTROLAR ANCHO Y ALINEACIÓN ---
+// Puedes usar selectores de clase si los añades a las celdas/cabeceras,
+// o selectores basados en el matColumnDef si es necesario (más frágil).
+
+// Ejemplo para la columna de nombre (recipient_name)
+[matColumnDef="recipient_name"] {
+  // width: 150px; // Descomenta y ajusta si necesitas un ancho fijo
 }
 
-.actions-column-header,
-.actions-cell {
-  text-align: center !important;
+// Ejemplo para columnas numéricas (alinear a la derecha)
+[matColumnDef="amount_to_collect_at_delivery"],
+[matColumnDef="shipping_cost"] {
+  // width: 100px; // Ejemplo de ancho
+  &.mat-header-cell, // Aplicar a cabecera
+  &.mat-cell {
+    // Aplicar a celda
+    text-align: right;
+    justify-content: flex-end; // Para el contenido de la cabecera si usa flex
+  }
+}
+
+// Para la columna de acciones (centrar)
+[matColumnDef="actions"] {
+  width: 80px; // Ancho para el botón de quitar
+  &.mat-header-cell,
+  &.mat-cell {
+    text-align: center;
+    justify-content: center;
+  }
 }
 
 .truncate-text {
-  max-width: 120px; // Ajusta según el contenido típico
+  display: block; // Necesario para que text-overflow funcione bien con width/max-width
+  max-width: 120px; // Ajusta según el contenido típico (ej. para dirección, producto)
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: inline-block; // Necesario para que max-width funcione con text-overflow
-  vertical-align: middle; // Alinear con iconos si los hubiera
 }
 
 .no-orders-message {
   text-align: center;
-  padding: 20px;
+  padding: 30px;
   font-style: italic;
   color: #6c757d;
+  background-color: #f8f9fa; // Fondo para el mensaje
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
 }

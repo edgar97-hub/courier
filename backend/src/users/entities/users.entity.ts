@@ -4,18 +4,10 @@ import { ROLES } from '../../constants/roles';
 import { IUser } from '../../interfaces/user.interface';
 import { BaseEntity } from '../../config/base.entity';
 import { UsersProjectsEntity } from './usersProjects.entity';
+import { OrdersEntity } from '../../orders/entities/orders.entity';
 
 @Entity({ name: 'users' })
 export class UsersEntity extends BaseEntity implements IUser {
-  // @Column()
-  // firstName: string;
-
-  // @Column()
-  // lastName: string;
-
-  // @Column()
-  // age: number;
-
   @Column({ unique: true })
   @Generated('increment')
   code: number;
@@ -35,4 +27,7 @@ export class UsersEntity extends BaseEntity implements IUser {
 
   @OneToMany(() => UsersProjectsEntity, (usersProjects) => usersProjects.user)
   projectsIncludes: UsersProjectsEntity[];
+
+  @OneToMany(() => OrdersEntity, (usersOrders) => usersOrders.user)
+  ordersIncludes: OrdersEntity[];
 }

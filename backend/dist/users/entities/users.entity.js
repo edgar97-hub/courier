@@ -15,6 +15,7 @@ const class_transformer_1 = require("class-transformer");
 const roles_1 = require("../../constants/roles");
 const base_entity_1 = require("../../config/base.entity");
 const usersProjects_entity_1 = require("./usersProjects.entity");
+const orders_entity_1 = require("../../orders/entities/orders.entity");
 let UsersEntity = class UsersEntity extends base_entity_1.BaseEntity {
 };
 exports.UsersEntity = UsersEntity;
@@ -44,6 +45,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => usersProjects_entity_1.UsersProjectsEntity, (usersProjects) => usersProjects.user),
     __metadata("design:type", Array)
 ], UsersEntity.prototype, "projectsIncludes", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => orders_entity_1.OrdersEntity, (usersOrders) => usersOrders.user),
+    __metadata("design:type", Array)
+], UsersEntity.prototype, "ordersIncludes", void 0);
 exports.UsersEntity = UsersEntity = __decorate([
     (0, typeorm_1.Entity)({ name: 'users' })
 ], UsersEntity);

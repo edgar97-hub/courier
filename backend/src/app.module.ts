@@ -11,6 +11,7 @@ import { ProjectsModule } from './projects/projects.module';
 import { TasksModule } from './tasks/tasks.module';
 import { ProvidersModule } from './providers/providers.module';
 import { SettingsModule } from './settings/settings.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { SettingsModule } from './settings/settings.module';
     AuthModule,
     TasksModule,
     ProvidersModule,
+    OrdersModule,
   ],
 })
 export class AppModule {}

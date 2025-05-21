@@ -30,13 +30,13 @@ import { DistrictsService } from '../services/districts.service';
 export class DistrictsController {
   constructor(private readonly usersService: DistrictsService) {}
 
-  @AdminAccess()
+  // @AdminAccess()
   @Post('register')
   public async registerUser(@Body() body: DistrictDTO) {
     return await this.usersService.createUser(body);
   }
 
-  @AdminAccess()
+  // @AdminAccess()
   @Get('all')
   public async findAllUsers() {
     return await this.usersService.findUsers();
@@ -52,7 +52,7 @@ export class DistrictsController {
     status: 400,
     description: 'No se encontro resultado',
   })
-  @AdminAccess()
+  // @AdminAccess()
   @Get(':id')
   public async findUserById(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.usersService.findUserById(id);
@@ -61,7 +61,7 @@ export class DistrictsController {
   @ApiParam({
     name: 'id',
   })
-  @AdminAccess()
+  // @AdminAccess()
   @Put('edit/:id')
   public async updateUser(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -73,7 +73,7 @@ export class DistrictsController {
   @ApiParam({
     name: 'id',
   })
-  @AdminAccess()
+  // @AdminAccess()
   @Delete('delete/:id')
   public async deleteUser(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.usersService.deleteUser(id);

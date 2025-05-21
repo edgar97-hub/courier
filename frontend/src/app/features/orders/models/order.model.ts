@@ -83,6 +83,7 @@ export interface MaxPackageDimensions {
   sta_height_cm?: number;
   sta_weight_kg?: number;
 
+  volumetric_factor?: number;
   standard_package_info?: string;
   info_text?: string;
 }

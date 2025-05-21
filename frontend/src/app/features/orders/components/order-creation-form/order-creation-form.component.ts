@@ -86,17 +86,16 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private datePipe = inject(DatePipe);
   private destroy$ = new Subject<void>();
-  private _districtsCache: DistrictOption[] = [];
+  _districtsCache: DistrictOption[] = [];
 
   constructor() {
     this.minDeliveryDate = new Date(); // No se puede entregar en el pasado
     this.deliveryDistricts$ = this.orderService.getDeliveryDistricts().pipe(
       map((allDistricts: DistrictOption[]) => {
-        return allDistricts.filter(
-          (district) => district.isStandard
-        );
-      }),
-      tap((districts) => (this._districtsCache = districts)) // Cachear para buscar nombre
+        this._districtsCache = allDistricts;
+        return allDistricts.filter((district) => district.isStandard);
+      })
+      // tap((districts) => (this._districtsCache = districts)) // Cachear para buscar nombre
     );
     this.buildForm();
   }
@@ -108,6 +107,95 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       .subscribe((status) => {
         this.formValidityChanged.emit(status === 'VALID');
       });
+
+    this.orderForm
+      .get('delivery_district_id')
+      ?.valueChanges.pipe(takeUntil(this.destroy$), distinctUntilChanged())
+      .subscribe((newDistrictId) => {
+        console.log('District changed to:', newDistrictId);
+        if (newDistrictId) {
+          if (
+            this.packageDetailsFormGroup.get('package_size_type')?.value ===
+            'standard'
+          ) {
+            let ditrict = this._districtsCache.find(
+              (item) => item.id === newDistrictId
+            );
+            if (ditrict) {
+              this.calculatedShippingCost.set(parseFloat(ditrict.price));
+            }
+          } else {
+            this.calculatedShippingCost.set(0);
+          }
+
+          // this.resetPackageTypeSelection();
+          // También es un buen momento para recalcular el costo de envío
+          // si el tipo de paquete ya estaba seleccionado como 'standard'
+          // if (
+          //   this.packageDetailsFormGroup.get('package_size_type')?.value ===
+          //   'standard'
+          // ) {
+          //   // Llama al método que el PackageCalculatorComponent usa para el costo estándar
+          //   // Esto es un poco indirecto. Sería mejor si PackageCalculatorComponent
+          //   // también escuchara el cambio de distrito si su cálculo depende de él.
+          //   // Por ahora, reseteamos el costo calculado en el formulario padre:
+          //   this.calculatedShippingCost.set(0); // O null, e indicarle al usuario que recalcule
+          //   // const packageCalculator = this.getChildPackageCalculator(); // Necesitarás un ViewChild
+          //   // if (
+          //   //   packageCalculator &&
+          //   //   packageCalculator.packageFormGroup.get('package_size_type')
+          //   //     ?.value === 'standard'
+          //   // ) {
+          //   //   packageCalculator.calculateStandardShippingCost();
+          //   // }
+          // } else {
+          //   // Si era 'custom', simplemente limpiar el costo para que el usuario recalcule
+          //   this.calculatedShippingCost.set(0); // O null
+          // }
+        }
+      });
+
+    this.packageDetailsFormGroup
+      .get('package_size_type')
+      ?.valueChanges.pipe(takeUntil(this.destroy$), distinctUntilChanged())
+      .subscribe((type) => {
+        console.log('type', type);
+        let deliveryDistrictId = this.orderForm.get(
+          'delivery_district_id'
+        )?.value;
+        if (deliveryDistrictId && type === 'standard') {
+          let ditrict = this._districtsCache.find(
+            (item) => item.id === deliveryDistrictId
+          );
+          if (ditrict) {
+            this.calculatedShippingCost.set(parseFloat(ditrict.price));
+          }
+        } else {
+          this.calculatedShippingCost.set(0);
+        }
+      });
+  }
+
+  private resetPackageTypeSelection(): void {
+    const packageTypeControl =
+      this.packageDetailsFormGroup.get('package_size_type');
+    if (packageTypeControl) {
+      // Opción A: Desmarcar todo (si mat-radio-group lo permite sin un valor)
+      // packageTypeControl.reset(null, { emitEvent: false }); // emitEvent: false para evitar bucles si hay otras suscripciones
+      // Opción B: Resetear a un valor por defecto, por ejemplo 'standard'
+      // packageTypeControl.setValue('standard', { emitEvent: true }); // emitEvent: true para que PackageCalculator reaccione
+      // console.log('Package type reset to standard');
+      // Si reseteas a 'standard', el PackageCalculatorComponent (si está bien implementado)
+      // debería deshabilitar los campos custom y recalcular el costo para estándar.
+      // Si reseteas a null, PackageCalculatorComponent debería manejar ese estado.
+    }
+    // También reseteamos el costo de envío calculado
+    this.calculatedShippingCost.set(0); // O null
+    this.isCalculatingShipping.set(false);
+  }
+
+  get packageDetailsFormGroup(): FormGroup {
+    return this.orderForm.get('package_details') as FormGroup;
   }
 
   private buildForm(): void {
@@ -176,6 +264,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
         .toString(36)
         .substring(2, 7)}`, // ID temporal único
     };
+    console.log('newOrderData', newOrderData);
     // delete newOrderData.package_details; // Eliminar el subgrupo anidado
 
     console.log('Submitting New Order Data:', newOrderData);
@@ -220,9 +309,6 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   }
 
   // Helper para obtener el FormGroup de package_details
-  get packageDetailsFormGroup(): FormGroup {
-    return this.orderForm.get('package_details') as FormGroup;
-  }
 
   ngOnDestroy(): void {
     this.destroy$.next();

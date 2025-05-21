@@ -2,6 +2,7 @@ import { ROLES } from '../../constants/roles';
 import { IUser } from '../../interfaces/user.interface';
 import { BaseEntity } from '../../config/base.entity';
 import { UsersProjectsEntity } from './usersProjects.entity';
+import { OrdersEntity } from '../../orders/entities/orders.entity';
 export declare class UsersEntity extends BaseEntity implements IUser {
     code: number;
     email: string;
@@ -9,4 +10,5 @@ export declare class UsersEntity extends BaseEntity implements IUser {
     password: string;
     role: ROLES;
     projectsIncludes: UsersProjectsEntity[];
+    ordersIncludes: OrdersEntity[];
 }

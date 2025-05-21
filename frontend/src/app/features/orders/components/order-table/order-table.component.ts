@@ -57,15 +57,15 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   // y con los matColumnDef en el HTML.
   displayedColumns: string[] = [
     'id',
-    'type',
+    'shipment_type	',
     'recipient_name',
     'recipient_phone',
-    'district',
-    'registration_date',
+    'delivery_district_name',
+    'createdAt',
     'delivery_date',
     'status',
-    'amount_to_collect',
-    'service_amount',
+    'amount_to_collect_at_delivery',
+    'shipping_cost',
     'actions',
   ];
   dataSource: MatTableDataSource<Order> = new MatTableDataSource<Order>();
@@ -79,17 +79,11 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     if (changes['orders'] && this.orders) {
       this.dataSource.data = this.orders;
     }
-    // El paginador y el sort se manejan desde el componente padre para paginación/sort del servidor
   }
 
   ngAfterViewInit(): void {
-    // No configurar dataSource.paginator o dataSource.sort si son del lado del servidor.
-    // Los eventos se emiten al componente padre.
-
-    // Escuchar cambios en el sort para emitir al padre
     if (this.sort) {
       this.sort.sortChange.subscribe((sortState: Sort) => {
-        // Cuando el sort cambia, reseteamos el paginador al índice 0 si está presente
         if (this.paginator) {
           this.paginator.pageIndex = 0;
         }
@@ -97,7 +91,6 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
       });
     }
 
-    // Escuchar cambios en la página para emitir al padre
     if (this.paginator) {
       this.paginator.page.subscribe((pageState: PageEvent) => {
         this.pageChanged.emit(pageState);
@@ -105,7 +98,6 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     }
   }
 
-  // ---- Métodos para las acciones de fila (ejemplos) ----
   onViewDetails(order: Order): void {
     console.log('View details for:', order);
     // this.viewOrder.emit(order);

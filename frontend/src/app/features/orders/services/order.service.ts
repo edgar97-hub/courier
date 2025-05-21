@@ -22,7 +22,7 @@ import { AuthService } from '../../../core/services/auth.service';
   providedIn: 'root',
 })
 export class OrderService {
-  //   private apiUrl = 'http://localhost:8000/api/orders/distr';
+  readonly apiUrlOrders = environment.apiUrl + '/orders';
   readonly apiUrl = environment.apiUrl + '/districts';
   readonly apiUrlSettings = environment.apiUrl + '/settings';
 
@@ -71,22 +71,24 @@ export class OrderService {
       }
     }
 
-    console.log(
-      'OrderService: Fetching orders with params:',
-      params.toString()
-    );
-    return this.http.get<PaginatedOrdersResponse>(this.apiUrl, { params }).pipe(
-      map((response) => {
-        // Si necesitas transformar las fechas de string a Date object aquí:
-        // response.items = response.items.map(order => ({
-        //   ...order,
-        //   registration_date: new Date(order.registration_date),
-        //   delivery_date: order.delivery_date ? new Date(order.delivery_date) : null,
-        // }));
-        return response;
-      }),
-      catchError(this.handleError)
-    );
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(() => new Error('Not authenticated to fetch users.'));
+    }
+    return this.http
+      .get<PaginatedOrdersResponse>(this.apiUrlOrders, { params, headers })
+      .pipe(
+        map((response) => {
+          // Si necesitas transformar las fechas de string a Date object aquí:
+          // response.items = response.items.map(order => ({
+          //   ...order,
+          //   registration_date: new Date(order.registration_date),
+          //   delivery_date: order.delivery_date ? new Date(order.delivery_date) : null,
+          // }));
+          return response;
+        }),
+        catchError(this.handleError)
+      );
   }
 
   // Podrías tener un método para obtener los posibles estados si vienen de la API
@@ -110,22 +112,9 @@ export class OrderService {
     if (!this.authService.getAccessToken()) {
       return throwError(() => new Error('Not authenticated to fetch users.'));
     }
-    console.log('getDeliveryDistricts');
     return this.http
       .get<DistrictOption[]>(`${this.apiUrl}/all`, { headers })
       .pipe(catchError(this.handleError));
-    // Simulación:
-    // console.log('OrderService: Fetching delivery districts (simulated)');
-    // return of([
-    //   { id: 'D001', name: 'Miraflores', coverage_info: 'Cobertura completa.' },
-    //   { id: 'D002', name: 'San Isidro', coverage_info: 'Cobertura completa.' },
-    //   {
-    //     id: 'D003',
-    //     name: 'Surquillo',
-    //     coverage_info: 'Verificar cobertura en algunas zonas.',
-    //   },
-    //   { id: 'D004', name: 'Lince', coverage_info: 'Cobertura completa.' },
-    // ]).pipe(delay(300));
   }
 
   getMaxPackageDimensions(): Observable<MaxPackageDimensions> {
@@ -133,21 +122,6 @@ export class OrderService {
     if (!this.authService.getAccessToken()) {
       return throwError(() => new Error('Not authenticated to fetch users.'));
     }
-    // return this.http
-    //   .get<MaxPackageDimensions>(`${this.apiUrlSettings}/all`, { headers })
-    //   .pipe(catchError(this.handleError));
-
-    // // Simulación:
-    // console.log('OrderService: Fetching max package dimensions (simulated)');
-    // return of({
-    //   max_length_cm: 30,
-    //   max_width_cm: 25,
-    //   max_height_cm: 45,
-    //   max_weight_kg: 5,
-    //   standard_package_info: 'Estándar : 30cmx15cmx20cm 1.5kg',
-    //   info_text:
-    //     'MEDIDAS MAXIMAS (Largo 30 cm x Ancho 25 cm x Alto 45 cm) y PESO MAXIMO (5 kilogramos)',
-    // }).pipe(delay(200));
     return this.http
       .get<MaxPackageDimensions>(`${this.apiUrlSettings}/all`, { headers })
       .pipe(
@@ -160,24 +134,6 @@ export class OrderService {
         map((apiResponse: any): MaxPackageDimensions => {
           console.log('apiResponse', apiResponse);
           if (apiResponse.length) {
-            //address: "test"
-            // business_name: "empresa prueba"
-            // createdAt: "2025-05-15T14:50:57.957Z"
-            // id: "8ae01119-0ca4-4aed-9c03-bae8df1fb8db"
-            // logo_url: null
-            // maximum_measurements_height: 0
-            // maximum_measurements_length: 4
-            // maximum_measurements_weight: 7
-            // maximum_measurements_width: 5
-            // phone_number: "951954633"
-            // standard_measurements_height: 5
-            // standard_measurements_length: 9
-            // standard_measurements_weight: 2
-            // standard_measurements_width: 2
-            // terms_conditions_url: null
-            // updatedAt: "2025-05-20T22:39:37.631Z"
-            // volumetric_factor: 7
-
             let standard_package_info =
               'Estándar : ' +
               apiResponse[0].standard_measurements_length +
@@ -211,6 +167,8 @@ export class OrderService {
               sta_height_cm: apiResponse[0].standard_measurements_height,
               sta_weight_kg: apiResponse[0].standard_measurements_weight,
 
+              volumetric_factor: apiResponse[0].volumetric_factor,
+
               standard_package_info: standard_package_info,
               info_text: info_text,
             };
@@ -225,7 +183,7 @@ export class OrderService {
             sta_width_cm: 0,
             sta_height_cm: 0,
             sta_weight_kg: 0,
-
+            volumetric_factor: 0,
             standard_package_info: '',
             info_text: '',
           };
@@ -256,6 +214,7 @@ export class OrderService {
     package_height_cm?: number | null;
     package_weight_kg?: number | null;
   }): Observable<ShippingCostResponse> {
+    console.log('packageData', packageData);
     // return this.http.post<ShippingCostResponse>(`${this.baseUrl}/shipping/calculate-cost`, packageData).pipe(catchError(this.handleError));
     // Simulación:
     console.log(
@@ -280,17 +239,18 @@ export class OrderService {
   createBatchOrders(
     payload: CreateBatchOrderPayload
   ): Observable<{ success: boolean; message: string; batchId?: string }> {
-    // return this.http.post<{ success: boolean; message: string; batchId?: string }>(`${this.baseUrl}/orders/batch-create`, payload).pipe(catchError(this.handleError));
-    // Simulación:
-    console.log('OrderService: Creating batch orders (simulated)', payload);
-    if (payload.orders.length === 0) {
-      return throwError(() => new Error('No orders to submit.'));
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(() => new Error('Not authenticated to fetch users.'));
     }
-    return of({
-      success: true,
-      message: 'Pedidos generados exitosamente!',
-      batchId: `B-${Date.now()}`,
-    }).pipe(delay(1500));
+
+    return this.http
+      .post<{ success: boolean; message: string; batchId?: string }>(
+        `${this.apiUrlOrders}/batch-create`,
+        payload,
+        { headers }
+      )
+      .pipe(catchError(this.handleError));
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {

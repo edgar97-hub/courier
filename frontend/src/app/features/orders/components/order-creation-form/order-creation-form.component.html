@@ -139,6 +139,7 @@
   <!-- Sección 2: Tamaño del Paquete y Costo -->
   <app-package-calculator
     [packageFormGroup]="packageDetailsFormGroup"
+    [listaDeDistritos]="_districtsCache"
     [deliveryDistrictId]="orderForm.get('delivery_district_id')?.value"
     (shippingCostCalculated)="onShippingCostCalculated($event)"
     (calculationLoading)="onPackageCalculationLoading($event)"

@@ -61,20 +61,16 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
   currentSortField = 'registration_date'; // Campo de ordenamiento inicial
   currentSortDirection: 'asc' | 'desc' = 'desc'; // Dirección inicial
 
-  // Subject para manejar los filtros actuales
   private filterCriteriaSubject = new BehaviorSubject<OrderFilterCriteria>({});
   private destroy$ = new Subject<void>();
 
   constructor() {}
 
   ngOnInit(): void {
-    // Escuchar cambios en los filtros y recargar datos
     this.filterCriteriaSubject
       .pipe(
         takeUntil(this.destroy$),
-        // debounceTime(300), // Opcional: añadir debounce si los filtros emiten muy rápido
-        // distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
-        tap(() => (this.currentPageIndex = 0)) // Resetear a la primera página cuando los filtros cambian
+        tap(() => (this.currentPageIndex = 0))
       )
       .subscribe((criteria) => {
         this.fetchOrders();
@@ -116,7 +112,6 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
   onFiltersChanged(filters: OrderFilterCriteria): void {
     console.log('OrderListPage: Filters changed', filters);
     this.filterCriteriaSubject.next(filters);
-    // fetchOrders se llamará a través de la suscripción a filterCriteriaSubject
   }
 
   onPageChanged(event: PageEvent): void {
@@ -129,12 +124,11 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
   onSortChanged(sort: Sort): void {
     console.log('OrderListPage: Sort changed', sort);
     this.currentSortField = sort.active;
-    this.currentSortDirection = sort.direction as 'asc' | 'desc'; // El tipo SortDirection puede ser '', pero nuestro servicio espera 'asc' o 'desc'
-    this.currentPageIndex = 0; // Resetear a la primera página al cambiar el orden
+    this.currentSortDirection = sort.direction as 'asc' | 'desc';
+    this.currentPageIndex = 0;
     this.fetchOrders();
   }
 
-  // Placeholder para acciones masivas
   handleMassiveActions(action: string): void {
     console.log('Massive action selected:', action);
     // Implementar lógica para acciones masivas

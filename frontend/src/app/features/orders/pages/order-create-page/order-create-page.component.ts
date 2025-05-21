@@ -143,12 +143,15 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
 
     const ordersToSubmit = this.pendingOrders().map((order) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { temp_id, delivery_district_name, ...orderDataForBackend } = order;
+      const { temp_id, ...orderDataForBackend } = order;
       return orderDataForBackend;
     });
 
     const payload: CreateBatchOrderPayload = {
-      orders: ordersToSubmit,
+      orders: ordersToSubmit.map((item) => ({
+        ...item,
+        type_order_transfer_to_warehouse: this.pickupOptionControl.value,
+      })),
       pickup_option: this.pickupOptionControl.value || 'RECOGER_DOMICILIO',
       terms_accepted: true, // Ya validado arriba
     };
@@ -170,10 +173,10 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
               panelClass: ['success-snackbar'],
             }
           );
-          this.pendingOrders.set([]); // Limpiar la lista
+          this.pendingOrders.set([]);
           this.pickupOptionControl.reset('RECOGER_DOMICILIO');
           this.termsAcceptedControl.reset(false);
-          this.router.navigate(['/features/orders']); // Navegar a la lista de pedidos general
+          this.router.navigate(['/features/orders']);
         },
         error: (err) => {
           this.snackBar.open(

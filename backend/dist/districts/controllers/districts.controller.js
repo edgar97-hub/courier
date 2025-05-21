@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DistrictsController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
-const admin_decorator_1 = require("../../auth/decorators/admin.decorator");
 const access_level_guard_1 = require("../../auth/guards/access-level.guard");
 const auth_guard_1 = require("../../auth/guards/auth.guard");
 const roles_guard_1 = require("../../auth/guards/roles.guard");
@@ -43,7 +42,6 @@ let DistrictsController = class DistrictsController {
 };
 exports.DistrictsController = DistrictsController;
 __decorate([
-    (0, admin_decorator_1.AdminAccess)(),
     (0, common_1.Post)('register'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -51,7 +49,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DistrictsController.prototype, "registerUser", null);
 __decorate([
-    (0, admin_decorator_1.AdminAccess)(),
     (0, common_1.Get)('all'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
@@ -68,7 +65,6 @@ __decorate([
         status: 400,
         description: 'No se encontro resultado',
     }),
-    (0, admin_decorator_1.AdminAccess)(),
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
     __metadata("design:type", Function),
@@ -79,7 +75,6 @@ __decorate([
     (0, swagger_1.ApiParam)({
         name: 'id',
     }),
-    (0, admin_decorator_1.AdminAccess)(),
     (0, common_1.Put)('edit/:id'),
     __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
     __param(1, (0, common_1.Body)()),
@@ -91,7 +86,6 @@ __decorate([
     (0, swagger_1.ApiParam)({
         name: 'id',
     }),
-    (0, admin_decorator_1.AdminAccess)(),
     (0, common_1.Delete)('delete/:id'),
     __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
     __metadata("design:type", Function),

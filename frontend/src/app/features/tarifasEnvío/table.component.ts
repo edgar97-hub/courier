@@ -73,13 +73,13 @@ export interface UserData {
             class="@apply flex justify-between  flex-col items-start gap-3"
           >
             <div class="@apply flex justify-between items-center gap-3">
-              <mat-form-field>
+              <mat-form-field appearance="outline">
                 <mat-label>Ancho (cm)</mat-label>
                 <input matInput formControlName="standard_measurements_width" />
                 <mat-error appFieldError></mat-error>
               </mat-form-field>
 
-              <mat-form-field>
+              <mat-form-field appearance="outline">
                 <mat-label>Largo (cm)</mat-label>
                 <input
                   matInput
@@ -88,7 +88,7 @@ export interface UserData {
                 <mat-error appFieldError></mat-error>
               </mat-form-field>
 
-              <mat-form-field>
+              <mat-form-field appearance="outline">
                 <mat-label>Alto (cm)</mat-label>
                 <input
                   matInput
@@ -97,7 +97,7 @@ export interface UserData {
                 <mat-error appFieldError></mat-error>
               </mat-form-field>
 
-              <mat-form-field>
+              <mat-form-field appearance="outline">
                 <mat-label>Peso real (kg)</mat-label>
                 <input
                   matInput
@@ -138,7 +138,7 @@ export interface UserData {
                 </mat-card-header>
                 <mat-card-content>
                   <div class="@apply flex justify-between items-center gap-3">
-                    <mat-form-field>
+                    <mat-form-field appearance="outline">
                       <mat-label>Ancho (cm)</mat-label>
                       <input
                         matInput
@@ -146,7 +146,7 @@ export interface UserData {
                       />
                       <mat-error appFieldError></mat-error>
                     </mat-form-field>
-                    <mat-form-field>
+                    <mat-form-field appearance="outline">
                       <mat-label>Largo (cm)</mat-label>
                       <input
                         matInput
@@ -155,7 +155,7 @@ export interface UserData {
                       <mat-error appFieldError></mat-error>
                     </mat-form-field>
 
-                    <mat-form-field>
+                    <mat-form-field appearance="outline">
                       <mat-label>Alto (cm)</mat-label>
                       <input
                         matInput
@@ -164,7 +164,7 @@ export interface UserData {
                       <mat-error appFieldError></mat-error>
                     </mat-form-field>
 
-                    <mat-form-field>
+                    <mat-form-field appearance="outline">
                       <mat-label>Peso máximo permitido (kg)</mat-label>
                       <input
                         matInput
@@ -176,7 +176,7 @@ export interface UserData {
                 </mat-card-content>
               </mat-card>
 
-              <mat-form-field>
+              <mat-form-field appearance="outline">
                 <mat-label>Factor volumétrico</mat-label>
                 <input matInput formControlName="volumetric_factor" />
                 <mat-error appFieldError></mat-error>

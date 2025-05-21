@@ -25,6 +25,7 @@ import { Subject, Observable } from 'rxjs';
 import { startWith, takeUntil, tap } from 'rxjs/operators';
 
 import {
+  DistrictOption,
   MaxPackageDimensions,
   ShippingCostResponse,
 } from '../../models/order.model';
@@ -49,12 +50,18 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
   // Este FormGroup será un subgrupo del formulario principal de la página de creación
   @Input() packageFormGroup!: FormGroup; // Recibe el FormGroup para 'package_details'
   @Input() deliveryDistrictId: string | number | null = null; // Necesario para el cálculo de costo
+  @Input() listaDeDistritos: DistrictOption[] | null = []; // Recibe la lista del padre
+  // @Input() districts: Observable<DistrictOption[]>;
+  // @Input() _districtsCache: DistrictOption[] = [];
+
+  // private _districtsCache: DistrictOption[] = [];
 
   @Output() shippingCostCalculated = new EventEmitter<number>();
   @Output() calculationLoading = new EventEmitter<boolean>(); // Para notificar al padre
 
   maxDimensions$: Observable<MaxPackageDimensions>;
   standardPackageLabel: WritableSignal<string> = signal('Estándar'); // Para mostrar info del paquete estándar
+  volumetric_factor: WritableSignal<number> = signal(0);
 
   isCalculating: WritableSignal<boolean> = signal(false);
 
@@ -64,12 +71,14 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
   constructor() {
     this.maxDimensions$ = this.orderService.getMaxPackageDimensions().pipe(
       tap((dims) => {
-        if (dims.standard_package_info) {
+        if (dims.standard_package_info && dims.volumetric_factor) {
           this.standardPackageLabel.set(dims.standard_package_info);
+          this.volumetric_factor.set(dims.volumetric_factor);
         }
         // Podríamos usar estas dimensiones para validadores dinámicos en los campos custom
       })
     );
+    // this.districts = new Observable<DistrictOption[]>();
   }
 
   ngOnInit(): void {
@@ -89,12 +98,20 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
       )
       .subscribe((type) => {
         this.toggleCustomDimensionControls(type === 'custom');
-        if (type === 'standard') {
-          this.calculateStandardShippingCost(); // Calcular costo si se selecciona estándar
-        } else {
-          // Si se cambia a custom y ya había un costo, podría resetearse o esperar al botón "Calcular"
-          // Por ahora, lo dejamos que el usuario presione "Calcular"
-        }
+        // console.log('type', type);
+        // console.log('this.districts', this._districtsCache);
+
+        // if (type === 'standard') {
+        //   if (!this.deliveryDistrictId) {
+        //     this.shippingCostCalculated.emit(0);
+        //   }
+        //   // this.calculateStandardShippingCost(); // Calcular costo si se selecciona estándar
+        // } else {
+        //   this.shippingCostCalculated.emit(0);
+
+        //   // Si se cambia a custom y ya había un costo, podría resetearse o esperar al botón "Calcular"
+        //   // Por ahora, lo dejamos que el usuario presione "Calcular"
+        // }
       });
   }
 
@@ -118,7 +135,9 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
         } else {
           control.disable();
           control.clearValidators();
-          control.reset(); // Limpiar valores si se cambia a estándar
+          // control.setValue(0, { emitEvent: false }); // Usar setValue para establecerlo en 0
+          control.updateValueAndValidity({ emitEvent: false }); // Evitar re-trigger innecesario de valueChanges si no es necesario
+          // control.reset(); // Limpiar valores si se cambia a estándar
         }
         control.updateValueAndValidity();
       }
@@ -197,23 +216,96 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
       package_weight_kg: this.packageFormGroup.get('package_weight_kg')?.value,
     };
 
-    this.orderService
-      .calculateShippingCost(customData)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response: ShippingCostResponse) => {
-          this.shippingCostCalculated.emit(response.shipping_cost);
-          this.isCalculating.set(false);
-          this.calculationLoading.emit(false);
-        },
-        error: (err) => {
-          console.error('Error calculating custom shipping cost:', err);
-          // Podrías emitir un valor de error o null para indicar fallo
-          this.shippingCostCalculated.emit(0); // O un valor que indique error
-          this.isCalculating.set(false);
-          this.calculationLoading.emit(false);
-        },
-      });
+    this.maxDimensions$;
+
+    // console.log('listaDeDistritos', this.listaDeDistritos);
+    // console.log('customData', customData);
+    // console.log('this.volumetric_factor', this.volumetric_factor());
+
+    if (
+      customData.package_width_cm &&
+      customData.package_length_cm &&
+      customData.package_height_cm &&
+      customData.package_weight_kg &&
+      this.volumetric_factor()
+    ) {
+      let peso_volumetrico =
+        (customData.package_length_cm *
+          customData.package_width_cm *
+          customData.package_height_cm) /
+        this.volumetric_factor();
+
+      let precio = 0;
+      let peso_cobrado = customData.package_weight_kg;
+      if (peso_volumetrico > customData.package_weight_kg) {
+        peso_cobrado = peso_volumetrico;
+      }
+
+      if (customData.delivery_district_id) {
+        let districtFound = this.listaDeDistritos?.find(
+          (item) => item.id === customData.delivery_district_id
+        );
+        if (districtFound) {
+          let filtrados = this.listaDeDistritos?.filter(
+            (item) => item.name === districtFound?.name
+          );
+          interface Tarifa {
+            id: number | string; // Identificador único de la tarifa
+            weight_from: number; // Límite inferior del rango de peso (inclusivo)
+            weight_to: number; // Límite superior del rango de peso (inclusivo)
+            precio: number; // Precio para esta tarifa
+          }
+          function getTarifa(
+            peso_cobrado: number,
+            filtrados: any[] = []
+          ): any | undefined {
+            for (const tarifa of filtrados) {
+              if (
+                peso_cobrado >= tarifa.weight_from &&
+                peso_cobrado <= tarifa.weight_to
+              ) {
+                console.log('tarifa', tarifa);
+                return tarifa;
+              }
+            }
+            return 0;
+          }
+
+          if (filtrados) {
+            let tarifa = getTarifa(peso_cobrado, filtrados);
+            precio = tarifa.price || 0;
+          }
+        }
+      }
+      // console.log('peso_volumetrico', peso_volumetrico);
+      // console.log('customData.package_weight_kg', customData.package_weight_kg);
+      console.log('peso_cobrado', peso_cobrado);
+      console.log('precio', precio);
+      this.shippingCostCalculated.emit(precio);
+      this.isCalculating.set(false);
+      this.calculationLoading.emit(false);
+    } else {
+      alert('las entradas no son validas');
+    }
+
+    return;
+    // this.orderService
+    //   .calculateShippingCost(customData)
+    //   .pipe(takeUntil(this.destroy$))
+    //   .subscribe({
+    //     next: (response: ShippingCostResponse) => {
+    //       this.shippingCostCalculated.emit(response.shipping_cost);
+    //       this.isCalculating.set(false);
+    //       this.calculationLoading.emit(false);
+    //     },
+    //     error: (err) => {
+    //       console.error('Error calculating custom shipping cost:', err);
+    //       // Podrías emitir un valor de error o null para indicar fallo
+    //       this.shippingCostCalculated.emit(0); // O un valor que indique error
+    //       this.isCalculating.set(false);
+    //       this.calculationLoading.emit(false);
+    //     },
+    //   });
   }
 
   ngOnDestroy(): void {
