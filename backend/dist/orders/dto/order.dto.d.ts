@@ -1,3 +1,4 @@
+import { STATES } from 'src/constants/roles';
 export declare class OrderDTO {
     shipment_type?: string;
     recipient_name?: string;
@@ -17,6 +18,7 @@ export declare class OrderDTO {
     payment_method_for_collection: string;
     observations: string;
     type_order_transfer_to_warehouse: string;
+    status: STATES;
 }
 export declare class OrderUpdateDTO {
     shipment_type?: string;
@@ -37,4 +39,5 @@ export declare class OrderUpdateDTO {
     payment_method_for_collection: string;
     observations: string;
     type_order_transfer_to_warehouse: string;
+    status: STATES;
 }

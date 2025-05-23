@@ -8,8 +8,12 @@ import {
   Post,
   Put,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Express } from 'express';
 import {
   ApiHeader,
   ApiHeaders,
@@ -77,5 +81,32 @@ export class SettingsController {
   @Delete('delete/:id')
   public async deleteUser(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.usersService.deleteUser(id);
+  }
+
+  @Post('upload-logo')
+  @UseInterceptors(FileInterceptor('logoFile'))
+  public async uploadLogo(
+    @UploadedFile() logoFile: Express.Multer.File,
+    @Req() request: Request,
+  ) {
+    return await this.usersService.uploadLogo(logoFile, request);
+  }
+
+  @Post('upload-terms-pdf')
+  @UseInterceptors(FileInterceptor('termsPdfFile'))
+  public async uploadTermsPdf(
+    @UploadedFile() termsPdfFile: Express.Multer.File,
+    @Req() request: Request,
+  ) {
+    return await this.usersService.uploadTermsPdf(termsPdfFile, request);
+  }
+
+  @Post('upload-file')
+  @UseInterceptors(FileInterceptor('file'))
+  public async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() request: Request,
+  ) {
+    return await this.usersService.uploadFile(file, request);
   }
 }

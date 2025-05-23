@@ -1,5 +1,6 @@
 import { BaseEntity } from '../../config/base.entity';
 import { UsersEntity } from '../../users/entities/users.entity';
+import { STATES } from '../../constants/roles';
 export declare class OrdersEntity extends BaseEntity {
     code?: number;
     shipment_type?: string;
@@ -20,5 +21,6 @@ export declare class OrdersEntity extends BaseEntity {
     payment_method_for_collection?: string;
     observations?: string;
     type_order_transfer_to_warehouse?: string;
+    status: STATES;
     user: UsersEntity;
 }

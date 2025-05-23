@@ -18,13 +18,39 @@ const typeorm_1 = require("@nestjs/typeorm");
 const error_manager_1 = require("../../utils/error.manager");
 const typeorm_2 = require("typeorm");
 const orders_entity_1 = require("../entities/orders.entity");
+const districts_entity_1 = require("../../districts/entities/districts.entity");
+const roles_1 = require("../../constants/roles");
+const typeorm_3 = require("typeorm");
+const EXCEL_HEADER_TO_ENTITY_KEY_MAP = {
+    'TIPO DE ENVIO': 'shipment_type',
+    'NOMBRE DEL DESTINATARIO': 'recipient_name',
+    'TELEFONO DESTINATARIO 9 DIGITOS': 'recipient_phone',
+    'DISTRITO (SELECCIONE SOLO DEL LISTADO)': 'delivery_district_name',
+    'DIRECCION DE ENTREGA': 'delivery_address',
+    'FECHA DE ENTREGA (DIA/MES/AÑO)': 'delivery_date',
+    'DETALLE DEL PRODUCTO': 'item_description',
+    'MONTO A COBRAR': 'amount_to_collect_at_delivery',
+    'FORMA DE PAGO': 'payment_method_for_collection',
+    OBSERVACION: 'observations',
+};
 let OrdersService = class OrdersService {
-    constructor(userRepository) {
-        this.userRepository = userRepository;
+    constructor(orderRepository, districtsRepository, entityManager) {
+        this.orderRepository = orderRepository;
+        this.districtsRepository = districtsRepository;
+        this.entityManager = entityManager;
     }
-    async createUser(body) {
+    async createOrder(body) {
         try {
-            return await this.userRepository.save(body);
+            return await this.orderRepository.save(body);
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
+    async updateOrderStatus(body) {
+        try {
+            const order = await this.orderRepository.update(body.orderId, { status: body.newStatus });
+            return order;
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
@@ -35,7 +61,7 @@ let OrdersService = class OrdersService {
         if (!orderDTOs || orderDTOs.length === 0) {
             throw error_manager_1.ErrorManager.createSignatureError('No orders provided in the batch.');
         }
-        const queryRunner = this.userRepository.manager.connection.createQueryRunner();
+        const queryRunner = this.orderRepository.manager.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         const createdOrders = [];
@@ -107,7 +133,227 @@ let OrdersService = class OrdersService {
             await queryRunner.release();
         }
     }
-    async findUsers({ pageNumber = 1, pageSize = 1, sortField = '', sortDirection = '', startDate, endDate, }) {
+    async importOrdersFromExcelData(excelRows) {
+        if (!excelRows || excelRows.length === 0) {
+            return { success: false, message: 'No data provided in the Excel file.' };
+        }
+        let importedCount = 0;
+        const errors = [];
+        const ordersToSave = [];
+        const firstRow = excelRows[0];
+        if (typeof firstRow !== 'object' || firstRow === null) {
+            return {
+                success: false,
+                message: 'Formato de datos de Excel inválido. Se esperaba una fila de cabecera.',
+            };
+        }
+        for (let i = 0; i < excelRows.length; i++) {
+            const excelRowData = excelRows[i];
+            const excelRowNumber = i + 2;
+            const orderEntity = {};
+            let rowHasErrors = false;
+            for (const excelHeader in excelRowData) {
+                if (excelRowData.hasOwnProperty(excelHeader)) {
+                    const entityKey = EXCEL_HEADER_TO_ENTITY_KEY_MAP[excelHeader.trim().toUpperCase()];
+                    if (entityKey) {
+                        orderEntity[entityKey] = String(excelRowData[excelHeader]).trim();
+                    }
+                }
+            }
+            if (!orderEntity.recipient_phone ||
+                !/^[0-9]{9}$/.test(orderEntity.recipient_phone)) {
+                errors.push({
+                    rowExcel: excelRowNumber,
+                    message: `Teléfono del destinatario inválido: '${orderEntity.recipient_phone || ''}'.`,
+                    rowData: excelRowData,
+                });
+                rowHasErrors = true;
+            }
+            if (!orderEntity.delivery_address ||
+                orderEntity.delivery_address.length < 5) {
+                errors.push({
+                    rowExcel: excelRowNumber,
+                    message: 'Dirección de entrega es requerida y debe tener al menos 5 caracteres.',
+                    rowData: excelRowData,
+                });
+                rowHasErrors = true;
+            }
+            orderEntity.amount_to_collect_at_delivery =
+                orderEntity.amount_to_collect_at_delivery || 0;
+            if (orderEntity.amount_to_collect_at_delivery >= 0) {
+                const amount = parseFloat(orderEntity.amount_to_collect_at_delivery.toString());
+                if (isNaN(amount)) {
+                    errors.push({
+                        rowExcel: excelRowNumber,
+                        message: `Monto a cobrar inválido: '${orderEntity.amount_to_collect_at_delivery}'. Debe ser un número`,
+                        rowData: excelRowData,
+                    });
+                    rowHasErrors = true;
+                }
+                else {
+                    orderEntity.amount_to_collect_at_delivery = amount;
+                }
+            }
+            else if (orderEntity.type_order_transfer_to_warehouse?.toUpperCase() ===
+                'CONTRAENTREGA') {
+                errors.push({
+                    rowExcel: excelRowNumber,
+                    message: 'Monto a cobrar es requerido para tipo de envío CONTRAENTREGA.',
+                    rowData: excelRowData,
+                });
+                rowHasErrors = true;
+            }
+            else {
+                orderEntity.amount_to_collect_at_delivery = 0;
+            }
+            if (orderEntity.delivery_date) {
+                const dateParts = String(orderEntity.delivery_date).split('/');
+                if (dateParts.length === 3) {
+                    console.log('dateParts', dateParts);
+                    const day = parseInt(dateParts[0], 10);
+                    const month = parseInt(dateParts[1], 10) - 1;
+                    const year = parseInt(dateParts[2], 10);
+                    const parsedDate = new Date(year, month, day);
+                    console.log(parsedDate.getTime(), parsedDate.getDate(), day, parsedDate.getMonth(), month, parsedDate.getFullYear(), year);
+                    if (isNaN(parsedDate.getTime()) ||
+                        parsedDate.getDate() !== day ||
+                        parsedDate.getMonth() !== month ||
+                        parsedDate.getFullYear() !== year) {
+                        errors.push({
+                            rowExcel: excelRowNumber,
+                            message: `Fecha de entrega inválida: '${orderEntity.delivery_date}'. Usar DD/MM/AAAA.`,
+                            rowData: excelRowData,
+                        });
+                        rowHasErrors = true;
+                    }
+                    else {
+                        orderEntity.delivery_date = day + '-' + month + '-' + year;
+                    }
+                }
+                else {
+                    errors.push({
+                        rowExcel: excelRowNumber,
+                        message: `Formato de fecha de entrega incorrecto: '${orderEntity.delivery_date}'. Usar DD/MM/AAAA.`,
+                        rowData: excelRowData,
+                    });
+                    rowHasErrors = true;
+                }
+            }
+            else {
+                errors.push({
+                    rowExcel: excelRowNumber,
+                    message: 'Fecha de entrega es requerida.',
+                    rowData: excelRowData,
+                });
+                rowHasErrors = true;
+            }
+            if (orderEntity.delivery_district_name) {
+                const district = await this.districtsRepository
+                    .createQueryBuilder('d')
+                    .where('LOWER(d.name) = LOWER(:name)', {
+                    name: orderEntity.delivery_district_name,
+                })
+                    .getOne();
+                if (!district) {
+                    errors.push({
+                        rowExcel: excelRowNumber,
+                        message: `Distrito '${orderEntity.delivery_district_name}' no encontrado o no válido.`,
+                        rowData: excelRowData,
+                    });
+                    rowHasErrors = true;
+                }
+            }
+            else {
+                errors.push({
+                    rowExcel: excelRowNumber,
+                    message: 'Distrito es requerido.',
+                    rowData: excelRowData,
+                });
+                rowHasErrors = true;
+            }
+            console.log('test1');
+            console.log('ordersToSave.length > 0 && errors.length', ordersToSave, errors);
+            if (!rowHasErrors) {
+                orderEntity.status = roles_1.STATES.REGISTERED;
+                ordersToSave.push(orderEntity);
+            }
+        }
+        if (ordersToSave.length > 0 && errors.length === 0) {
+            console.log('test2');
+            const queryRunner = this.orderRepository.manager.connection.createQueryRunner();
+            await queryRunner.connect();
+            await queryRunner.startTransaction();
+            await this.entityManager
+                .transaction(async (transactionalEntityManager) => {
+                try {
+                    console.log(`Iniciando transacción para guardar ${ordersToSave.length} pedidos.`);
+                    const entitiesToSave = ordersToSave.map((orderData) => transactionalEntityManager.create(orders_entity_1.OrdersEntity, orderData));
+                    await transactionalEntityManager.save(orders_entity_1.OrdersEntity, entitiesToSave);
+                    importedCount = ordersToSave.length;
+                    console.log(`${importedCount} pedidos guardados exitosamente dentro de la transacción.`);
+                }
+                catch (dbError) {
+                    console.error('Error DENTRO de la transacción de base de datos, iniciando rollback:', dbError);
+                    importedCount = 0;
+                    throw dbError;
+                }
+            })
+                .catch((transactionError) => {
+                console.error('La transacción de guardado de pedidos falló y se revirtió (rollback):', transactionError);
+                errors.push({
+                    rowExcel: 0,
+                    message: `Error crítico al guardar los pedidos en la base de datos. Ningún pedido fue importado. Detalles: ${transactionError.message || 'Error desconocido de base de datos.'}`,
+                });
+                importedCount = 0;
+            });
+        }
+        else if (ordersToSave.length === 0 &&
+            errors.length === 0 &&
+            excelRows.length > 0) {
+            if (excelRows.length <= 1 && Object.keys(excelRows[0] || {}).length > 0) {
+                errors.push({
+                    rowExcel: 0,
+                    message: 'El archivo solo contiene cabeceras o ninguna fila de datos válida.',
+                });
+            }
+            else if (excelRows.length > 0) {
+                errors.push({
+                    rowExcel: 0,
+                    message: 'Ningún pedido cumplió los criterios para ser procesado después de la validación inicial.',
+                });
+            }
+        }
+        const totalProcessed = excelRows.length;
+        const finalSuccess = errors.length === 0 && importedCount > 0;
+        let finalMessage = '';
+        if (finalSuccess) {
+            finalMessage = `¡Importación exitosa! ${importedCount} pedidos fueron importados correctamente.`;
+        }
+        else if (importedCount > 0 && errors.length > 0) {
+            finalMessage = `Error en la importación. ${importedCount} pedidos podrían haberse procesado parcialmente antes de un error crítico. Se encontraron ${errors.length} problemas.`;
+        }
+        else if (errors.length > 0) {
+            finalMessage = `La importación falló. Se encontraron ${errors.length} errores. Ningún pedido fue guardado.`;
+            if (importedCount > 0) {
+                finalMessage += ` (Nota: se detectó un conteo de importados de ${importedCount}, pero debido a errores críticos, la operación debería haberse revertido).`;
+                importedCount = 0;
+            }
+        }
+        else if (totalProcessed > 0 && importedCount === 0) {
+            finalMessage =
+                'No se importaron pedidos. El archivo podría estar vacío o los datos no fueron válidos.';
+        }
+        else {
+            finalMessage = 'No se encontraron datos para importar en el archivo.';
+        }
+        return {
+            success: finalSuccess,
+            message: finalMessage,
+            importedCount: importedCount,
+            errors: errors,
+        };
+    }
+    async findOrders({ pageNumber = 0, pageSize = 0, sortField = '', sortDirection = '', startDate, endDate, status = '', }) {
         try {
             const skip = (pageNumber - 1) * pageSize;
             const where = {};
@@ -118,11 +364,14 @@ let OrdersService = class OrdersService {
                 const end = new Date(endY, endM - 1, endD, 23, 59, 59);
                 where.createdAt = (0, typeorm_2.Between)(start, end);
             }
+            if (status) {
+                where.status = status;
+            }
             const sortFieldMap = {
                 registration_date: 'createdAt',
             };
             const sortBy = sortFieldMap[sortField] || sortField;
-            return this.userRepository
+            return this.orderRepository
                 .findAndCount({
                 where,
                 order: {
@@ -142,19 +391,52 @@ let OrdersService = class OrdersService {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
-    async findUserById(id) {
+    async getFilteredOrders({ sortField = '', sortDirection = '', startDate, endDate, status = '', }) {
         try {
-            const user = (await this.userRepository
+            const where = {};
+            if (startDate && endDate) {
+                const [startY, startM, startD] = startDate.split('-').map(Number);
+                const [endY, endM, endD] = endDate.split('-').map(Number);
+                const start = new Date(startY, startM - 1, startD, 0, 0, 0);
+                const end = new Date(endY, endM - 1, endD, 23, 59, 59);
+                where.createdAt = (0, typeorm_2.Between)(start, end);
+            }
+            if (status) {
+                where.status = status;
+            }
+            const sortFieldMap = {
+                registration_date: 'createdAt',
+            };
+            const sortBy = sortFieldMap[sortField] || sortField;
+            return this.orderRepository
+                .findAndCount({
+                where,
+                order: {
+                    [sortBy]: sortDirection.toUpperCase(),
+                },
+            })
+                .then(([items, total]) => ({
+                items,
+                total_count: total,
+            }));
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
+    async findOrderById(id) {
+        try {
+            const order = (await this.orderRepository
                 .createQueryBuilder('user')
                 .where({ id })
                 .getOne());
-            if (!user) {
+            if (!order) {
                 throw new error_manager_1.ErrorManager({
                     type: 'BAD_REQUEST',
                     message: 'No se encontro resultado',
                 });
             }
-            return user;
+            return order;
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
@@ -162,42 +444,42 @@ let OrdersService = class OrdersService {
     }
     async findBy({ key, value }) {
         try {
-            const user = (await this.userRepository
+            const order = (await this.orderRepository
                 .createQueryBuilder('user')
                 .addSelect('user.password')
                 .where({ [key]: value })
                 .getOne());
-            return user;
+            return order;
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
-    async updateUser(body, id) {
+    async updateOrder(body, id) {
         try {
-            const user = await this.userRepository.update(id, body);
-            if (user.affected === 0) {
+            const order = await this.orderRepository.update(id, body);
+            if (order.affected === 0) {
                 throw new error_manager_1.ErrorManager({
                     type: 'BAD_REQUEST',
                     message: 'No se pudo actualizar',
                 });
             }
-            return user;
+            return order;
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
-    async deleteUser(id) {
+    async deleteOrder(id) {
         try {
-            const user = await this.userRepository.delete(id);
-            if (user.affected === 0) {
+            const order = await this.orderRepository.delete(id);
+            if (order.affected === 0) {
                 throw new error_manager_1.ErrorManager({
                     type: 'BAD_REQUEST',
                     message: 'No se pudo borrar',
                 });
             }
-            return user;
+            return order;
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
@@ -208,6 +490,10 @@ exports.OrdersService = OrdersService;
 exports.OrdersService = OrdersService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(orders_entity_1.OrdersEntity)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __param(1, (0, typeorm_1.InjectRepository)(districts_entity_1.DistrictsEntity)),
+    __param(2, (0, typeorm_1.InjectEntityManager)()),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
+        typeorm_3.EntityManager])
 ], OrdersService);
 //# sourceMappingURL=orders.service.js.map

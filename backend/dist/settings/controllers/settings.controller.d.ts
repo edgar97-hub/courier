@@ -6,6 +6,15 @@ export declare class SettingsController {
     registerUser(body: SettingDTO): Promise<import("../entities/settings.entity").SettingsEntity>;
     findAllUsers(): Promise<import("../entities/settings.entity").SettingsEntity[]>;
     findUserById(id: string): Promise<import("../entities/settings.entity").SettingsEntity>;
-    updateUser(id: string, body: SettingUpdateDTO): Promise<import("typeorm").UpdateResult | undefined>;
+    updateUser(id: string, body: SettingUpdateDTO): Promise<any>;
     deleteUser(id: string): Promise<import("typeorm").DeleteResult | undefined>;
+    uploadLogo(logoFile: Express.Multer.File, request: Request): Promise<{
+        logo_url: string;
+    }>;
+    uploadTermsPdf(termsPdfFile: Express.Multer.File, request: Request): Promise<{
+        terms_conditions_url: string;
+    }>;
+    uploadFile(file: Express.Multer.File, request: Request): Promise<{
+        file_url: string;
+    }>;
 }

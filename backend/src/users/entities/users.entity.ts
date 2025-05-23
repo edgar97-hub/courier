@@ -3,7 +3,6 @@ import { Exclude } from 'class-transformer';
 import { ROLES } from '../../constants/roles';
 import { IUser } from '../../interfaces/user.interface';
 import { BaseEntity } from '../../config/base.entity';
-import { UsersProjectsEntity } from './usersProjects.entity';
 import { OrdersEntity } from '../../orders/entities/orders.entity';
 
 @Entity({ name: 'users' })
@@ -22,11 +21,56 @@ export class UsersEntity extends BaseEntity implements IUser {
   @Column()
   password: string;
 
+  @Column({ default: '' })
+  business_type: string;
+
+  @Column({ default: '' })
+  business_name: string;
+
+  @Column({ default: '' })
+  business_district: string;
+
+  @Column({ default: '' })
+  business_address: string;
+
+  @Column({ default: '' })
+  business_phone_number: string;
+
+  @Column({ default: '' })
+  business_sector: string;
+
+  @Column({ default: '' })
+  business_document_type: string;
+
+  @Column({ default: '' })
+  business_email: string;
+
+  @Column({ type: 'bool', default: false })
+  assumes_5_percent_pos: boolean;
+
+  @Column({ default: '' })
+  business_document_number: string;
+
+  @Column({ default: '' })
+  owner_name: string;
+
+  @Column({ default: '' })
+  owner_phone_number: string;
+
+  @Column({ default: '' })
+  owner_document_type: string;
+
+  @Column({ default: '' })
+  owner_document_number: string;
+
+  @Column({ default: '' })
+  owner_email_address: string;
+
+  @Column({ default: '' })
+  owner_bank_account: string;
+
   @Column({ type: 'enum', enum: ROLES, unique: false })
   role: ROLES;
-
-  @OneToMany(() => UsersProjectsEntity, (usersProjects) => usersProjects.user)
-  projectsIncludes: UsersProjectsEntity[];
 
   @OneToMany(() => OrdersEntity, (usersOrders) => usersOrders.user)
   ordersIncludes: OrdersEntity[];

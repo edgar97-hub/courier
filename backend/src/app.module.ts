@@ -7,8 +7,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSourceConfig } from './config/data.source';
 import { AuthModule } from './auth/auth.module';
 
-import { ProjectsModule } from './projects/projects.module';
-import { TasksModule } from './tasks/tasks.module';
 import { ProvidersModule } from './providers/providers.module';
 import { SettingsModule } from './settings/settings.module';
 import { OrdersModule } from './orders/orders.module';
@@ -23,9 +21,7 @@ import { OrdersModule } from './orders/orders.module';
     UsersModule,
     DistrictsModule,
     SettingsModule,
-    ProjectsModule,
     AuthModule,
-    TasksModule,
     ProvidersModule,
     OrdersModule,
   ],

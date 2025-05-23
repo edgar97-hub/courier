@@ -14,7 +14,6 @@ const typeorm_1 = require("typeorm");
 const class_transformer_1 = require("class-transformer");
 const roles_1 = require("../../constants/roles");
 const base_entity_1 = require("../../config/base.entity");
-const usersProjects_entity_1 = require("./usersProjects.entity");
 const orders_entity_1 = require("../../orders/entities/orders.entity");
 let UsersEntity = class UsersEntity extends base_entity_1.BaseEntity {
 };
@@ -38,13 +37,73 @@ __decorate([
     __metadata("design:type", String)
 ], UsersEntity.prototype, "password", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], UsersEntity.prototype, "business_type", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], UsersEntity.prototype, "business_name", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], UsersEntity.prototype, "business_district", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], UsersEntity.prototype, "business_address", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], UsersEntity.prototype, "business_phone_number", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], UsersEntity.prototype, "business_sector", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], UsersEntity.prototype, "business_document_type", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], UsersEntity.prototype, "business_email", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'bool', default: false }),
+    __metadata("design:type", Boolean)
+], UsersEntity.prototype, "assumes_5_percent_pos", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], UsersEntity.prototype, "business_document_number", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], UsersEntity.prototype, "owner_name", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], UsersEntity.prototype, "owner_phone_number", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], UsersEntity.prototype, "owner_document_type", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], UsersEntity.prototype, "owner_document_number", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], UsersEntity.prototype, "owner_email_address", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], UsersEntity.prototype, "owner_bank_account", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'enum', enum: roles_1.ROLES, unique: false }),
     __metadata("design:type", String)
 ], UsersEntity.prototype, "role", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(() => usersProjects_entity_1.UsersProjectsEntity, (usersProjects) => usersProjects.user),
-    __metadata("design:type", Array)
-], UsersEntity.prototype, "projectsIncludes", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => orders_entity_1.OrdersEntity, (usersOrders) => usersOrders.user),
     __metadata("design:type", Array)

@@ -8,6 +8,7 @@ const constants_1 = require("./constants");
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const path_1 = require("path");
+const bodyParser = require("body-parser");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.use(morgan('dev'));
@@ -18,6 +19,8 @@ async function bootstrap() {
     }));
     const reflector = app.get(core_1.Reflector);
     app.useGlobalInterceptors(new common_1.ClassSerializerInterceptor(reflector));
+    app.use(bodyParser.json({ limit: '50mb' }));
+    app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
     const configservice = app.get(config_1.ConfigService);
     app.enableCors(constants_1.CORS);
     app.setGlobalPrefix('api');

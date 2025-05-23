@@ -1,12 +1,24 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ACCESS_LEVEL = exports.ROLES = void 0;
+exports.ACCESS_LEVEL = exports.STATES = exports.ROLES = void 0;
 var ROLES;
 (function (ROLES) {
     ROLES["ADMIN"] = "ADMIN";
     ROLES["CUSTOMER"] = "CUSTOMER";
     ROLES["MOTORIZED"] = "MOTORIZED";
+    ROLES["RECEPTIONIST"] = "RECEPTIONIST";
 })(ROLES || (exports.ROLES = ROLES = {}));
+var STATES;
+(function (STATES) {
+    STATES["REGISTERED"] = "REGISTRADO";
+    STATES["PICKUP"] = "RECOGIDO";
+    STATES["IN_WHAREHOUSE"] = "EN ALMACEN";
+    STATES["IN_TRANSIT"] = "EN TRANSITO";
+    STATES["DELIVERED"] = "ENTREGADO";
+    STATES["CANCELED"] = "CANCELADO";
+    STATES["REJECTED"] = "RECHAZADO";
+    STATES["RESCHEDULED"] = "REPROGRAMADO";
+})(STATES || (exports.STATES = STATES = {}));
 var ACCESS_LEVEL;
 (function (ACCESS_LEVEL) {
     ACCESS_LEVEL[ACCESS_LEVEL["DEVELOPER"] = 30] = "DEVELOPER";

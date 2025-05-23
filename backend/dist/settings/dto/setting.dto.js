@@ -42,6 +42,22 @@ __decorate([
 ], SettingDTO.prototype, "terms_conditions_url", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], SettingDTO.prototype, "background_image_url", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], SettingDTO.prototype, "rates_image_url", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], SettingDTO.prototype, "excel_import_template_url", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], SettingDTO.prototype, "coverage_map_url", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
     __metadata("design:type", Number)
 ], SettingDTO.prototype, "standard_measurements_width", void 0);
 __decorate([
@@ -95,6 +111,22 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], SettingUpdateDTO.prototype, "logo_url", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], SettingUpdateDTO.prototype, "background_image_url", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], SettingUpdateDTO.prototype, "rates_image_url", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], SettingUpdateDTO.prototype, "excel_import_template_url", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], SettingUpdateDTO.prototype, "coverage_map_url", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", Number)

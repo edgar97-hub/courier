@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   NotFoundException,
   Param,
   ParseIntPipe,
@@ -28,63 +30,44 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { AccessLevelGuard } from 'src/auth/guards/access-level.guard';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { ProjectsEntity } from 'src/projects/entities/projects.entity';
 import { OrderDTO, OrderUpdateDTO } from '../dto/order.dto';
 import { OrdersService } from '../services/orders.service';
-import { PdfService } from '../pdf/pdf.service';
 import { Response } from 'express'; // Asegúrate de importar Response de 'express'
+import { ImportResult } from '../dto/import-result.dto';
 
 @ApiTags('Orders')
 @Controller('orders')
 @UseGuards(AuthGuard, RolesGuard, AccessLevelGuard)
 export class OrdersController {
-  constructor(
-    private readonly usersService: OrdersService,
-    // private readonly pdfService: PdfService,
-  ) {}
+  constructor(private readonly ordersService: OrdersService) {}
 
-  // @Get('pdf') // GET /shipments/:id/label/pdf
-  // async getShipmentLabelPdf(
-  //   @Param('id', ParseIntPipe) id: string,
-  //   @Res() res: Response,
-  // ): Promise<void> {
-  //   const shipment = await this.usersService.findUserById(id); // Tu método para obtener datos
-
-  //   if (!shipment) {
-  //     throw new NotFoundException(`Envío con ID "${id}" no encontrado.`);
-  //   }
-
-  //   const pdfBuffer = await this.pdfService.generateShipmentLabel(shipment);
-
-  //   res.set({
-  //     'Content-Type': 'application/pdf',
-  //     'Content-Disposition': `attachment; filename="etiqueta_envio_${shipment.code || id}.pdf"`,
-  //     'Content-Length': pdfBuffer.length.toString(), // Content-Length debe ser string
-  //   });
-
-  //   res.end(pdfBuffer);
-  // }
-
-  // @AdminAccess()
   @Post('create')
   public async register(@Body() body: OrderDTO) {
-    return await this.usersService.createUser(body);
+    return await this.ordersService.createOrder(body);
   }
 
   @Post('batch-create')
   public async batchCreateOrders(@Body() body: any) {
-    return await this.usersService.batchCreateOrders(body);
+    return await this.ordersService.batchCreateOrders(body);
   }
 
-  // @AdminAccess()
+  @Post('import-batch-json')
+  @HttpCode(HttpStatus.OK)
+  async importOrders(
+    @Body() ordersData: any[],
+  ): Promise<ImportResult | undefined> {
+    return await this.ordersService.importOrdersFromExcelData(ordersData);
+  }
+
   @Get('')
-  public async findAllUsers(
-    @Query('page_number') pageNumber = 1,
-    @Query('page_size') pageSize = 10,
+  public async findAllOrders(
+    @Query('page_number') pageNumber = 0,
+    @Query('page_size') pageSize = 0,
     @Query('sort_field') sortField = 'created_at',
     @Query('sort_direction') sortDirection = 'desc',
     @Query('start_date') startDate?: string,
     @Query('end_date') endDate?: string,
+    @Query('status') status?: string,
   ) {
     const queryParams = {
       pageNumber,
@@ -93,8 +76,31 @@ export class OrdersController {
       sortDirection,
       startDate,
       endDate,
+      status,
     };
-    return await this.usersService.findUsers(queryParams);
+    return await this.ordersService.findOrders(queryParams);
+  }
+
+  @Get('filtered-orders')
+  public async getFilteredOrders(
+    @Query('page_number') pageNumber = 0,
+    @Query('page_size') pageSize = 0,
+    @Query('sort_field') sortField = 'created_at',
+    @Query('sort_direction') sortDirection = 'desc',
+    @Query('start_date') startDate?: string,
+    @Query('end_date') endDate?: string,
+    @Query('status') status?: string,
+  ) {
+    const queryParams = {
+      pageNumber,
+      pageSize,
+      sortField,
+      sortDirection,
+      startDate,
+      endDate,
+      status,
+    };
+    return await this.ordersService.getFilteredOrders(queryParams);
   }
 
   @ApiParam({
@@ -107,10 +113,9 @@ export class OrdersController {
     status: 400,
     description: 'No se encontro resultado',
   })
-  // @AdminAccess()
   @Get(':id')
-  public async findUserById(@Param('id', new ParseUUIDPipe()) id: string) {
-    return await this.usersService.findUserById(id);
+  public async findOrderById(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.ordersService.findOrderById(id);
   }
 
   @ApiParam({
@@ -118,11 +123,16 @@ export class OrdersController {
   })
   @AdminAccess()
   @Put('edit/:id')
-  public async updateUser(
+  public async updateOrder(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() body: OrderUpdateDTO,
   ) {
-    return await this.usersService.updateUser(body, id);
+    return await this.ordersService.updateOrder(body, id);
+  }
+
+  @Post('update-order-status')
+  public async updateOrderStatus(@Body() body: any) {
+    return await this.ordersService.updateOrderStatus(body);
   }
 
   @ApiParam({
@@ -130,7 +140,7 @@ export class OrdersController {
   })
   @AdminAccess()
   @Delete('delete/:id')
-  public async deleteUser(@Param('id', new ParseUUIDPipe()) id: string) {
-    return await this.usersService.deleteUser(id);
+  public async deleteOrder(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.ordersService.deleteOrder(id);
   }
 }

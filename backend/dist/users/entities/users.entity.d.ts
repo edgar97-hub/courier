@@ -1,14 +1,28 @@
 import { ROLES } from '../../constants/roles';
 import { IUser } from '../../interfaces/user.interface';
 import { BaseEntity } from '../../config/base.entity';
-import { UsersProjectsEntity } from './usersProjects.entity';
 import { OrdersEntity } from '../../orders/entities/orders.entity';
 export declare class UsersEntity extends BaseEntity implements IUser {
     code: number;
     email: string;
     username: string;
     password: string;
+    business_type: string;
+    business_name: string;
+    business_district: string;
+    business_address: string;
+    business_phone_number: string;
+    business_sector: string;
+    business_document_type: string;
+    business_email: string;
+    assumes_5_percent_pos: boolean;
+    business_document_number: string;
+    owner_name: string;
+    owner_phone_number: string;
+    owner_document_type: string;
+    owner_document_number: string;
+    owner_email_address: string;
+    owner_bank_account: string;
     role: ROLES;
-    projectsIncludes: UsersProjectsEntity[];
     ordersIncludes: OrdersEntity[];
 }

@@ -1,4 +1,4 @@
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { SettingDTO, SettingUpdateDTO } from '../dto/setting.dto';
 import { SettingsEntity } from '../entities/settings.entity';
 export declare class SettingsService {
@@ -11,6 +11,15 @@ export declare class SettingsService {
         key: keyof SettingDTO;
         value: any;
     }): Promise<SettingsEntity>;
-    updateUser(body: SettingUpdateDTO, id: string): Promise<UpdateResult | undefined>;
+    updateUser(body: SettingUpdateDTO, id: string): Promise<any | undefined>;
     deleteUser(id: string): Promise<DeleteResult | undefined>;
+    uploadLogo(logoFile: Express.Multer.File, req: Request): Promise<{
+        logo_url: string;
+    }>;
+    uploadTermsPdf(termsPdfFile: Express.Multer.File, req: Request): Promise<{
+        terms_conditions_url: string;
+    }>;
+    uploadFile(termsPdfFile: Express.Multer.File, req: Request): Promise<{
+        file_url: string;
+    }>;
 }

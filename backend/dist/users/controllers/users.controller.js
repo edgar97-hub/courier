@@ -34,12 +34,6 @@ let UsersController = class UsersController {
     async findUserById(id) {
         return await this.usersService.findUserById(id);
     }
-    async addToProject(body, id) {
-        return await this.usersService.relationToProject({
-            ...body,
-            project: id,
-        });
-    }
     async updateUser(id, body) {
         return await this.usersService.updateUser(body, id);
     }
@@ -57,7 +51,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "registerUser", null);
 __decorate([
-    (0, admin_decorator_1.AdminAccess)(),
     (0, common_1.Get)('all'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
@@ -82,21 +75,8 @@ __decorate([
 ], UsersController.prototype, "findUserById", null);
 __decorate([
     (0, swagger_1.ApiParam)({
-        name: 'projectId',
-    }),
-    (0, admin_decorator_1.AdminAccess)(),
-    (0, common_1.Post)('add-to-project/:projectId'),
-    __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Param)('projectId', new common_1.ParseUUIDPipe())),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_dto_1.UserToProjectDTO, String]),
-    __metadata("design:returntype", Promise)
-], UsersController.prototype, "addToProject", null);
-__decorate([
-    (0, swagger_1.ApiParam)({
         name: 'id',
     }),
-    (0, admin_decorator_1.AdminAccess)(),
     (0, common_1.Put)('edit/:id'),
     __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
     __param(1, (0, common_1.Body)()),
@@ -108,7 +88,6 @@ __decorate([
     (0, swagger_1.ApiParam)({
         name: 'id',
     }),
-    (0, admin_decorator_1.AdminAccess)(),
     (0, common_1.Delete)('delete/:id'),
     __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
     __metadata("design:type", Function),

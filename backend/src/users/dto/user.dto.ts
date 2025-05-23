@@ -8,25 +8,8 @@ import {
   IsUUID,
 } from 'class-validator';
 import { ACCESS_LEVEL, ROLES } from 'src/constants/roles';
-import { ProjectsEntity } from 'src/projects/entities/projects.entity';
-import { UsersEntity } from '../entities/users.entity';
 
 export class UserDTO {
-  // @ApiProperty()
-  // @IsNotEmpty()
-  // @IsString()
-  // firstName: string;
-
-  // @ApiProperty()
-  // @IsNotEmpty()
-  // @IsString()
-  // lastName: string;
-
-  // @ApiProperty()
-  // @IsNotEmpty()
-  // @IsNumber()
-  // age: number;
-
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
@@ -46,24 +29,57 @@ export class UserDTO {
   @IsNotEmpty()
   @IsEnum(ROLES)
   role: ROLES;
+
+  @ApiProperty()
+  business_type: string;
+
+  @ApiProperty()
+  business_name: string;
+
+  @ApiProperty()
+  business_district: string;
+
+  @ApiProperty()
+  business_address: string;
+
+  @ApiProperty()
+  business_phone_number: string;
+
+  @ApiProperty()
+  business_sector: string;
+
+  @ApiProperty()
+  business_document_type: string;
+
+  @ApiProperty()
+  business_email: string;
+
+  @ApiProperty()
+  assumes_5_percent_pos: boolean;
+
+  @ApiProperty()
+  business_document_number: string;
+
+  @ApiProperty()
+  owner_name: string;
+
+  @ApiProperty()
+  owner_phone_number: string;
+
+  @ApiProperty()
+  owner_document_type: string;
+
+  @ApiProperty()
+  owner_document_number: string;
+
+  @ApiProperty()
+  owner_email_address: string;
+
+  @ApiProperty()
+  owner_bank_account: string;
 }
 
 export class UserUpdateDTO {
-  // @ApiProperty()
-  // @IsOptional()
-  // @IsString()
-  // firstName: string;
-
-  // @ApiProperty()
-  // @IsOptional()
-  // @IsString()
-  // lastName: string;
-
-  // @ApiProperty()
-  // @IsOptional()
-  // @IsNumber()
-  // age: number;
-
   @ApiProperty()
   @IsOptional()
   @IsString()
@@ -82,19 +98,52 @@ export class UserUpdateDTO {
   @IsOptional()
   @IsEnum(ROLES)
   role: ROLES;
-}
 
-export class UserToProjectDTO {
   @ApiProperty()
-  @IsNotEmpty()
-  @IsUUID()
-  user: UsersEntity;
+  business_type: string;
+
   @ApiProperty()
-  @IsOptional()
-  @IsUUID()
-  project: ProjectsEntity;
+  business_name: string;
+
   @ApiProperty()
-  @IsNotEmpty()
-  @IsEnum(ACCESS_LEVEL)
-  accessLevel: ACCESS_LEVEL;
+  business_district: string;
+
+  @ApiProperty()
+  business_address: string;
+
+  @ApiProperty()
+  business_phone_number: string;
+
+  @ApiProperty()
+  business_sector: string;
+
+  @ApiProperty()
+  business_document_type: string;
+
+  @ApiProperty()
+  business_email: string;
+
+  @ApiProperty()
+  assumes_5_percent_pos: boolean;
+
+  @ApiProperty()
+  business_document_number: string;
+
+  @ApiProperty()
+  owner_name: string;
+
+  @ApiProperty()
+  owner_phone_number: string;
+
+  @ApiProperty()
+  owner_document_type: string;
+
+  @ApiProperty()
+  owner_document_number: string;
+
+  @ApiProperty()
+  owner_email_address: string;
+
+  @ApiProperty()
+  owner_bank_account: string;
 }

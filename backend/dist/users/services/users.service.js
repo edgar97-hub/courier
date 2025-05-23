@@ -19,11 +19,9 @@ const bcrypt = require("bcrypt");
 const error_manager_1 = require("../../utils/error.manager");
 const typeorm_2 = require("typeorm");
 const users_entity_1 = require("../entities/users.entity");
-const usersProjects_entity_1 = require("../entities/usersProjects.entity");
 let UsersService = class UsersService {
-    constructor(userRepository, userProjectRepository) {
+    constructor(userRepository) {
         this.userRepository = userRepository;
-        this.userProjectRepository = userProjectRepository;
     }
     async createUser(body) {
         try {
@@ -60,14 +58,6 @@ let UsersService = class UsersService {
                 });
             }
             return user;
-        }
-        catch (error) {
-            throw error_manager_1.ErrorManager.createSignatureError(error.message);
-        }
-    }
-    async relationToProject(body) {
-        try {
-            return await this.userProjectRepository.save(body);
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
@@ -127,8 +117,6 @@ exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(users_entity_1.UsersEntity)),
-    __param(1, (0, typeorm_1.InjectRepository)(usersProjects_entity_1.UsersProjectsEntity)),
-    __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map

@@ -18,6 +18,8 @@ const typeorm_1 = require("@nestjs/typeorm");
 const error_manager_1 = require("../../utils/error.manager");
 const typeorm_2 = require("typeorm");
 const settings_entity_1 = require("../entities/settings.entity");
+const path = require("path");
+const fs = require("fs");
 let SettingsService = class SettingsService {
     constructor(userRepository) {
         this.userRepository = userRepository;
@@ -81,7 +83,16 @@ let SettingsService = class SettingsService {
                     message: 'No se pudo actualizar',
                 });
             }
-            return user;
+            const updatedUser = await this.userRepository.findOneBy({
+                id: id,
+            });
+            if (!updatedUser) {
+                throw new error_manager_1.ErrorManager({
+                    type: 'INTERNAL_SERVER_ERROR',
+                    message: 'El usuario fue actualizado pero no se pudo recuperar.',
+                });
+            }
+            return updatedUser;
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
@@ -97,6 +108,69 @@ let SettingsService = class SettingsService {
                 });
             }
             return user;
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
+    async uploadLogo(logoFile, req) {
+        try {
+            if (!logoFile) {
+                throw new error_manager_1.ErrorManager({
+                    type: 'BAD_REQUEST',
+                    message: 'No logo file provided',
+                });
+            }
+            const fileName = `logo-${Date.now()}-${logoFile.originalname}`;
+            const filePath = path.join(__dirname, '..', '..', '..', 'public', 'uploads', fileName);
+            await fs.promises.writeFile(filePath, logoFile.buffer);
+            const relativeUrl = `/uploads/${fileName}`;
+            const protocol = req.protocol;
+            const host = req.get('host');
+            const absoluteUrl = `${protocol}://${host}${relativeUrl}`;
+            return { logo_url: absoluteUrl };
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
+    async uploadTermsPdf(termsPdfFile, req) {
+        try {
+            if (!termsPdfFile) {
+                throw new error_manager_1.ErrorManager({
+                    type: 'BAD_REQUEST',
+                    message: 'No terms PDF file provided',
+                });
+            }
+            const fileName = `terms-${Date.now()}-${termsPdfFile.originalname}`;
+            const filePath = path.join(__dirname, '..', '..', '..', 'public', 'uploads', fileName);
+            await fs.promises.writeFile(filePath, termsPdfFile.buffer);
+            const relativeUrl = `/uploads/${fileName}`;
+            const protocol = req.protocol;
+            const host = req.get('host');
+            const absoluteUrl = `${protocol}://${host}${relativeUrl}`;
+            return { terms_conditions_url: absoluteUrl };
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
+    async uploadFile(termsPdfFile, req) {
+        try {
+            if (!termsPdfFile) {
+                throw new error_manager_1.ErrorManager({
+                    type: 'BAD_REQUEST',
+                    message: 'No terms PDF file provided',
+                });
+            }
+            const fileName = `${Date.now()}-${termsPdfFile.originalname}`;
+            const filePath = path.join(__dirname, '..', '..', '..', 'public', 'uploads', fileName);
+            await fs.promises.writeFile(filePath, termsPdfFile.buffer);
+            const relativeUrl = `/uploads/${fileName}`;
+            const protocol = req.protocol;
+            const host = req.get('host');
+            const absoluteUrl = `${protocol}://${host}${relativeUrl}`;
+            return { file_url: absoluteUrl };
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);

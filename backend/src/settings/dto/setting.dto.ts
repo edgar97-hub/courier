@@ -30,6 +30,18 @@ export class SettingDTO {
   terms_conditions_url: string;
 
   @ApiProperty()
+  background_image_url: string;
+
+  @ApiProperty()
+  rates_image_url: string;
+
+  @ApiProperty()
+  excel_import_template_url: string;
+
+  @ApiProperty()
+  coverage_map_url: string;
+
+  @ApiProperty()
   standard_measurements_width: number;
 
   @ApiProperty()
@@ -69,6 +81,18 @@ export class SettingUpdateDTO {
 
   @ApiProperty()
   logo_url: string;
+
+  @ApiProperty()
+  background_image_url: string;
+
+  @ApiProperty()
+  rates_image_url: string;
+
+  @ApiProperty()
+  excel_import_template_url: string;
+
+  @ApiProperty()
+  coverage_map_url: string;
 
   @ApiProperty()
   standard_measurements_width: number;

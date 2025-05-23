@@ -47,13 +47,6 @@ let AccessLevelGuard = class AccessLevelGuard {
             return true;
         }
         const user = await this.userService.findUserById(idUser);
-        const userExistInProject = user.projectsIncludes.find((project) => project.project.id === req.params.projectId);
-        if (userExistInProject === undefined) {
-            throw new common_1.UnauthorizedException('No formas parte del proyecto');
-        }
-        if (roles_1.ACCESS_LEVEL[accessLevel] > userExistInProject.accessLevel) {
-            throw new common_1.UnauthorizedException('No tienes el nivel de acceso necesario');
-        }
         return true;
     }
 };

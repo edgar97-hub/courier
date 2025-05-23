@@ -8,9 +8,9 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { Request, Response, NextFunction } from 'express';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
-  // const app = await NestFactory.create(AppModule);
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.use(morgan('dev'));
   app.useGlobalPipes(
@@ -22,11 +22,11 @@ async function bootstrap() {
   );
   const reflector = app.get(Reflector);
   app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
-
+  app.use(bodyParser.json({ limit: '50mb' }));
+  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   const configservice = app.get(ConfigService);
   app.enableCors(CORS);
   app.setGlobalPrefix('api');
-
   const config = new DocumentBuilder()
     .setTitle('courier API')
     .setDescription('courier')
@@ -44,13 +44,6 @@ async function bootstrap() {
     res.sendFile(join(__dirname, '..', 'public', 'index.html'));
   });
 
-  // app.useStaticAssets(join(__dirname, '..', 'public')); // donde está Angular
-  // app.setBaseViewsDir(join(__dirname, '..', 'public'));
-
-  // // catch-all route para SPA
-  // app.use('*', (req: Request, res: Response) => {
-  //   res.sendFile(join(__dirname, '..', 'public', 'index.html'));
-  // });
   await app.listen(configservice.get('PORT') ?? 3000);
   console.log(`Application running on: ${await app.getUrl()}`);
 }

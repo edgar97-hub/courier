@@ -4,6 +4,10 @@ export declare class SettingDTO {
     phone_number: string;
     logo_url: string;
     terms_conditions_url: string;
+    background_image_url: string;
+    rates_image_url: string;
+    excel_import_template_url: string;
+    coverage_map_url: string;
     standard_measurements_width: number;
     standard_measurements_length: number;
     standard_measurements_height: number;
@@ -19,6 +23,10 @@ export declare class SettingUpdateDTO {
     address: string;
     phone_number: string;
     logo_url: string;
+    background_image_url: string;
+    rates_image_url: string;
+    excel_import_template_url: string;
+    coverage_map_url: string;
     standard_measurements_width: number;
     standard_measurements_length: number;
     standard_measurements_height: number;

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AppDS = exports.DataSourceConfig = void 0;
+exports.DataSourceConfig = void 0;
 const config_1 = require("@nestjs/config");
 const typeorm_1 = require("typeorm");
 const typeorm_naming_strategies_1 = require("typeorm-naming-strategies");
@@ -22,5 +22,8 @@ exports.DataSourceConfig = {
     logging: false,
     namingStrategy: new typeorm_naming_strategies_1.SnakeNamingStrategy(),
 };
-exports.AppDS = new typeorm_1.DataSource(exports.DataSourceConfig);
+console.time('DataSourceInit');
+const AppDataSource = new typeorm_1.DataSource(exports.DataSourceConfig);
+console.timeEnd('DataSourceInit');
+exports.default = AppDataSource;
 //# sourceMappingURL=data.source.js.map

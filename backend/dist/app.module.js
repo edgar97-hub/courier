@@ -14,8 +14,6 @@ const config_1 = require("@nestjs/config");
 const typeorm_1 = require("@nestjs/typeorm");
 const data_source_1 = require("./config/data.source");
 const auth_module_1 = require("./auth/auth.module");
-const projects_module_1 = require("./projects/projects.module");
-const tasks_module_1 = require("./tasks/tasks.module");
 const providers_module_1 = require("./providers/providers.module");
 const settings_module_1 = require("./settings/settings.module");
 const orders_module_1 = require("./orders/orders.module");
@@ -33,9 +31,7 @@ exports.AppModule = AppModule = __decorate([
             users_module_1.UsersModule,
             districts_module_1.DistrictsModule,
             settings_module_1.SettingsModule,
-            projects_module_1.ProjectsModule,
             auth_module_1.AuthModule,
-            tasks_module_1.TasksModule,
             providers_module_1.ProvidersModule,
             orders_module_1.OrdersModule,
         ],

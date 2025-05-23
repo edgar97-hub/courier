@@ -13,6 +13,7 @@ exports.OrdersEntity = void 0;
 const typeorm_1 = require("typeorm");
 const base_entity_1 = require("../../config/base.entity");
 const users_entity_1 = require("../../users/entities/users.entity");
+const roles_1 = require("../../constants/roles");
 let OrdersEntity = class OrdersEntity extends base_entity_1.BaseEntity {
 };
 exports.OrdersEntity = OrdersEntity;
@@ -42,7 +43,7 @@ __decorate([
     __metadata("design:type", String)
 ], OrdersEntity.prototype, "delivery_address", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], OrdersEntity.prototype, "delivery_coordinates", void 0);
 __decorate([
@@ -50,7 +51,7 @@ __decorate([
     __metadata("design:type", String)
 ], OrdersEntity.prototype, "delivery_date", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], OrdersEntity.prototype, "package_size_type", void 0);
 __decorate([
@@ -78,7 +79,7 @@ __decorate([
     __metadata("design:type", String)
 ], OrdersEntity.prototype, "item_description", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: false, type: 'float', default: 0.0 }),
+    (0, typeorm_1.Column)({ nullable: true, type: 'float', default: 0.0 }),
     __metadata("design:type", Number)
 ], OrdersEntity.prototype, "amount_to_collect_at_delivery", void 0);
 __decorate([
@@ -93,6 +94,15 @@ __decorate([
     (0, typeorm_1.Column)({ nullable: true, default: '' }),
     __metadata("design:type", String)
 ], OrdersEntity.prototype, "type_order_transfer_to_warehouse", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'enum',
+        enum: roles_1.STATES,
+        unique: false,
+        default: roles_1.STATES.REGISTERED,
+    }),
+    __metadata("design:type", String)
+], OrdersEntity.prototype, "status", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => users_entity_1.UsersEntity, (user) => user.ordersIncludes),
     __metadata("design:type", users_entity_1.UsersEntity)

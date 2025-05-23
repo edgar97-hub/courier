@@ -7,6 +7,7 @@ import {
   IsString,
   IsUUID,
 } from 'class-validator';
+import { STATES } from 'src/constants/roles';
 
 export class OrderDTO {
   @ApiProperty()
@@ -62,6 +63,10 @@ export class OrderDTO {
 
   @ApiProperty()
   type_order_transfer_to_warehouse: string;
+
+  @ApiProperty()
+  @IsEnum(STATES)
+  status: STATES;
 }
 
 export class OrderUpdateDTO {
@@ -136,4 +141,10 @@ export class OrderUpdateDTO {
   @ApiProperty()
   @IsNotEmpty()
   type_order_transfer_to_warehouse: string;
+
+  @ApiProperty()
+  @IsEnum(STATES)
+  status: STATES;
 }
+
+

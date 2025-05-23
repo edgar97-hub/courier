@@ -10,22 +10,12 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiHeader,
-  ApiHeaders,
-  ApiParam,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-import { AccessLevel } from 'src/auth/decorators/access-level.decorator';
+import { ApiHeader, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AdminAccess } from 'src/auth/decorators/admin.decorator';
-import { PublicAccess } from 'src/auth/decorators/public.decorator';
-import { Roles } from 'src/auth/decorators/roles.decorator';
 import { AccessLevelGuard } from 'src/auth/guards/access-level.guard';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { ProjectsEntity } from 'src/projects/entities/projects.entity';
-import { UserDTO, UserToProjectDTO, UserUpdateDTO } from '../dto/user.dto';
+import { UserDTO, UserUpdateDTO } from '../dto/user.dto';
 import { UsersService } from '../services/users.service';
 
 @ApiTags('Users')
@@ -41,7 +31,7 @@ export class UsersController {
     return await this.usersService.createUser(body);
   }
 
-  @AdminAccess()
+  // @AdminAccess()
   @Get('all')
   public async findAllUsers() {
     return await this.usersService.findUsers();
@@ -64,25 +54,9 @@ export class UsersController {
   }
 
   @ApiParam({
-    name: 'projectId',
-  })
-  // @AccessLevel('OWNER')
-  @AdminAccess()
-  @Post('add-to-project/:projectId')
-  public async addToProject(
-    @Body() body: UserToProjectDTO,
-    @Param('projectId', new ParseUUIDPipe()) id: string,
-  ) {
-    return await this.usersService.relationToProject({
-      ...body,
-      project: id as unknown as ProjectsEntity,
-    });
-  }
-
-  @ApiParam({
     name: 'id',
   })
-  @AdminAccess()
+  // @AdminAccess()
   @Put('edit/:id')
   public async updateUser(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -94,7 +68,7 @@ export class UsersController {
   @ApiParam({
     name: 'id',
   })
-  @AdminAccess()
+  // @AdminAccess()
   @Delete('delete/:id')
   public async deleteUser(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.usersService.deleteUser(id);

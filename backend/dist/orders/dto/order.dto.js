@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderUpdateDTO = exports.OrderDTO = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+const roles_1 = require("../../constants/roles");
 class OrderDTO {
 }
 exports.OrderDTO = OrderDTO;
@@ -87,6 +88,11 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], OrderDTO.prototype, "type_order_transfer_to_warehouse", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsEnum)(roles_1.STATES),
+    __metadata("design:type", String)
+], OrderDTO.prototype, "status", void 0);
 class OrderUpdateDTO {
 }
 exports.OrderUpdateDTO = OrderUpdateDTO;
@@ -180,4 +186,9 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], OrderUpdateDTO.prototype, "type_order_transfer_to_warehouse", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsEnum)(roles_1.STATES),
+    __metadata("design:type", String)
+], OrderUpdateDTO.prototype, "status", void 0);
 //# sourceMappingURL=order.dto.js.map

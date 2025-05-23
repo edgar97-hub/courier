@@ -22,16 +22,19 @@ const roles_guard_1 = require("../../auth/guards/roles.guard");
 const order_dto_1 = require("../dto/order.dto");
 const orders_service_1 = require("../services/orders.service");
 let OrdersController = class OrdersController {
-    constructor(usersService) {
-        this.usersService = usersService;
+    constructor(ordersService) {
+        this.ordersService = ordersService;
     }
     async register(body) {
-        return await this.usersService.createUser(body);
+        return await this.ordersService.createOrder(body);
     }
     async batchCreateOrders(body) {
-        return await this.usersService.batchCreateOrders(body);
+        return await this.ordersService.batchCreateOrders(body);
     }
-    async findAllUsers(pageNumber = 1, pageSize = 10, sortField = 'created_at', sortDirection = 'desc', startDate, endDate) {
+    async importOrders(ordersData) {
+        return await this.ordersService.importOrdersFromExcelData(ordersData);
+    }
+    async findAllOrders(pageNumber = 0, pageSize = 0, sortField = 'created_at', sortDirection = 'desc', startDate, endDate, status) {
         const queryParams = {
             pageNumber,
             pageSize,
@@ -39,17 +42,33 @@ let OrdersController = class OrdersController {
             sortDirection,
             startDate,
             endDate,
+            status,
         };
-        return await this.usersService.findUsers(queryParams);
+        return await this.ordersService.findOrders(queryParams);
     }
-    async findUserById(id) {
-        return await this.usersService.findUserById(id);
+    async getFilteredOrders(pageNumber = 0, pageSize = 0, sortField = 'created_at', sortDirection = 'desc', startDate, endDate, status) {
+        const queryParams = {
+            pageNumber,
+            pageSize,
+            sortField,
+            sortDirection,
+            startDate,
+            endDate,
+            status,
+        };
+        return await this.ordersService.getFilteredOrders(queryParams);
     }
-    async updateUser(id, body) {
-        return await this.usersService.updateUser(body, id);
+    async findOrderById(id) {
+        return await this.ordersService.findOrderById(id);
     }
-    async deleteUser(id) {
-        return await this.usersService.deleteUser(id);
+    async updateOrder(id, body) {
+        return await this.ordersService.updateOrder(body, id);
+    }
+    async updateOrderStatus(body) {
+        return await this.ordersService.updateOrderStatus(body);
+    }
+    async deleteOrder(id) {
+        return await this.ordersService.deleteOrder(id);
     }
 };
 exports.OrdersController = OrdersController;
@@ -68,6 +87,14 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "batchCreateOrders", null);
 __decorate([
+    (0, common_1.Post)('import-batch-json'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "importOrders", null);
+__decorate([
     (0, common_1.Get)(''),
     __param(0, (0, common_1.Query)('page_number')),
     __param(1, (0, common_1.Query)('page_size')),
@@ -75,10 +102,24 @@ __decorate([
     __param(3, (0, common_1.Query)('sort_direction')),
     __param(4, (0, common_1.Query)('start_date')),
     __param(5, (0, common_1.Query)('end_date')),
+    __param(6, (0, common_1.Query)('status')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, String, String]),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, String, String, String]),
     __metadata("design:returntype", Promise)
-], OrdersController.prototype, "findAllUsers", null);
+], OrdersController.prototype, "findAllOrders", null);
+__decorate([
+    (0, common_1.Get)('filtered-orders'),
+    __param(0, (0, common_1.Query)('page_number')),
+    __param(1, (0, common_1.Query)('page_size')),
+    __param(2, (0, common_1.Query)('sort_field')),
+    __param(3, (0, common_1.Query)('sort_direction')),
+    __param(4, (0, common_1.Query)('start_date')),
+    __param(5, (0, common_1.Query)('end_date')),
+    __param(6, (0, common_1.Query)('status')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, String, String, String]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "getFilteredOrders", null);
 __decorate([
     (0, swagger_1.ApiParam)({
         name: 'id',
@@ -95,7 +136,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], OrdersController.prototype, "findUserById", null);
+], OrdersController.prototype, "findOrderById", null);
 __decorate([
     (0, swagger_1.ApiParam)({
         name: 'id',
@@ -107,7 +148,14 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, order_dto_1.OrderUpdateDTO]),
     __metadata("design:returntype", Promise)
-], OrdersController.prototype, "updateUser", null);
+], OrdersController.prototype, "updateOrder", null);
+__decorate([
+    (0, common_1.Post)('update-order-status'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "updateOrderStatus", null);
 __decorate([
     (0, swagger_1.ApiParam)({
         name: 'id',
@@ -118,7 +166,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], OrdersController.prototype, "deleteUser", null);
+], OrdersController.prototype, "deleteOrder", null);
 exports.OrdersController = OrdersController = __decorate([
     (0, swagger_1.ApiTags)('Orders'),
     (0, common_1.Controller)('orders'),

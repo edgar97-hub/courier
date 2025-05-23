@@ -12,11 +12,23 @@ export class SettingsEntity extends BaseEntity {
   @Column()
   phone_number: string;
 
-  @Column({ nullable: true, default: '' })
+  @Column({ nullable: false, default: '' })
   logo_url: string;
 
-  @Column({ nullable: true, default: '' })
+  @Column({ nullable: false, default: '' })
   terms_conditions_url: string;
+
+  @Column({ nullable: false, default: '' })
+  background_image_url: string;
+
+  @Column({ nullable: false, default: '' })
+  rates_image_url: string;
+
+  @Column({ default: '' })
+  excel_import_template_url: string;
+
+  @Column({ default: '' })
+  coverage_map_url: string;
 
   //   @Column({
   //     type: 'jsonb',
