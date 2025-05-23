@@ -22,8 +22,5 @@ exports.DataSourceConfig = {
     logging: false,
     namingStrategy: new typeorm_naming_strategies_1.SnakeNamingStrategy(),
 };
-console.time('DataSourceInit');
-const AppDataSource = new typeorm_1.DataSource(exports.DataSourceConfig);
-console.timeEnd('DataSourceInit');
-exports.default = AppDataSource;
+exports.default = new typeorm_1.DataSource(exports.DataSourceConfig);
 //# sourceMappingURL=data.source.js.map

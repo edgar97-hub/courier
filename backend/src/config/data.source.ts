@@ -22,7 +22,4 @@ export const DataSourceConfig: DataSourceOptions = {
   logging: false,
   namingStrategy: new SnakeNamingStrategy(),
 };
-console.time('DataSourceInit');
-const AppDataSource = new DataSource(DataSourceConfig);
-console.timeEnd('DataSourceInit');
-export default AppDataSource;
+export default new DataSource(DataSourceConfig);
