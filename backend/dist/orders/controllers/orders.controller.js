@@ -15,15 +15,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrdersController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
-const admin_decorator_1 = require("../../auth/decorators/admin.decorator");
+const public_decorator_1 = require("../../auth/decorators/public.decorator");
 const access_level_guard_1 = require("../../auth/guards/access-level.guard");
 const auth_guard_1 = require("../../auth/guards/auth.guard");
 const roles_guard_1 = require("../../auth/guards/roles.guard");
 const order_dto_1 = require("../dto/order.dto");
 const orders_service_1 = require("../services/orders.service");
+const order_pdf_generator_service_1 = require("../services/order-pdf-generator.service");
 let OrdersController = class OrdersController {
-    constructor(ordersService) {
+    constructor(ordersService, orderPdfGeneratorService) {
         this.ordersService = ordersService;
+        this.orderPdfGeneratorService = orderPdfGeneratorService;
     }
     async register(body) {
         return await this.ordersService.createOrder(body);
@@ -69,6 +71,22 @@ let OrdersController = class OrdersController {
     }
     async deleteOrder(id) {
         return await this.ordersService.deleteOrder(id);
+    }
+    async getOrderPdf(orderId, res) {
+        try {
+            await this.orderPdfGeneratorService.streamOrderPdfToResponse(orderId, res);
+        }
+        catch (error) {
+            console.error('Error in PDF streaming controller:', error);
+            if (!res.headersSent) {
+                if (error instanceof common_1.NotFoundException) {
+                    res.status(404).send({ message: error.message });
+                }
+                else {
+                    res.status(500).send({ message: 'Error generating PDF stream' });
+                }
+            }
+        }
     }
 };
 exports.OrdersController = OrdersController;
@@ -141,7 +159,6 @@ __decorate([
     (0, swagger_1.ApiParam)({
         name: 'id',
     }),
-    (0, admin_decorator_1.AdminAccess)(),
     (0, common_1.Put)('edit/:id'),
     __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
     __param(1, (0, common_1.Body)()),
@@ -160,17 +177,26 @@ __decorate([
     (0, swagger_1.ApiParam)({
         name: 'id',
     }),
-    (0, admin_decorator_1.AdminAccess)(),
     (0, common_1.Delete)('delete/:id'),
     __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "deleteOrder", null);
+__decorate([
+    (0, public_decorator_1.PublicAccess)(),
+    (0, common_1.Get)(':id/pdf'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "getOrderPdf", null);
 exports.OrdersController = OrdersController = __decorate([
     (0, swagger_1.ApiTags)('Orders'),
     (0, common_1.Controller)('orders'),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard, roles_guard_1.RolesGuard, access_level_guard_1.AccessLevelGuard),
-    __metadata("design:paramtypes", [orders_service_1.OrdersService])
+    __metadata("design:paramtypes", [orders_service_1.OrdersService,
+        order_pdf_generator_service_1.OrderPdfGeneratorService])
 ], OrdersController);
 //# sourceMappingURL=orders.controller.js.map

@@ -1,9 +1,12 @@
 import { OrderDTO, OrderUpdateDTO } from '../dto/order.dto';
 import { OrdersService } from '../services/orders.service';
+import { Response } from 'express';
 import { ImportResult } from '../dto/import-result.dto';
+import { OrderPdfGeneratorService } from '../services/order-pdf-generator.service';
 export declare class OrdersController {
     private readonly ordersService;
-    constructor(ordersService: OrdersService);
+    private readonly orderPdfGeneratorService;
+    constructor(ordersService: OrdersService, orderPdfGeneratorService: OrderPdfGeneratorService);
     register(body: OrderDTO): Promise<import("../entities/orders.entity").OrdersEntity>;
     batchCreateOrders(body: any): Promise<{
         success: boolean;
@@ -26,4 +29,5 @@ export declare class OrdersController {
     updateOrder(id: string, body: OrderUpdateDTO): Promise<import("typeorm").UpdateResult | undefined>;
     updateOrderStatus(body: any): Promise<import("typeorm").UpdateResult>;
     deleteOrder(id: string): Promise<import("typeorm").DeleteResult | undefined>;
+    getOrderPdf(orderId: string, res: Response): Promise<void>;
 }

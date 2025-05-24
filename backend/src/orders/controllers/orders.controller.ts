@@ -34,12 +34,16 @@ import { OrderDTO, OrderUpdateDTO } from '../dto/order.dto';
 import { OrdersService } from '../services/orders.service';
 import { Response } from 'express'; // Asegúrate de importar Response de 'express'
 import { ImportResult } from '../dto/import-result.dto';
+import { OrderPdfGeneratorService } from '../services/order-pdf-generator.service';
 
 @ApiTags('Orders')
 @Controller('orders')
 @UseGuards(AuthGuard, RolesGuard, AccessLevelGuard)
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(
+    private readonly ordersService: OrdersService,
+    private readonly orderPdfGeneratorService: OrderPdfGeneratorService,
+  ) {}
 
   @Post('create')
   public async register(@Body() body: OrderDTO) {
@@ -121,7 +125,7 @@ export class OrdersController {
   @ApiParam({
     name: 'id',
   })
-  @AdminAccess()
+  // @AdminAccess()
   @Put('edit/:id')
   public async updateOrder(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -138,9 +142,35 @@ export class OrdersController {
   @ApiParam({
     name: 'id',
   })
-  @AdminAccess()
+  // @AdminAccess()
   @Delete('delete/:id')
   public async deleteOrder(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.ordersService.deleteOrder(id);
+  }
+
+  @PublicAccess()
+  @Get(':id/pdf')
+  async getOrderPdf(
+    @Param('id' /*, ParseUUIDPipe opcional si ID es UUID */) orderId: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    try {
+      await this.orderPdfGeneratorService.streamOrderPdfToResponse(
+        orderId,
+        res,
+      );
+    } catch (error) {
+      // El manejo de errores dentro de streamOrderPdfToResponse debe ser robusto
+      // o manejarlo aquí si lanza excepciones antes de empezar el stream.
+      console.error('Error in PDF streaming controller:', error);
+      if (!res.headersSent) {
+        // Solo enviar respuesta si no se ha enviado nada aún
+        if (error instanceof NotFoundException) {
+          res.status(404).send({ message: error.message });
+        } else {
+          res.status(500).send({ message: 'Error generating PDF stream' });
+        }
+      }
+    }
   }
 }

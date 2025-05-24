@@ -31,12 +31,12 @@ async function bootstrap() {
         .build();
     const document = swagger_1.SwaggerModule.createDocument(app, config);
     swagger_1.SwaggerModule.setup('docs', app, document);
-    app.useStaticAssets((0, path_1.join)(__dirname, '..', 'public'));
+    app.useStaticAssets((0, path_1.join)(__dirname, '..', 'public/angular/browser'));
     app.use((req, res, next) => {
         if (req.path.startsWith('/api')) {
             return next();
         }
-        res.sendFile((0, path_1.join)(__dirname, '..', 'public', 'index.html'));
+        res.sendFile((0, path_1.join)(__dirname, '..', 'public/angular/browser', 'index.html'));
     });
     await app.listen(configservice.get('PORT') ?? 3000);
     console.log(`Application running on: ${await app.getUrl()}`);

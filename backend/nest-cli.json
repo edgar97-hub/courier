@@ -10,6 +10,7 @@
       "include": "public/**/*",
       "outDir": "public",
       "watchAssets": true
-    }
+    },
+    { "include": "assets/fonts/**/*", "outDir": "dist/assets" }
   ]
 }
