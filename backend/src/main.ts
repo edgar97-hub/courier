@@ -36,12 +36,33 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
-  app.useStaticAssets(join(__dirname, '..', 'public/angular/browser'));
+  const uploadsStaticPath = join(__dirname, '..', 'public', 'uploads');
+  app.useStaticAssets(uploadsStaticPath, {
+    prefix: '/uploads/',
+  });
+
+  const angularAppStaticPath = join(
+    __dirname,
+    '..',
+    'public',
+    'angular',
+    'browser',
+  );
+  app.useStaticAssets(angularAppStaticPath);
   app.use((req: Request, res: Response, next: NextFunction) => {
-    if (req.path.startsWith('/api')) {
-      return next();
+    const path = req.path;
+    console.log(`Middleware catch-all SPA: Petición para ${path}`);
+
+    if (
+      !path.startsWith('/api/') &&
+      !path.startsWith('/uploads/') &&
+      !path.split('/').pop()?.includes('.')
+    ) {
+      const angularIndexHtmlPath = join(angularAppStaticPath, 'index.html');
+      res.sendFile(angularIndexHtmlPath);
+    } else {
+      next();
     }
-    res.sendFile(join(__dirname, '..', 'public/angular/browser', 'index.html'));
   });
 
   await app.listen(configservice.get('PORT') ?? 3000);
