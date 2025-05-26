@@ -4,6 +4,18 @@ import { DistrictsEntity } from '../entities/districts.entity';
 export declare class DistrictsService {
     private readonly userRepository;
     constructor(userRepository: Repository<DistrictsEntity>);
+    findDistricts({ pageNumber, pageSize, sortField, sortDirection, search, }: {
+        pageNumber?: number;
+        pageSize?: number;
+        sortField?: string;
+        sortDirection?: string;
+        search?: String;
+    }): Promise<{
+        items: any;
+        total_count: number;
+        page_number: number;
+        page_size: number;
+    }>;
     createUser(body: DistrictDTO): Promise<DistrictsEntity>;
     findUsers(): Promise<DistrictsEntity[]>;
     findUserById(id: string): Promise<DistrictsEntity>;

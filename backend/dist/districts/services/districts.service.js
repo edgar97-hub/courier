@@ -22,6 +22,30 @@ let DistrictsService = class DistrictsService {
     constructor(userRepository) {
         this.userRepository = userRepository;
     }
+    async findDistricts({ pageNumber = 0, pageSize = 10, sortField = '', sortDirection = '', search = '', }) {
+        try {
+            const skip = (pageNumber - 1) * pageSize;
+            const query = this.userRepository.createQueryBuilder('districts');
+            if (search) {
+                query.where('LOWER(districts.name) LIKE :search', {
+                    search: `%${search.toLowerCase()}%`,
+                });
+            }
+            const sortBy = sortField || 'updatedAt';
+            const sortDir = (sortDirection || 'DESC').toUpperCase();
+            query.orderBy(`districts.${sortBy}`, sortDir).skip(skip).take(pageSize);
+            const [items, total] = await query.getManyAndCount();
+            return {
+                items,
+                total_count: total,
+                page_number: pageNumber,
+                page_size: pageSize,
+            };
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
     async createUser(body) {
         try {
             return await this.userRepository.save(body);
@@ -46,10 +70,8 @@ let DistrictsService = class DistrictsService {
     async findUserById(id) {
         try {
             const user = (await this.userRepository
-                .createQueryBuilder('user')
+                .createQueryBuilder('districts')
                 .where({ id })
-                .leftJoinAndSelect('user.projectsIncludes', 'projectsIncludes')
-                .leftJoinAndSelect('projectsIncludes.project', 'project')
                 .getOne());
             if (!user) {
                 throw new error_manager_1.ErrorManager({

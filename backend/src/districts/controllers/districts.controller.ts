@@ -7,6 +7,7 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -40,6 +41,23 @@ export class DistrictsController {
   @Get('all')
   public async findAllUsers() {
     return await this.usersService.findUsers();
+  }
+  @Get('')
+  public async findAllOrders(
+    @Query('page_number') pageNumber = 0,
+    @Query('page_size') pageSize = 0,
+    @Query('sort_field') sortField = 'updatedAt',
+    @Query('sort_direction') sortDirection = 'desc',
+    @Query('search') search = '',
+  ) {
+    const queryParams = {
+      pageNumber,
+      pageSize,
+      sortField,
+      sortDirection,
+      search,
+    };
+    return await this.usersService.findDistricts(queryParams);
   }
 
   @ApiParam({

@@ -1,7 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ErrorManager } from 'src/utils/error.manager';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import {
+  Between,
+  DeleteResult,
+  FindOptionsWhere,
+  Like,
+  Repository,
+  UpdateResult,
+} from 'typeorm';
 import { DistrictDTO, DistrictUpdateDTO } from '../dto/district.dto';
 import { DistrictsEntity } from '../entities/districts.entity';
 
@@ -11,6 +18,50 @@ export class DistrictsService {
     @InjectRepository(DistrictsEntity)
     private readonly userRepository: Repository<DistrictsEntity>,
   ) {}
+
+  public async findDistricts({
+    pageNumber = 0,
+    pageSize = 10,
+    sortField = '',
+    sortDirection = '',
+    search = '',
+  }: {
+    pageNumber?: number;
+    pageSize?: number;
+    sortField?: string;
+    sortDirection?: string;
+    search?: String;
+  }): Promise<{
+    items: any;
+    total_count: number;
+    page_number: number;
+    page_size: number;
+  }> {
+    try {
+      const skip = (pageNumber - 1) * pageSize;
+      const query = this.userRepository.createQueryBuilder('districts');
+
+      if (search) {
+        query.where('LOWER(districts.name) LIKE :search', {
+          search: `%${search.toLowerCase()}%`,
+        });
+      }
+
+      const sortBy = sortField || 'updatedAt';
+      const sortDir = (sortDirection || 'DESC').toUpperCase() as 'ASC' | 'DESC';
+      query.orderBy(`districts.${sortBy}`, sortDir).skip(skip).take(pageSize);
+      const [items, total] = await query.getManyAndCount();
+
+      return {
+        items,
+        total_count: total,
+        page_number: pageNumber,
+        page_size: pageSize,
+      };
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
 
   public async createUser(body: DistrictDTO): Promise<DistrictsEntity> {
     try {
@@ -42,10 +93,10 @@ export class DistrictsService {
   public async findUserById(id: string): Promise<DistrictsEntity> {
     try {
       const user: DistrictsEntity = (await this.userRepository
-        .createQueryBuilder('user')
+        .createQueryBuilder('districts')
         .where({ id })
-        .leftJoinAndSelect('user.projectsIncludes', 'projectsIncludes')
-        .leftJoinAndSelect('projectsIncludes.project', 'project')
+        // .leftJoinAndSelect('user.projectsIncludes', 'projectsIncludes')
+        // .leftJoinAndSelect('projectsIncludes.project', 'project')
         .getOne()) as any;
       if (!user) {
         throw new ErrorManager({

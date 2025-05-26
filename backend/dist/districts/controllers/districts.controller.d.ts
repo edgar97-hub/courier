@@ -5,6 +5,12 @@ export declare class DistrictsController {
     constructor(usersService: DistrictsService);
     registerUser(body: DistrictDTO): Promise<import("../entities/districts.entity").DistrictsEntity>;
     findAllUsers(): Promise<import("../entities/districts.entity").DistrictsEntity[]>;
+    findAllOrders(pageNumber?: number, pageSize?: number, sortField?: string, sortDirection?: string, search?: string): Promise<{
+        items: any;
+        total_count: number;
+        page_number: number;
+        page_size: number;
+    }>;
     findUserById(id: string): Promise<import("../entities/districts.entity").DistrictsEntity>;
     updateUser(id: string, body: DistrictUpdateDTO): Promise<import("typeorm").UpdateResult | undefined>;
     deleteUser(id: string): Promise<import("typeorm").DeleteResult | undefined>;

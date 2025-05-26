@@ -30,6 +30,16 @@ let DistrictsController = class DistrictsController {
     async findAllUsers() {
         return await this.usersService.findUsers();
     }
+    async findAllOrders(pageNumber = 0, pageSize = 0, sortField = 'updatedAt', sortDirection = 'desc', search = '') {
+        const queryParams = {
+            pageNumber,
+            pageSize,
+            sortField,
+            sortDirection,
+            search,
+        };
+        return await this.usersService.findDistricts(queryParams);
+    }
     async findUserById(id) {
         return await this.usersService.findUserById(id);
     }
@@ -54,6 +64,17 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], DistrictsController.prototype, "findAllUsers", null);
+__decorate([
+    (0, common_1.Get)(''),
+    __param(0, (0, common_1.Query)('page_number')),
+    __param(1, (0, common_1.Query)('page_size')),
+    __param(2, (0, common_1.Query)('sort_field')),
+    __param(3, (0, common_1.Query)('sort_direction')),
+    __param(4, (0, common_1.Query)('search')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object]),
+    __metadata("design:returntype", Promise)
+], DistrictsController.prototype, "findAllOrders", null);
 __decorate([
     (0, swagger_1.ApiParam)({
         name: 'id',
