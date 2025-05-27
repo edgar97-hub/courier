@@ -1,0 +1,37 @@
+<form [formGroup]="filterForm" class="filters-container">
+  <div style="min-width: 100%">
+    <mat-form-field appearance="outline" style="width:250px !important">
+      <mat-label>Fecha de entrega </mat-label>
+      <input
+        matInput
+        [matDatepicker]="startDatePicker"
+        formControlName="start_date"
+        placeholder="mm/dd/yyyy"
+      />
+      <mat-datepicker-toggle
+        matSuffix
+        [for]="startDatePicker"
+      ></mat-datepicker-toggle>
+      <mat-datepicker #startDatePicker></mat-datepicker>
+    </mat-form-field>
+  </div>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Buscar</mat-label>
+    <input matInput formControlName="search_term" placeholder="Buscar..." />
+  </mat-form-field>
+
+  <div class="filter-actions">
+    <button
+      mat-stroked-button
+      color="primary"
+      type="button"
+      (click)="applyFilters()"
+    >
+      <mat-icon>search</mat-icon> Buscar
+    </button>
+    <button mat-stroked-button type="button" (click)="clearFilters()">
+      <mat-icon>clear_all</mat-icon> Limpiar
+    </button>
+  </div>
+</form>

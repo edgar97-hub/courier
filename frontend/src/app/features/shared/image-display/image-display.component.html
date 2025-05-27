@@ -1,0 +1,42 @@
+<div
+  class="image-container"
+  [style.height]="containerHeight"
+  [style.width]="containerWidth"
+  [class.loading]="isLoading()"
+  [class.error]="hasError()"
+  [class.loaded]="isLoaded()">
+
+  <!-- Spinner de Carga -->
+  @if (isLoading() && enableSpinner) {
+    <div class="overlay spinner-overlay">
+      <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+    </div>
+  }
+
+  <!-- Icono de Error -->
+  @if (hasError() && enableErrorIcon && !isLoading()) {
+    <div class="overlay error-overlay">
+      <mat-icon class="error-icon">broken_image</mat-icon>
+      <span class="error-text">No se pudo cargar la imagen</span>
+    </div>
+  }
+
+  <!-- La Imagen (se muestra solo si hay URL y no hay error, o después de cargar) -->
+  @if (processedImageUrl() && !hasError()) {
+    <img
+      [src]="processedImageUrl()"
+      [alt]="altText"
+      [style.object-fit]="objectFit"
+      class="displayed-image"
+      [class.visible]="isLoaded()"
+      [class.hidden]="isLoading() || hasError()"
+    />
+  } @else if (!processedImageUrl() && !isLoading() && !hasError()) {
+    <!-- Opcional: Mensaje si no se proporciona URL inicialmente y no está cargando ni en error -->
+    <div class="overlay placeholder-overlay">
+        <mat-icon class="placeholder-icon">image_search</mat-icon>
+        <span class="placeholder-text">Sin imagen para mostrar</span>
+    </div>
+  }
+
+</div>

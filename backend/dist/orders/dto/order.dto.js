@@ -71,6 +71,10 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
+], OrderDTO.prototype, "payment_method_for_shipping_cost", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
 ], OrderDTO.prototype, "item_description", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
@@ -93,6 +97,10 @@ __decorate([
     (0, class_validator_1.IsEnum)(roles_1.STATES),
     __metadata("design:type", String)
 ], OrderDTO.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], OrderDTO.prototype, "product_delivery_photo_url", void 0);
 class OrderUpdateDTO {
 }
 exports.OrderUpdateDTO = OrderUpdateDTO;
@@ -163,6 +171,10 @@ __decorate([
 ], OrderUpdateDTO.prototype, "shipping_cost", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], OrderUpdateDTO.prototype, "payment_method_for_shipping_cost", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], OrderUpdateDTO.prototype, "item_description", void 0);
@@ -191,4 +203,8 @@ __decorate([
     (0, class_validator_1.IsEnum)(roles_1.STATES),
     __metadata("design:type", String)
 ], OrderUpdateDTO.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], OrderUpdateDTO.prototype, "product_delivery_photo_url", void 0);
 //# sourceMappingURL=order.dto.js.map

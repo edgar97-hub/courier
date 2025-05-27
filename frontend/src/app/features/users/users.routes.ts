@@ -1,8 +1,9 @@
 import { Routes } from '@angular/router';
 import { UserListPageComponent } from './pages/user-list-page/user-list-page.component';
 import { UserCreatePageComponent } from './pages/user-create-page/user-create-page.component';
-import { UserDetailPageComponent } from './pages/user-detail-page/user-detail-page.component';
+import { UserEditPageComponent } from './pages/user-edit-page/user-edit-page.component';
 import { usersFeatureProviders } from './users.config'; // <--- IMPORTA LOS PROVIDERS
+import { UserDetailPageComponent } from './pages/user-detail-page/user-detail-page.component';
 
 export const USERS_ROUTES: Routes = [
   {
@@ -21,14 +22,13 @@ export const USERS_ROUTES: Routes = [
         component: UserCreatePageComponent,
         title: 'Create New User',
       },
-      // ... otras rutas hijas ...
       {
         path: 'edit/:id',
-        component: UserDetailPageComponent,
+        component: UserEditPageComponent,
         title: 'Edit User',
       },
       {
-        path: ':id',
+        path: 'detail',
         component: UserDetailPageComponent,
         title: 'User Details',
       },

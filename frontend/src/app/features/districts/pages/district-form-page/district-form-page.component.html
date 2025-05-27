@@ -1,0 +1,33 @@
+<div class="page-container form-page-container">
+  <div class="page-header">
+    <button
+      mat-icon-button
+      (click)="handleCancel()"
+      matTooltip="Volver a la Lista"
+      aria-label="Volver a la lista de distritos"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>{{ pageTitle }}</h1>
+  </div>
+
+  <!-- Mostrar el spinner MIENTRAS isLoading es true -->
+  <div *ngIf="isLoading" class="loading-indicator">
+    <mat-progress-spinner
+      mode="indeterminate"
+      diameter="40"
+    ></mat-progress-spinner>
+    <p>Cargando datos del distrito...</p>
+  </div>
+
+  <!-- El formulario se muestra CUANDO isLoading es false.
+       El async pipe dentro del formulario se encargará de esperar los datos si es necesario. -->
+  <app-district-form
+    *ngIf="!isLoading"
+    [districtToEdit]="districtId ? (districtToEdit$ | async) : null"
+    [isLoading]="isSaving"
+    (formSubmit)="handleSubmit($event)"
+    (formCancel)="handleCancel()"
+  >
+  </app-district-form>
+</div>

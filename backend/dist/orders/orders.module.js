@@ -13,13 +13,14 @@ const orders_controller_1 = require("./controllers/orders.controller");
 const typeorm_1 = require("@nestjs/typeorm");
 const orders_entity_1 = require("./entities/orders.entity");
 const order_pdf_generator_service_1 = require("./services/order-pdf-generator.service");
+const orderLog_entity_1 = require("./entities/orderLog.entity");
 let OrdersModule = class OrdersModule {
 };
 exports.OrdersModule = OrdersModule;
 exports.OrdersModule = OrdersModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([orders_entity_1.OrdersEntity])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([orders_entity_1.OrdersEntity, orderLog_entity_1.OrderLogEntity])],
         providers: [orders_service_1.OrdersService, order_pdf_generator_service_1.OrderPdfGeneratorService],
         controllers: [orders_controller_1.OrdersController],
         exports: [orders_service_1.OrdersService, typeorm_1.TypeOrmModule],

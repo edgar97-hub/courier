@@ -14,6 +14,7 @@ const typeorm_1 = require("typeorm");
 const base_entity_1 = require("../../config/base.entity");
 const users_entity_1 = require("../../users/entities/users.entity");
 const roles_1 = require("../../constants/roles");
+const orderLog_entity_1 = require("./orderLog.entity");
 let OrdersEntity = class OrdersEntity extends base_entity_1.BaseEntity {
 };
 exports.OrdersEntity = OrdersEntity;
@@ -75,6 +76,10 @@ __decorate([
     __metadata("design:type", Number)
 ], OrdersEntity.prototype, "shipping_cost", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true, default: '' }),
+    __metadata("design:type", String)
+], OrdersEntity.prototype, "payment_method_for_shipping_cost", void 0);
+__decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], OrdersEntity.prototype, "item_description", void 0);
@@ -105,8 +110,26 @@ __decorate([
 ], OrdersEntity.prototype, "status", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => users_entity_1.UsersEntity, (user) => user.ordersIncludes),
+    (0, typeorm_1.JoinColumn)({ name: 'user_id' }),
     __metadata("design:type", users_entity_1.UsersEntity)
 ], OrdersEntity.prototype, "user", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => users_entity_1.UsersEntity, (user) => user.assignedDriversIncludes),
+    (0, typeorm_1.JoinColumn)({ name: 'assigned_driver_id' }),
+    __metadata("design:type", users_entity_1.UsersEntity)
+], OrdersEntity.prototype, "assigned_driver", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => orderLog_entity_1.OrderLogEntity, (log) => log.order),
+    __metadata("design:type", Array)
+], OrdersEntity.prototype, "logs", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ unique: true }),
+    __metadata("design:type", String)
+], OrdersEntity.prototype, "tracking_code", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true, default: '' }),
+    __metadata("design:type", String)
+], OrdersEntity.prototype, "product_delivery_photo_url", void 0);
 exports.OrdersEntity = OrdersEntity = __decorate([
     (0, typeorm_1.Entity)({ name: 'orders' })
 ], OrdersEntity);

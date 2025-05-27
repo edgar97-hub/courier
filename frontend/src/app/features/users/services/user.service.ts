@@ -39,44 +39,30 @@ export class UserService {
   getUsers(): Observable<User[]> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
-      // El Effect o el interceptor deberían manejar la redirección o el error de no autenticado
       return throwError(() => new Error('Not authenticated to fetch users.'));
     }
-    console.log('UserService: Fetching all users from API');
     return this.http.get<User[]>(`${this.apiUrl}/all`, { headers }).pipe(
-      map((users) => users || []), // Asegurar que devuelve un array, incluso si la API devuelve null
+      map((users) => users || []),
       catchError(this.handleError)
     );
   }
 
-  // Obtener un usuario por ID (para ser llamado por un Effect de NgRx)
   getUserById(id: string): Observable<User> {
-    // Asumimos que la API devuelve un User o un error
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
       return throwError(
         () => new Error('Not authenticated to fetch user by ID.')
       );
     }
-    console.log(`UserService: Fetching user by ID: ${id}`);
     return this.http
       .get<User>(`${this.apiUrl}/${id}`, { headers })
       .pipe(catchError(this.handleError));
   }
 
-  // Crear un nuevo usuario (para ser llamado por un Effect de NgRx)
-  createUser(userData: Omit<User, 'id'>): Observable<User> {
+  createUser(user: User): Observable<User> {
     const headers = this.getAuthHeaders();
-    // if (!this.authService.getAccessToken()) { // Podrías chequear aquí o confiar en el interceptor/backend
-    //   return throwError(() => new Error('Not authenticated to create user.'));
-    // }
-    console.log(
-      `UserService: Attempting to create user - POST`,
-      `${this.apiUrl}/register`,
-      userData
-    );
     return this.http
-      .post<User>(this.apiUrl + '/register', userData, { headers })
+      .post<User>(this.apiUrl + '/register', user, { headers })
       .pipe(
         tap((createdUser) =>
           console.log('UserService: User created via API', createdUser)
@@ -84,21 +70,15 @@ export class UserService {
         catchError(this.handleError)
       );
   }
-  // Actualizar un usuario existente (para ser llamado por un Effect de NgRx)
+
   updateUser(user: User): Observable<User> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
       return throwError(() => new Error('Not authenticated to update user.'));
     }
-    console.log('UserService: Updating user via API', user);
-    // Asegúrate de que el endpoint sea el correcto para tu API (ej. /users/:id o /users/edit/:id)
-    return (
-      this.http
-        .put<User>(`${this.apiUrl}/edit/${user.id}`, user, { headers }) // Cambiado a /users/:id
-        // o si tu API realmente usa /edit/:id
-        // return this.http.put<User>(`${this.apiUrl}/edit/${user.id}`, user, { headers })
-        .pipe(catchError(this.handleError))
-    );
+    return this.http
+      .put<User>(`${this.apiUrl}/edit/${user.id}`, user, { headers })
+      .pipe(catchError(this.handleError));
   }
 
   // Eliminar un usuario (para ser llamado por un Effect de NgRx)

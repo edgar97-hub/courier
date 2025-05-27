@@ -155,17 +155,17 @@ let SettingsService = class SettingsService {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
-    async uploadFile(termsPdfFile, req) {
+    async uploadFile(file, req) {
         try {
-            if (!termsPdfFile) {
+            if (!file) {
                 throw new error_manager_1.ErrorManager({
                     type: 'BAD_REQUEST',
                     message: 'No terms PDF file provided',
                 });
             }
-            const fileName = `${Date.now()}-${termsPdfFile.originalname}`;
+            const fileName = `${Date.now()}-${file.originalname}`;
             const filePath = path.join(__dirname, '..', '..', '..', 'public', 'uploads', fileName);
-            await fs.promises.writeFile(filePath, termsPdfFile.buffer);
+            await fs.promises.writeFile(filePath, file.buffer);
             const relativeUrl = `/uploads/${fileName}`;
             const protocol = req.protocol;
             const host = req.get('host');

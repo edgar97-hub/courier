@@ -8,13 +8,13 @@ export declare class OrdersController {
     private readonly orderPdfGeneratorService;
     constructor(ordersService: OrdersService, orderPdfGeneratorService: OrderPdfGeneratorService);
     register(body: OrderDTO): Promise<import("../entities/orders.entity").OrdersEntity>;
-    batchCreateOrders(body: any): Promise<{
+    batchCreateOrders(body: any, req: any): Promise<{
         success: boolean;
         message: string;
         createdOrders?: import("../entities/orders.entity").OrdersEntity[];
         errors?: any[];
     }>;
-    importOrders(ordersData: any[]): Promise<ImportResult | undefined>;
+    importOrders(ordersData: any[], req: any): Promise<ImportResult | undefined>;
     findAllOrders(pageNumber?: number, pageSize?: number, sortField?: string, sortDirection?: string, startDate?: string, endDate?: string, status?: string): Promise<{
         items: any;
         total_count: number;
@@ -25,9 +25,12 @@ export declare class OrdersController {
         items: any;
         total_count: number;
     }>;
+    getOrderByTrackingCode(tracking_code?: string): Promise<import("../entities/orders.entity").OrdersEntity | null>;
     findOrderById(id: string): Promise<import("../entities/orders.entity").OrdersEntity>;
     updateOrder(id: string, body: OrderUpdateDTO): Promise<import("typeorm").UpdateResult | undefined>;
-    updateOrderStatus(body: any): Promise<import("typeorm").UpdateResult>;
+    updateOrderStatus(body: any, req: any): Promise<any>;
+    assignDriverToOrder(id: string, body: any, req: any): Promise<any>;
+    rescheduleOrder(id: string, body: any, req: any): Promise<any>;
     deleteOrder(id: string): Promise<import("typeorm").DeleteResult | undefined>;
     getOrderPdf(orderId: string, res: Response): Promise<void>;
 }

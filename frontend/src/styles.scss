@@ -1,7 +1,35 @@
+@use "./app/styles/colors.scss";
 @use "./app/styles/material.scss";
 
 @use "./app/styles/tailwind.css";
 
 @use "./app/styles/custom.scss";
 
+/* src/styles.css o src/styles.scss */
 
+// src/styles.scss (si usas SCSS)
+
+// Estos estilos deben estar en el nivel raíz de styles.scss, no anidados.
+::ng-deep .success-snackbar {
+  background-color: var(
+    --sys-primary-container
+  ) !important; // Añadir !important si es necesario
+  color: var(--sys-on-primary-container) !important;
+
+  // Para el botón de acción
+  .mat-mdc-button.mat-mdc-button-base .mdc-button__label, // MDC
+  .mat-simple-snackbar-action button {
+    // Pre-MDC
+    color: var(--sys-on-primary-container) !important;
+  }
+}
+
+::ng-deep .error-snackbar {
+  background-color: var(--sys-error-container) !important;
+  color: var(--sys-on-error-container) !important;
+
+  .mat-mdc-button.mat-mdc-button-base .mdc-button__label,
+  .mat-simple-snackbar-action button {
+    color: var(--sys-on-error-container) !important;
+  }
+}

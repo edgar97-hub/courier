@@ -1,6 +1,7 @@
 import { BaseEntity } from '../../config/base.entity';
 import { UsersEntity } from '../../users/entities/users.entity';
 import { STATES } from '../../constants/roles';
+import { OrderLogEntity } from './orderLog.entity';
 export declare class OrdersEntity extends BaseEntity {
     code?: number;
     shipment_type?: string;
@@ -16,6 +17,7 @@ export declare class OrdersEntity extends BaseEntity {
     package_height_cm?: number;
     package_weight_kg?: number;
     shipping_cost?: number;
+    payment_method_for_shipping_cost?: string;
     item_description?: string;
     amount_to_collect_at_delivery?: number;
     payment_method_for_collection?: string;
@@ -23,4 +25,8 @@ export declare class OrdersEntity extends BaseEntity {
     type_order_transfer_to_warehouse?: string;
     status: STATES;
     user: UsersEntity;
+    assigned_driver: UsersEntity;
+    logs: OrderLogEntity[];
+    tracking_code: string;
+    product_delivery_photo_url?: string;
 }

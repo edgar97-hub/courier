@@ -1,0 +1,46 @@
+<div
+  class="dialog-container"
+  cdkDrag
+  cdkDragRootElement=".cdk-overlay-pane"
+  cdkDragHandle=".dialog-header-draggable"
+>
+  <div class="dialog-header dialog-header-draggable">
+    <h2 mat-dialog-title class="dialog-title">Foto del Pedido</h2>
+    <!-- El order-code-chip es opcional, lo quito para simplificar como en tu captura de modal si solo muestra la foto -->
+    <!-- <span class="order-code-chip">N°: {{ data.orderCode }}</span> -->
+    <button
+      mat-icon-button
+      class="close-button"
+      (click)="onClose()"
+      aria-label="Cerrar diálogo"
+      matTooltip="Cerrar"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="evidence-dialog-content">
+    <div class="image-wrapper">
+      <img
+        [src]="data.order.product_delivery_photo_url"
+        alt="Foto del Pedido"
+        class="evidence-image"
+      />
+
+      <!-- MENSAJE DE ERROR/SIN IMAGEN: Se muestra si NO hay URL O si ha fallado la carga -->
+      <div
+        *ngIf="!data.order.product_delivery_photo_url || imageLoadFailed()"
+        class="placeholder-container"
+      >
+        <mat-icon class="placeholder-icon">broken_image</mat-icon>
+        <p class="placeholder-text">
+          No hay imagen de evidencia disponible o no se pudo cargar.
+        </p>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="dialog-actions">
+    <button mat-flat-button color="primary" (click)="onClose()">Close</button>
+  </mat-dialog-actions>
+</div>

@@ -184,18 +184,18 @@ export class SettingsService {
   }
 
   public async uploadFile(
-    termsPdfFile: Express.Multer.File,
+    file: Express.Multer.File,
     req: Request,
   ): Promise<{ file_url: string }> {
     try {
-      if (!termsPdfFile) {
+      if (!file) {
         throw new ErrorManager({
           type: 'BAD_REQUEST',
           message: 'No terms PDF file provided',
         });
       }
 
-      const fileName = `${Date.now()}-${termsPdfFile.originalname}`;
+      const fileName = `${Date.now()}-${file.originalname}`;
       const filePath = path.join(
         __dirname,
         '..',
@@ -205,7 +205,7 @@ export class SettingsService {
         'uploads',
         fileName,
       );
-      await fs.promises.writeFile(filePath, termsPdfFile.buffer);
+      await fs.promises.writeFile(filePath, file.buffer);
       const relativeUrl = `/uploads/${fileName}`;
       const protocol = (req as any).protocol;
       const host = (req as any).get('host');

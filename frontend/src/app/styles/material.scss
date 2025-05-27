@@ -1,7 +1,6 @@
 @use "@angular/material" as mat;
 
-html {
-  color-scheme: light;
+html:not(.dark-theme) {
   @include mat.theme(
     (
       color: mat.$azure-palette,
@@ -9,8 +8,8 @@ html {
     )
   );
 }
-
-.dark {
+body.dark-theme,
+html.dark-theme {
   color-scheme: dark;
 }
 

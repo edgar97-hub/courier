@@ -11,9 +11,14 @@ import { Subject, BehaviorSubject, of } from 'rxjs';
 import { switchMap, takeUntil, catchError, tap, filter } from 'rxjs/operators';
 
 import { UserCardComponent } from '../../components/user-card/user-card.component';
-import { UserFormComponent } from '../../components/user-form/user-form.component';
+
 import { UserService } from '../../services/user.service';
 import { User } from '../../models/user.model';
+import {
+  UserDisplayComponent,
+  UserFormData,
+} from '../../components/user-display/user-display.component';
+import { AppStore } from '../../../../app.store';
 
 @Component({
   selector: 'app-user-detail-page',
@@ -21,8 +26,7 @@ import { User } from '../../models/user.model';
   imports: [
     CommonModule,
     RouterModule,
-    UserCardComponent,
-    UserFormComponent,
+    UserDisplayComponent,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
@@ -37,9 +41,11 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private userService = inject(UserService);
   private snackBar = inject(MatSnackBar);
+  appStore = inject(AppStore);
 
   userSubject = new BehaviorSubject<User | null>(null);
   user$ = this.userSubject.asObservable(); // Para pasar al UserCardComponent si no se edita
+  userDataToDisplay: UserFormData | null = null; // Propiedad para almacenar los datos del usuario
 
   isLoading = true;
   isEditMode = false; // Determinará si estamos en modo vista o edición
@@ -55,11 +61,8 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
           this.userSubject.next(null); // Limpiar usuario anterior
         }),
         switchMap((params) => {
-          const idParam = params.get('id');
-          if (idParam) {
-            this.userId = idParam;
-            // Verifica si la URL contiene 'edit' para determinar el modo
-            this.isEditMode = this.router.url.includes(`/edit/${this.userId}`);
+          if (this.appStore.currentUser()?.id) {
+            this.userId = this.appStore.currentUser()?.id || '';
             return this.userService.getUserById(this.userId);
           }
           this.snackBar.open('User ID not provided in URL.', 'Close', {
@@ -83,6 +86,7 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
         this.isLoading = false;
         if (user) {
           this.userSubject.next(user);
+          this.userDataToDisplay = user;
         } else if (this.userId) {
           // Si había un ID pero el user es null (no encontrado por el servicio)
           this.snackBar.open(
@@ -109,10 +113,14 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
 
   handleFormSubmit(updatedUserDataFromForm: User): void {
     if (!this.userId) {
-      this.snackBar.open('Cannot update user: User ID is missing.', 'Close', {
-        duration: 3000,
-        panelClass: ['error-snackbar'],
-      });
+      this.snackBar.open(
+        'No se puede actualizar el usuario: falta el ID de usuario.',
+        'Close',
+        {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+        }
+      );
       return;
     }
     this.isLoading = true;
@@ -125,22 +133,18 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
         next: (savedUser) => {
           this.isLoading = false;
           this.userSubject.next(savedUser); // Actualiza el usuario mostrado si es necesario
-          this.snackBar.open(
-            `User "${savedUser.username}" updated successfully!`,
-            'OK',
-            {
-              duration: 3000,
-              verticalPosition: 'top',
-              panelClass: ['success-snackbar'],
-            }
-          );
-          this.isEditMode = false; // Salir del modo edición y mostrar detalles
-          this.router.navigate(['/configuracion/users']); // Navegar a la vista de detalles actualizada
+          this.snackBar.open(`¡Actualizado exitosamente!`, 'OK', {
+            duration: 3000,
+            verticalPosition: 'top',
+            panelClass: ['success-snackbar'],
+          });
+          this.isEditMode = false;
+          this.router.navigate(['/configuracion/users']);
         },
         error: (err) => {
           this.isLoading = false;
           this.snackBar.open(
-            'Error updating user. Please try again.',
+            'Error al actualizar el usuario. Inténtalo de nuevo.',
             'Retry',
             {
               duration: 5000,

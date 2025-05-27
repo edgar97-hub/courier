@@ -45,6 +45,23 @@ let UsersService = class UsersService {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
+    async findUsersByRol(rol) {
+        try {
+            const users = await this.userRepository.find({
+                where: { role: rol },
+            });
+            if (!users) {
+                throw new error_manager_1.ErrorManager({
+                    type: 'BAD_REQUEST',
+                    message: 'No se encontro resultado',
+                });
+            }
+            return users;
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
     async findUserById(id) {
         try {
             const user = (await this.userRepository

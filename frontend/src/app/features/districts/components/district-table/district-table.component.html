@@ -1,0 +1,129 @@
+<div class="table-container mat-elevation-z4">
+  <div *ngIf="isLoading" class="spinner-overlay">
+    <mat-progress-spinner
+      mode="indeterminate"
+      diameter="50"
+    ></mat-progress-spinner>
+  </div>
+
+  <table
+    mat-table
+    [dataSource]="dataSource"
+    matSort
+    (matSortChange)="sortChanged.emit($event)"
+    class="districts-table"
+    aria-label="Lista de Distritos y Tarifas"
+  >
+    <!-- Code Column -->
+    <ng-container matColumnDef="code">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="code">N°</th>
+      <td mat-cell *matCellDef="let district">{{ district.code || "N/A" }}</td>
+    </ng-container>
+
+    <!-- Name Column -->
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="name">
+        Nombre Distrito
+      </th>
+      <td mat-cell *matCellDef="let district">{{ district.name }}</td>
+    </ng-container>
+
+    <!-- Weight Range Column -->
+    <ng-container matColumnDef="weight_range">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="weight_from">
+        Rango Peso (kg)
+      </th>
+      <!-- Ordena por weight_from -->
+      <td mat-cell *matCellDef="let district">
+        {{ district.weight_from }} - {{ district.weight_to }}
+      </td>
+    </ng-container>
+
+    <!-- Price Column -->
+    <ng-container matColumnDef="price">
+      <th
+        mat-header-cell
+        *matHeaderCellDef
+        mat-sort-header="price"
+        class="align-right"
+      >
+        Precio Tarifa
+      </th>
+      <td mat-cell *matCellDef="let district" class="align-right amount-cell">
+        {{ district.price | currency : "PEN" : "S/ " : "1.2-2" }}
+      </td>
+    </ng-container>
+
+    <!-- isStandard Column -->
+    <ng-container matColumnDef="isStandard">
+      <th
+        mat-header-cell
+        *matHeaderCellDef
+        mat-sort-header="isStandard"
+        class="align-center"
+      >
+        Estándar
+      </th>
+      <td mat-cell *matCellDef="let district" class="align-center">
+        <mat-checkbox
+          [checked]="district.isStandard"
+          disabled="true"
+          color="primary"
+        ></mat-checkbox>
+      </td>
+    </ng-container>
+
+    <!-- Actions Column -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef class="actions-column-header">
+        Acciones
+      </th>
+      <td mat-cell *matCellDef="let district" class="actions-cell">
+        <button
+          mat-icon-button
+          color="primary"
+          (click)="onEdit(district)"
+          matTooltip="Editar Distrito/Tarifa"
+        >
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          color="warn"
+          (click)="onDelete(district)"
+          matTooltip="Eliminar Distrito/Tarifa"
+        >
+          <mat-icon>delete_outline</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr
+      mat-header-row
+      *matHeaderRowDef="displayedColumns; sticky: true"
+      class="header-row-sticky"
+    ></tr>
+    <tr
+      mat-row
+      *matRowDef="let row; columns: displayedColumns"
+      class="data-row"
+    ></tr>
+
+    <tr class="mat-row" *matNoDataRow>
+      <td [attr.colspan]="displayedColumns.length" class="no-data-cell">
+        No se encontraron distritos que coincidan con la búsqueda.
+      </td>
+    </tr>
+  </table>
+
+  <mat-paginator
+    [length]="totalCount"
+    [pageSize]="pageSize"
+    [pageIndex]="pageIndex"
+    [pageSizeOptions]="[5, 10, 20, 50]"
+    (page)="handlePageEvent($event)"
+    showFirstLastButtons
+    aria-label="Seleccione página de distritos"
+  >
+  </mat-paginator>
+</div>

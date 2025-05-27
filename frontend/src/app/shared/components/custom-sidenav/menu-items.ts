@@ -3,65 +3,29 @@ export type MenuItem = {
   label: string;
   route?: string;
   subItems?: MenuItem[];
+  roles?: string[];
+  externalLink?: string;
+  key?: string;
 };
 
 export const menuItems: MenuItem[] = [
-  // {
-  //   icon: 'dashboard',
-  //   label: 'Dashboard',
-  //   route: 'dashboard',
-  // },
-  // {
-  //   icon: 'format_list_bulleted',
-  //   label: 'Components',
-  //   route: 'components',
-  //   subItems: [
-  //     {
-  //       icon: 'touch_app',
-  //       label: 'Buttons',
-  //       route: 'buttons',
-  //     },
-  //     {
-  //       icon: 'question_answer',
-  //       label: 'Dialog',
-  //       route: 'dialog',
-  //     },
-  //     {
-  //       icon: 'text_fields',
-  //       label: 'Inputs',
-  //       route: 'inputs',
-  //     },
-  //     {
-  //       icon: 'view_agenda',
-  //       label: 'Panels',
-  //       route: 'panels',
-  //     },
-  //     {
-  //       icon: 'donut_large',
-  //       label: 'Progress',
-  //       route: 'progress',
-  //     },
-  //     {
-  //       icon: 'format_list_numbered',
-  //       label: 'Stepper',
-  //       route: 'stepper',
-  //     },
-  //     {
-  //       icon: 'table_chart',
-  //       label: 'Table',
-  //       route: 'table',
-  //     },
-  //     {
-  //       icon: 'tab',
-  //       label: 'Tabs',
-  //       route: 'tabs',
-  //     },
-  //   ],
-  // },
+  {
+    icon: 'list_alt',
+    label: 'Tarifas',
+    route: 'configuracion/tarifas',
+    roles: ['ADMIN', 'MOTORIZED', 'CUSTOMER', 'RECEPTIONIST'],
+  },
+  {
+    icon: 'list_alt',
+    label: 'Detalles del negocio',
+    route: 'configuracion/users/detail/',
+    roles: ['CUSTOMER'],
+  },
   {
     icon: 'format_list_bulleted',
     label: 'Configuración',
     route: 'configuracion',
+    roles: ['ADMIN'],
     subItems: [
       {
         icon: 'settings_applications',
@@ -73,22 +37,26 @@ export const menuItems: MenuItem[] = [
         label: 'Usuarios',
         route: 'users',
       },
-      // {
-      //   icon: 'list_alt',
-      //   label: 'Datos del cliente',
-      //   route: 'customer-data',
-      // },
+
       {
         icon: 'settings_applications',
         label: 'Tarifas de Envío',
         route: 'shipping-rates',
       },
+      {
+        icon: 'settings_applications',
+        label: 'ditritos',
+        route: 'districts',
+      },
     ],
   },
+
   {
     icon: 'format_list_bulleted',
     label: 'Pedidos',
     route: 'orders',
+    roles: ['ADMIN', 'MOTORIZED', 'CUSTOMER', 'RECEPTIONIST'],
+
     subItems: [
       {
         icon: 'add',
@@ -100,31 +68,12 @@ export const menuItems: MenuItem[] = [
         label: 'Pedidos',
         route: 'orders',
       },
-      // {
-      //   icon: 'settings_applications',
-      //   label: 'Tarifas de Envío',
-      //   route: 'shipping-rates',
-      // },
     ],
   },
-  // {
-  //   icon: 'edit_note',
-  //   label: 'Forms',
-  //   route: 'forms',
-  // },
-  // {
-  //   icon: 'video_library',
-  //   label: 'Content',
-  //   route: 'content',
-  // },
-  // {
-  //   icon: 'shopping_basket',
-  //   label: 'Pedidos',
-  //   route: 'forms',
-  // },
-  // {
-  //   icon: 'calculate',
-  //   label: 'Calculadora',
-  //   route: 'content',
-  // },
+  {
+    icon: 'list_alt',
+    label: 'Pedidos entregados',
+    route: 'orders-delivered',
+    roles: ['ADMIN', 'MOTORIZED', 'CUSTOMER', 'RECEPTIONIST'],
+  },
 ];

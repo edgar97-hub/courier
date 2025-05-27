@@ -1,0 +1,79 @@
+<!-- <div class="page-container">
+  <div class="page-header">
+    <h1>Gestión de Distritos y Tarifas</h1>
+    <button mat-flat-button color="primary" (click)="navigateToCreate()">
+      <mat-icon>add_circle_outline</mat-icon>
+      Nuevo Distrito/Tarifa
+    </button>
+  </div>
+
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-label>Buscar Distritos</mat-label>
+    <input
+      matInput
+      (keyup)="onSearchTermChange($event)"
+      placeholder="Ej: Carabayllo, Lince..."
+    />
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+
+  <app-district-table
+    [districts]="districts"
+    [isLoading]="isLoading"
+    [totalCount]="totalDistricts"
+    [pageSize]="currentPageSize"
+    [pageIndex]="currentPageIndex"
+    (pageChanged)="onPageChanged($event)"
+    (sortChanged)="onSortChanged($event)"
+    (editDistrict)="navigateToEdit($event)"
+    (deleteDistrict)="confirmAndDeleteDistrict($event)"
+  ></app-district-table>
+</div>
+ -->
+
+<div class="page-container" fxLayout="column" fxLayoutGap="24px"> <!-- Usando Flex Layout para espaciado -->
+
+  <div class="page-header" fxLayout="row" fxLayoutAlign="space-between center">
+    <h1 class="page-title">Gestión de Distritos y Tarifas</h1>
+    <button mat-flat-button color="primary" (click)="navigateToCreate()" class="create-button">
+      <mat-icon>add_circle_outline</mat-icon>
+      <span>Nuevo Distrito/Tarifa</span> <!-- Span para mejor control de estilos si es necesario -->
+    </button>
+  </div>
+
+  <mat-card appearance="outlined" class="filter-card">
+    <mat-card-content fxLayout="row" fxLayoutAlign="start center">
+      <mat-form-field appearance="outline" class="search-field" fxFlex>
+        <mat-label>Buscar por nombre o código</mat-label>
+        <input
+          matInput
+          (keyup)="onSearchTermChange($event)"
+          placeholder="Ej: Carabayllo, Lince, 101..."
+          #searchInput
+        />
+        <button mat-icon-button matSuffix *ngIf="searchInput.value" 
+        (click)="clearSearch(searchInput)" 
+        aria-label="Limpiar búsqueda">
+            <mat-icon>close</mat-icon>
+        </button>
+        <mat-icon matSuffix *ngIf="!searchInput.value">search</mat-icon>
+      </mat-form-field>
+      <!-- Podrías añadir más filtros aquí si es necesario, ej. un mat-select para 'isStandard' -->
+    </mat-card-content>
+  </mat-card>
+
+  <!-- La tabla de distritos se mantiene igual, ya que su diseño interno se maneja
+       en district-table.component.scss y debería heredar el tema. -->
+  <app-district-table
+    [districts]="districts"
+    [isLoading]="isLoading"
+    [totalCount]="totalDistricts"
+    [pageSize]="currentPageSize"
+    [pageIndex]="currentPageIndex"
+    (pageChanged)="onPageChanged($event)"
+    (sortChanged)="onSortChanged($event)"
+    (editDistrict)="navigateToEdit($event)"
+    (deleteDistrict)="confirmAndDeleteDistrict($event)"
+  ></app-district-table>
+
+</div>

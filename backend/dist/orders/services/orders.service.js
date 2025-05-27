@@ -21,6 +21,7 @@ const orders_entity_1 = require("../entities/orders.entity");
 const districts_entity_1 = require("../../districts/entities/districts.entity");
 const roles_1 = require("../../constants/roles");
 const typeorm_3 = require("typeorm");
+const orderLog_entity_1 = require("../entities/orderLog.entity");
 const EXCEL_HEADER_TO_ENTITY_KEY_MAP = {
     'TIPO DE ENVIO': 'shipment_type',
     'NOMBRE DEL DESTINATARIO': 'recipient_name',
@@ -34,8 +35,9 @@ const EXCEL_HEADER_TO_ENTITY_KEY_MAP = {
     OBSERVACION: 'observations',
 };
 let OrdersService = class OrdersService {
-    constructor(orderRepository, districtsRepository, entityManager) {
+    constructor(orderRepository, orderLogRepository, districtsRepository, entityManager) {
         this.orderRepository = orderRepository;
+        this.orderLogRepository = orderLogRepository;
         this.districtsRepository = districtsRepository;
         this.entityManager = entityManager;
     }
@@ -47,16 +49,39 @@ let OrdersService = class OrdersService {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
-    async updateOrderStatus(body) {
+    async updateOrderStatus(body, idUser) {
         try {
-            const order = await this.orderRepository.update(body.orderId, { status: body.newStatus });
-            return order;
+            const oldOrder = await this.orderRepository.findOne({
+                where: { id: body.payload.orderId },
+            });
+            if (!oldOrder)
+                throw new Error('Orden no encontrada');
+            await this.orderRepository.update(body.payload.orderId, {
+                status: body.payload.newStatus,
+                product_delivery_photo_url: body.payload.product_delivery_photo_url,
+                payment_method_for_collection: body.payload.payment_method_for_collection,
+                payment_method_for_shipping_cost: body.payload.payment_method_for_shipping_cost,
+            });
+            const updatedOrder = await this.orderRepository.findOne({
+                where: { id: body.payload.orderId },
+                relations: ['assigned_driver'],
+            });
+            const log = await this.orderLogRepository.create({
+                order: { id: body.payload.orderId },
+                performedBy: { id: idUser },
+                action: body.payload.action,
+                previousValue: oldOrder.status,
+                newValue: body.payload.newStatus,
+                notes: body.payload.reason,
+            });
+            await this.orderLogRepository.save(log);
+            return updatedOrder;
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
-    async batchCreateOrders(payload) {
+    async batchCreateOrders(payload, idUser) {
         const { orders: orderDTOs } = payload;
         if (!orderDTOs || orderDTOs.length === 0) {
             throw error_manager_1.ErrorManager.createSignatureError('No orders provided in the batch.');
@@ -92,6 +117,13 @@ let OrdersService = class OrdersService {
                     orderToCreate.observations = orderDto.observations;
                     orderToCreate.type_order_transfer_to_warehouse =
                         orderDto.type_order_transfer_to_warehouse;
+                    orderDto.user = { id: idUser };
+                    async function generateTrackingCode() {
+                        const { customAlphabet } = await Promise.resolve().then(() => require('nanoid'));
+                        const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 10);
+                        return nanoid();
+                    }
+                    orderDto.tracking_code = await generateTrackingCode();
                     const savedOrder = await queryRunner.manager.save(orders_entity_1.OrdersEntity, orderToCreate);
                     createdOrders.push(savedOrder);
                 }
@@ -133,7 +165,7 @@ let OrdersService = class OrdersService {
             await queryRunner.release();
         }
     }
-    async importOrdersFromExcelData(excelRows) {
+    async importOrdersFromExcelData(excelRows, idUser) {
         if (!excelRows || excelRows.length === 0) {
             return { success: false, message: 'No data provided in the Excel file.' };
         }
@@ -275,11 +307,17 @@ let OrdersService = class OrdersService {
             console.log('ordersToSave.length > 0 && errors.length', ordersToSave, errors);
             if (!rowHasErrors) {
                 orderEntity.status = roles_1.STATES.REGISTERED;
+                orderEntity.user = { id: idUser };
+                async function generateTrackingCode() {
+                    const { customAlphabet } = await Promise.resolve().then(() => require('nanoid'));
+                    const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 10);
+                    return nanoid();
+                }
+                orderEntity.tracking_code = await generateTrackingCode();
                 ordersToSave.push(orderEntity);
             }
         }
         if (ordersToSave.length > 0 && errors.length === 0) {
-            console.log('test2');
             const queryRunner = this.orderRepository.manager.connection.createQueryRunner();
             await queryRunner.connect();
             await queryRunner.startTransaction();
@@ -374,6 +412,7 @@ let OrdersService = class OrdersService {
             return this.orderRepository
                 .findAndCount({
                 where,
+                relations: ['user', 'assigned_driver'],
                 order: {
                     [sortBy]: sortDirection.toUpperCase(),
                 },
@@ -419,6 +458,18 @@ let OrdersService = class OrdersService {
                 items,
                 total_count: total,
             }));
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
+    async getOrderByTrackingCode({ tracking_code = '', }) {
+        try {
+            const order = await this.orderRepository.findOne({
+                where: { tracking_code },
+                relations: ['logs'],
+            });
+            return order;
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
@@ -470,6 +521,76 @@ let OrdersService = class OrdersService {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
+    async assignDriverToOrder(body, id, idUser) {
+        try {
+            const oldOrder = await this.orderRepository.findOne({
+                where: { id },
+                relations: ['assigned_driver'],
+            });
+            if (!oldOrder)
+                throw new Error('Orden no encontrada');
+            await this.orderRepository.update(id, {
+                assigned_driver: { id: body.motorizedId },
+            });
+            const updatedOrder = await this.orderRepository.findOne({
+                where: { id },
+                relations: ['assigned_driver'],
+            });
+            let action = 'MOTORIZADO ASIGNADO';
+            let previousValue = oldOrder.assigned_driver?.username;
+            let newValue = updatedOrder?.assigned_driver?.username;
+            if (oldOrder.assigned_driver) {
+                action = 'MOTORIZADO CAMBIADO';
+            }
+            const log = await this.orderLogRepository.create({
+                order: { id },
+                performedBy: { id: idUser },
+                action: action,
+                previousValue: previousValue,
+                newValue: newValue,
+                notes: body.notes,
+            });
+            await this.orderLogRepository.save(log);
+            return updatedOrder;
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
+    async rescheduleOrder(body, id, idUser) {
+        try {
+            const oldOrder = await this.orderRepository.findOne({
+                where: { id },
+                relations: ['assigned_driver'],
+            });
+            if (!oldOrder)
+                throw new Error('Orden no encontrada');
+            await this.orderRepository.update(id, {
+                delivery_date: body.newDate,
+                status: 'REPROGRAMADO',
+            });
+            const updatedOrder = await this.orderRepository.findOne({
+                where: { id },
+            });
+            let action = 'REPROGRAMADO';
+            let previousValue = oldOrder.delivery_date;
+            let newValue = updatedOrder?.delivery_date;
+            let notes = body.reason;
+            const log = await this.orderLogRepository.create({
+                order: { id },
+                performedBy: { id: idUser },
+                action: action,
+                previousValue: previousValue,
+                newValue: newValue,
+                notes: notes,
+            });
+            await this.orderLogRepository.save(log);
+            return updatedOrder;
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
     async deleteOrder(id) {
         try {
             const order = await this.orderRepository.delete(id);
@@ -490,9 +611,11 @@ exports.OrdersService = OrdersService;
 exports.OrdersService = OrdersService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(orders_entity_1.OrdersEntity)),
-    __param(1, (0, typeorm_1.InjectRepository)(districts_entity_1.DistrictsEntity)),
-    __param(2, (0, typeorm_1.InjectEntityManager)()),
+    __param(1, (0, typeorm_1.InjectRepository)(orderLog_entity_1.OrderLogEntity)),
+    __param(2, (0, typeorm_1.InjectRepository)(districts_entity_1.DistrictsEntity)),
+    __param(3, (0, typeorm_1.InjectEntityManager)()),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_3.EntityManager])
 ], OrdersService);

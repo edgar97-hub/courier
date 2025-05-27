@@ -1,0 +1,107 @@
+<div
+  class="dialog-container"
+  cdkDrag
+  cdkDragRootElement=".cdk-overlay-pane"
+  cdkDragHandle=".dialog-header-draggable"
+>
+  <div class="dialog-header dialog-header-draggable">
+    <h2 mat-dialog-title>Reprogramar Pedido</h2>
+    <span class="order-code-chip"
+      >Pedido N°: {{ data.order.code || data.order.id }}</span
+    >
+    <button
+      mat-icon-button
+      class="close-button"
+      (click)="onCancel()"
+      aria-label="Cerrar diálogo"
+      matTooltip="Cerrar"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="rescheduleForm" (ngSubmit)="onConfirm()">
+    <mat-dialog-content class="dialog-content">
+      <p>
+        Cliente: <strong>{{ data.order.recipient_name }}</strong>
+      </p>
+      <p>
+        Fecha de Entrega Actual:
+        <strong *ngIf="data.order.delivery_date; else noCurrentDate">
+          {{ data.order.delivery_date | date : "dd/MM/yyyy" }}
+        </strong>
+        <ng-template #noCurrentDate><span>No programada</span></ng-template>
+      </p>
+
+      <mat-divider class="content-divider"></mat-divider>
+
+      <mat-form-field appearance="outline" class="full-width date-picker-field">
+        <mat-label>Nueva Fecha de Entrega</mat-label>
+        <input
+          matInput
+          [matDatepicker]="picker"
+          formControlName="newDeliveryDate"
+          [min]="minDateForReschedule"
+          placeholder="Seleccione una fecha"
+          readonly
+          required
+        />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        @if (newDeliveryDateCtrl?.hasError('required') &&
+        (newDeliveryDateCtrl?.touched || newDeliveryDateCtrl?.dirty ||
+        formSubmitted)) {
+        <mat-error>Debe seleccionar una nueva fecha de entrega.</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Opcional: Selector de Franja Horaria
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Franja Horaria (Opcional)</mat-label>
+        <mat-select formControlName="timeSlot">
+          <mat-option value="">Cualquier Hora</mat-option>
+          <mat-option value="AM">Mañana (9am - 1pm)</mat-option>
+          <mat-option value="PM">Tarde (2pm - 6pm)</mat-option>
+        </mat-select>
+      </mat-form-field>
+      -->
+
+      <mat-form-field appearance="outline" class="full-width reason-field">
+        <mat-label>Motivo de Reprogramación (Opcional)</mat-label>
+        <textarea
+          matInput
+          formControlName="reason"
+          rows="3"
+          cdkTextareaAutosize
+          cdkAutosizeMinRows="2"
+          cdkAutosizeMaxRows="5"
+          placeholder="Ej: Cliente solicitó cambio, Ruta congestionada..."
+        ></textarea>
+        @if (reasonCtrl?.hasError('maxlength')) {
+        <mat-error>El motivo no debe exceder los 250 caracteres.</mat-error>
+        }
+      </mat-form-field>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end" class="dialog-actions">
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="onCancel()"
+        class="cancel-button"
+      >
+        Cancelar
+      </button>
+
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        class="confirm-button"
+        [disabled]="rescheduleForm.invalid"
+      >
+        Confirmar Reprogramación
+      </button>
+    </mat-dialog-actions>
+  </form>
+</div>

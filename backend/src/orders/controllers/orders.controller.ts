@@ -13,6 +13,7 @@ import {
   Put,
   Query,
   Req,
+  Request,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -51,16 +52,19 @@ export class OrdersController {
   }
 
   @Post('batch-create')
-  public async batchCreateOrders(@Body() body: any) {
-    return await this.ordersService.batchCreateOrders(body);
+  public async batchCreateOrders(@Body() body: any, @Request() req) {
+    return await this.ordersService.batchCreateOrders(body, req.idUser);
   }
-
   @Post('import-batch-json')
   @HttpCode(HttpStatus.OK)
   async importOrders(
     @Body() ordersData: any[],
+    @Request() req,
   ): Promise<ImportResult | undefined> {
-    return await this.ordersService.importOrdersFromExcelData(ordersData);
+    return await this.ordersService.importOrdersFromExcelData(
+      ordersData,
+      req.idUser,
+    );
   }
 
   @Get('')
@@ -68,7 +72,7 @@ export class OrdersController {
     @Query('page_number') pageNumber = 0,
     @Query('page_size') pageSize = 0,
     @Query('sort_field') sortField = 'created_at',
-    @Query('sort_direction') sortDirection = 'desc',
+    @Query('sort_direction') sortDirection = 'asc',
     @Query('start_date') startDate?: string,
     @Query('end_date') endDate?: string,
     @Query('status') status?: string,
@@ -107,6 +111,17 @@ export class OrdersController {
     return await this.ordersService.getFilteredOrders(queryParams);
   }
 
+  @PublicAccess()
+  @Get('tracking')
+  public async getOrderByTrackingCode(
+    @Query('tracking_code') tracking_code = '',
+  ) {
+    const queryParams = {
+      tracking_code,
+    };
+    return await this.ordersService.getOrderByTrackingCode(queryParams);
+  }
+
   @ApiParam({
     name: 'id',
   })
@@ -125,7 +140,6 @@ export class OrdersController {
   @ApiParam({
     name: 'id',
   })
-  // @AdminAccess()
   @Put('edit/:id')
   public async updateOrder(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -135,14 +149,31 @@ export class OrdersController {
   }
 
   @Post('update-order-status')
-  public async updateOrderStatus(@Body() body: any) {
-    return await this.ordersService.updateOrderStatus(body);
+  public async updateOrderStatus(@Body() body: any, @Request() req) {
+    return await this.ordersService.updateOrderStatus(body, req.idUser);
+  }
+
+  @Put('assign-driver-to-order/:id')
+  public async assignDriverToOrder(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() body: any,
+    @Request() req,
+  ) {
+    return await this.ordersService.assignDriverToOrder(body, id, req.idUser);
+  }
+
+  @Put('reschedule-order/:id')
+  public async rescheduleOrder(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() body: any,
+    @Request() req,
+  ) {
+    return await this.ordersService.rescheduleOrder(body, id, req.idUser);
   }
 
   @ApiParam({
     name: 'id',
   })
-  // @AdminAccess()
   @Delete('delete/:id')
   public async deleteOrder(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.ordersService.deleteOrder(id);
@@ -151,7 +182,7 @@ export class OrdersController {
   @PublicAccess()
   @Get(':id/pdf')
   async getOrderPdf(
-    @Param('id' /*, ParseUUIDPipe opcional si ID es UUID */) orderId: string,
+    @Param('id') orderId: string,
     @Res() res: Response,
   ): Promise<void> {
     try {
@@ -160,11 +191,8 @@ export class OrdersController {
         res,
       );
     } catch (error) {
-      // El manejo de errores dentro de streamOrderPdfToResponse debe ser robusto
-      // o manejarlo aquí si lanza excepciones antes de empezar el stream.
       console.error('Error in PDF streaming controller:', error);
       if (!res.headersSent) {
-        // Solo enviar respuesta si no se ha enviado nada aún
         if (error instanceof NotFoundException) {
           res.status(404).send({ message: error.message });
         } else {

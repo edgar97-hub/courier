@@ -1,0 +1,175 @@
+<div class="tracking-page-container">
+  <mat-card class="tracking-form-card mat-elevation-z4">
+    <mat-card-header>
+      <mat-card-title>Rastrear Pedido</mat-card-title>
+      <mat-card-subtitle
+        >Ingrese su código de seguimiento para ver el estado de su
+        envío.</mat-card-subtitle
+      >
+    </mat-card-header>
+    <mat-card-content>
+      <form
+        [formGroup]="trackingForm"
+        (ngSubmit)="submitTracking()"
+        class="tracking-form"
+      >
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Código de Seguimiento</mat-label>
+          <input
+            matInput
+            formControlName="trackingCode"
+            placeholder="Ej: TRK12345XYZ"
+            required
+          />
+          <mat-icon matSuffix>search</mat-icon>
+          @if (trackingCodeCtrl?.hasError('required') &&
+          trackingCodeCtrl?.touched) {
+          <mat-error>El código de seguimiento es obligatorio.</mat-error>
+          } @if (trackingCodeCtrl?.hasError('minlength') &&
+          trackingCodeCtrl?.touched) {
+          <mat-error>El código debe tener al menos 5 caracteres.</mat-error>
+          }
+        </mat-form-field>
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          [disabled]="isLoading()"
+          class="track-button"
+        >
+          @if (isLoading()) {
+          <mat-progress-spinner
+            mode="indeterminate"
+            diameter="20"
+            strokeWidth="3"
+          ></mat-progress-spinner>
+          <span>Rastreando...</span>
+          } @else {
+          <span>Rastrear</span>
+          }
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  @if (searchAttempted() && !isLoading() && errorMessage()) {
+  <mat-card class="result-card error-card mat-elevation-z2">
+    <mat-card-content class="error-message">
+      <mat-icon color="warn">error_outline</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </mat-card-content>
+  </mat-card>
+  } @if (trackedOrder(); as order) {
+  <mat-card class="result-card order-details-card mat-elevation-z2">
+    <mat-card-header class="order-details-header">
+      <div>
+        <mat-card-title
+          >Pedido: {{ order.code || order.tracking_code }}</mat-card-title
+        >
+        <mat-card-subtitle
+          >Destinatario:
+          {{ order.recipient_name | default : "N/A" }}</mat-card-subtitle
+        >
+      </div>
+      <span
+        class="status-badge-tracking"
+        [ngClass]="getStatusBadgeClass(order.status)"
+      >
+        {{ order.status | titlecase }}
+      </span>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="order-summary">
+        <div class="summary-item">
+          <mat-icon>description</mat-icon>
+          <span
+            ><strong>Contenido:</strong>
+            {{ order.item_description | default : "No especificado" }}</span
+          >
+        </div>
+        <div class="summary-item">
+          <mat-icon>home</mat-icon>
+          <span
+            ><strong>Destino:</strong>
+            {{
+              order.delivery_district_name | titlecase | default : "N/A"
+            }}</span
+          >
+        </div>
+        <div class="summary-item" *ngIf="order.delivery_date">
+          <mat-icon>event</mat-icon>
+          <span
+            ><strong>Entrega Estimada:</strong>
+            {{
+              order.delivery_date | date : "fullDate" | default : "N/A"
+            }}</span
+          >
+        </div>
+        @if(order.delivery_coordinates){
+        <div
+          class="summary-item map-link"
+          (click)="openMap(order.delivery_coordinates)"
+          matTooltip="Ver última ubicación conocida o destino en mapa"
+        >
+          <mat-icon color="primary">location_on</mat-icon>
+          <span>Ver en Mapa (Destino)</span>
+        </div>
+        }
+      </div>
+
+      <mat-divider class="section-divider"></mat-divider>
+
+      <h3>Historial de Seguimiento</h3>
+      @if (order.logs && order.logs.length > 0) {
+      <mat-list class="tracking-timeline">
+        @for (log of order.logs | slice:0:10; track log.id; let i = $index; let
+        first = $first) {
+        <mat-list-item class="timeline-item" [class.first-item]="first">
+          <mat-icon
+            matListItemIcon
+            [color]="getTimelineIconColor(log)"
+            class="timeline-icon"
+            >{{ getTimelineIcon(log) }}</mat-icon
+          >
+          <div matListItemTitle class="timeline-action">
+            {{ log.action | titlecase }}
+          </div>
+          <div matListItemLine class="timeline-date">
+            {{ log.createdAt | date : "dd/MM/yyyy HH:mm" }}
+          </div>
+          @if (log.notes) {
+          <div matListItemLine class="timeline-notes">
+            <mat-icon class="notes-icon">short_text</mat-icon> {{ log.notes }}
+          </div>
+          } @if (log.previousValue && log.newValue &&
+          log.action.toUpperCase().includes('ESTADO')) {
+          <div matListItemLine class="timeline-change">
+            De: {{ log.previousValue | titlecase }} → A:
+            {{ log.newValue | titlecase }}
+          </div>
+          }
+        </mat-list-item>
+        @if (i < (order.logs | slice:0:10).length - 1) {
+        <div class="timeline-connector"></div>
+        } }
+      </mat-list>
+      } @else {
+      <p class="no-history-message">
+        No hay historial de seguimiento disponible para este pedido.
+      </p>
+      }
+    </mat-card-content>
+  </mat-card>
+  } @else if (searchAttempted() && !isLoading() && !errorMessage()) {
+  <mat-card class="result-card info-card mat-elevation-z2">
+    <mat-card-content class="info-message">
+      <mat-icon>info_outline</mat-icon>
+      <span
+        >No se encontró información para el código de seguimiento
+        ingresado.</span
+      >
+    </mat-card-content>
+  </mat-card>
+  }
+</div>

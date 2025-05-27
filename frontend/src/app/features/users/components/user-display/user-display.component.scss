@@ -1,0 +1,111 @@
+@use "@angular/material" as mat; // Si usas colores del tema
+
+.multi-section-form-card.readonly-mode {
+  // Añadimos readonly-mode para especificidad
+  max-width: 900px;
+  margin: 24px auto;
+  padding: 16px 24px;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+mat-card-title {
+  font-size: 1.5em;
+  margin-bottom: 4px;
+}
+mat-card-subtitle {
+  margin-bottom: 24px;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.form-section {
+  margin-bottom: 28px;
+
+  .section-title {
+    font-size: 1.15em;
+    font-weight: 500;
+    color: #3f51b5;
+    // O usa tu color de tema: mat.get-color-from-palette($tu-primary-palette)
+    // color: rgba(15, 72, 228, 0.696);
+
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+}
+
+.section-divider {
+  margin-top: 12px;
+  margin-bottom: 28px;
+}
+
+.details-grid {
+  display: grid;
+  gap: 10px 20px; // Espacio vertical y horizontal
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+
+  &.two-columns {
+    @media (min-width: 768px) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+}
+
+.detail-item {
+  padding: 4px 0; // Menor padding vertical
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px; // Espacio entre items si están uno debajo de otro en móvil
+}
+
+.detail-label {
+  font-size: 0.78em; // Más pequeño
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 3px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.detail-value {
+  font-size: 0.92em;
+  color: rgba(0, 0, 0, 0.87);
+  word-break: break-word;
+  line-height: 1.45;
+}
+
+.detail-value-multiline {
+  // Para campos como 'notas'
+  @extend .detail-value;
+  white-space: pre-wrap;
+  background-color: #f9f9f9;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #efefef;
+  min-height: 40px;
+  margin-top: 2px;
+}
+
+.full-width-mobile {
+  // Si el grid es de una sola columna en móvil, esto ya sucede.
+  // Si necesitas que un item ocupe todo el ancho en un grid de múltiples columnas en móvil:
+  @media (max-width: 599px) {
+    grid-column: 1 / -1;
+  }
+}
+
+.no-data-message {
+  text-align: center;
+  padding: 40px;
+  font-style: italic;
+  color: #757575;
+}
+
+.mat-card-actions.form-actions-sticky {
+  padding: 16px 24px !important;
+  border-top: 1px solid #e0e0e0;
+}

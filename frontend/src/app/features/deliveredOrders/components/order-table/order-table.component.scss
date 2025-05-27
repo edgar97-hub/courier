@@ -1,0 +1,237 @@
+:host {
+  display: block; // Asegura que el componente ocupe espacio
+}
+
+.table-wrapper {
+  position: relative;
+  overflow: auto;
+  border-radius: 12px; // Bordes más redondeados
+  background-color: var(--sys-surface);
+  color: var(--sys-on-surface);
+  margin-top: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); // Sombra más suave y moderna
+  transition: box-shadow 0.3s ease-in-out;
+
+  &:hover {
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.spinner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(var(--sys-surface), 0.85); // Más opaco
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100; // Asegurar que esté por encima de la tabla
+  border-radius: 12px; // Consistente con el wrapper
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse; // Evita doble borde
+}
+
+th.mat-header-cell {
+  font-weight: 600; // Más peso para cabeceras
+  color: var(--sys-on-surface-variant); // Un gris azulado oscuro
+  background-color: var(
+    --sys-surface-container-low
+  ); // Fondo muy claro, casi blanco
+  padding: 14px 18px; // Más padding
+  border-bottom: 1px solid var(--sys-outline-variant); // Línea divisoria estándar
+  text-transform: uppercase; // Opcional, para un look más formal
+  font-size: 0.8rem; // Un poco más pequeño
+  letter-spacing: 0.5px;
+}
+
+td.mat-cell {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--sys-outline-variant); // Líneas de fila muy sutiles
+  color: var(--sys-on-surface-variant); // Color de texto principal
+  font-size: 0.9rem;
+}
+
+.header-row-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10; // Para que la cabecera se mantenga por encima al hacer scroll
+  background-color: var(
+    --sys-surface-container-low
+  ); // El mismo que th.mat-header-cell
+}
+
+.data-row {
+  transition: background-color 0.2s ease-in-out;
+  &:hover {
+    background-color: var(
+      --sys-surface-container-highest
+    ); // Un hover gris claro
+    cursor: pointer; // Si la fila es clickeable
+  }
+}
+
+.highlight-row {
+  // Si quieres resaltar una fila seleccionada
+  background-color: var(--sys-primary-container) !important; // Un azul claro
+  font-weight: 500;
+}
+
+.align-right {
+  text-align: right;
+  justify-content: flex-end;
+}
+.amount-cell {
+  font-weight: 500; // Resaltar montos
+}
+
+.actions-column-header {
+  text-align: center !important;
+}
+.actions-cell {
+  display: flex;
+  text-align: center;
+  white-space: nowrap;
+  button.mat-icon-button {
+    margin: 0 2px; // Espacio mínimo
+    color: var(--sys-on-surface-variant); // Color base para iconos de acción
+    transition: color 0.2s ease;
+    &:hover {
+      color: var(
+        --sys-primary
+      ); // Color primario al hacer hover (o el color específico)
+    }
+  }
+}
+
+.action-icon-delivered {
+  // Para el ícono de entregado
+  color: #4caf50; // Verde - TODO: Add to theme
+  &:hover {
+    color: #388e3c; // TODO: Add to theme
+  }
+}
+.action-icon-neutral {
+  // Para PDF, more_vert
+  color: var(--sys-on-surface-variant);
+  &:hover {
+    color: var(--sys-on-surface);
+  }
+}
+// Mat-icon-button color="primary" ya usa el color primario del tema.
+// Mat-icon-button color="warn" ya usa el color de advertencia.
+
+.no-data-cell {
+  text-align: center;
+  padding: 50px;
+  font-style: italic;
+  color: var(--sys-on-surface-variant); // Un gris más oscuro
+  font-size: 1rem;
+}
+
+.mat-mdc-paginator {
+  background-color: var(--sys-surface-container-low);
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  color: var(--sys-on-surface-variant);
+  border-top: 1px solid var(--sys-outline-variant);
+  padding: 8px 0; // Un poco de padding vertical
+}
+
+.truncate-text {
+  max-width: 180px; // Un poco más de espacio
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block; // Necesario para que text-overflow funcione bien
+  vertical-align: middle; // Alinear mejor con otros elementos si los hubiera
+}
+
+.code-cell a {
+  // Estilo para el código de pedido clickeable
+  color: #3f51b5; // Color primario
+  text-decoration: none;
+  font-weight: 500;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Estilos mejorados para los badges de estado
+.status-badge {
+  padding: 5px 12px; // Más padding horizontal
+  border-radius: 16px; // Totalmente redondeado
+  font-size: 0.75rem; // Ligeramente más pequeño
+  font-weight: 600; // Más peso
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex; // Para alinear ícono y texto si añades íconos
+  align-items: center;
+  line-height: 1; // Ajustar línea de altura
+  // mat-icon { // Si añades íconos a los badges
+  //   font-size: 1rem;
+  //   margin-right: 4px;
+  // }
+}
+
+// Colores de estado más modernos y consistentes (ejemplos)
+// .status-pendiente {
+//   background-color: #ffc107;
+//   color: #212529;
+// }
+// .status-confirmado {
+//   background-color: #0dcaf0;
+//   color: #fff;
+// } // Cyan con texto blanco
+// .status-en-preparacion {
+//   background-color: #6610f2;
+//   color: #fff;
+// } // Índigo con texto blanco
+.status-registrado {
+  background-color: var(--status-registrado-bg);
+  color: var(--status-registrado-color);
+} // Índigo con texto blanco
+.status-recogido {
+  background-color: var(--status-recogido-bg);
+  color: var(--status-recogido-color);
+} // Naranja con texto blanco
+.status-en-almacen {
+  background-color: var(--status-en-almacen-bg);
+  color: var(--status-en-almacen-color);
+} // Azul primario con texto blanco
+.status-en-transito {
+  background-color: var(--status-en-transito-bg);
+  color: var(--status-en-transito-color);
+}
+.status-entregado {
+  background-color: var(--status-entregado-bg);
+  color: var(--status-entregado-color);
+} // Verde éxito con texto blanco
+.status-no-entregado {
+  background-color: var(--status-no-entregado-bg);
+  color: var(--status-no-entregado-color);
+} // Rojo peligro con texto blanco
+.status-cancelado {
+  background-color: var(--status-cancelado-bg);
+  color: var(--status-cancelado-color);
+} // Gris secundario con texto blanco
+.status-rechazado {
+  background-color: var(--status-rechazado-bg);
+  color: var(--status-rechazado-color);
+}
+.status-reprogramado {
+  background-color: var(--status-reprogramado-bg);
+  color: var(--status-reprogramado-color);
+}
+
+@media (max-width: 768px) {
+  th.mat-header-cell,
+  td.mat-cell {
+    padding: 8px 12px;
+    font-size: 0.75rem;
+  }
+}

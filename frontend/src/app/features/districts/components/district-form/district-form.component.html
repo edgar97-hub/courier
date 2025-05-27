@@ -1,0 +1,127 @@
+<form
+  [formGroup]="districtForm"
+  (ngSubmit)="onSubmit()"
+  novalidate
+  class="district-form-container"
+>
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>{{
+        districtToEdit
+          ? "Editar Distrito/Tarifa"
+          : "Crear Nuevo Distrito/Tarifa"
+      }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="full-width-field">
+          <mat-label>Nombre del Distrito</mat-label>
+          <input
+            matInput
+            formControlName="name"
+            required
+            placeholder="Ej: Carabayllo"
+            [matAutocomplete]="autoDistrictName"
+          />
+          <mat-autocomplete
+            #autoDistrictName="matAutocomplete"
+            (optionSelected)="onDistrictNameSelected($event)"
+          >
+            @for (name of filteredDistrictNames$ | async; track name) {
+            <mat-option [value]="name">{{ name }}</mat-option>
+            }
+          </mat-autocomplete>
+          @if (nameCtrl?.hasError('required') && (nameCtrl?.touched ||
+          nameCtrl?.dirty)) {
+          <mat-error>El nombre del distrito es obligatorio.</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Peso Desde (kg)</mat-label>
+          <input
+            matInput
+            formControlName="weight_from"
+            type="number"
+            min="0"
+            step="0.01"
+            required
+            placeholder="0.00"
+          />
+          @if (weightFromCtrl?.hasError('required') && (weightFromCtrl?.touched
+          || weightFromCtrl?.dirty)) {
+          <mat-error>Peso Desde es obligatorio.</mat-error>
+          } @if (weightFromCtrl?.hasError('min') && (weightFromCtrl?.touched ||
+          weightFromCtrl?.dirty)) {
+          <mat-error>Debe ser mayor o igual a 0.</mat-error>
+          } @if (weightFromCtrl?.hasError('weightOrder') &&
+          (weightFromCtrl?.touched || weightFromCtrl?.dirty)) {
+          <mat-error>{{ weightFromCtrl?.errors?.['weightOrder'] }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Peso Hasta (kg)</mat-label>
+          <input
+            matInput
+            formControlName="weight_to"
+            type="number"
+            min="0"
+            step="0.01"
+            required
+            placeholder="0.00"
+          />
+          @if (weightFromCtrl?.hasError('weightOrder') &&
+          (weightFromCtrl?.touched || weightFromCtrl?.dirty)) {
+          <mat-error>{{ weightFromCtrl?.errors?.['weightOrder'] }}</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width-field">
+        <mat-label>Precio Tarifa (S/)</mat-label>
+        <input
+          matInput
+          formControlName="price"
+          type="number"
+          min="0"
+          step="0.01"
+          required
+          placeholder="0.00"
+        />
+        <span matTextPrefix>S/ </span>
+        @if (weightToCtrl?.hasError('weightOrder') && (weightToCtrl?.touched ||
+        weightToCtrl?.dirty)) {
+        <mat-error>{{ weightToCtrl?.errors?.['weightOrder'] }}</mat-error>
+        }
+      </mat-form-field>
+
+      <div class="form-row">
+        <mat-checkbox
+          formControlName="isStandard"
+          color="primary"
+          class="standard-checkbox"
+        >
+          ¿Es tarifa estándar para este distrito?
+        </mat-checkbox>
+      </div>
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <button mat-stroked-button type="button" (click)="onCancelClick()">
+        Cancelar
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="isLoading || districtForm.invalid"
+      >
+        {{
+          isLoading ? "Guardando..." : districtToEdit ? "Actualizar" : "Crear"
+        }}
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</form>

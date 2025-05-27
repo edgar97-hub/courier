@@ -1,0 +1,86 @@
+@use "@angular/material" as mat;
+
+:host {
+  display: block; // Asegura que el componente ocupe su espacio
+}
+
+.image-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; // Importante para object-fit y overlays
+  //   background-color: mat.get-color-from-palette(
+  //     mat.$gray-palette,
+  //     100
+  //   ); // Fondo mientras carga o si hay error
+  border-radius: 4px; // Opcional: bordes redondeados
+  //   border: 1px solid mat.get-color-from-palette(mat.$gray-palette, 300); // Borde sutil
+
+  &.loading {
+    // Estilos específicos mientras carga si son necesarios además del spinner
+  }
+
+  &.error {
+    // Estilos específicos si hay error
+    // background-color: mat.get-color-from-palette(mat.$gray-palette, 200);
+  }
+
+  &.loaded {
+    border-color: transparent; // Quitar borde una vez cargada la imagen si se prefiere
+    background-color: transparent; // Quitar fondo una vez cargada
+  }
+}
+
+.displayed-image {
+  display: block;
+  width: 60%;
+  height: 700px;
+  transition: opacity 0.5s ease-in-out; // Transición suave para mostrar la imagen
+  &.visible {
+    opacity: 1; // Mostrar cuando esté cargada
+  }
+  &.hidden {
+    display: none; // Ocultar completamente si no se usa o hay error/carga
+  }
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column; // Para icono y texto
+  justify-content: center;
+  align-items: center;
+  z-index: 1; // Para estar encima de la imagen si la imagen aún no es visible
+}
+
+.spinner-overlay {
+  // No necesita fondo si el image-container ya tiene uno
+}
+
+.error-overlay,
+.placeholder-overlay {
+  //   color: mat.get-color-from-palette(mat.$gray-palette, 600);
+  text-align: center;
+  padding: 10px;
+}
+
+.error-icon,
+.placeholder-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 8px;
+}
+.error-icon {
+  //   color: mat.get-color-from-palette(mat.$red-palette, 400); // Color de error
+}
+
+.error-text,
+.placeholder-text {
+  font-size: 0.9em;
+}

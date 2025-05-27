@@ -50,7 +50,8 @@ html {
   --sys-surface-container-highest: rgb(226 226 232);
 }
 
-.dark {
+body.dark-theme,
+html.dark-theme {
   --sys-primary: rgb(170 199 255);
   --sys-surface-tint: rgb(170 199 255);
   --sys-on-primary: rgb(0 47 100);
@@ -100,4 +101,25 @@ html {
   --sys-surface-container: rgb(30 32 36);
   --sys-surface-container-high: rgb(40 42 46);
   --sys-surface-container-highest: rgb(51 53 57);
+}
+
+:root {
+  --status-registrado-bg: #6610f2;
+  --status-registrado-color: #fff;
+  --status-recogido-bg: #fd7e14;
+  --status-recogido-color: #fff;
+  --status-en-almacen-bg: #0d6efd;
+  --status-en-almacen-color: #fff;
+  --status-en-transito-bg: #0c1a77;
+  --status-en-transito-color: #fff;
+  --status-entregado-bg: #198754;
+  --status-entregado-color: #fff;
+  --status-no-entregado-bg: #dc3545;
+  --status-no-entregado-color: #fff;
+  --status-cancelado-bg: #6c757d;
+  --status-cancelado-color: #fff;
+  --status-rechazado-bg: #ff6b6b;
+  --status-rechazado-color: #fff;
+  --status-reprogramado-bg: #adb5bd;
+  --status-reprogramado-color: #212529;
 }

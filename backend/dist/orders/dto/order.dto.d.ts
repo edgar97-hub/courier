@@ -13,12 +13,14 @@ export declare class OrderDTO {
     package_height_cm: number;
     package_weight_kg: number;
     shipping_cost: number;
+    payment_method_for_shipping_cost: string;
     item_description: string;
     amount_to_collect_at_delivery: number;
     payment_method_for_collection: string;
     observations: string;
     type_order_transfer_to_warehouse: string;
     status: STATES;
+    product_delivery_photo_url: string;
 }
 export declare class OrderUpdateDTO {
     shipment_type?: string;
@@ -34,10 +36,12 @@ export declare class OrderUpdateDTO {
     package_height_cm: number;
     package_weight_kg: number;
     shipping_cost: number;
+    payment_method_for_shipping_cost: string;
     item_description: string;
     amount_to_collect_at_delivery: number;
     payment_method_for_collection: string;
     observations: string;
     type_order_transfer_to_warehouse: string;
     status: STATES;
+    product_delivery_photo_url: string;
 }

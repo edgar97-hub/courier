@@ -39,12 +39,17 @@
           </mat-form-field>
         </div>
 
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Enlace del mapa de cobertura</mat-label>
+          <input matInput formControlName="coverage_map_url" />
+        </mat-form-field>
+
         <h2>Marca y aspectos legales</h2>
         <div class="logo-section file-upload-section">
           <p class="mat-body-1 section-subtitle">Logotipo de empresa</p>
           <div class="logo-preview-container">
             <img
-              [src]="logoPreviewUrl || 'assets/placeholder-logo.png'"
+              [src]="logoPreviewUrl"
               alt="Vista previa del logotipo"
               class="logo-preview"
             />
@@ -72,7 +77,126 @@
           <p class="mat-caption hint">Recomendado: PNG, JPG, SVG. Max 2MB.</p>
         </div>
 
-        <!-- --- NUEVA SECCIÓN PARA TÉRMINOS Y CONDICIONES PDF --- -->
+        <div class="logo-section file-upload-section">
+          <p class="mat-body-1 section-subtitle">Imagen de fondo</p>
+          <div class="logo-preview-container">
+            <img
+              [src]="backgroundImagePreviewUrl"
+              alt="Vista previa del imagen de fondo"
+              class="logo-preview"
+            />
+          </div>
+          <input
+            type="file"
+            (change)="onLogoFileSelected3($event)"
+            #logoUploadInput3
+            accept="image/png, image/jpeg, image/svg+xml"
+            style="display: none"
+          />
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="logoUploadInput3.click()"
+            class="upload-button"
+          >
+            <mat-icon>cloud_upload</mat-icon>
+            {{
+              selectedBackgroundImageFile
+                ? "Change imagen (" + selectedBackgroundImageFile.name + ")"
+                : "Subir nueva imagen"
+            }}
+          </button>
+          <p class="mat-caption hint">Recomendado: PNG, JPG, SVG. Max 2MB.</p>
+        </div>
+
+        <div class="logo-section file-upload-section">
+          <p class="mat-body-1 section-subtitle">imagen de las tarifas</p>
+          <div class="logo-preview-container">
+            <img
+              [src]="ratesImagePreviewUrl"
+              alt="Vista previa del imagen de las tarifas"
+              class="logo-preview"
+            />
+          </div>
+          <input
+            type="file"
+            (change)="onLogoFileSelected4($event)"
+            #logoUploadInput4
+            accept="image/png, image/jpeg, image/svg+xml"
+            style="display: none"
+          />
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="logoUploadInput4.click()"
+            class="upload-button"
+          >
+            <mat-icon>cloud_upload</mat-icon>
+            {{
+              selectedRatesImageFile
+                ? "Change imagen (" + selectedRatesImageFile.name + ")"
+                : "Subir nueva imagen"
+            }}
+          </button>
+          <p class="mat-caption hint">Recomendado: PNG, JPG, SVG. Max 2MB.</p>
+        </div>
+
+        <!-- PLANTILLA EXCEL PARA IMPORTACION -->
+        <div class="terms-pdf-section file-upload-section">
+          <p class="mat-body-1 section-subtitle">
+            Plantilla de Excel para importación
+          </p>
+          <div class="current-file-info">
+            <ng-container
+              *ngIf="currentExcelImportTemplateUrl; else noTermsFile"
+            >
+              Archivo actual:
+              <a
+                [href]="currentExcelImportTemplateUrl"
+                target="_blank"
+                class="file-link"
+                >{{
+                  currentExcelImportTemplateUrl.split("/").pop() || "View Terms"
+                }}</a
+              >
+            </ng-container>
+            <ng-template #noTermsFile>
+              <span class="no-file-text"
+                >Aún no se ha cargado ningún archivo.</span
+              >
+            </ng-template>
+          </div>
+
+          <input
+            type="file"
+            (change)="onLogoFileSelected5($event)"
+            #termsUploadInput2
+            style="display: none"
+          />
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="termsUploadInput2.click()"
+            class="upload-button"
+          >
+            <mat-icon>cloud_upload</mat-icon>
+            {{
+              selectedExcelImportTemplateFile
+                ? "Cambiar archivo (" +
+                  selectedExcelImportTemplateFile.name +
+                  ")"
+                : "Subir nuevo archivo"
+            }}
+          </button>
+          <p class="mat-caption hint" *ngIf="!selectedExcelImportTemplateFile">
+            Sube un archivo
+          </p>
+          <p class="mat-caption hint" *ngIf="selectedExcelImportTemplateFile">
+            Selected: {{ selectedExcelImportTemplateFile.name }}
+          </p>
+        </div>
+
+        <!-- --- SECCIÓN PARA TÉRMINOS Y CONDICIONES PDF --- -->
         <div class="terms-pdf-section file-upload-section">
           <!-- Clase común para estilos -->
           <p class="mat-body-1 section-subtitle">
@@ -120,18 +244,6 @@
             Selected: {{ selectedTermsFile.name }}
           </p>
         </div>
-        <!-- El campo terms_conditions_url del formulario es solo para almacenar la URL final. -->
-        <!-- No es editable directamente por el usuario si solo se actualiza mediante subida. -->
-        <!-- Si quieres permitir pegar una URL existente Y subir un archivo, la lógica sería más compleja -->
-        <!-- <mat-form-field
-          appearance="outline"
-          class="full-width"
-          style="display: none"
-        >
-          <mat-label>Terms & Conditions URL (auto-filled)</mat-label>
-          <input matInput formControlName="terms_conditions_url" readonly />
-        </mat-form-field> -->
-        <!-- --- FIN NUEVA SECCIÓN --- -->
 
         <mat-card-actions align="end" class="form-actions">
           <button

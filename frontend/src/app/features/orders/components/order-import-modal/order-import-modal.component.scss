@@ -1,0 +1,166 @@
+.import-modal-container {
+  width: 100%;
+  max-width: 650px; // Ancho máximo para el modal en desktop
+}
+
+mat-dialog-content {
+  padding-top: 0; // Quitar padding superior si el título ya tiene
+  line-height: 1.6;
+  font-size: 0.95em;
+
+  // Hacer el contenido scrollable si es muy largo en móviles
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.instructions {
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+ol {
+  padding-left: 20px;
+  margin-bottom: 24px;
+  li {
+    margin-bottom: 12px;
+  }
+}
+
+.template-button {
+  margin-left: 8px;
+  vertical-align: middle; // Alinear mejor con el texto
+  transform: translateY(-2px); // Pequeño ajuste visual
+}
+
+.file-input-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 16px;
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+
+  // Responsive: stack en móviles
+  @media (max-width: 500px) {
+    flex-direction: column;
+    align-items: flex-start;
+    button {
+      width: 100%;
+      margin-bottom: 8px;
+    }
+  }
+}
+
+.file-name-display {
+  font-style: italic;
+  color: #555;
+  word-break: break-all; // Para nombres de archivo largos
+}
+
+.upload-progress-container {
+  margin: 20px 0;
+  p {
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+}
+
+.import-results {
+  margin-top: 24px;
+  padding: 16px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+}
+
+.success-message {
+  color: #2e7d32; // Verde éxito
+  border-left: 4px solid #2e7d32;
+  padding-left: 12px;
+}
+
+.error-message {
+  color: #c62828; // Rojo error
+  border-left: 4px solid #c62828;
+  padding-left: 12px;
+}
+
+.error-details {
+  margin-top: 16px;
+  h4 {
+    margin-bottom: 8px;
+    font-size: 1em;
+    font-weight: 500;
+  }
+}
+
+.error-item {
+  // Estilos para cada item de error
+  padding-bottom: 8px !important; // Aumentar espacio
+  border-bottom: 1px dotted #eee;
+  &:last-child {
+    border-bottom: none;
+  }
+  .mat-mdc-list-item-line {
+    // Para el texto secundario en MatList
+    white-space: normal !important; // Permitir múltiples líneas
+  }
+}
+
+
+
+.error-data-preview {
+  font-size: 0.8em;
+  color: #757575;
+  display: block;
+  margin-top: 4px;
+}
+
+mat-dialog-actions {
+  padding: 8px 24px 16px 24px !important; // Ajustar padding de acciones
+}
+
+// Para que el modal sea responsive en altura
+@media (max-height: 600px) {
+  mat-dialog-content {
+    max-height: 55vh;
+  }
+}
+
+ol li { // Ajustar el margen de los items de la lista principal si es necesario
+  margin-bottom: 10px; 
+}
+
+.column-descriptions {
+  list-style-type: disc; // O none si prefieres quitar las viñetas
+  padding-left: 20px; // Indentación para la lista de descripciones
+  margin-top: 8px; // Espacio antes de la lista de descripciones
+  margin-bottom: 16px; // Espacio después de la lista de descripciones
+  font-size: 0.9em; // Ligeramente más pequeño para no abrumar
+  background-color: #f9f9f9; // Un fondo sutil para destacar esta sección
+  padding: 10px 15px 10px 30px; // Padding interno
+  border-radius: 4px; // Bordes redondeados
+
+  li {
+    margin-bottom: 8px; // Espacio entre descripciones de columnas
+    line-height: 1.5;
+
+    strong {
+      color: #3f51b5; // Color primario de Material para los nombres de columna
+    }
+
+    code { // Para resaltar valores de ejemplo
+      background-color: #e0e0e0;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+  }
+}

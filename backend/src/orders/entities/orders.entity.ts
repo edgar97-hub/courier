@@ -1,7 +1,16 @@
-import { Column, Entity, Generated, OneToMany, ManyToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Generated,
+  OneToMany,
+  ManyToOne,
+  JoinColumn,
+  BeforeInsert,
+} from 'typeorm';
 import { BaseEntity } from '../../config/base.entity';
 import { UsersEntity } from '../../users/entities/users.entity';
 import { STATES } from '../../constants/roles';
+import { OrderLogEntity } from './orderLog.entity';
 
 @Entity({ name: 'orders' })
 export class OrdersEntity extends BaseEntity {
@@ -48,6 +57,9 @@ export class OrdersEntity extends BaseEntity {
   @Column({ nullable: false, type: 'float', default: 0.0 })
   shipping_cost?: number;
 
+  @Column({ nullable: true, default: '' })
+  payment_method_for_shipping_cost?: string;
+
   @Column()
   item_description?: string;
 
@@ -72,5 +84,19 @@ export class OrdersEntity extends BaseEntity {
   status: STATES;
 
   @ManyToOne(() => UsersEntity, (user) => user.ordersIncludes)
+  @JoinColumn({ name: 'user_id' })
   user: UsersEntity;
+
+  @ManyToOne(() => UsersEntity, (user) => user.assignedDriversIncludes)
+  @JoinColumn({ name: 'assigned_driver_id' })
+  assigned_driver: UsersEntity;
+
+  @OneToMany(() => OrderLogEntity, (log) => log.order)
+  logs: OrderLogEntity[];
+
+  @Column({ unique: true })
+  tracking_code: string;
+
+  @Column({ nullable: true, default: '' })
+  product_delivery_photo_url?: string;
 }

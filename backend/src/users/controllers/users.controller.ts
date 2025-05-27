@@ -37,6 +37,11 @@ export class UsersController {
     return await this.usersService.findUsers();
   }
 
+  @Get('rol/:rol')
+  public async findUsersByRol(@Param('rol') rol: string) {
+    return await this.usersService.findUsersByRol(rol);
+  }
+
   @ApiParam({
     name: 'id',
   })

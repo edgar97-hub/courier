@@ -1,0 +1,61 @@
+@use "@angular/material" as mat;
+
+.district-form-container {
+  padding: 10px 0; // Espacio si el form se usa directamente en una página
+}
+
+mat-card {
+  border-radius: 8px;
+  // box-shadow: 0 2px 8px rgba(0,0,0,0.08); // Sombra sutil si no es outlined
+}
+
+mat-card-header {
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+  mat-card-title {
+    font-size: 1.4em;
+    font-weight: 500;
+  }
+}
+
+mat-card-content {
+  padding-top: 0;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px; // Espacio entre campos en la misma fila
+  margin-bottom: 0px; // Reducir si los form-field ya tienen margen
+}
+
+.form-field,
+.full-width-field {
+  margin-bottom: 16px; // Espacio estándar debajo de cada campo
+}
+
+.form-field {
+  flex: 1; // Para que ocupen espacio equitativo en .form-row
+}
+
+.full-width-field {
+  width: 100%;
+}
+
+.standard-checkbox {
+  margin-top: 8px;
+  margin-bottom: 20px;
+}
+
+mat-card-actions {
+  padding: 16px 0 0 0; // Padding solo arriba para las acciones
+  margin-top: 24px;
+  button {
+    font-weight: 500;
+  }
+}
+
+// Asegúrate de tener el tema de material importado en tu styles.scss global
+// para que mat.get-color-from-palette funcione, o reemplaza con colores hexadecimales.
+// Ejemplo de reemplazo:
+// border-bottom: 1px solid #eeeeee;
+// color: #455a64;

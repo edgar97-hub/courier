@@ -105,9 +105,13 @@ __decorate([
     __metadata("design:type", String)
 ], UsersEntity.prototype, "role", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => orders_entity_1.OrdersEntity, (usersOrders) => usersOrders.user),
+    (0, typeorm_1.OneToMany)(() => orders_entity_1.OrdersEntity, (order) => order.user),
     __metadata("design:type", Array)
 ], UsersEntity.prototype, "ordersIncludes", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => orders_entity_1.OrdersEntity, (order) => order.assigned_driver),
+    __metadata("design:type", Array)
+], UsersEntity.prototype, "assignedDriversIncludes", void 0);
 exports.UsersEntity = UsersEntity = __decorate([
     (0, typeorm_1.Entity)({ name: 'users' })
 ], UsersEntity);

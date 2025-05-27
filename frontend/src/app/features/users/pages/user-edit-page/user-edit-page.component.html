@@ -1,0 +1,54 @@
+<div class="page-container detail-page-container">
+  <div class="page-header">
+    <button
+      mat-icon-button
+      routerLink="/configuracion/users"
+      matTooltip="Back to User List"
+      aria-label="Back to user list"
+    >
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <ng-template #loadingOrMissingTitle>
+      <h1>
+        {{
+          isLoading
+            ? "Loading User..."
+            : isEditMode
+            ? "Edit User"
+            : "User Details"
+        }}
+      </h1>
+    </ng-template>
+
+    <button
+      *ngIf="!isLoading && (user$ | async) && !isEditMode"
+      mat-stroked-button
+      color="accent"
+      (click)="navigateToEdit()"
+    >
+      <mat-icon>edit</mat-icon> Edit User
+    </button>
+  </div>
+
+  <div *ngIf="isLoading" class="spinner-container">
+    <mat-progress-spinner
+      mode="indeterminate"
+      diameter="60"
+    ></mat-progress-spinner>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+    <div class="form-wrapper">
+      <app-user-form
+        [userToEdit]="user$ | async"
+        (formSubmit)="handleFormSubmit($event)"
+        (formCancel)="handleFormCancel()"
+        [isLoading]="isLoading"
+      ></app-user-form>
+    </div>
+  </ng-container>
+
+  <p *ngIf="!isLoading && !(user$ | async) && userId" class="not-found-message">
+    User with ID {{ userId }} not found or could not be loaded.
+  </p>
+</div>

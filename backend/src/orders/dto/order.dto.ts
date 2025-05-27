@@ -50,6 +50,9 @@ export class OrderDTO {
   shipping_cost: number;
 
   @ApiProperty()
+  payment_method_for_shipping_cost: string;
+
+  @ApiProperty()
   item_description: string;
 
   @ApiProperty()
@@ -67,6 +70,9 @@ export class OrderDTO {
   @ApiProperty()
   @IsEnum(STATES)
   status: STATES;
+
+  @ApiProperty()
+  product_delivery_photo_url: string;
 }
 
 export class OrderUpdateDTO {
@@ -123,6 +129,9 @@ export class OrderUpdateDTO {
   shipping_cost: number;
 
   @ApiProperty()
+  payment_method_for_shipping_cost: string;
+
+  @ApiProperty()
   @IsNotEmpty()
   item_description: string;
 
@@ -145,6 +154,7 @@ export class OrderUpdateDTO {
   @ApiProperty()
   @IsEnum(STATES)
   status: STATES;
+
+  @ApiProperty()
+  product_delivery_photo_url: string;
 }
-
-

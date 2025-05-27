@@ -215,10 +215,10 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       package_details: this.fb.group({
         // Sub-FormGroup para PackageCalculatorComponent
         package_size_type: ['standard', Validators.required],
-        package_width_cm: [{ value: null, disabled: true }],
-        package_length_cm: [{ value: null, disabled: true }],
-        package_height_cm: [{ value: null, disabled: true }],
-        package_weight_kg: [{ value: null, disabled: true }],
+        package_width_cm: [{ value: 0, disabled: true }],
+        package_length_cm: [{ value: 0, disabled: true }],
+        package_height_cm: [{ value: 0, disabled: true }],
+        package_weight_kg: [{ value: 0, disabled: true }],
       }),
       // shipping_cost se maneja con la señal `calculatedShippingCost`
       item_description: ['', Validators.required],

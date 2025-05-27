@@ -39,6 +39,7 @@ export class SettingsService {
     }
     return new HttpHeaders({ 'Content-Type': 'application/json' });
   }
+
   // Obtener la configuración actual
   loadSettings(): Observable<AppSettings> {
     // Si ya tenemos datos en el subject y no queremos forzar recarga, podríamos devolverlos
@@ -65,7 +66,6 @@ export class SettingsService {
       )
     );
   }
-  //        .put<User>(`${this.apiUrl}/edit/${user.id}`, user, { headers }) // Cambiado a /users/:id
   saveSettings(settings: AppSettings): Observable<AppSettings> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
@@ -87,21 +87,22 @@ export class SettingsService {
       );
   }
 
-  // Subir el logo
   uploadLogo(file: File): Observable<{ logo_url: string }> {
     const formData = new FormData();
-    formData.append('logoFile', file, file.name); // El backend esperará un campo 'logoFile'
+    formData.append('logoFile', file, file.name);
 
-    // Puede que necesites cabeceras específicas si tu backend no maneja 'multipart/form-data' por defecto
-    // const headers = new HttpHeaders();
-    // headers.append('Content-Type', 'multipart/form-data'); // A menudo no es necesario, el navegador lo pone
-    // headers.append('Accept', 'application/json');
+    const token = this.authService.getAccessToken();
+    if (!token) {
+      return throwError(() => new Error('Not authenticated to fetch users.'));
+    }
+    let headers = new HttpHeaders({
+      codrr_token: token,
+    });
 
     return this.http
-      .post<{ logo_url: string }>(
-        `${this.apiUrl}/upload-logo`,
-        formData /*, { headers: headers }*/
-      )
+      .post<{ logo_url: string }>(`${this.apiUrl}/upload-logo`, formData, {
+        headers,
+      })
       .pipe(
         tap((response) =>
           console.log('SettingsService: Logo uploaded', response)
@@ -114,12 +115,18 @@ export class SettingsService {
     const formData = new FormData();
     // El backend esperará un campo como 'termsPdfFile' o similar
     formData.append('termsPdfFile', file, file.name);
-    console.log('SettingsService: Uploading terms PDF...', file.name);
-
+    const token = this.authService.getAccessToken();
+    if (!token) {
+      return throwError(() => new Error('Not authenticated to fetch users.'));
+    }
+    let headers = new HttpHeaders({
+      codrr_token: token,
+    });
     return this.http
       .post<{ terms_conditions_url: string }>(
         `${this.apiUrl}/upload-terms-pdf`,
-        formData
+        formData,
+        { headers }
       )
       .pipe(
         tap((response) =>
@@ -131,16 +138,36 @@ export class SettingsService {
       );
   }
 
+  uploadFile(file: File): Observable<{ file_url: string }> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    const token = this.authService.getAccessToken();
+    if (!token) {
+      return throwError(() => new Error('Not authenticated to fetch users.'));
+    }
+    let headers = new HttpHeaders({
+      codrr_token: token,
+    });
+    return this.http
+      .post<{ file_url: string }>(`${this.apiUrl}/upload-file`, formData, {
+        headers,
+      })
+      .pipe(
+        tap((response) =>
+          console.log('SettingsService: Terms PDF uploaded', response)
+        ),
+        catchError(
+          this.handleError<{
+            file_url: string;
+          }>('file')
+        )
+      );
+  }
+
   // Método genérico para manejo de errores
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: HttpErrorResponse): Observable<T> => {
       console.error(`${operation} failed: ${error.message}`, error);
-
-      // Podrías tener un servicio de logging aquí
-      // this.logger.logError(error);
-
-      // Dejar que la app siga corriendo devolviendo un resultado vacío o por defecto.
-      // O podrías lanzar el error si quieres que el componente lo maneje más explícitamente.
       if (result !== undefined) {
         return of(result as T);
       } else {

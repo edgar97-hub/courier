@@ -39,46 +39,23 @@ import {
   provideHttpClient,
   withInterceptorsFromDi,
 } from '@angular/common/http';
-
-import { provideStore, StoreModule } from '@ngrx/store'; // <--- IMPORTA provideStore
-import { provideEffects } from '@ngrx/effects'; // <--- IMPORTA provideEffects (si tienes root effects)
-// import { provideStoreDevtools } from '@ngrx/store-devtools'; // Opcional, para Redux DevTools
-// import { reducers, metaReducers } from './store/reducers'; // Si tienes reducers raíz y meta-reducers
+import { LOCALE_ID } from '@angular/core';
+import { DatePipe, registerLocaleData } from '@angular/common';
+import { provideStore, StoreModule } from '@ngrx/store';
+import { provideEffects } from '@ngrx/effects';
 import { provideAnimations } from '@angular/platform-browser/animations';
-
+import localeEsPE from '@angular/common/locales/es-PE';
 import { routes } from './app.routes';
-// import { AppEffects } from './store/app.effects'; // Si tienes efectos raíz
+registerLocaleData(localeEsPE, 'es-PE');
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withInterceptorsFromDi()),
-
-    // Configuración de NgRx Store a Nivel Raíz
-    provideStore({}), // <--- DEBE ESTAR AQUÍ. {} si no tienes reducers raíz, o tus reducers raíz aquí.
-    // Si tienes reducers raíz (ej. para autenticación global si no lo haces con signalStore):
-    // provideStore(reducers, { metaReducers }),
-
-    provideEffects([]), // <--- DEBE ESTAR AQUÍ. [] si no tienes effects raíz, o tus effects raíz aquí.
+    provideStore({}),
+    provideEffects([]),
     provideAnimations(),
-
-    // Si tienes effects raíz:
-    // provideEffects([AppEffects]),
-
-    // Opcional: Configuración para Redux DevTools (muy recomendado para desarrollo)
-    // importProvidersFrom(
-    //   StoreModule.forRoot({}), // Necesario para que Devtools se conecte correctamente en algunos casos
-    //   isDevMode() ? StoreDevtoolsModule.instrument({ maxAge: 25, logOnly: !isDevMode() }) : []
-    // ),
-    // O si usas provideStoreDevtools (más moderno):
-    // provideStoreDevtools({
-    //   maxAge: 25, // Retains last 25 states
-    //   logOnly: !isDevMode(), // Restrict extension to log-only mode in production
-    //   autoPause: true, // Pauses recording actions and state changes when the extension window is not open
-    //   trace: false, //  If set to true, will include stack trace for every dispatched action, so you can see it in trace tab jumping to the source code
-    //   traceLimit: 75, // Maximum stack trace frames to be stored (in case trace option was provided as true)
-    // }),
-
-    // ... otros providers globales ...
+    DatePipe,
+    { provide: LOCALE_ID, useValue: 'es-PE' },
   ],
 };

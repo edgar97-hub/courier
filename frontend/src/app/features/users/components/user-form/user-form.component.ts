@@ -12,6 +12,7 @@ import {
   FormGroup,
   ReactiveFormsModule,
   Validators,
+  FormControl,
 } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -20,7 +21,8 @@ import { MatCardModule } from '@angular/material/card';
 import { User } from '../../models/user.model'; // Ajusta la ruta
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
-
+import { MatDividerModule } from '@angular/material/divider';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 @Component({
   selector: 'app-user-form',
   standalone: true,
@@ -33,6 +35,8 @@ import { MatIconModule } from '@angular/material/icon';
     MatCardModule,
     MatSelectModule,
     MatIconModule,
+    MatDividerModule,
+    MatCheckboxModule,
   ],
   templateUrl: './user-form.component.html',
   styleUrls: ['./user-form.component.scss'],
@@ -45,28 +49,72 @@ export class UserFormComponent implements OnInit {
 
   userForm!: FormGroup;
   hidePassword = signal(true);
-
   constructor(private fb: FormBuilder) {}
-
-  //  @Input() userToEdit: User | null = null;
-  // @Input() isLoading: boolean | null = false; // Acepta null por el pipe async
-  // @Output() formSubmit = new EventEmitter<User | Omit<User, 'id'>>(); // Puede emitir User completo o sin ID
-  // @Output() formCancel = new EventEmitter<void>();
 
   ngOnInit(): void {
     this.initForm();
     if (this.userToEdit) {
       this.userForm.patchValue(this.userToEdit);
     }
+
+    this.userForm.get('role')?.valueChanges.subscribe((roleValue) => {
+      this.handleRoleChange(roleValue);
+    });
+  }
+  get roleControl(): FormControl {
+    return this.userForm.get('role') as FormControl;
+  }
+  handleRoleChange(role: string): void {
+    // const sectionsToToggle = [
+    //   'mainPhone',
+    //   'secondaryPhone',
+    //   'addressLine1',
+    //   'addressLine2',
+    //   'preferredLanguage',
+    //   'enableEmailNotifications',
+    //   'enableSmsNotifications',
+    //   'notes',
+    // ];
+    // if (role !== 'CUSTOMER') {
+    //   // Si no es CUSTOMER, deshabilita y limpia los campos de las otras secciones
+    //   sectionsToToggle.forEach((controlName) => {
+    //     this.userForm.get(controlName)?.disable();
+    //     this.userForm.get(controlName)?.reset(); // Opcional: limpiar el valor
+    //   });
+    // } else {
+    //   // Si es CUSTOMER, habilita los campos
+    //   sectionsToToggle.forEach((controlName) => {
+    //     this.userForm.get(controlName)?.enable();
+    //   });
+    // }
   }
 
   private initForm(): void {
     this.userForm = this.fb.group({
-      id: [null], // Se manejará en el servicio o backend
+      id: [null],
       username: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', []],
       role: ['CUSTOMER'],
+
+      business_type: ['', []],
+      business_name: ['', []],
+      business_district: ['', []],
+      business_address: ['', []],
+      business_phone_number: ['', []],
+      business_sector: ['', []],
+      business_document_type: ['', []],
+      business_email: ['', []],
+      assumes_5_percent_pos: [false, []],
+      business_document_number: ['', []],
+
+      owner_name: ['', []],
+      owner_phone_number: ['', []],
+      owner_document_type: ['', []],
+      owner_document_number: ['', []],
+      owner_email_address: ['', []],
+
+      owner_bank_account: ['', []],
     });
   }
 
@@ -80,13 +128,12 @@ export class UserFormComponent implements OnInit {
   onSubmit(): void {
     if (this.userForm.valid) {
       if (this.userToEdit && this.userToEdit.id) {
-        // Es edición
-        // Incluye el ID original y los valores del formulario
         const formData: User = {
           ...(this.userToEdit as User), // Mantener propiedades no editables si las hay
           ...this.userForm.value,
-          id: this.userToEdit.id, // Asegurar que el ID no se pierda
+          id: this.userToEdit.id,
         };
+        console.log('formData', formData);
         this.formSubmit.emit(formData);
       } else {
         // Es creación

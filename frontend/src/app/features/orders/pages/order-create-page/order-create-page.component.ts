@@ -142,7 +142,6 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
     this.isSubmittingBatch.set(true);
 
     const ordersToSubmit = this.pendingOrders().map((order) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { temp_id, ...orderDataForBackend } = order;
       return orderDataForBackend;
     });

@@ -72,6 +72,9 @@ export class UsersEntity extends BaseEntity implements IUser {
   @Column({ type: 'enum', enum: ROLES, unique: false })
   role: ROLES;
 
-  @OneToMany(() => OrdersEntity, (usersOrders) => usersOrders.user)
+  @OneToMany(() => OrdersEntity, (order) => order.user)
   ordersIncludes: OrdersEntity[];
+
+  @OneToMany(() => OrdersEntity, (order) => order.assigned_driver)
+  assignedDriversIncludes: OrdersEntity[];
 }

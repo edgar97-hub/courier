@@ -35,7 +35,6 @@ export class UserListPageComponent implements OnInit, OnDestroy {
   private store = inject(Store);
   private router = inject(Router);
   private dialog = inject(MatDialog);
-  private snackBar = inject(MatSnackBar); // Inyectar MatSnackBar si lo usas aquí
 
   users$: Observable<User[]>;
   isLoading$: Observable<boolean>;
@@ -117,7 +116,7 @@ export class UserListPageComponent implements OnInit, OnDestroy {
   }
 
   navigateToCreate(): void {
-    this.router.navigate(['/users/create']);
+    this.router.navigate(['/configuracion/users/edit/0']);
   }
 
   ngOnDestroy(): void {

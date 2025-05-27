@@ -66,17 +66,14 @@ export class AuthService {
     return localStorage.getItem(ACCESS_TOKEN_KEY);
   }
 
-  // login() ahora actualiza las señales INTERNAS de AuthService
-  // y AppStore leerá estas señales o será notificado
   login(credentials: Credentials): Observable<AuthResponse> {
     const body = { email: credentials.email, password: credentials.password };
     return this.http.post<any>(this.loginUrl, body).pipe(
-      // loginUrl es tu API o la de reqres.in
       delay(1000),
       map((response) => {
-        console.log('response', response);
         const simulatedUser: User = {
-          id: 's',
+          id: response.user.id,
+          rol: response.user.role,
           email: credentials.email,
           username: credentials.email.split('@')[0],
         };

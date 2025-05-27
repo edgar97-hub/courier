@@ -1,0 +1,290 @@
+// No necesitas @use "@angular/material" as mat; para los colores aquí
+
+.tracking-page-container {
+  padding: 24px;
+  max-width: 900px;
+  margin: 20px auto;
+  background-color: #f4f6f8; // Un gris muy claro para el fondo de la página
+  min-height: calc(100vh - 64px);
+}
+
+.tracking-form-card {
+  margin-bottom: 30px;
+  padding: 20px 24px;
+  border-radius: 8px;
+  background-color: #fff; // Fondo blanco para la tarjeta
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); // Sombra sutil
+
+  mat-card-title {
+    font-size: 1.6em;
+    font-weight: 500;
+    color: #303f9f; // indigo-600 (o el color primario de tu tema claro)
+  }
+  mat-card-subtitle {
+    margin-bottom: 20px;
+    color: #616161; // gray-700
+  }
+}
+
+.tracking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .full-width {
+    width: 100%;
+  }
+}
+
+.track-button {
+  padding: 10px 0;
+  font-size: 1.1em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-height: 48px;
+
+  mat-progress-spinner {
+    margin-right: 8px;
+    ::ng-deep circle {
+      stroke: currentColor !important;
+    }
+  }
+  span + span {
+    margin-left: 8px;
+  }
+}
+
+.result-card {
+  margin-top: 24px;
+  border-radius: 8px;
+  padding: 0;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.order-details-card {
+  mat-card-header.order-details-header {
+    padding: 20px 24px;
+    background-color: #e8eaf6; // blue-grey-50 (o un indigo muy claro)
+    border-bottom: 1px solid #c5cae9; // gray-200 (o un indigo claro)
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    mat-card-title {
+      font-size: 1.3em;
+      font-weight: 500;
+      margin-bottom: 4px;
+      color: #283593; // indigo-700
+    }
+    mat-card-subtitle {
+      font-size: 0.9em;
+      color: #546e7a; // blue-grey-600
+    }
+  }
+  mat-card-content {
+    padding: 24px;
+  }
+}
+
+.status-badge-tracking {
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #fff;
+  line-height: 1.2;
+  // Las clases específicas de status (ej. .status-en-transito) definirán el background-color
+}
+
+.order-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+
+  .summary-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background-color: #f8f9fa; // gray-50
+    border-radius: 6px;
+    border: 1px solid #e9ecef; // gray-200
+    mat-icon {
+      margin-right: 12px;
+      color: #78909c; // blue-grey-400
+    }
+    span {
+      font-size: 0.95em;
+      color: #495057; // gray-800 (Bootstrap)
+      strong {
+        color: #212529; // gray-900 (Bootstrap)
+        font-weight: 500;
+      }
+    }
+  }
+  .map-link {
+    cursor: pointer;
+    &:hover {
+      background-color: #e8eaf6; // indigo-50 (Material)
+      border-color: #9fa8da; // indigo-200 (Material)
+      span {
+        color: #283593; // indigo-700 (Material)
+      }
+      mat-icon {
+        color: #3f51b5; // indigo-500 (Material)
+      }
+    }
+  }
+}
+
+.section-divider {
+  margin: 24px 0;
+  border-top-color: #e0e0e0; // gray-300
+}
+
+h3 {
+  font-size: 1.25em;
+  font-weight: 500;
+  margin-bottom: 16px;
+  color: #455a64; // blue-grey-700
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e0e0e0; // gray-300
+}
+
+.tracking-timeline {
+  padding-left: 0;
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 20px;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    background-color: #d1d5db; // gray-300 (Tailwind)
+    z-index: 0;
+  }
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: 50px !important;
+  padding-bottom: 20px !important;
+  min-height: 160px;
+
+  .timeline-icon {
+    position: absolute;
+    left: -8px;
+    top: 4px;
+    background-color: #fdfeff; // Mismo que el fondo de página
+    border-radius: 50%;
+    // padding: 4px;
+    z-index: 1;
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    // El color del icono se establece con [color] en el HTML
+  }
+
+  .timeline-action {
+    font-weight: 500;
+    font-size: 1.05em;
+    color: #374151; // gray-700 (Tailwind)
+    margin-bottom: 4px;
+  }
+
+  .timeline-date {
+    font-size: 0.8em;
+    color: #6b7280; // gray-500 (Tailwind)
+    margin-bottom: 6px;
+  }
+  .timeline-notes {
+    font-size: 0.85em;
+    color: #4b5563; // gray-600 (Tailwind)
+    display: flex;
+    align-items: center;
+    .notes-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      margin-right: 6px;
+      opacity: 0.7;
+    }
+  }
+  .timeline-change {
+    font-size: 0.8em;
+    color: #4b5563; // gray-600
+    font-style: italic;
+    margin-top: 4px;
+  }
+}
+
+.error-card,
+.info-card {
+  // Los que muestran mensajes de error o "no encontrado"
+  margin-top: 20px;
+  text-align: center;
+  background-color: #fff; // Fondo blanco
+  .error-message,
+  .info-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    font-size: 1.1em;
+    color: #4b5563; // gray-600
+    mat-icon {
+      font-size: 40px;
+      width: 40px;
+      height: 40px;
+      margin-bottom: 10px;
+    }
+  }
+  .error-message mat-icon {
+    color: #ef4444; // red-500 (Tailwind)
+  }
+  .info-message mat-icon {
+    color: #3b82f6; // blue-500 (Tailwind)
+  }
+}
+
+.no-history-message {
+  font-style: italic;
+  color: #6b7280; // gray-500 (Tailwind)
+  padding: 20px 0;
+  text-align: center;
+}
+
+.status-registrado {
+  background-color: #06b6d4;
+  color: #fff;
+} // cyan-500
+.status-recogido {
+  background-color: #3b82f6;
+  color: #fff;
+} // blue-500
+.status-en-transito {
+  background-color: #3b82f6;
+  color: #fff;
+} // blue-500
+.status-entregado {
+  background-color: #22c55e;
+  color: #fff;
+} // emerald-500
+.status-cancelado {
+  background-color: #6b7280;
+  color: #fff;
+} // gray-500
+.status-rechazado {
+  background-color: #ef4444;
+  color: #fff;
+} // red-500
+
+.status-reprogramado {
+  background-color: #a855f7;
+  color: #fff;
+} // purple-500

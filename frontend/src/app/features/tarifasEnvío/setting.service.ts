@@ -5,12 +5,16 @@ import {
   HttpHeaders,
 } from '@angular/common/http';
 import { AuthService } from '../../core/services/auth.service';
+import { environment } from '../../../environments/environment';
+
 @Injectable({
   providedIn: 'root',
 })
 export class SettingService {
   // readonly API_URL = 'http://161.132.41.184:8000/api/settings';
-  readonly API_URL = 'http://localhost:8000/api/settings';
+  // readonly API_URL = 'http://localhost:8000/api/settings';
+  readonly API_URL = environment.apiUrl + '/settings';
+
   private authService = inject(AuthService);
 
   unsubscribe: any | null = null;

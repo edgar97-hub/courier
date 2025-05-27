@@ -6,6 +6,7 @@ export declare class UsersService {
     constructor(userRepository: Repository<UsersEntity>);
     createUser(body: UserDTO): Promise<UsersEntity>;
     findUsers(): Promise<UsersEntity[]>;
+    findUsersByRol(rol: string): Promise<UsersEntity[]>;
     findUserById(id: string): Promise<UsersEntity>;
     findBy({ key, value }: {
         key: keyof UserDTO;

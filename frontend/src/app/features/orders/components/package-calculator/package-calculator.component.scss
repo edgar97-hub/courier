@@ -59,3 +59,14 @@ mat-radio-group {
   background-color: #efefef;
   border-radius: 4px;
 }
+
+.warning-paquete-size {
+  font-size: 14px;
+  font-weight: bold;
+  margin: 16px 0;
+  text-align: left; // O donde prefieras mostrarlo
+  color: #d32f2f; // Color rojo como en la imagen
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; // Alinea a la derecha
+}

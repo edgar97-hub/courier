@@ -31,6 +31,9 @@ let UsersController = class UsersController {
     async findAllUsers() {
         return await this.usersService.findUsers();
     }
+    async findUsersByRol(rol) {
+        return await this.usersService.findUsersByRol(rol);
+    }
     async findUserById(id) {
         return await this.usersService.findUserById(id);
     }
@@ -56,6 +59,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findAllUsers", null);
+__decorate([
+    (0, common_1.Get)('rol/:rol'),
+    __param(0, (0, common_1.Param)('rol')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "findUsersByRol", null);
 __decorate([
     (0, swagger_1.ApiParam)({
         name: 'id',

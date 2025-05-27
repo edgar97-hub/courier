@@ -6,6 +6,11 @@ import {
 
 export const routes: Routes = [
   {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: 'orders/orders',
+  },
+  {
     path: 'login',
     loadComponent: () =>
       import('./features/login/pages/login-page/login-page.component').then(
@@ -57,6 +62,22 @@ export const routes: Routes = [
         path: 'shipping-rates',
         loadComponent: () => import('./features/tarifasEnvío/table.component'),
       },
+      {
+        path: 'tarifas',
+        loadComponent: () =>
+          import(
+            './features/shared/image-display/image-display.component'
+          ).then((m) => m.ImageDisplayComponent),
+        title: 'Tarifas de Envío',
+      },
+      {
+        path: 'districts',
+        loadChildren: () =>
+          import('./features/districts/districts.routes').then(
+            (m) => m.DISTRICTS_ROUTES
+          ),
+        title: 'Gestión de Distritos',
+      },
     ],
   },
   {
@@ -73,5 +94,28 @@ export const routes: Routes = [
           ),
       },
     ],
+  },
+  {
+    path: '',
+    loadComponent: () =>
+      import('../app/shared/components/layout/layout.component'),
+    canActivate: [redirectLoginIfNotAuthenticated()],
+    children: [
+      {
+        path: 'orders-delivered',
+        loadChildren: () =>
+          import('./features/deliveredOrders/orders.routes').then(
+            (m) => m.ORDERS_ROUTES
+          ),
+      },
+    ],
+  },
+  {
+    path: 'tracking',
+    loadChildren: () =>
+      import('./features/tracking/tracking.routes').then(
+        (m) => m.TRACKING_ROUTES
+      ),
+    title: 'Seguimiento de Envíos',
   },
 ];

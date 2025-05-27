@@ -242,6 +242,10 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
       }
 
       if (customData.delivery_district_id) {
+        console.log(
+          'customData.delivery_district_id',
+          customData.delivery_district_id
+        );
         let districtFound = this.listaDeDistritos?.find(
           (item) => item.id === customData.delivery_district_id
         );
@@ -249,17 +253,30 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
           let filtrados = this.listaDeDistritos?.filter(
             (item) => item.name === districtFound?.name
           );
-          interface Tarifa {
-            id: number | string; // Identificador único de la tarifa
-            weight_from: number; // Límite inferior del rango de peso (inclusivo)
-            weight_to: number; // Límite superior del rango de peso (inclusivo)
-            precio: number; // Precio para esta tarifa
-          }
+          console.log('districtFound', districtFound);
+          // interface Tarifa {
+          //   id: number | string; // Identificador único de la tarifa
+          //   weight_from: number; // Límite inferior del rango de peso (inclusivo)
+          //   weight_to: number; // Límite superior del rango de peso (inclusivo)
+          //   precio: number; // Precio para esta tarifa
+          // }
           function getTarifa(
             peso_cobrado: number,
             filtrados: any[] = []
           ): any | undefined {
             for (const tarifa of filtrados) {
+              // console.log(
+              //   'peso_cobrado >= tarifa.weight_from',
+              //   peso_cobrado,
+              //   tarifa.weight_from,
+              //   peso_cobrado >= tarifa.weight_from
+              // );
+              // console.log(
+              //   'peso_cobrado <= tarifa.weight_to',
+              //   peso_cobrado,
+              //   tarifa.weight_to,
+              //   peso_cobrado <= tarifa.weight_to
+              // );
               if (
                 peso_cobrado >= tarifa.weight_from &&
                 peso_cobrado <= tarifa.weight_to
@@ -272,6 +289,7 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
           }
 
           if (filtrados) {
+            console.log('filtrados', filtrados);
             let tarifa = getTarifa(peso_cobrado, filtrados);
             precio = tarifa.price || 0;
           }

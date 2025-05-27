@@ -5,6 +5,7 @@ import { ErrorManager } from 'src/utils/error.manager';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { UserDTO, UserUpdateDTO } from '../dto/user.dto';
 import { UsersEntity } from '../entities/users.entity';
+import { ROLES } from 'src/constants/roles';
 
 @Injectable()
 export class UsersService {
@@ -38,6 +39,23 @@ export class UsersService {
       //     message: 'No se encontro resultado',
       //   });
       // }
+      return users;
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  public async findUsersByRol(rol: string): Promise<UsersEntity[]> {
+    try {
+      const users: UsersEntity[] = await this.userRepository.find({
+        where: { role: rol as ROLES },
+      });
+      if (!users) {
+        throw new ErrorManager({
+          type: 'BAD_REQUEST',
+          message: 'No se encontro resultado',
+        });
+      }
       return users;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);

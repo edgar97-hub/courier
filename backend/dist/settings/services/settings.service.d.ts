@@ -19,7 +19,7 @@ export declare class SettingsService {
     uploadTermsPdf(termsPdfFile: Express.Multer.File, req: Request): Promise<{
         terms_conditions_url: string;
     }>;
-    uploadFile(termsPdfFile: Express.Multer.File, req: Request): Promise<{
+    uploadFile(file: Express.Multer.File, req: Request): Promise<{
         file_url: string;
     }>;
 }

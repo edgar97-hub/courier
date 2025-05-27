@@ -1,13 +1,16 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../core/services/auth.service';
+import { environment } from '../../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root',
 })
 export class DistrictService {
-  readonly API_URL = 'http://localhost:8000/api/districts';
+  // readonly API_URL = 'http://localhost:8000/api/districts';
   // readonly API_URL = 'http://161.132.41.184:8000/api/districts';
+  readonly API_URL = environment.apiUrl + '/districts';
 
   unsubscribe: any | null = null;
   private authService = inject(AuthService);

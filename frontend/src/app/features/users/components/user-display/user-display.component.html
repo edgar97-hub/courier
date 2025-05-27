@@ -1,0 +1,186 @@
+<mat-card class="multi-section-form-card readonly-mode" *ngIf="userData">
+  <mat-card-header>
+    <mat-card-title
+      >Detalles del Usuario: {{ userData.username }}</mat-card-title
+    >
+    <mat-card-subtitle>Información registrada</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <!-- SECCIÓN 1: INFORMACIÓN BÁSICA -->
+    <div class="form-section">
+      <h3 class="section-title">
+        <mat-icon>person_outline</mat-icon>
+        Información Básica
+      </h3>
+      <div class="details-grid">
+        <div class="detail-item">
+          <span class="detail-label">Nombre de Usuario:</span>
+          <span class="detail-value">{{ userData.username || "N/A" }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Email:</span>
+          <span class="detail-value">{{ userData.email || "N/A" }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Rol:</span>
+          <span class="detail-value">{{ userData.role || "N/A" }}</span>
+        </div>
+        <!-- No mostramos la contraseña -->
+      </div>
+    </div>
+
+    <ng-container *ngIf="isCustomerRole">
+      <mat-divider class="section-divider"></mat-divider>
+      <!-- SECCIÓN 2: Característica del Negocio -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <mat-icon>featured_play_list</mat-icon>
+          Característica del Negocio
+        </h3>
+        <div class="details-grid two-columns">
+          <div class="detail-item">
+            <span class="detail-label">Tipo de Negocio:</span>
+            <span class="detail-value">{{
+              userData.business_type || "N/A"
+            }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Nombre del Negocio:</span>
+            <span class="detail-value">{{
+              userData.business_name || "N/A"
+            }}</span>
+          </div>
+        </div>
+        <div class="detail-item full-width-mobile">
+          <span class="detail-label">Distrito del Negocio:</span>
+          <span class="detail-value">{{
+            userData.business_district || "N/A"
+          }}</span>
+        </div>
+        <div class="detail-item full-width-mobile">
+          <span class="detail-label">Dirección del Negocio:</span>
+          <span class="detail-value">{{
+            userData.business_address || "N/A"
+          }}</span>
+        </div>
+        <div class="details-grid two-columns">
+          <div class="detail-item">
+            <span class="detail-label">Número de teléfono del Negocio:</span>
+            <span class="detail-value">{{
+              userData.business_phone_number || "N/A"
+            }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Sector del Negocio:</span>
+            <span class="detail-value">{{
+              userData.business_sector || "N/A"
+            }}</span>
+          </div>
+        </div>
+        <div class="details-grid two-columns">
+          <div class="detail-item">
+            <span class="detail-label">Tipo de documento del Negocio:</span>
+            <span class="detail-value">{{
+              userData.business_document_type || "N/A"
+            }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Correo electrónico del Negocio:</span>
+            <span class="detail-value">{{
+              userData.business_email || "N/A"
+            }}</span>
+          </div>
+        </div>
+        <div class="details-grid two-columns">
+          <!-- Asumo que el número de documento va solo -->
+          <div class="detail-item">
+            <span class="detail-label">Número de documento del Negocio:</span>
+            <span class="detail-value">{{
+              userData.business_document_number || "N/A"
+            }}</span>
+          </div>
+          <div class="detail-item">
+            <!-- Placeholder o mueve el checkbox aquí si quieres 2 columnas -->
+          </div>
+        </div>
+        <div class="detail-item">
+          <!-- Checkbox en su propia línea o ajustado al grid -->
+          <span class="detail-label">Asume el 5% POS:</span>
+          <span class="detail-value">{{
+            formatBoolean(userData.assumes_5_percent_pos)
+          }}</span>
+        </div>
+      </div>
+
+      <mat-divider class="section-divider"></mat-divider>
+      <!-- SECCIÓN 3: Información del Propietario -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <mat-icon>attribution</mat-icon>
+          Información del Propietario
+        </h3>
+        <div class="details-grid two-columns">
+          <div class="detail-item">
+            <span class="detail-label">Nombre del propietario:</span>
+            <span class="detail-value">{{ userData.owner_name || "N/A" }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label"
+              >Número de teléfono del propietario:</span
+            >
+            <span class="detail-value">{{
+              userData.owner_phone_number || "N/A"
+            }}</span>
+          </div>
+        </div>
+        <div class="details-grid two-columns">
+          <div class="detail-item">
+            <span class="detail-label">Tipo de documento del propietario:</span>
+            <span class="detail-value">{{
+              userData.owner_document_type || "N/A"
+            }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label"
+              >Número de documento del propietario:</span
+            >
+            <span class="detail-value">{{
+              userData.owner_document_number || "N/A"
+            }}</span>
+          </div>
+        </div>
+        <div class="details-grid">
+          <!-- Asumo que el email va solo en una fila del grid -->
+          <div class="detail-item">
+            <span class="detail-label"
+              >Dirección de correo electrónico del propietario:</span
+            >
+            <span class="detail-value">{{
+              userData.owner_email_address || "N/A"
+            }}</span>
+          </div>
+        </div>
+      </div>
+
+      <mat-divider class="section-divider"></mat-divider>
+      <!-- SECCIÓN 4: Cuenta bancaria -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <mat-icon>account_balance</mat-icon>
+          Cuenta bancaria
+        </h3>
+        <div class="detail-item full-width-mobile">
+          <span class="detail-label">Cuenta bancaria:</span>
+          <span class="detail-value">{{
+            userData.owner_bank_account || "N/A"
+          }}</span>
+        </div>
+      </div>
+    </ng-container>
+  </mat-card-content>
+</mat-card>
+
+<div *ngIf="!userData" class="no-data-message">
+  No hay información de usuario para mostrar.
+</div>

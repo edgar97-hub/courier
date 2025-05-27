@@ -14,9 +14,11 @@ import {
   MaxPackageDimensions,
   ShippingCostResponse,
   CreateBatchOrderPayload,
+  Order,
 } from '../models/order.model';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
+import { ImportResult } from '../components/order-import-modal/order-import-modal.component';
 
 @Injectable({
   providedIn: 'root',
@@ -24,6 +26,7 @@ import { AuthService } from '../../../core/services/auth.service';
 export class OrderService {
   readonly apiUrlOrders = environment.apiUrl + '/orders';
   readonly apiUrl = environment.apiUrl + '/districts';
+  readonly apiUrlUsers = environment.apiUrl + '/users';
   readonly apiUrlSettings = environment.apiUrl + '/settings';
 
   private http = inject(HttpClient);
@@ -91,17 +94,64 @@ export class OrderService {
       );
   }
 
-  // Podrías tener un método para obtener los posibles estados si vienen de la API
+  getOrders2(
+    filters?: OrderFilterCriteria,
+    sortField: string = 'id', // Campo por defecto para ordenar
+    sortDirection: 'asc' | 'desc' = 'desc' // Dirección por defecto
+  ): Observable<Order[]> {
+    let params = new HttpParams()
+      .set('sort_field', sortField)
+      .set('sort_direction', sortDirection);
+
+    if (filters) {
+      if (filters.start_date) {
+        params = params.set('start_date', filters.start_date);
+      }
+      if (filters.end_date) {
+        params = params.set('end_date', filters.end_date);
+      }
+      if (filters.status) {
+        params = params.set('status', filters.status);
+      }
+      if (filters.search_term && filters.search_term.trim() !== '') {
+        params = params.set('search_term', filters.search_term.trim());
+      }
+    }
+
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(() => new Error('Not authenticated to fetch users.'));
+    }
+    return this.http
+      .get<Order[]>(this.apiUrlOrders + '/filtered-orders', {
+        params,
+        headers,
+      })
+      .pipe(
+        map((response: any) => {
+          // Si necesitas transformar las fechas de string a Date object aquí:
+          // response.items = response.items.map(order => ({
+          //   ...order,
+          //   registration_date: new Date(order.registration_date),
+          //   delivery_date: order.delivery_date ? new Date(order.delivery_date) : null,
+          // }));
+          return response.items;
+        }),
+        catchError(this.handleError)
+      );
+  }
+
   getOrderStatuses(): Observable<string[]> {
-    // return this.http.get<string[]>(`${this.apiUrl}/statuses`).pipe(catchError(this.handleError));
-    // Por ahora, un mock:
     return new Observable((observer) => {
       observer.next([
-        'Pending',
-        'In Transit',
-        'Delivered',
-        'Cancelled',
-        'On Hold',
+        'REGISTRADO',
+        'RECOGIDO',
+        'EN ALMACEN',
+        'EN TRANSITO',
+        'ENTREGADO',
+        'CANCELADO',
+        'RECHAZADO',
+        'REPROGRAMADO',
       ]);
       observer.complete();
     });
@@ -114,6 +164,46 @@ export class OrderService {
     }
     return this.http
       .get<DistrictOption[]>(`${this.apiUrl}/all`, { headers })
+      .pipe(catchError(this.handleError));
+  }
+
+  updateOrderStatus(
+    orderId: number | string,
+    newStatus: string,
+    reason?: string,
+    product_delivery_photo_url?: string | null,
+    payment_method_for_shipping_cost?: string | null,
+    payment_method_for_collection?: string | null
+  ): Observable<any> {
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(() => new Error('Not authenticated to fetch users.'));
+    }
+
+    let payload: any = {
+      orderId,
+      reason,
+      newStatus,
+      action: 'CAMBIO DE ESTADO',
+    };
+    if (product_delivery_photo_url) {
+      payload.product_delivery_photo_url = product_delivery_photo_url;
+    }
+    if (payment_method_for_shipping_cost) {
+      payload.payment_method_for_shipping_cost =
+        payment_method_for_shipping_cost;
+    }
+    if (payment_method_for_collection) {
+      payload.payment_method_for_collection = payment_method_for_collection;
+    }
+    return this.http
+      .post<{ success: boolean; message: string; batchId?: string }>(
+        `${this.apiUrlOrders}/update-order-status`,
+        {
+          payload,
+        },
+        { headers }
+      )
       .pipe(catchError(this.handleError));
   }
 
@@ -251,6 +341,104 @@ export class OrderService {
         { headers }
       )
       .pipe(catchError(this.handleError));
+  }
+
+  importOrdersFromParsedJson(parsedOrders: any[]): Observable<ImportResult> {
+    console.log(
+      'OrderService: Sending parsed JSON to backend for import',
+      parsedOrders
+    );
+
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(() => new Error('Not authenticated to fetch users.'));
+    }
+
+    return this.http
+      .post<ImportResult>(
+        `${this.apiUrlOrders}/import-batch-json`,
+        parsedOrders,
+        { headers }
+      )
+      .pipe(catchError(this.handleImportError));
+  }
+
+  getAvailableDrivers(searchTerm: string): Observable<any> {
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(() => new Error('Not authenticated to fetch users.'));
+    }
+
+    return this.http
+      .get<any>(`${this.apiUrlUsers}/rol/MOTORIZED`, { headers })
+      .pipe(catchError(this.handleError));
+  }
+
+  assignDriverToOrder(
+    orderId: string | number,
+    motorizedId: string
+  ): Observable<any> {
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(() => new Error('Not authenticated to fetch users.'));
+    }
+
+    return this.http
+      .put<{ success: boolean; message: string }>(
+        `${this.apiUrlOrders}/assign-driver-to-order/` + orderId,
+        {
+          motorizedId,
+        },
+        { headers }
+      )
+      .pipe(catchError(this.handleError));
+  }
+
+  rescheduleOrder(
+    orderId: number | string,
+    newDate: string,
+    reason?: string
+  ): Observable<any> {
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(() => new Error('Not authenticated to fetch users.'));
+    }
+
+    return this.http
+      .put<{ success: boolean; message: string }>(
+        `${this.apiUrlOrders}/reschedule-order/` + orderId,
+        {
+          newDate,
+          reason,
+        },
+        { headers }
+      )
+      .pipe(catchError(this.handleError));
+  }
+
+  private handleImportError(error: HttpErrorResponse): Observable<never> {
+    console.error('API Import Error:', error);
+    let result: ImportResult = {
+      success: false,
+      message: 'Error de comunicación con el servidor durante la importación.',
+      errors: [
+        {
+          row: 0,
+          message: `Error: ${error.status} - ${
+            error.statusText || 'Error desconocido'
+          }`,
+        },
+      ],
+    };
+    // Si el backend devuelve un objeto ImportResult en el cuerpo del error:
+    if (
+      error.error &&
+      typeof error.error === 'object' &&
+      'message' in error.error
+    ) {
+      result = { ...result, ...error.error }; // Sobrescribir con el error del backend
+    }
+    return throwError(() => result); // Devolver el objeto ImportResult para que el componente lo maneje
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {

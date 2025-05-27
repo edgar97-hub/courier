@@ -13,10 +13,7 @@
   ></app-order-filters>
 
   <div class="table-controls-bar">
-    <div class="records-info">
-      <!-- Esto se podría hacer más dinámico con el paginador -->
-      <!-- Mostrando registros del X al Y de un total de Z registros -->
-    </div>
+    <div class="records-info"></div>
     <div class="actions-group">
       <!-- Botón de Acciones Masivas (ejemplo con mat-menu) -->
       <button
@@ -27,13 +24,15 @@
         Acciones Masivas <mat-icon>arrow_drop_down</mat-icon>
       </button>
       <mat-menu #massiveActionsMenu="matMenu">
-        <button mat-menu-item (click)="handleMassiveActions('export_excel')">
+        <button mat-menu-item (click)="exportDataToExcel()">
           Exportar a Excel
         </button>
-        <button mat-menu-item (click)="handleMassiveActions('print_selected')">
+        <!-- <button mat-menu-item (click)="handleMassiveActions('print_selected')">
           Imprimir Seleccionados
+        </button> -->
+        <button mat-menu-item (click)="openImportModal()">
+          Importar desde Excel
         </button>
-        <!-- Más acciones -->
       </mat-menu>
     </div>
   </div>
@@ -46,5 +45,8 @@
     [pageIndex]="currentPageIndex"
     (pageChanged)="onPageChanged($event)"
     (sortChanged)="onSortChanged($event)"
+    (statusChanged)="handleStatusChanged($event)"
+    (motorizedChanged)="handleMotorizedChanged($event)"
+    (rescheduleChanged)="handleRescheduleChanged($event)"
   ></app-order-table>
 </div>

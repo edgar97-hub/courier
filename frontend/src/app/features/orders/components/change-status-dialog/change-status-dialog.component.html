@@ -1,0 +1,269 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>Cambiar Estado del Pedido</h2>
+    <span class="order-code-chip"
+      >Pedido N°: {{ data.order.code || data.order.id }}</span
+    >
+    <button
+      mat-icon-button
+      (click)="onCancel()"
+      class="close-button-header"
+      matTooltip="Cerrar"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="deliveryDetailsForm" (ngSubmit)="onConfirm()">
+    <mat-dialog-content class="dialog-content">
+      <div class="current-status-container">
+        <span>Estado Actual:</span>
+        <span
+          class="status-badge"
+          [ngClass]="getStatusClass(data.order.status)"
+        >
+          {{ data.order.status | titlecase }}
+        </span>
+      </div>
+
+      <mat-form-field
+        appearance="outline"
+        class="full-width select-status-field"
+      >
+        <mat-label>Seleccionar Nuevo Estado</mat-label>
+        <mat-select
+          [(ngModel)]="selectedStatus"
+          (selectionChange)="onStatusChange($event)"
+          [ngModelOptions]="{ standalone: true }"
+          name="newStatus"
+          required
+        >
+          <mat-option
+            *ngFor="let status of data.availableStatuses"
+            [value]="status"
+          >
+            {{ status | titlecase }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="formSubmitted && !selectedStatus"
+          >Debe seleccionar un nuevo estado.</mat-error
+        >
+      </mat-form-field>
+
+      <mat-form-field
+        appearance="outline"
+        class="full-width reason-field"
+        *ngIf="showReasonField"
+      >
+        <mat-label>Motivo / Observación</mat-label>
+        <textarea
+          matInput
+          [(ngModel)]="reason"
+          [ngModelOptions]="{ standalone: true }"
+          name="reason"
+          rows="3"
+          cdkTextareaAutosize
+          cdkAutosizeMinRows="2"
+          cdkAutosizeMaxRows="3"
+          placeholder="Describa el motivo del cambio de estado..."
+        ></textarea>
+        <mat-hint align="start" *ngIf="isReasonMandatory(selectedStatus)">
+          Es importante detallar el motivo para este estados.
+        </mat-hint>
+        <mat-error
+          *ngIf="
+            formSubmitted &&
+            isReasonMandatory(selectedStatus) &&
+            (!reason || reason.trim() === '')
+          "
+        >
+          El motivo es obligatorio.
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Sección de Detalles de Entrega (Visible solo para estado ENTREGADO) -->
+      @if (showDeliveryDetails) {
+      <div class="delivery-details-section">
+        <mat-divider></mat-divider>
+        <h4>Prueba de Entrega y Pagos</h4>
+
+        <!-- Controles de Cámara y Subida de Imagen -->
+        <div class="image-upload-container">
+          <label class="image-upload-label">Foto de Prueba de Entrega:</label>
+          <div class="image-actions">
+            <button
+              mat-stroked-button
+              type="button"
+              color="primary"
+              (click)="startCamera()"
+              class="camera-button"
+              [disabled]="showCamera"
+            >
+              <mat-icon>photo_camera</mat-icon> Acceder a Cámara
+            </button>
+            <span class="or-divider">o</span>
+            <button
+              mat-stroked-button
+              type="button"
+              color="accent"
+              (click)="triggerFileUpload()"
+              class="upload-button"
+            >
+              <mat-icon>attach_file</mat-icon> Subir Archivo
+            </button>
+          </div>
+          <input
+            type="file"
+            hidden
+            #fileUpload
+            id="proofOfDeliveryImageUpload"
+            (change)="onFileSelected($event)"
+            accept="image/*"
+          />
+
+          <!-- @if(cameraError) {
+          <p class="camera-error-message">
+            <mat-icon color="warn">warning</mat-icon> {{ cameraError }}
+          </p>
+          } @if (showCamera && !photoTaken) { } -->
+          <div class="camera-view">
+            <video
+              #videoPlayer
+              autoplay
+              playsinline
+              class="video-preview"
+            ></video>
+            <button
+              mat-fab
+              extended
+              color="primary"
+              (click)="takePhoto()"
+              class="take-photo-button"
+              [disabled]="!stream"
+            >
+              <mat-icon>camera</mat-icon> Tomar Foto
+            </button>
+            <button
+              mat-icon-button
+              (click)="stopCamera()"
+              class="stop-camera-button"
+              matTooltip="Cerrar cámara"
+            >
+              <mat-icon>videocam_off</mat-icon>
+            </button>
+          </div>
+          <!-- Canvas oculto para procesar la foto -->
+          <canvas #canvasElement style="display: none"></canvas>
+
+          @if (imagePreviewUrl) {
+          <div class="image-preview-wrapper">
+            <p class="preview-label">Vista Previa:</p>
+            <img
+              [src]="imagePreviewUrl"
+              alt="Vista previa de la imagen"
+              class="image-preview"
+            />
+            <button
+              mat-icon-button
+              type="button"
+              (click)="removeImage()"
+              class="remove-image-button"
+              matTooltip="Quitar imagen / Tomar otra"
+            >
+              <mat-icon>delete_forever</mat-icon>
+            </button>
+          </div>
+          } @if (isUploadingImage) {
+          <div class="upload-spinner">
+            <mat-progress-spinner
+              mode="indeterminate"
+              diameter="24"
+            ></mat-progress-spinner>
+            <span>Subiendo imagen...</span>
+          </div>
+          }
+        </div>
+
+        <!-- Campos de Método de Pago (como los tenías) -->
+        <!-- @if (data.order.shipping_cost && data.order.shipping_cost > 0) { -->
+        <mat-form-field
+          appearance="outline"
+          class="full-width payment-method-field"
+        >
+          <mat-label
+            >Método Pago Costo Envío (S/
+            {{ data.order.shipping_cost | number : "1.2-2" }})</mat-label
+          >
+          <mat-select
+            formControlName="shippingCostPaymentMethod"
+            name="shippingCostPaymentMethod"
+          >
+            <mat-option
+              *ngFor="let method of paymentMethods"
+              [value]="method"
+              >{{ method }}</mat-option
+            >
+          </mat-select>
+          @if (formSubmitted && scpmCtrl?.hasError('required')) {
+          <mat-error>Seleccione método de pago para costo de envío.</mat-error>
+          }
+        </mat-form-field>
+        <!-- } -->
+        <!-- @if (data.order.amount_to_collect_at_delivery &&
+        data.order.amount_to_collect_at_delivery > 0) { -->
+        <mat-form-field
+          appearance="outline"
+          class="full-width payment-method-field"
+        >
+          <mat-label
+            >Método Pago Cobro (S/
+            {{
+              data.order.amount_to_collect_at_delivery | number : "1.2-2"
+            }})</mat-label
+          >
+          <mat-select
+            formControlName="collectionPaymentMethod"
+            name="collectionPaymentMethod"
+          >
+            <mat-option
+              *ngFor="let method of paymentMethods"
+              [value]="method"
+              >{{ method }}</mat-option
+            >
+          </mat-select>
+          @if (formSubmitted && cpmCtrl?.hasError('required')) {
+          <mat-error
+            >Seleccione método de pago para el monto a cobrar.</mat-error
+          >
+          }
+        </mat-form-field>
+        <!-- } -->
+      </div>
+      }
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end" class="dialog-actions">
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="onCancel()"
+        class="cancel-button"
+      >
+        Cancelar
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="
+          isConfirmDisabled() ||
+          isUploadingImage ||
+          (showCamera && !photoTaken && !imagePreviewUrl)
+        "
+        class="confirm-button"
+      >
+        {{ isUploadingImage ? "Subiendo..." : "Confirmar Cambio" }}
+      </button>
+    </mat-dialog-actions>
+  </form>
+</div>

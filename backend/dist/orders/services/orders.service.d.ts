@@ -4,20 +4,22 @@ import { OrdersEntity } from '../entities/orders.entity';
 import { DistrictsEntity } from 'src/districts/entities/districts.entity';
 import { ImportResult } from '../dto/import-result.dto';
 import { EntityManager } from 'typeorm';
+import { OrderLogEntity } from '../entities/orderLog.entity';
 export declare class OrdersService {
     private readonly orderRepository;
+    private readonly orderLogRepository;
     private districtsRepository;
     private entityManager;
-    constructor(orderRepository: Repository<OrdersEntity>, districtsRepository: Repository<DistrictsEntity>, entityManager: EntityManager);
+    constructor(orderRepository: Repository<OrdersEntity>, orderLogRepository: Repository<OrderLogEntity>, districtsRepository: Repository<DistrictsEntity>, entityManager: EntityManager);
     createOrder(body: OrderDTO): Promise<OrdersEntity>;
-    updateOrderStatus(body: any): Promise<UpdateResult>;
-    batchCreateOrders(payload: any): Promise<{
+    updateOrderStatus(body: any, idUser: string): Promise<any>;
+    batchCreateOrders(payload: any, idUser: any): Promise<{
         success: boolean;
         message: string;
         createdOrders?: OrdersEntity[];
         errors?: any[];
     }>;
-    importOrdersFromExcelData(excelRows: any[]): Promise<ImportResult | undefined>;
+    importOrdersFromExcelData(excelRows: any[], idUser: string): Promise<ImportResult | undefined>;
     findOrders({ pageNumber, pageSize, sortField, sortDirection, startDate, endDate, status, }: {
         pageNumber?: number;
         pageSize?: number;
@@ -42,11 +44,16 @@ export declare class OrdersService {
         items: any;
         total_count: number;
     }>;
+    getOrderByTrackingCode({ tracking_code, }: {
+        tracking_code?: string;
+    }): Promise<OrdersEntity | null>;
     findOrderById(id: string): Promise<OrdersEntity>;
     findBy({ key, value }: {
         key: keyof OrderDTO;
         value: any;
     }): Promise<OrdersEntity>;
     updateOrder(body: OrderUpdateDTO, id: string): Promise<UpdateResult | undefined>;
+    assignDriverToOrder(body: any, id: string, idUser: string): Promise<any>;
+    rescheduleOrder(body: any, id: string, idUser: string): Promise<any>;
     deleteOrder(id: string): Promise<DeleteResult | undefined>;
 }

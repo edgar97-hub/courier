@@ -106,7 +106,13 @@
       </button>
     </div>
   </div>
-
+  <div class="warning-paquete-size" *ngIf="packageFormGroup.get('package_size_type')?.value === 'standard'">
+    <p>
+      Si su paquete excede las medidas y pesos estándar y no utiliza la
+      calculadora de envío, se le cobrará en función de esas medidas sin previo
+      aviso.
+    </p>
+  </div>
   <div *ngIf="maxDimensions$ | async as maxDims" class="max-dimensions-info">
     <p>{{ maxDims.info_text }}</p>
   </div>

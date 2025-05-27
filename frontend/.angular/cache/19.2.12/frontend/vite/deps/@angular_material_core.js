@@ -1,9 +1,19 @@
 import {
+  MatLine,
+  MatLineModule,
+  setLines
+} from "./chunk-7PROVU53.js";
+import {
   DateAdapter,
   MAT_DATE_FORMATS,
   MAT_DATE_LOCALE,
   MAT_DATE_LOCALE_FACTORY
-} from "./chunk-76SZO5GL.js";
+} from "./chunk-4JSCSTMQ.js";
+import {
+  ErrorStateMatcher,
+  ShowOnDirtyErrorStateMatcher,
+  _ErrorStateTracker
+} from "./chunk-T5ZGWBYB.js";
 import {
   MAT_OPTGROUP,
   MAT_OPTION_PARENT_COMPONENT,
@@ -13,20 +23,20 @@ import {
   MatOptionSelectionChange,
   _countGroupLabelsBeforeOption,
   _getOptionScrollPosition
-} from "./chunk-KD3BYKPM.js";
+} from "./chunk-33LIKSG2.js";
 import {
   MatPseudoCheckbox,
   MatPseudoCheckboxModule
-} from "./chunk-RRISEOPB.js";
-import {
-  MatRippleLoader
-} from "./chunk-GRNNFOIX.js";
-import {
-  MatRippleModule
-} from "./chunk-CRAHCPON.js";
+} from "./chunk-RM7IC6I7.js";
 import {
   _MatInternalFormField
-} from "./chunk-GLZGW5KU.js";
+} from "./chunk-543APZV7.js";
+import {
+  MatRippleLoader
+} from "./chunk-43YUEEAL.js";
+import {
+  MatRippleModule
+} from "./chunk-MR2U5WZB.js";
 import {
   MAT_RIPPLE_GLOBAL_OPTIONS,
   MatRipple,
@@ -34,111 +44,45 @@ import {
   RippleRenderer,
   RippleState,
   defaultRippleAnimationConfig
-} from "./chunk-WNXBFQM2.js";
+} from "./chunk-6XIMYC2V.js";
 import {
   _StructuralStylesLoader
-} from "./chunk-UXCAZAZP.js";
-import {
-  ErrorStateMatcher,
-  ShowOnDirtyErrorStateMatcher,
-  _ErrorStateTracker
-} from "./chunk-CCYHDIFE.js";
-import "./chunk-FKDQECJV.js";
+} from "./chunk-GUE7OJMW.js";
+import "./chunk-VBD7OETI.js";
 import "./chunk-42FJBLFI.js";
 import "./chunk-JXBCBRYI.js";
 import {
   MATERIAL_SANITY_CHECKS,
   MatCommonModule
-} from "./chunk-HCEXDYRO.js";
+} from "./chunk-IAF6TOJZ.js";
+import "./chunk-VYUJMGHP.js";
+import "./chunk-ULF4TSYU.js";
+import "./chunk-DG6N4IH3.js";
 import "./chunk-2O4WY5GE.js";
-import "./chunk-5BSZYFDL.js";
-import "./chunk-TDK6UXAZ.js";
-import "./chunk-N5RTJ4SR.js";
-import "./chunk-7UHIR7TC.js";
-import "./chunk-AYTXNTMN.js";
+import "./chunk-AOPTDWYV.js";
+import "./chunk-Q6AVZNXX.js";
+import "./chunk-XPNS5X4K.js";
+import "./chunk-HCV4XG7V.js";
+import "./chunk-AKCOSPLG.js";
+import "./chunk-HS6XMO6F.js";
 import {
-  Directive,
   Injectable,
   NgModule,
   Version,
   inject,
   setClassMetadata,
-  ɵɵdefineDirective,
   ɵɵdefineInjectable,
   ɵɵdefineInjector,
   ɵɵdefineNgModule
-} from "./chunk-BI3KMKNR.js";
-import "./chunk-VWWWCGBE.js";
-import "./chunk-35WDS66D.js";
-import {
-  startWith
-} from "./chunk-QYZCK3CB.js";
+} from "./chunk-KTLKFSKR.js";
+import "./chunk-VMI3K6GE.js";
+import "./chunk-5KXDAEEK.js";
+import "./chunk-WD6C567C.js";
+import "./chunk-HM5YLMWO.js";
 import {
   __spreadProps,
   __spreadValues
-} from "./chunk-EPAV4CNQ.js";
-
-// node_modules/@angular/material/fesm2022/line-Bm3zUbBF.mjs
-var MatLine = class _MatLine {
-  static ɵfac = function MatLine_Factory(__ngFactoryType__) {
-    return new (__ngFactoryType__ || _MatLine)();
-  };
-  static ɵdir = ɵɵdefineDirective({
-    type: _MatLine,
-    selectors: [["", "mat-line", ""], ["", "matLine", ""]],
-    hostAttrs: [1, "mat-line"]
-  });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(MatLine, [{
-    type: Directive,
-    args: [{
-      selector: "[mat-line], [matLine]",
-      host: {
-        "class": "mat-line"
-      }
-    }]
-  }], null, null);
-})();
-function setLines(lines, element, prefix = "mat") {
-  lines.changes.pipe(startWith(lines)).subscribe(({
-    length
-  }) => {
-    setClass(element, `${prefix}-2-line`, false);
-    setClass(element, `${prefix}-3-line`, false);
-    setClass(element, `${prefix}-multi-line`, false);
-    if (length === 2 || length === 3) {
-      setClass(element, `${prefix}-${length}-line`, true);
-    } else if (length > 3) {
-      setClass(element, `${prefix}-multi-line`, true);
-    }
-  });
-}
-function setClass(element, className, isAdd) {
-  element.nativeElement.classList.toggle(className, isAdd);
-}
-var MatLineModule = class _MatLineModule {
-  static ɵfac = function MatLineModule_Factory(__ngFactoryType__) {
-    return new (__ngFactoryType__ || _MatLineModule)();
-  };
-  static ɵmod = ɵɵdefineNgModule({
-    type: _MatLineModule,
-    imports: [MatCommonModule, MatLine],
-    exports: [MatLine, MatCommonModule]
-  });
-  static ɵinj = ɵɵdefineInjector({
-    imports: [MatCommonModule, MatCommonModule]
-  });
-};
-(() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(MatLineModule, [{
-    type: NgModule,
-    args: [{
-      imports: [MatCommonModule, MatLine],
-      exports: [MatLine, MatCommonModule]
-    }]
-  }], null, null);
-})();
+} from "./chunk-WDMUDEB6.js";
 
 // node_modules/@angular/material/fesm2022/core.mjs
 var VERSION = new Version("19.2.16");

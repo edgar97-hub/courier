@@ -1,4 +1,4 @@
-import "./chunk-FKDQECJV.js";
+import "./chunk-VBD7OETI.js";
 import "./chunk-42FJBLFI.js";
 import {
   coerceBooleanProperty
@@ -10,27 +10,32 @@ import {
   InteractivityChecker,
   MatCommonModule,
   hasModifierKey
-} from "./chunk-HCEXDYRO.js";
+} from "./chunk-IAF6TOJZ.js";
+import "./chunk-VYUJMGHP.js";
+import "./chunk-ULF4TSYU.js";
+import "./chunk-DG6N4IH3.js";
 import {
   CdkScrollable,
   CdkScrollableModule,
   ScrollDispatcher,
   ViewportRuler
-} from "./chunk-KLMP4R7R.js";
-import "./chunk-PE6TJFTM.js";
+} from "./chunk-MFGWAJKE.js";
+import "./chunk-I64SFFH6.js";
 import "./chunk-2O4WY5GE.js";
 import {
   Directionality
-} from "./chunk-5BSZYFDL.js";
-import "./chunk-TDK6UXAZ.js";
+} from "./chunk-AOPTDWYV.js";
+import "./chunk-Q6AVZNXX.js";
 import {
-  Platform,
   coerceNumberProperty
-} from "./chunk-N5RTJ4SR.js";
-import "./chunk-7UHIR7TC.js";
+} from "./chunk-XPNS5X4K.js";
+import {
+  Platform
+} from "./chunk-HCV4XG7V.js";
+import "./chunk-AKCOSPLG.js";
 import {
   DOCUMENT
-} from "./chunk-AYTXNTMN.js";
+} from "./chunk-HS6XMO6F.js";
 import {
   ANIMATION_MODULE_TYPE,
   ChangeDetectionStrategy,
@@ -78,12 +83,12 @@ import {
   ɵɵstyleProp,
   ɵɵtemplate,
   ɵɵviewQuery
-} from "./chunk-BI3KMKNR.js";
+} from "./chunk-KTLKFSKR.js";
 import {
   fromEvent,
   merge
-} from "./chunk-VWWWCGBE.js";
-import "./chunk-35WDS66D.js";
+} from "./chunk-VMI3K6GE.js";
+import "./chunk-5KXDAEEK.js";
 import {
   Subject,
   debounceTime,
@@ -93,8 +98,9 @@ import {
   startWith,
   take,
   takeUntil
-} from "./chunk-QYZCK3CB.js";
-import "./chunk-EPAV4CNQ.js";
+} from "./chunk-WD6C567C.js";
+import "./chunk-HM5YLMWO.js";
+import "./chunk-WDMUDEB6.js";
 
 // node_modules/@angular/material/fesm2022/sidenav.mjs
 var _c0 = ["*"];
