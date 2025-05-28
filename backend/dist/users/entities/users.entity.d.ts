@@ -7,6 +7,7 @@ export declare class UsersEntity extends BaseEntity implements IUser {
     email: string;
     username: string;
     password: string;
+    photo_url: string;
     business_type: string;
     business_name: string;
     business_district: string;

@@ -80,6 +80,24 @@ let UsersService = class UsersService {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
+    async findUserPerfil(idUser) {
+        console.log('idUser', idUser);
+        try {
+            const user = await this.userRepository.findOne({
+                where: { id: idUser },
+            });
+            if (!user) {
+                throw new error_manager_1.ErrorManager({
+                    type: 'BAD_REQUEST',
+                    message: 'No se encontro resultado',
+                });
+            }
+            return user;
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
     async findBy({ key, value }) {
         try {
             const user = (await this.userRepository
@@ -109,6 +127,24 @@ let UsersService = class UsersService {
                 });
             }
             return user;
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
+    async updateProfile(body, id) {
+        try {
+            if (body.password) {
+                body.password = await bcrypt.hash(body.password, Number(process.env.HASH_SALT));
+            }
+            else {
+                delete body.password;
+            }
+            await this.userRepository.update(id, body);
+            const updatedUser = await this.userRepository.findOne({
+                where: { id },
+            });
+            return updatedUser;
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);

@@ -33,7 +33,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
         mode="indeterminate"
       />
       }
-      <!-- [style.marginTop.px]="isMobile() ? 56 : 0" -->
 
       <mat-sidenav-container class="example-sidenav-container">
         <mat-sidenav
@@ -45,7 +44,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
           fixedTopGap="56"
           [style.width]="sidenavWidth()"
         >
-          <app-custom-sidenav [isSidenavOpen]="isSidenavOpen" />
+          <app-custom-sidenav />
         </mat-sidenav>
         <mat-sidenav-content class="content">
           <router-outlet></router-outlet>
@@ -95,20 +94,7 @@ export default class LayoutComponent implements OnDestroy {
   protected readonly isMobile = signal(true);
   private readonly _mobileQuery: MediaQueryList;
   private readonly _mobileQueryListener: () => void;
-  protected readonly fillerNav = Array.from(
-    { length: 50 },
-    (_, i) => `Nav Item ${i + 1}`
-  );
 
-  protected readonly fillerContent = Array.from(
-    { length: 50 },
-    () =>
-      `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-       labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-       laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
-       voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-       cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`
-  );
   constructor() {
     const media = inject(MediaMatcher);
 

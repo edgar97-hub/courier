@@ -7,6 +7,8 @@ import { Router } from '@angular/router';
 import { AppStore } from '../../../app.store';
 import { MatSidenav } from '@angular/material/sidenav';
 import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
+import { ProfileEditDialogComponent } from '../profile-edit-dialog/profile-edit-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-header',
@@ -25,25 +27,17 @@ import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
         <mat-icon>menu</mat-icon>
       </button>
       <div class="flex-1"></div>
-      <!-- <button mat-icon-button (click)="darkMode.set(!darkMode())">
-
-         @if (darkMode()) {
-        <mat-icon>light_mode</mat-icon>
-        } @else {
-        <mat-icon>dark_mode</mat-icon>
-        } 
-      </button>-->
       <app-theme-toggle></app-theme-toggle>
 
       @if (appStore.currentUser(); as user) {
       <button mat-icon-button [mat-menu-trigger-for]="profileMenu">
-        <!-- <img
-          [src]="user.photoUrl"
-          class="w-[24px] h-[24px] object-cover rounded-full"
-        /> -->
         <mat-icon>more_vert</mat-icon>
       </button>
       <mat-menu #profileMenu="matMenu">
+        <button mat-menu-item (click)="openProfileEditDialog()">
+          <mat-icon>manage_accounts</mat-icon>
+          <span>Editar Perfil</span>
+        </button>
         <button mat-menu-item (click)="appStore.logout()">
           <mat-icon>logout</mat-icon>
           Log out
@@ -65,13 +59,18 @@ export class HeaderComponent {
   router = inject(Router);
 
   @Input() sidenav!: MatSidenav;
+  private dialog = inject(MatDialog);
 
   toggleSidenav() {
     this.sidenav.toggle();
   }
-
-  // darkMode = signal(false);
-  // setDarkModeClass = effect(() => {
-  //   document.documentElement.classList.toggle('dark', this.darkMode());
-  // });
+  openProfileEditDialog(): void {
+    const currentUser = this.appStore.currentUser();
+    this.dialog.open(ProfileEditDialogComponent, {
+      width: '600px',
+      maxWidth: '95vw',
+      data: { user: currentUser },
+      disableClose: true,
+    });
+  }
 }

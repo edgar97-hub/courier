@@ -132,13 +132,14 @@ export class UserEditPageComponent implements OnInit, OnDestroy {
             //     panelClass: ['success-snackbar'],
             //   }
             // );
-            this.snackBar.open(`¡Actualizado exitosamente!`, 'OK', {
+            this.snackBar.open(`guardado exitosamente!`, 'OK', {
               duration: 3000,
               verticalPosition: 'top',
               panelClass: ['success-snackbar'],
             });
             this.isEditMode = false;
-            this.router.navigate(['/configuracion/users']);
+            // this.router.navigate(['/users']);
+            window.location.href = '/users';
           },
           error: (err) => {
             this.isLoading = false;
@@ -183,7 +184,8 @@ export class UserEditPageComponent implements OnInit, OnDestroy {
               panelClass: ['success-snackbar'],
             });
             this.isEditMode = false;
-            this.router.navigate(['/configuracion/users']);
+            window.location.href = '/users';
+            // this.router.navigate(['/users']);
           },
           error: (err) => {
             this.isLoading = false;
@@ -204,7 +206,7 @@ export class UserEditPageComponent implements OnInit, OnDestroy {
 
   handleFormCancel(): void {
     this.isEditMode = false;
-    this.router.navigate(['/configuracion/users']);
+    this.router.navigate(['/users']);
   }
 
   ngOnDestroy(): void {

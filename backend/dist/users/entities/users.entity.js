@@ -39,6 +39,10 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
+], UsersEntity.prototype, "photo_url", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
 ], UsersEntity.prototype, "business_type", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: '' }),

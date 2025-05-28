@@ -5,20 +5,22 @@ import { AppStore } from '../../../../app.store';
   selector: 'app-sidenav-header',
   imports: [],
   template: `
-    <div class="pt-6 flex flex-col items-center">
-      <!-- <img
+    <div class="pt-4 flex flex-col items-center">
+      <img
         class="object-cover object-center rounded-full mb-3 aspect-square"
         [width]="profilePicSize()"
         [height]="profilePicSize()"
-        [src]="appStore.user()?.photoUrl ?? 'person-placeholder.png'"
-      /> -->
+        [src]="appStore.currentUser()?.photo_url"
+      />
       <div
-        class="text-center mb-2 h-[3rem] {{
+        class="text-center mb-2 h-[2rem] {{
           collapsed() ? 'h-0! opacity-0' : ''
         }}"
       >
-        <h2 class="text-lg">{{ appStore.currentUser()?.username ?? 'User' }}</h2>
-        <p class="text-sm">{{ appStore.currentUser()?.rol }}</p>
+        <h2 class="text-lg">
+          {{ appStore.currentUser()?.username ?? 'User' }}
+        </h2>
+        <p class="text-sm">{{ appStore.currentUser()?.role }}</p>
       </div>
     </div>
   `,

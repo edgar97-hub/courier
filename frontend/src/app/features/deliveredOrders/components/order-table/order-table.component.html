@@ -111,11 +111,19 @@
         Acciones
       </th>
       <td mat-cell *matCellDef="let order" class="actions-cell">
-        <button mat-menu-item (click)="onViewOrderDetails(order)">
+        <button
+          mat-menu-item
+          (click)="onViewOrderDetails(order)"
+          *ngIf="order.product_delivery_photo_url"
+        >
           <mat-icon>photo</mat-icon>
         </button>
 
-        <button mat-menu-item (click)="onViewPdf(order)">
+        <button
+          mat-menu-item
+          (click)="onViewPdf(order)"
+          *ngIf="order.product_delivery_photo_url"
+        >
           <mat-icon>download</mat-icon>
         </button>
       </td>

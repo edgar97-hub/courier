@@ -4,14 +4,6 @@
     <span class="order-code-chip"
       >Pedido N°: {{ data.order.code || data.order.id }}</span
     >
-    <button
-      mat-icon-button
-      (click)="onCancel()"
-      class="close-button-header"
-      matTooltip="Cerrar"
-    >
-      <mat-icon>close</mat-icon>
-    </button>
   </div>
 
   <form [formGroup]="deliveryDetailsForm" (ngSubmit)="onConfirm()">
@@ -87,7 +79,6 @@
         <mat-divider></mat-divider>
         <h4>Prueba de Entrega y Pagos</h4>
 
-        <!-- Controles de Cámara y Subida de Imagen -->
         <div class="image-upload-container">
           <label class="image-upload-label">Foto de Prueba de Entrega:</label>
           <div class="image-actions">
@@ -121,11 +112,6 @@
             accept="image/*"
           />
 
-          <!-- @if(cameraError) {
-          <p class="camera-error-message">
-            <mat-icon color="warn">warning</mat-icon> {{ cameraError }}
-          </p>
-          } @if (showCamera && !photoTaken) { } -->
           <div class="camera-view">
             <video
               #videoPlayer

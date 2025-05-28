@@ -96,22 +96,15 @@ export class ChangeStatusDialogComponent implements OnInit {
   // isUploadingImage: boolean = false;
   // uploadedImageUrl: string | null = null; // URL de la imagen después de subirla
 
-  // Opciones para los métodos de pago
-  readonly paymentMethods: string[] = [
-    'Efectivo',
-    'Yape',
-    'Plin',
-    'Transferencia',
-    'POS',
-  ];
+  readonly paymentMethods: string[] = ['Efectivo', 'Pago directo', 'POS'];
   showDeliveryDetails: boolean = false;
 
-  public OrderStatusEnum = OrderStatus; // Para usar en la plantilla
+  public OrderStatusEnum = OrderStatus;
 
   private fb = inject(FormBuilder);
-  private imageUploadService = inject(ImageUploadService); // Inyecta tu servicio de subida
-  private snackBar = inject(MatSnackBar); // Inyectar MatSnackBar
-  private cdr = inject(ChangeDetectorRef); // Para forzar detección de cambios
+  private imageUploadService = inject(ImageUploadService);
+  private snackBar = inject(MatSnackBar);
+  private cdr = inject(ChangeDetectorRef);
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -121,7 +114,6 @@ export class ChangeStatusDialogComponent implements OnInit {
     >,
     @Inject(MAT_DIALOG_DATA) public data: ChangeStatusDialogData
   ) {
-    // Inicializar el formulario reactivo
     this.deliveryDetailsForm = this.fb.group({
       shippingCostPaymentMethod: [null], // Opcional, solo si se cobra en entrega
       collectionPaymentMethod: [null], // Opcional, solo si hay monto a cobrar
@@ -319,6 +311,7 @@ export class ChangeStatusDialogComponent implements OnInit {
     const statusesRequiringReason: OrderStatus[] = [
       OrderStatus.CANCELADO,
       OrderStatus.REPROGRAMADO,
+      OrderStatus.RECHAZADO,
     ];
     return statusesRequiringReason.includes(currentStatus);
   }
@@ -388,8 +381,8 @@ export class ChangeStatusDialogComponent implements OnInit {
       // Si es ENTREGADO, el formulario de detalles de entrega debe ser válido
       // y se requiere una imagen si la política del negocio lo exige.
       // Para este ejemplo, haremos que la imagen sea opcional, pero los selects de pago sí deben ser válidos si los montos son > 0
-      if (!this.deliveryDetailsForm.valid) return true;
-      // Podrías añadir: if (!this.selectedImageFile) return true; // Si la imagen es obligatoria
+      // if (!this.deliveryDetailsForm.valid) return true;
+      if (!this.selectedImageFile) return true; // Si la imagen es obligatoria
     }
     return false; // Si pasa todas las validaciones, no está deshabilitado
   }

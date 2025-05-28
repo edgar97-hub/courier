@@ -1,0 +1,125 @@
+:host {
+  display: block;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.profile-dialog-container {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  //   border-bottom: 1px solid mat.get-color-from-palette(mat.$gray-palette, 300);
+  //   background-color: mat.get-color-from-palette(mat.$gray-palette, 50);
+  cursor: move;
+
+  h2.mat-mdc-dialog-title {
+    margin: 0;
+    font-size: 1.25em;
+    font-weight: 500;
+  }
+}
+
+.close-button {
+  //   color: mat.get-color-from-palette(mat.$gray-palette, 700);
+}
+
+.dialog-content {
+  padding: 24px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.profile-picture-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+
+  .profile-avatar-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 16px;
+    // border: 3px solid mat.get-color-from-palette(mat.$gray-palette, 200);
+    // background-color: mat.get-color-from-palette(
+    //   mat.$gray-palette,
+    //   100
+    // ); // Placeholder color
+  }
+
+  .upload-button {
+    max-width: 200px; // Limitar ancho del botón
+  }
+  .file-name-display {
+    font-size: 0.8em;
+    // color: mat.get-color-from-palette(mat.$gray-palette, 600);
+    margin-top: 8px;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.section-title {
+  font-size: 1.1em;
+  font-weight: 500;
+  //   color: mat.get-color-from-palette(mat.$blue-grey-palette, 600);
+  margin-top: 24px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  //   border-bottom: 1px solid mat.get-color-from-palette(mat.$gray-palette, 200);
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 0; // El form-field ya tiene margen inferior
+  .form-field {
+    flex: 1;
+  }
+}
+
+.group-error {
+  font-size: 0.75em;
+  margin-top: -8px; // Ajustar para que esté cerca de los campos
+  margin-bottom: 16px;
+  // color: mat.get-theme-color(theme.$warn-palette, default); // Para usar el color de error del tema
+  color: #f44336; // Color de error directo
+}
+
+.dialog-actions {
+  padding: 16px 24px;
+  //   border-top: 1px solid mat.get-color-from-palette(mat.$gray-palette, 300);
+  //   background-color: mat.get-color-from-palette(mat.$gray-palette, 50);
+  button {
+    font-weight: 500;
+  }
+}
+
+.form-spinner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; // Por encima de todo en el diálogo
+  border-radius: 8px; // Coincidir con el diálogo
+}

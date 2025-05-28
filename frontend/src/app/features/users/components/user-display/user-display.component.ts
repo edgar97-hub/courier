@@ -42,7 +42,7 @@ export class UserDisplayComponent {
 
   // Para la lógica condicional de secciones basada en el rol del usuario mostrado
   get isCustomerRole(): boolean {
-    return this.userData?.role === 'CUSTOMER';
+    return this.userData?.role === 'CLIENTE';
   }
 
   // Helper para mostrar 'Sí' o 'No' para booleanos

@@ -1,5 +1,5 @@
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
-import { UserDTO, UserUpdateDTO } from '../dto/user.dto';
+import { UserDTO, UserProfile, UserUpdateDTO } from '../dto/user.dto';
 import { UsersEntity } from '../entities/users.entity';
 export declare class UsersService {
     private readonly userRepository;
@@ -8,10 +8,12 @@ export declare class UsersService {
     findUsers(): Promise<UsersEntity[]>;
     findUsersByRol(rol: string): Promise<UsersEntity[]>;
     findUserById(id: string): Promise<UsersEntity>;
+    findUserPerfil(idUser: string): Promise<UsersEntity>;
     findBy({ key, value }: {
         key: keyof UserDTO;
         value: any;
     }): Promise<UsersEntity>;
     updateUser(body: UserUpdateDTO, id: string): Promise<UpdateResult | undefined>;
+    updateProfile(body: UserProfile, id: string): Promise<any | undefined>;
     deleteUser(id: string): Promise<DeleteResult | undefined>;
 }

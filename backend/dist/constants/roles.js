@@ -3,10 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ACCESS_LEVEL = exports.STATES = exports.ROLES = void 0;
 var ROLES;
 (function (ROLES) {
-    ROLES["ADMIN"] = "ADMIN";
-    ROLES["CUSTOMER"] = "CUSTOMER";
-    ROLES["MOTORIZED"] = "MOTORIZED";
-    ROLES["RECEPTIONIST"] = "RECEPTIONIST";
+    ROLES["ADMIN"] = "ADMINISTRADOR";
+    ROLES["CUSTOMER"] = "CLIENTE";
+    ROLES["MOTORIZED"] = "MOTORIZADO";
+    ROLES["RECEPTIONIST"] = "RECEPCIONISTA";
 })(ROLES || (exports.ROLES = ROLES = {}));
 var STATES;
 (function (STATES) {

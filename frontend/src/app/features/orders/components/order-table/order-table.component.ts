@@ -40,6 +40,7 @@ import {
 } from '../assign-driver-dialog/assign-driver-dialog.component'; // <--- IMPORTA EL DIÁLOGO
 import { User } from '../../../../shared/models/user';
 import { RescheduleOrderDialogComponent } from '../reschedule-order-dialog/reschedule-order-dialog.component';
+import { AppStore } from '../../../../app.store';
 
 @Component({
   selector: 'app-order-table',
@@ -64,6 +65,8 @@ import { RescheduleOrderDialogComponent } from '../reschedule-order-dialog/resch
   styleUrls: ['./order-table.component.scss'],
 })
 export class OrderTableComponent implements AfterViewInit, OnChanges {
+  appStore = inject(AppStore);
+
   @Input() orders: Order_[] | null = [];
   @Input() isLoading: boolean = false;
   @Input() totalCount: number = 0;
@@ -381,14 +384,17 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   }
 
   isAdminOrDriver(): boolean {
-    // const userRole = this.appStore.currentUser()?.role;
-    // return userRole === 'ADMINISTRADOR' || userRole === 'MOTORIZADO';
-    return true; // Placeholder
+    const userRole = this.appStore.currentUser()?.role;
+    return userRole === 'ADMINISTRADOR' || userRole === 'MOTORIZADO';
+  }
+
+  isAdminOrReceptionist(): boolean {
+    const userRole = this.appStore.currentUser()?.role;
+    return userRole === 'ADMINISTRADOR' || userRole === 'RECEPCIONISTA';
   }
 
   isAdminUser(): boolean {
-    // const userRole = this.appStore.currentUser()?.role;
-    // return userRole === 'ADMINISTRADOR';
-    return true; // Placeholder
+    const userRole = this.appStore.currentUser()?.role;
+    return userRole === 'ADMINISTRADOR';
   }
 }

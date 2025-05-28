@@ -370,7 +370,7 @@ export class OrderService {
     }
 
     return this.http
-      .get<any>(`${this.apiUrlUsers}/rol/MOTORIZED`, { headers })
+      .get<any>(`${this.apiUrlUsers}/rol/MOTORIZADO`, { headers })
       .pipe(catchError(this.handleError));
   }
 

@@ -63,7 +63,12 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   deliveryDistricts$: Observable<DistrictOption[]>;
   minDeliveryDate: Date;
 
-  shipmentTypes: string[] = ['SOLO ENTREGA NO COBRAR']; // Podría venir de una API
+  shipmentTypes: string[] = [
+    'CONTRAENTREGA',
+    'SOLO ENTREGAR',
+    'CAMBIO',
+    'RECOJO',
+  ];
   paymentMethodsForCollection: string[] = [
     'NO COBRAR',
     'EFECTIVO',

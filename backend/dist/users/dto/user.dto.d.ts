@@ -43,3 +43,9 @@ export declare class UserUpdateDTO {
     owner_email_address: string;
     owner_bank_account: string;
 }
+export declare class UserProfile {
+    email: string;
+    username: string;
+    password?: string;
+    photo_url: string;
+}

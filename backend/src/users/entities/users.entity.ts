@@ -22,6 +22,9 @@ export class UsersEntity extends BaseEntity implements IUser {
   password: string;
 
   @Column({ default: '' })
+  photo_url: string;
+
+  @Column({ default: '' })
   business_type: string;
 
   @Column({ default: '' })

@@ -67,7 +67,7 @@ export class DistrictFormPageComponent implements OnInit, OnDestroy {
                 'Cerrar',
                 { duration: 5000, panelClass: ['error-snackbar'] }
               );
-              this.router.navigate(['/configuracion/districts']);
+              this.router.navigate(['/districts']);
             }
             this.isLoading = false;
           }),
@@ -122,7 +122,7 @@ export class DistrictFormPageComponent implements OnInit, OnDestroy {
           duration: 3000,
           panelClass: ['success-snackbar'],
         });
-        this.router.navigate(['/configuracion/districts']); // Volver a la lista
+        this.router.navigate(['/districts']); // Volver a la lista
       },
       error: (err) => {
         this.isSaving = false;
@@ -139,7 +139,7 @@ export class DistrictFormPageComponent implements OnInit, OnDestroy {
   }
 
   handleCancel(): void {
-    this.router.navigate(['/configuracion/districts']);
+    this.router.navigate(['/districts']);
   }
 
   ngOnDestroy(): void {

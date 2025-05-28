@@ -38,7 +38,7 @@ export const routes: Routes = [
     title: 'Forgot Password',
   },
   {
-    path: 'configuracion',
+    path: '',
     loadComponent: () =>
       import('../app/shared/components/layout/layout.component'),
     canActivate: [redirectLoginIfNotAuthenticated()],
@@ -78,14 +78,14 @@ export const routes: Routes = [
           ),
         title: 'Gestión de Distritos',
       },
-    ],
-  },
-  {
-    path: 'orders',
-    loadComponent: () =>
-      import('../app/shared/components/layout/layout.component'),
-    canActivate: [redirectLoginIfNotAuthenticated()],
-    children: [
+      //  {
+      //   path: 'districts',
+      //   loadChildren: () =>
+      //     import('./features/users/pages/user-detail-page/user-detail-page.component').then(
+      //       (m) => m.D
+      //     ),
+      //   title: 'Gestión de Distritos',
+      // },
       {
         path: 'orders',
         loadChildren: () =>
@@ -93,14 +93,6 @@ export const routes: Routes = [
             (m) => m.ORDERS_ROUTES
           ),
       },
-    ],
-  },
-  {
-    path: '',
-    loadComponent: () =>
-      import('../app/shared/components/layout/layout.component'),
-    canActivate: [redirectLoginIfNotAuthenticated()],
-    children: [
       {
         path: 'orders-delivered',
         loadChildren: () =>
@@ -108,8 +100,16 @@ export const routes: Routes = [
             (m) => m.ORDERS_ROUTES
           ),
       },
+      {
+        path: 'lista-cierre-caja',
+        loadChildren: () =>
+          import('./features/listaCierreCaja/orders.routes').then(
+            (m) => m.ORDERS_ROUTES
+          ),
+      },
     ],
   },
+
   {
     path: 'tracking',
     loadChildren: () =>

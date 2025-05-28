@@ -37,8 +37,15 @@ let UsersController = class UsersController {
     async findUserById(id) {
         return await this.usersService.findUserById(id);
     }
+    async findUserPerfil(req) {
+        console.log('idUser', req.idUser);
+        return await this.usersService.findUserPerfil(req.idUser);
+    }
     async updateUser(id, body) {
         return await this.usersService.updateUser(body, id);
+    }
+    async updateProfile(id, body) {
+        return await this.usersService.updateProfile(body, id);
     }
     async deleteUser(id) {
         return await this.usersService.deleteUser(id);
@@ -84,6 +91,13 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findUserById", null);
 __decorate([
+    (0, common_1.Get)('/perfil/me'),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "findUserPerfil", null);
+__decorate([
     (0, swagger_1.ApiParam)({
         name: 'id',
     }),
@@ -94,6 +108,17 @@ __decorate([
     __metadata("design:paramtypes", [String, user_dto_1.UserUpdateDTO]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateUser", null);
+__decorate([
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+    }),
+    (0, common_1.Put)('update-profile/:id'),
+    __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, user_dto_1.UserProfile]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "updateProfile", null);
 __decorate([
     (0, swagger_1.ApiParam)({
         name: 'id',

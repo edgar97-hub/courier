@@ -1,5 +1,9 @@
 import { Injectable, inject, signal, WritableSignal } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpHeaders,
+} from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, throwError, of } from 'rxjs';
 import { catchError, tap, map, delay } from 'rxjs/operators';
@@ -17,11 +21,12 @@ const USER_INFO_KEY = 'user_info';
 })
 export class AuthService {
   private http = inject(HttpClient);
-  private router = inject(Router); // Router todavía puede ser útil aquí
+  private router = inject(Router);
 
   readonly isAuthenticated: WritableSignal<boolean> = signal(false);
   readonly currentUser: WritableSignal<User | null> = signal(null);
   readonly loginUrl = environment.apiUrl + '/auth/login';
+  readonly usersUrl = environment.apiUrl + '/users';
 
   constructor() {
     this.loadSessionFromStorage();
@@ -41,7 +46,7 @@ export class AuthService {
         this.clearUserSessionAndSignals();
       }
     } else {
-      this.clearUserSessionAndSignals(); // Asegura que las señales estén limpias si no hay sesión
+      this.clearUserSessionAndSignals();
     }
   }
 
@@ -62,6 +67,35 @@ export class AuthService {
     this.currentUser.set(null);
   }
 
+  getCurrentUserFromBackend(): Observable<User> {
+    const token = this.getAccessToken();
+    let headers;
+    if (token) {
+      headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        codrr_token: token,
+      });
+    }
+
+    return this.http.get<User>(`${this.usersUrl}/perfil/me`, { headers }).pipe(
+      tap((user) => {
+        this.currentUser.set(user);
+        this.storeUserInfo(user);
+        this.isAuthenticated.set(true);
+        console.log('AuthService: Usuario actualizado desde el backend', user);
+      }),
+      catchError((error) => {
+        console.error(
+          'Error al obtener el usuario actual desde el backend',
+          error
+        );
+        this.clearUserSessionAndSignals();
+        this.router.navigate(['/login']);
+        return throwError(() => error);
+      })
+    );
+  }
+
   getAccessToken(): string | null {
     return localStorage.getItem(ACCESS_TOKEN_KEY);
   }
@@ -73,7 +107,7 @@ export class AuthService {
       map((response) => {
         const simulatedUser: User = {
           id: response.user.id,
-          rol: response.user.role,
+          role: response.user.role,
           email: credentials.email,
           username: credentials.email.split('@')[0],
         };

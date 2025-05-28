@@ -81,6 +81,16 @@ export class UserService {
       .pipe(catchError(this.handleError));
   }
 
+  updateProfile(user: User): Observable<User> {
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(() => new Error('Not authenticated to update user.'));
+    }
+    return this.http
+      .put<User>(`${this.apiUrl}/update-profile/${user.id}`, user, { headers })
+      .pipe(catchError(this.handleError));
+  }
+
   // Eliminar un usuario (para ser llamado por un Effect de NgRx)
   deleteUser(id: string): Observable<{}> {
     // La API podría devolver un cuerpo vacío o un mensaje

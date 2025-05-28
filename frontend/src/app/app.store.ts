@@ -107,8 +107,6 @@
 //   }))
 // );
 
-// src/app/store/auth.store.ts
-// src/app/store/auth.store.ts (o app.store.ts si prefieres)
 import { computed, inject, signal, WritableSignal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -119,14 +117,13 @@ import {
   patchState,
   withComputed,
   type PartialStateUpdater,
-} from '@ngrx/signals'; // Importa PartialStateUpdater
+} from '@ngrx/signals';
 import { AuthService } from './core/services/auth.service';
 import { Credentials } from './features/login/models/credentials.interface';
 import { AuthResponse } from './features/login/models/auth-response.interface';
 import { User } from './features/login/models/user.interface'; // Asumiendo que este es el modelo de usuario que quieres guardar
 
 interface AppUiState {
-  // Renombrado para reflejar que es más estado de UI/orquestación
   isLoading: boolean;
   error: string | null;
 }
@@ -139,39 +136,18 @@ const initialAppUiState: AppUiState = {
 export const AppStore = signalStore(
   { providedIn: 'root' },
   withState(initialAppUiState),
-
-  // Derivar el estado de autenticación directamente de las señales del AuthService
-  withComputed(
-    (
-      // store: StateSignal<AppUiState>, // No es necesario aquí si solo derivamos
-      _, // Placeholder
-      authService = inject(AuthService)
-    ) => ({
-      currentUser: computed(() => authService.currentUser()), // Lee la señal de AuthService
-      isAuthenticated: computed(() => authService.isAuthenticated()), // Lee la señal de AuthService
-    })
-  ),
+  withComputed((_, authService = inject(AuthService)) => ({
+    currentUser: computed(() => authService.currentUser()),
+    isAuthenticated: computed(() => authService.isAuthenticated()),
+  })),
 
   withMethods(
     (
-      store, // El 'store' aquí se refiere a AppUiState
+      store,
       router = inject(Router),
-      authService = inject(AuthService), // AuthService se inyecta aquí para sus métodos de acción
+      authService = inject(AuthService),
       snackbar = inject(MatSnackBar)
-      // injector = inject(Injector) // Inyectar el Injector
     ) => {
-      // Efecto para reaccionar a cambios en la autenticación del AuthService
-      // y actualizar el estado del AppStore si es necesario (aunque withComputed ya lo hace)
-      // o para realizar acciones adicionales.
-      // runInInjectionContext(injector, () => { // Ejecutar effect en contexto de inyección
-      //   effect(() => {
-      //     const isAuth = authService.isAuthenticated();
-      //     const user = authService.currentUser();
-      //     console.log('AppStore effect: Auth state changed in AuthService:', { isAuth, user });
-      //     // patchState(store, { currentUser: user, isAuthenticated: isAuth }); // Redundante si withComputed está bien
-      //   });
-      // });
-
       return {
         async login(credentials: Credentials): Promise<void> {
           patchState(store, { isLoading: true, error: null });
@@ -189,7 +165,8 @@ export const AppStore = signalStore(
                 panelClass: ['success-snackbar'],
               }
             );
-            router.navigate(['/configuracion/users']);
+            authService.getCurrentUserFromBackend().subscribe();
+            router.navigate(['orders-delivered']);
           } catch (err: any) {
             const errorMessage =
               err.message || 'Login failed. Please try again.';
@@ -212,6 +189,13 @@ export const AppStore = signalStore(
             verticalPosition: 'top',
           });
         },
+
+        //        updateCurrentUser(updatedUser: User): void {
+        //   patchState(store, { currentUser: updatedUser });
+        //   // También actualiza el localStorage si AuthService guarda el usuario ahí
+        //   // inject(AuthService).storeUserInfo(updatedUser); // Necesitarías inyectar AuthService o manejarlo diferente
+        //   localStorage.setItem('user_info', JSON.stringify(updatedUser)); // Ejemplo simple
+        // }
 
         clearError(): void {
           patchState(store, { error: null });

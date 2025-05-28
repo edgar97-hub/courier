@@ -4,7 +4,6 @@ export type MenuItem = {
   route?: string;
   subItems?: MenuItem[];
   roles?: string[];
-  externalLink?: string;
   key?: string;
 };
 
@@ -12,20 +11,20 @@ export const menuItems: MenuItem[] = [
   {
     icon: 'list_alt',
     label: 'Tarifas',
-    route: 'configuracion/tarifas',
-    roles: ['ADMIN', 'MOTORIZED', 'CUSTOMER', 'RECEPTIONIST'],
+    route: 'tarifas',
+    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'CLIENTE', 'RECEPCIONISTA'],
   },
   {
     icon: 'list_alt',
     label: 'Detalles del negocio',
-    route: 'configuracion/users/detail/',
-    roles: ['CUSTOMER'],
+    route: 'users/detail/',
+    roles: ['CLIENTE'],
   },
   {
     icon: 'format_list_bulleted',
     label: 'Configuración',
     route: 'configuracion',
-    roles: ['ADMIN'],
+    roles: ['ADMINISTRADOR'],
     subItems: [
       {
         icon: 'settings_applications',
@@ -55,7 +54,7 @@ export const menuItems: MenuItem[] = [
     icon: 'format_list_bulleted',
     label: 'Pedidos',
     route: 'orders',
-    roles: ['ADMIN', 'MOTORIZED', 'CUSTOMER', 'RECEPTIONIST'],
+    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'CLIENTE', 'RECEPCIONISTA'],
 
     subItems: [
       {
@@ -74,6 +73,12 @@ export const menuItems: MenuItem[] = [
     icon: 'list_alt',
     label: 'Pedidos entregados',
     route: 'orders-delivered',
-    roles: ['ADMIN', 'MOTORIZED', 'CUSTOMER', 'RECEPTIONIST'],
+    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'CLIENTE', 'RECEPCIONISTA'],
+  },
+  {
+    icon: 'list_alt',
+    label: 'Lista de cierre de caja',
+    route: 'lista-cierre-caja',
+    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'CLIENTE', 'RECEPCIONISTA'],
   },
 ];

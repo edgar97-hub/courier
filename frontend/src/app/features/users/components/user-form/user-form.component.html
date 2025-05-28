@@ -16,7 +16,7 @@
         <div class="form-grid">
           <mat-form-field appearance="outline" class="form-field small-field">
             <mat-label>Nombre de Usuario</mat-label>
-            <input 
+            <input
               matInput
               formControlName="username"
               autocomplete="off"
@@ -77,10 +77,10 @@
           <mat-form-field appearance="outline" class="form-field small-field">
             <mat-label>Rol</mat-label>
             <mat-select formControlName="role" required>
-              <mat-option value="ADMIN">Administrador</mat-option>
-              <mat-option value="MOTORIZED">Motorizado</mat-option>
-              <mat-option value="CUSTOMER">Cliente</mat-option>
-              <mat-option value="RECEPTIONIST">Recepcionista</mat-option>
+              <mat-option value="ADMINISTRADOR">Administrador</mat-option>
+              <mat-option value="MOTORIZADO">Motorizado</mat-option>
+              <mat-option value="CLIENTE">Cliente</mat-option>
+              <mat-option value="RECEPCIONISTA">Recepcionista</mat-option>
             </mat-select>
             <mat-error
               *ngIf="

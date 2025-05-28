@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { ErrorManager } from 'src/utils/error.manager';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
-import { UserDTO, UserUpdateDTO } from '../dto/user.dto';
+import { UserDTO, UserProfile, UserUpdateDTO } from '../dto/user.dto';
 import { UsersEntity } from '../entities/users.entity';
 import { ROLES } from 'src/constants/roles';
 
@@ -108,6 +108,24 @@ export class UsersService {
     }
   }
 
+  public async findUserPerfil(idUser: string): Promise<UsersEntity> {
+    console.log('idUser', idUser);
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: idUser },
+      });
+      if (!user) {
+        throw new ErrorManager({
+          type: 'BAD_REQUEST',
+          message: 'No se encontro resultado',
+        });
+      }
+      return user;
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
   public async findBy({ key, value }: { key: keyof UserDTO; value: any }) {
     try {
       const user: UsersEntity = (await this.userRepository
@@ -144,6 +162,30 @@ export class UsersService {
         });
       }
       return user;
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  public async updateProfile(
+    body: UserProfile,
+    id: string,
+  ): Promise<any | undefined> {
+    try {
+      if (body.password) {
+        body.password = await bcrypt.hash(
+          body.password,
+          Number(process.env.HASH_SALT),
+        );
+      } else {
+        delete body.password;
+      }
+      await this.userRepository.update(id, body);
+      const updatedUser = await this.userRepository.findOne({
+        where: { id },
+      });
+
+      return updatedUser;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }

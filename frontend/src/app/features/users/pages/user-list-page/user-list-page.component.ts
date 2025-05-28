@@ -88,7 +88,7 @@ export class UserListPageComponent implements OnInit, OnDestroy {
   }
 
   handleEditUser(user: User): void {
-    this.router.navigate(['/configuracion/users', 'edit', user.id]);
+    this.router.navigate(['/users', 'edit', user.id]);
   }
 
   handleDeleteUser(user: User): void {
@@ -116,7 +116,7 @@ export class UserListPageComponent implements OnInit, OnDestroy {
   }
 
   navigateToCreate(): void {
-    this.router.navigate(['/configuracion/users/edit/0']);
+    this.router.navigate(['/users/edit/0']);
   }
 
   ngOnDestroy(): void {

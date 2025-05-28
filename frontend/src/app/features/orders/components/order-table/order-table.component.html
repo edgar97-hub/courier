@@ -154,7 +154,11 @@
             <mat-icon>swap_horiz</mat-icon>
             <span>Cambiar Estado General</span>
           </button>
-          <button mat-menu-item (click)="openRescheduleOrderModal(order)">
+          <button
+            mat-menu-item
+            (click)="openRescheduleOrderModal(order)"
+            *ngIf="isAdminOrReceptionist()"
+          >
             <mat-icon>event_repeat</mat-icon>
             <span>Reprogramar</span>
           </button>

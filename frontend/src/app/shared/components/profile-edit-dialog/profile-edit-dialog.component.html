@@ -1,0 +1,110 @@
+<div class="profile-dialog-container">
+  <div class="dialog-header" cdkDrag cdkDragHandle>
+    <h2 mat-dialog-title>Editar Perfil</h2>
+    <button
+      mat-icon-button
+      class="close-button"
+      (click)="onCancel()"
+      matTooltip="Cerrar"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+      <div class="profile-picture-section">
+        <img
+          [src]="imagePreviewUrl"
+          alt="Vista previa del perfil"
+          class="profile-avatar-preview"
+        />
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="triggerFileInput()"
+          class="upload-button"
+        >
+          <mat-icon>photo_camera</mat-icon>
+          <span>{{ selectedFile ? "Cambiar Foto" : "Subir Foto" }}</span>
+        </button>
+        <input
+          type="file"
+          id="profilePhotoInput"
+          (change)="onFileSelected($event)"
+          accept="image/png, image/jpeg, image/gif"
+          hidden
+        />
+        @if (selectedFile) {
+        <span class="file-name-display">Archivo: {{ selectedFile.name }}</span>
+        }
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <h3 class="section-title">Información Personal</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nombre Completo</mat-label>
+        <input matInput formControlName="name" required />
+        @if (nameCtrl?.hasError('required')) {
+        <mat-error>El nombre es obligatorio.</mat-error> }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Correo Electrónico</mat-label>
+        <input matInput formControlName="email" type="email" required />
+        <mat-icon matSuffix>email</mat-icon>
+        @if (emailCtrl?.hasError('required')) {
+        <mat-error>El correo es obligatorio.</mat-error> } @if
+        (emailCtrl?.hasError('email')) {
+        <mat-error>Formato de correo inválido.</mat-error> }
+      </mat-form-field>
+
+      <mat-divider></mat-divider>
+
+      <h3 class="section-title">Cambiar Contraseña (Opcional)</h3>
+      <div>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Contraseña </mat-label>
+          <input
+            matInput
+            formControlName="password"
+            [type]="hidePassword ? 'password' : 'text'"
+            autocomplete="new-password"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            (click)="hidePassword = !hidePassword"
+            type="button"
+            tabindex="-1"
+          >
+            <mat-icon>{{
+              hidePassword ? "visibility_off" : "visibility"
+            }}</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="dialog-actions">
+    <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="onSubmit()"
+      [disabled]="isLoading || profileForm.invalid"
+    >
+      {{ isLoading ? "Guardando..." : "Guardar Cambios" }}
+    </button>
+  </mat-dialog-actions>
+
+  <!-- Spinner de carga global para la operación de guardado -->
+  <div *ngIf="isLoading" class="form-spinner-overlay">
+    <mat-progress-spinner
+      mode="indeterminate"
+      diameter="40"
+    ></mat-progress-spinner>
+  </div>
+</div>

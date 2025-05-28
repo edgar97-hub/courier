@@ -1,108 +1,337 @@
-import { Component, computed, Input, input, signal } from '@angular/core';
+// import { Component, computed, Input, input, signal } from '@angular/core';
+// import { RouterLinkActive, RouterModule } from '@angular/router';
+// import { MatListModule } from '@angular/material/list';
+// import { MatIconModule } from '@angular/material/icon';
+// import { trigger, transition, style, animate } from '@angular/animations';
+// import { MenuItem } from '../menu-items';
+// import { CommonModule } from '@angular/common'; // <--- IMPORTANTE: Añadir CommonModule para *ngIf
+// @Component({
+//   selector: 'app-menu-item',
+//   imports: [
+//     RouterModule,
+//     RouterLinkActive,
+//     MatListModule,
+//     MatIconModule,
+//     CommonModule,
+//   ],
+//   template: `
+//     <a
+//       mat-list-item
+//       [style.--mat-list-list-item-leading-icon-start-space]="indentation()"
+//       [routerLink]="routeHistory() + '/' + item().route"
+//       (click)="nestedItemOpen.set(!nestedItemOpen())"
+//       routerLinkActive
+//       #rla="routerLinkActive"
+//       [activated]="rla.isActive"
+//     >
+//       <mat-icon
+//         [fontSet]="rla.isActive ? 'material-icons' : 'material-icons-outlined'"
+//         matListItemIcon
+//         >{{ item().icon }}</mat-icon
+//       >
+//       <span matListItemTitle>{{ item().label }}</span>
+
+//       @if(item().subItems) {
+//       <span matListItemMeta>
+//         @if(nestedItemOpen()) {
+//         <mat-icon>expand_less</mat-icon>
+//         } @else {
+//         <mat-icon>expand_more</mat-icon>
+//         }
+//       </span>
+//       }
+//     </a>
+//     @if (nestedItemOpen() ) {
+//     <div @expandContractMenu>
+//       @for(subItem of item().subItems; track subItem.route) {
+//       <app-menu-item
+//         [item]="subItem"
+//         [routeHistory]="routeHistory() + '/' + item().route"
+//         [isSidenavOpen]="isSidenavOpen"
+//       />
+//       }
+//     </div>
+//     }
+//   `,
+//   styles: `
+//     :host * {
+//       transition-property: margin-inline-start, opacity, height;
+//       transition-duration: 500ms;
+//       transition-timing-function: ease-in-out;
+//     }
+//   `,
+//   animations: [
+//     trigger('expandContractMenu', [
+//       transition(':enter', [
+//         style({ opacity: 0, height: '0px' }),
+//         animate('500ms ease-in-out', style({ opacity: 1, height: '*' })),
+//       ]),
+//       transition(':leave', [
+//         animate('500ms ease-in-out', style({ opacity: 0, height: '0px' })),
+//       ]),
+//     ]),
+//   ],
+// })
+// export class MenuItemComponent {
+//   item = input.required<MenuItem>();
+//   @Input() isSidenavOpen = false;
+
+//   routeHistory = input('');
+
+//   level = computed(() => this.routeHistory().split('/').length - 1);
+//   indentation = computed(() => {
+//     return this.isSidenavOpen ? '26px' : `${16 + this.level() * 16}px`;
+//   });
+
+//   nestedItemOpen = signal(false);
+// }
+
+import { Component, computed, input, signal, Input } from '@angular/core'; // input individual
 import { RouterLinkActive, RouterModule } from '@angular/router';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
-import { trigger, transition, style, animate } from '@angular/animations';
+import { MatRippleModule } from '@angular/material/core';
+import {
+  trigger,
+  state,
+  style,
+  animate,
+  transition,
+} from '@angular/animations'; // state añadido
+import { CommonModule } from '@angular/common';
 import { MenuItem } from '../menu-items';
-import { CommonModule } from '@angular/common'; // <--- IMPORTANTE: Añadir CommonModule para *ngIf
+
 @Component({
   selector: 'app-menu-item',
+  standalone: true,
   imports: [
+    CommonModule,
     RouterModule,
     RouterLinkActive,
     MatListModule,
     MatIconModule,
-    CommonModule,
+    MatRippleModule,
   ],
-  template: `
+  template: `<ng-container *ngIf="item()">
     <a
-      *ngIf="isExternalLink()"
-      mat-list-item
-      [href]="item().externalLink"
-      target="_blank"
-      rel="noopener noreferrer"
-      [style.--mat-list-list-item-leading-icon-start-space]="indentation()"
-      matRipple
-      class="menu-link-item"
-    >
-      <mat-icon matListItemIcon>{{ item().icon }}</mat-icon>
-      @if(!isSidenavOpen) {
-      <span matListItemTitle>{{ item().label }}</span>
-
-      }
-    </a>
-    <a
-      *ngIf="!isExternalLink()"
       mat-list-item
       [style.--mat-list-list-item-leading-icon-start-space]="indentation()"
-      [routerLink]="routeHistory() + '/' + item().route"
-      (click)="nestedItemOpen.set(!nestedItemOpen())"
+      [routerLink]="buildRouterLink()"
+      (click)="handleClick()"
+      [class.active-menu-item]="rla.isActive"
+      [class.expanded]="isSubmenuOpen()"
+      [class.has-subitems]="hasSubitems()"
       routerLinkActive
       #rla="routerLinkActive"
-      [activated]="rla.isActive"
+      [routerLinkActiveOptions]="{ exact: item().route ? true : false }"
+      [attr.aria-expanded]="hasSubitems() ? isSubmenuOpen() : null"
+      matRipple
+      class="menu-item"
     >
       <mat-icon
-        [fontSet]="rla.isActive ? 'material-icons' : 'material-icons-outlined'"
         matListItemIcon
-        >{{ item().icon }}</mat-icon
+        class="menu-item-icon"
+        [fontSet]="
+          rla.isActive && item().route
+            ? 'material-icons'
+            : 'material-icons-outlined'
+        "
       >
-      <span matListItemTitle>{{ item().label }}</span>
-
-      @if(item().subItems) {
-      <span matListItemMeta>
-        @if(nestedItemOpen()) {
-        <mat-icon>expand_less</mat-icon>
-        } @else {
-        <mat-icon>expand_more</mat-icon>
-        }
+        {{ item().icon }}
+      </mat-icon>
+      @if(!collapsed()) {
+      <span matListItemTitle class="menu-item-label">{{ item().label }}</span>
+      } @if(hasSubitems() && !collapsed()) {
+      <span matListItemMeta class="expand-indicator">
+        <mat-icon>{{
+          isSubmenuOpen() ? 'expand_less' : 'expand_more'
+        }}</mat-icon>
       </span>
       }
     </a>
-    @if (nestedItemOpen() ) {
-    <div @expandContractMenu>
-      @for(subItem of item().subItems; track subItem.route) {
+
+    @if (hasSubitems() && isSubmenuOpen()) {
+    <div
+      [@expandContractMenu]="isSubmenuOpen() ? 'expanded' : 'collapsed'"
+      class="submenu-container"
+    >
+      @for(subItem of item().subItems; track subItem.key) {
       <app-menu-item
         [item]="subItem"
-        [routeHistory]="routeHistory() + '/' + item().route"
-        [isSidenavOpen]="isSidenavOpen"
+        [collapsed]="collapsed()"
+        [level]="level() + 1"
       />
       }
     </div>
     }
-  `,
-  styles: `
-    :host * {
-      transition-property: margin-inline-start, opacity, height;
-      transition-duration: 500ms;
-      transition-timing-function: ease-in-out;
+  </ng-container> `,
+  styles: ` 
+ :host {
+  display: block;
+  width: 100%;
+}
+
+.menu-item {
+  width: 100%;
+  border-radius: 0; // O el radio que desees para los ítems
+  transition: background-color 0.2s ease-out, color 0.2s ease-out;
+  height: 48px; // Altura estándar de MatList item
+
+  .menu-item-icon {
+    margin-right: 16px; // Espacio entre icono y texto
+    color: inherit; // Hereda color del link
+  }
+
+  .menu-item-label {
+    font-size: 0.9rem;
+    font-weight: 400;
+    line-height: 1.5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .expand-indicator mat-icon,
+  .external-link-indicator mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    opacity: 0.7;
+  }
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04); // Hover sutil
+  }
+
+  &.active-menu-item {
+    background-color: rgba(63, 81, 181, 0.1); // Un color de activo sutil
+    // color: #3f51b5; // Color primario para el texto e icono activo
+
+    .menu-item-icon, .menu-item-label {
+      color: #3f51b5; // Color primario
+      font-weight: 500;
     }
-  `,
+  }
+
+  // Si el ítem tiene submenús y está expandido, también podría tener un estilo activo
+  &.has-subitems.expanded {
+    // background-color: rgba(0, 0, 0, 0.03); // Un fondo ligeramente diferente
+  }
+}
+
+.submenu-container {
+  // background-color: rgba(0,0,0,0.02); // Fondo sutil para el contenedor del submenú
+  overflow: hidden; // Necesario para la animación
+  // Los app-menu-item hijos manejarán su propia indentación basada en [level]
+}
+
+// Estilos para el Sidenav colapsado (cuando CustomSidenav pasa collapsed=true)
+:host-context(.collapsed) .menu-item { // Si CustomSidenav tiene una clase .collapsed
+  .menu-item-label, .expand-indicator, .external-link-indicator {
+    display: none; // Ocultar texto e indicadores
+  }
+  .menu-item-icon {
+    margin-right: 0; // Quitar margen si solo se muestra el icono
+  }
+  // Centrar el icono si es necesario
+  // justify-content: center;
+}`,
   animations: [
     trigger('expandContractMenu', [
-      transition(':enter', [
-        style({ opacity: 0, height: '0px' }),
-        animate('500ms ease-in-out', style({ opacity: 1, height: '*' })),
-      ]),
-      transition(':leave', [
-        animate('500ms ease-in-out', style({ opacity: 0, height: '0px' })),
-      ]),
+      state(
+        'collapsed',
+        style({ height: '0px', opacity: 0, overflow: 'hidden' })
+      ),
+      state('expanded', style({ height: '*', opacity: 1 })), // Altura automática
+      transition(
+        'expanded <=> collapsed',
+        animate('300ms cubic-bezier(0.4, 0.0, 0.2, 1)')
+      ),
     ]),
   ],
 })
 export class MenuItemComponent {
   item = input.required<MenuItem>();
-  @Input() isSidenavOpen = false;
+  routeHistory = input<string>('');
+  // Este 'collapsed' viene del padre (CustomSidenav o MenuItem padre)
+  // Indica si el Sidenav general o el menú padre está en modo "solo icono"
+  collapsed = input.required<boolean>();
+  // 'level' se usa para la indentación de los submenús
+  level = input<number>(0);
 
-  routeHistory = input('');
+  isSubmenuOpen = signal(false);
 
-  level = computed(() => this.routeHistory().split('/').length - 1);
   indentation = computed(() => {
-    return this.isSidenavOpen ? '26px' : `${16 + this.level() * 16}px`;
+    if (this.collapsed()) {
+      return `${16 + this.level() * 8}px`; // Indentación mínima incluso colapsado para subítems
+    }
+    return `${16 + this.level() * 20}px`; // Mayor indentación por nivel cuando está expandido
   });
 
-  isExternalLink(): boolean {
-    return !!this.item().externalLink;
+  hasSubitems(): boolean {
+    return !!this.item().subItems && this.item().subItems!.length > 0;
   }
 
-  nestedItemOpen = signal(false);
+  handleClick(): void {
+    if (this.hasSubitems()) {
+      this.isSubmenuOpen.set(!this.isSubmenuOpen());
+    }
+    // La navegación para rutas internas se maneja con routerLink
+    // La navegación para enlaces externos se maneja con href
+  }
+
+  // Construir la ruta para routerLink
+  // buildRouterLink(): string | null {
+  //   const currentItem = this.item();
+  //   if (!currentItem.route && !this.hasSubitems()) return null; // No navegable si no tiene ruta ni subítems
+  //   if (!currentItem.route && this.hasSubitems()) return null; // Solo agrupador, no navegable
+
+  //   // Para la construcción de rutas relativas en submenús, es mejor manejar esto en el router padre o usar rutas absolutas
+  //   // Aquí asumimos que item.route es la ruta completa o relativa al padre inmediato
+
+  //   console.log('currentItem.route', currentItem.route);
+  //   return currentItem.route || null;
+  // }
+
+  buildRouterLink(): string[] | null {
+    const currentItem = this.item();
+
+    const parentRoute = this.routeHistory();
+    const currentRouteSegment = currentItem.route!; // Sabemos que existe por la condición anterior
+
+    // Para ítems de primer nivel (level 0), la ruta debe ser absoluta desde la raíz.
+    // Para subítems, construimos la ruta relativa al padre.
+    if (this.level() === 0) {
+      return [
+        '/',
+        ...currentRouteSegment.split('/').filter((s) => s.length > 0),
+      ];
+    } else {
+      // Si routeHistory ya es una ruta absoluta (ej. /configuracion)
+      // y currentRouteSegment es 'orders-delivered', queremos ['/configuracion', 'orders-delivered']
+      const segments: string[] = [];
+      if (parentRoute) {
+        segments.push(...parentRoute.split('/').filter((s) => s.length > 0));
+      }
+      segments.push(
+        ...currentRouteSegment.split('/').filter((s) => s.length > 0)
+      );
+      return ['/', ...segments]; // Siempre construir rutas absolutas desde la raíz para el menú principal
+    }
+  }
+
+  getChildRouteHistory(): string {
+    const currentItem = this.item();
+    const parentRoute = this.routeHistory();
+
+    // Si el ítem actual tiene una ruta, la concatenamos a la historia del padre.
+    // Si el ítem actual NO tiene ruta (es solo un agrupador), la historia de sus hijos
+    // sigue siendo la misma que la del padre.
+    if (currentItem.route) {
+      return parentRoute
+        ? `${parentRoute}/${currentItem.route}`
+        : currentItem.route;
+    }
+    return parentRoute; // El agrupador no añade a la ruta para sus hijos
+  }
 }

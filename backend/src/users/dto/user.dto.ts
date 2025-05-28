@@ -147,3 +147,17 @@ export class UserUpdateDTO {
   @ApiProperty()
   owner_bank_account: string;
 }
+
+export class UserProfile {
+  @ApiProperty()
+  email: string;
+
+  @ApiProperty()
+  username: string;
+
+  @IsOptional()
+  password?: string;
+
+  @ApiProperty()
+  photo_url: string;
+}

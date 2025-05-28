@@ -175,7 +175,7 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
           this.pendingOrders.set([]);
           this.pickupOptionControl.reset('RECOGER_DOMICILIO');
           this.termsAcceptedControl.reset(false);
-          this.router.navigate(['/features/orders']);
+          this.router.navigate(['/orders']);
         },
         error: (err) => {
           this.snackBar.open(

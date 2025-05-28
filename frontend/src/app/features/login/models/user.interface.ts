@@ -1,6 +1,9 @@
 export interface User {
   id: string;
-  username?: string;
   email?: string;
-  rol?: string; // Opcional
+  name?: string;
+  username?: string;
+  photo_url?: string;
+  role?: string;
+  token?: string;
 }

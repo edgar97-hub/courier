@@ -145,11 +145,11 @@ export class DistrictListPageComponent implements OnInit, OnDestroy {
   }
 
   navigateToCreate(): void {
-    this.router.navigate(['/configuracion/districts/create']);
+    this.router.navigate(['/districts/create']);
   }
 
   navigateToEdit(district: District): void {
-    this.router.navigate(['/configuracion/districts/edit', district.id]);
+    this.router.navigate(['/districts/edit', district.id]);
   }
 
   confirmAndDeleteDistrict(district: District): void {
