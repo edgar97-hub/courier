@@ -45,17 +45,28 @@ export class UsersService {
     }
   }
 
-  public async findUsersByRol(rol: string): Promise<UsersEntity[]> {
+  public async findUsersByRol({
+    search_term = '',
+    role = '',
+  }: {
+    search_term?: string;
+    role?: string;
+  }): Promise<UsersEntity[]> {
     try {
-      const users: UsersEntity[] = await this.userRepository.find({
-        where: { role: rol as ROLES },
-      });
-      if (!users) {
-        throw new ErrorManager({
-          type: 'BAD_REQUEST',
-          message: 'No se encontro resultado',
+      const queryBuilder = this.userRepository.createQueryBuilder('user');
+
+      if (search_term) {
+        queryBuilder.andWhere('LOWER(user.username) LIKE LOWER(:search)', {
+          search: `%${search_term}%`,
         });
       }
+
+      if (role) {
+        queryBuilder.andWhere('user.role = :role', { role });
+      }
+
+      const users: UsersEntity[] = await queryBuilder.getMany();
+
       return users;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);

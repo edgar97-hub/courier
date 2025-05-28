@@ -31,8 +31,12 @@ let UsersController = class UsersController {
     async findAllUsers() {
         return await this.usersService.findUsers();
     }
-    async findUsersByRol(rol) {
-        return await this.usersService.findUsersByRol(rol);
+    async findUsersByRol(search_term, role) {
+        const queryParams = {
+            search_term,
+            role,
+        };
+        return await this.usersService.findUsersByRol(queryParams);
     }
     async findUserById(id) {
         return await this.usersService.findUserById(id);
@@ -67,10 +71,11 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findAllUsers", null);
 __decorate([
-    (0, common_1.Get)('rol/:rol'),
-    __param(0, (0, common_1.Param)('rol')),
+    (0, common_1.Get)('filtered'),
+    __param(0, (0, common_1.Query)('search_term')),
+    __param(1, (0, common_1.Query)('role')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findUsersByRol", null);
 __decorate([

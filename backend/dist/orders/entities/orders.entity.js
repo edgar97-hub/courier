@@ -119,6 +119,11 @@ __decorate([
     __metadata("design:type", users_entity_1.UsersEntity)
 ], OrdersEntity.prototype, "assigned_driver", void 0);
 __decorate([
+    (0, typeorm_1.ManyToOne)(() => users_entity_1.UsersEntity, (user) => user.customerOrdersIncludes),
+    (0, typeorm_1.JoinColumn)({ name: 'customer_id' }),
+    __metadata("design:type", users_entity_1.UsersEntity)
+], OrdersEntity.prototype, "customer", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(() => orderLog_entity_1.OrderLogEntity, (log) => log.order),
     __metadata("design:type", Array)
 ], OrdersEntity.prototype, "logs", void 0);

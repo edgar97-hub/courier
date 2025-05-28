@@ -91,6 +91,11 @@ let OrdersService = class OrdersService {
         await queryRunner.startTransaction();
         const createdOrders = [];
         const operationErrors = [];
+        async function generateTrackingCode() {
+            const { customAlphabet } = await Promise.resolve().then(() => require('nanoid'));
+            const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 10);
+            return nanoid();
+        }
         try {
             for (const orderDto of orderDTOs) {
                 try {
@@ -117,13 +122,9 @@ let OrdersService = class OrdersService {
                     orderToCreate.observations = orderDto.observations;
                     orderToCreate.type_order_transfer_to_warehouse =
                         orderDto.type_order_transfer_to_warehouse;
-                    orderDto.user = { id: idUser };
-                    async function generateTrackingCode() {
-                        const { customAlphabet } = await Promise.resolve().then(() => require('nanoid'));
-                        const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 10);
-                        return nanoid();
-                    }
-                    orderDto.tracking_code = await generateTrackingCode();
+                    orderToCreate.user = { id: idUser };
+                    orderToCreate.customer = { id: orderDto.customer_id };
+                    orderToCreate.tracking_code = await generateTrackingCode();
                     const savedOrder = await queryRunner.manager.save(orders_entity_1.OrdersEntity, orderToCreate);
                     createdOrders.push(savedOrder);
                 }
@@ -391,7 +392,9 @@ let OrdersService = class OrdersService {
             errors: errors,
         };
     }
-    async findOrders({ pageNumber = 0, pageSize = 0, sortField = '', sortDirection = '', startDate, endDate, status = '', }) {
+    async findOrders({ pageNumber = 0, pageSize = 0, sortField = '', sortDirection = '', startDate, endDate, status = '', }, req) {
+        let idUser = req.idUser;
+        let role = req.roleUser;
         try {
             const skip = (pageNumber - 1) * pageSize;
             const where = {};
@@ -405,6 +408,12 @@ let OrdersService = class OrdersService {
             if (status) {
                 where.status = status;
             }
+            if (role === roles_1.ROLES.CUSTOMER) {
+                where.customer = { id: idUser };
+            }
+            if (role === roles_1.ROLES.MOTORIZED) {
+                where.assigned_driver = { id: idUser };
+            }
             const sortFieldMap = {
                 registration_date: 'createdAt',
             };
@@ -412,7 +421,7 @@ let OrdersService = class OrdersService {
             return this.orderRepository
                 .findAndCount({
                 where,
-                relations: ['user', 'assigned_driver'],
+                relations: ['user', 'assigned_driver', 'customer'],
                 order: {
                     [sortBy]: sortDirection.toUpperCase(),
                 },
@@ -430,7 +439,9 @@ let OrdersService = class OrdersService {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
-    async getFilteredOrders({ sortField = '', sortDirection = '', startDate, endDate, status = '', }) {
+    async getFilteredOrders({ sortField = '', sortDirection = '', startDate, endDate, status = '', }, req) {
+        let idUser = req.idUser;
+        let role = req.roleUser;
         try {
             const where = {};
             if (startDate && endDate) {
@@ -442,6 +453,12 @@ let OrdersService = class OrdersService {
             }
             if (status) {
                 where.status = status;
+            }
+            if (role === roles_1.ROLES.CUSTOMER) {
+                where.customer = { id: idUser };
+            }
+            if (role === roles_1.ROLES.MOTORIZED) {
+                where.assigned_driver = { id: idUser };
             }
             const sortFieldMap = {
                 registration_date: 'createdAt',

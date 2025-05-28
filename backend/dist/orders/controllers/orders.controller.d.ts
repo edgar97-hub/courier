@@ -15,13 +15,13 @@ export declare class OrdersController {
         errors?: any[];
     }>;
     importOrders(ordersData: any[], req: any): Promise<ImportResult | undefined>;
-    findAllOrders(pageNumber?: number, pageSize?: number, sortField?: string, sortDirection?: string, startDate?: string, endDate?: string, status?: string): Promise<{
+    findAllOrders(req: any, pageNumber?: number, pageSize?: number, sortField?: string, sortDirection?: string, startDate?: string, endDate?: string, status?: string): Promise<{
         items: any;
         total_count: number;
         page_number: number;
         page_size: number;
     }>;
-    getFilteredOrders(pageNumber?: number, pageSize?: number, sortField?: string, sortDirection?: string, startDate?: string, endDate?: string, status?: string): Promise<{
+    getFilteredOrders(req: any, pageNumber?: number, pageSize?: number, sortField?: string, sortDirection?: string, startDate?: string, endDate?: string, status?: string): Promise<{
         items: any;
         total_count: number;
     }>;

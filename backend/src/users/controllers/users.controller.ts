@@ -7,6 +7,7 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
   Req,
   Request,
   UseGuards,
@@ -38,9 +39,35 @@ export class UsersController {
     return await this.usersService.findUsers();
   }
 
-  @Get('rol/:rol')
-  public async findUsersByRol(@Param('rol') rol: string) {
-    return await this.usersService.findUsersByRol(rol);
+  // public async findAllOrders(
+  //     @Query('page_number') pageNumber = 0,
+  //     @Query('page_size') pageSize = 0,
+  //     @Query('sort_field') sortField = 'created_at',
+  //     @Query('sort_direction') sortDirection = 'asc',
+  //     @Query('start_date') startDate?: string,
+  //     @Query('end_date') endDate?: string,
+  //     @Query('status') status?: string,
+  //   ) {
+  //     const queryParams = {
+  //       pageNumber,
+  //       pageSize,
+  //       sortField,
+  //       sortDirection,
+  //       startDate,
+  //       endDate,
+  //       status,
+  //     };
+
+  @Get('filtered')
+  public async findUsersByRol(
+    @Query('search_term') search_term: string,
+    @Query('role') role: string,
+  ) {
+    const queryParams = {
+      search_term,
+      role,
+    };
+    return await this.usersService.findUsersByRol(queryParams);
   }
 
   @ApiParam({

@@ -73,6 +73,9 @@ export class OrderDTO {
 
   @ApiProperty()
   product_delivery_photo_url: string;
+
+  @ApiProperty()
+  tracking_code: string;
 }
 
 export class OrderUpdateDTO {

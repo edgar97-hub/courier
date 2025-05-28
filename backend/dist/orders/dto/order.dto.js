@@ -101,6 +101,10 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], OrderDTO.prototype, "product_delivery_photo_url", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], OrderDTO.prototype, "tracking_code", void 0);
 class OrderUpdateDTO {
 }
 exports.OrderUpdateDTO = OrderUpdateDTO;

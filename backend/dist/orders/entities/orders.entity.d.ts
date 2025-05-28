@@ -26,6 +26,7 @@ export declare class OrdersEntity extends BaseEntity {
     status: STATES;
     user: UsersEntity;
     assigned_driver: UsersEntity;
+    customer: UsersEntity;
     logs: OrderLogEntity[];
     tracking_code: string;
     product_delivery_photo_url?: string;

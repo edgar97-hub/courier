@@ -69,6 +69,7 @@ export class OrdersController {
 
   @Get('')
   public async findAllOrders(
+    @Request() req,
     @Query('page_number') pageNumber = 0,
     @Query('page_size') pageSize = 0,
     @Query('sort_field') sortField = 'created_at',
@@ -86,11 +87,12 @@ export class OrdersController {
       endDate,
       status,
     };
-    return await this.ordersService.findOrders(queryParams);
+    return await this.ordersService.findOrders(queryParams, req);
   }
 
   @Get('filtered-orders')
   public async getFilteredOrders(
+    @Request() req,
     @Query('page_number') pageNumber = 0,
     @Query('page_size') pageSize = 0,
     @Query('sort_field') sortField = 'created_at',
@@ -108,7 +110,7 @@ export class OrdersController {
       endDate,
       status,
     };
-    return await this.ordersService.getFilteredOrders(queryParams);
+    return await this.ordersService.getFilteredOrders(queryParams, req);
   }
 
   @PublicAccess()

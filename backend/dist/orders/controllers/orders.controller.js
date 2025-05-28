@@ -36,7 +36,7 @@ let OrdersController = class OrdersController {
     async importOrders(ordersData, req) {
         return await this.ordersService.importOrdersFromExcelData(ordersData, req.idUser);
     }
-    async findAllOrders(pageNumber = 0, pageSize = 0, sortField = 'created_at', sortDirection = 'asc', startDate, endDate, status) {
+    async findAllOrders(req, pageNumber = 0, pageSize = 0, sortField = 'created_at', sortDirection = 'asc', startDate, endDate, status) {
         const queryParams = {
             pageNumber,
             pageSize,
@@ -46,9 +46,9 @@ let OrdersController = class OrdersController {
             endDate,
             status,
         };
-        return await this.ordersService.findOrders(queryParams);
+        return await this.ordersService.findOrders(queryParams, req);
     }
-    async getFilteredOrders(pageNumber = 0, pageSize = 0, sortField = 'created_at', sortDirection = 'desc', startDate, endDate, status) {
+    async getFilteredOrders(req, pageNumber = 0, pageSize = 0, sortField = 'created_at', sortDirection = 'desc', startDate, endDate, status) {
         const queryParams = {
             pageNumber,
             pageSize,
@@ -58,7 +58,7 @@ let OrdersController = class OrdersController {
             endDate,
             status,
         };
-        return await this.ordersService.getFilteredOrders(queryParams);
+        return await this.ordersService.getFilteredOrders(queryParams, req);
     }
     async getOrderByTrackingCode(tracking_code = '') {
         const queryParams = {
@@ -128,28 +128,30 @@ __decorate([
 ], OrdersController.prototype, "importOrders", null);
 __decorate([
     (0, common_1.Get)(''),
-    __param(0, (0, common_1.Query)('page_number')),
-    __param(1, (0, common_1.Query)('page_size')),
-    __param(2, (0, common_1.Query)('sort_field')),
-    __param(3, (0, common_1.Query)('sort_direction')),
-    __param(4, (0, common_1.Query)('start_date')),
-    __param(5, (0, common_1.Query)('end_date')),
-    __param(6, (0, common_1.Query)('status')),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Query)('page_number')),
+    __param(2, (0, common_1.Query)('page_size')),
+    __param(3, (0, common_1.Query)('sort_field')),
+    __param(4, (0, common_1.Query)('sort_direction')),
+    __param(5, (0, common_1.Query)('start_date')),
+    __param(6, (0, common_1.Query)('end_date')),
+    __param(7, (0, common_1.Query)('status')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, String, String, String]),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, String, String, String]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "findAllOrders", null);
 __decorate([
     (0, common_1.Get)('filtered-orders'),
-    __param(0, (0, common_1.Query)('page_number')),
-    __param(1, (0, common_1.Query)('page_size')),
-    __param(2, (0, common_1.Query)('sort_field')),
-    __param(3, (0, common_1.Query)('sort_direction')),
-    __param(4, (0, common_1.Query)('start_date')),
-    __param(5, (0, common_1.Query)('end_date')),
-    __param(6, (0, common_1.Query)('status')),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Query)('page_number')),
+    __param(2, (0, common_1.Query)('page_size')),
+    __param(3, (0, common_1.Query)('sort_field')),
+    __param(4, (0, common_1.Query)('sort_direction')),
+    __param(5, (0, common_1.Query)('start_date')),
+    __param(6, (0, common_1.Query)('end_date')),
+    __param(7, (0, common_1.Query)('status')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, String, String, String]),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, String, String, String]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "getFilteredOrders", null);
 __decorate([

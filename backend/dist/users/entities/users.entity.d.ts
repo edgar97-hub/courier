@@ -27,4 +27,5 @@ export declare class UsersEntity extends BaseEntity implements IUser {
     role: ROLES;
     ordersIncludes: OrdersEntity[];
     assignedDriversIncludes: OrdersEntity[];
+    customerOrdersIncludes: OrdersEntity[];
 }

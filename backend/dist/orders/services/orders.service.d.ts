@@ -28,7 +28,7 @@ export declare class OrdersService {
         startDate?: string;
         endDate?: string;
         status?: string;
-    }): Promise<{
+    }, req: any): Promise<{
         items: any;
         total_count: number;
         page_number: number;
@@ -40,7 +40,7 @@ export declare class OrdersService {
         startDate?: string;
         endDate?: string;
         status?: string;
-    }): Promise<{
+    }, req: any): Promise<{
         items: any;
         total_count: number;
     }>;

@@ -14,7 +14,7 @@ import { OrdersEntity } from '../entities/orders.entity';
 import { DistrictsService } from 'src/districts/services/districts.service';
 import { DistrictsEntity } from 'src/districts/entities/districts.entity';
 import { ImportResult } from '../dto/import-result.dto';
-import { STATES } from 'src/constants/roles';
+import { ROLES, STATES } from 'src/constants/roles';
 import { EntityManager, Connection, DataSource } from 'typeorm'; // Importa Connection o DataSource
 import { UsersEntity } from 'src/users/entities/users.entity';
 import { OrderLogEntity } from '../entities/orderLog.entity';
@@ -121,7 +121,11 @@ export class OrdersService {
 
     const createdOrders: OrdersEntity[] = [];
     const operationErrors: any[] = [];
-
+    async function generateTrackingCode() {
+      const { customAlphabet } = await import('nanoid');
+      const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 10);
+      return nanoid(); //`PKG-${nanoid()}`;
+    }
     try {
       for (const orderDto of orderDTOs) {
         try {
@@ -148,17 +152,10 @@ export class OrdersService {
           orderToCreate.observations = orderDto.observations;
           orderToCreate.type_order_transfer_to_warehouse =
             orderDto.type_order_transfer_to_warehouse;
-          orderDto.user = { id: idUser } as UsersEntity;
-          async function generateTrackingCode() {
-            const { customAlphabet } = await import('nanoid');
-            const nanoid = customAlphabet(
-              '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-              10,
-            );
-            return nanoid(); //`PKG-${nanoid()}`;
-          }
+          orderToCreate.user = { id: idUser } as UsersEntity;
+          orderToCreate.customer = { id: orderDto.customer_id } as UsersEntity;
+          orderToCreate.tracking_code = await generateTrackingCode();
 
-          orderDto.tracking_code = await generateTrackingCode();
           const savedOrder = await queryRunner.manager.save(
             OrdersEntity,
             orderToCreate,
@@ -419,7 +416,6 @@ export class OrdersService {
           return nanoid(); //`PKG-${nanoid()}`;
         }
 
-        // Luego cuando la uses:
         orderEntity.tracking_code = await generateTrackingCode();
         ordersToSave.push(orderEntity);
       }
@@ -530,28 +526,34 @@ export class OrdersService {
       errors: errors,
     };
   }
-  public async findOrders({
-    pageNumber = 0,
-    pageSize = 0,
-    sortField = '',
-    sortDirection = '',
-    startDate,
-    endDate,
-    status = '',
-  }: {
-    pageNumber?: number;
-    pageSize?: number;
-    sortField?: string;
-    sortDirection?: string;
-    startDate?: string;
-    endDate?: string;
-    status?: string;
-  }): Promise<{
+  public async findOrders(
+    {
+      pageNumber = 0,
+      pageSize = 0,
+      sortField = '',
+      sortDirection = '',
+      startDate,
+      endDate,
+      status = '',
+    }: {
+      pageNumber?: number;
+      pageSize?: number;
+      sortField?: string;
+      sortDirection?: string;
+      startDate?: string;
+      endDate?: string;
+      status?: string;
+    },
+    req,
+  ): Promise<{
     items: any;
     total_count: number;
     page_number: number;
     page_size: number;
   }> {
+    let idUser = req.idUser;
+    let role = req.roleUser;
+
     try {
       const skip = (pageNumber - 1) * pageSize;
       const where: FindOptionsWhere<OrdersEntity> = {};
@@ -568,6 +570,15 @@ export class OrdersService {
       if (status) {
         where.status = status as STATES;
       }
+
+      if (role === ROLES.CUSTOMER) {
+        where.customer = { id: idUser };
+      }
+
+      if (role === ROLES.MOTORIZED) {
+        where.assigned_driver = { id: idUser };
+      }
+
       const sortFieldMap = {
         registration_date: 'createdAt',
       };
@@ -576,7 +587,7 @@ export class OrdersService {
       return this.orderRepository
         .findAndCount({
           where,
-          relations: ['user', 'assigned_driver'],
+          relations: ['user', 'assigned_driver', 'customer'],
           order: {
             [sortBy]: sortDirection.toUpperCase() as 'ASC' | 'DESC',
           },
@@ -594,22 +605,28 @@ export class OrdersService {
     }
   }
 
-  public async getFilteredOrders({
-    sortField = '',
-    sortDirection = '',
-    startDate,
-    endDate,
-    status = '',
-  }: {
-    sortField?: string;
-    sortDirection?: string;
-    startDate?: string;
-    endDate?: string;
-    status?: string;
-  }): Promise<{
+  public async getFilteredOrders(
+    {
+      sortField = '',
+      sortDirection = '',
+      startDate,
+      endDate,
+      status = '',
+    }: {
+      sortField?: string;
+      sortDirection?: string;
+      startDate?: string;
+      endDate?: string;
+      status?: string;
+    },
+    req,
+  ): Promise<{
     items: any;
     total_count: number;
   }> {
+    let idUser = req.idUser;
+    let role = req.roleUser;
+
     try {
       const where: FindOptionsWhere<OrdersEntity> = {};
 
@@ -625,6 +642,15 @@ export class OrdersService {
       if (status) {
         where.status = status as STATES;
       }
+
+      if (role === ROLES.CUSTOMER) {
+        where.customer = { id: idUser };
+      }
+
+      if (role === ROLES.MOTORIZED) {
+        where.assigned_driver = { id: idUser };
+      }
+
       const sortFieldMap = {
         registration_date: 'createdAt',
       };
@@ -657,7 +683,6 @@ export class OrdersService {
         where: { tracking_code },
         relations: ['logs'],
       });
-      // console.log('order', order);
       return order;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);

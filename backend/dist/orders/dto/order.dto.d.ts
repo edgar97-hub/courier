@@ -21,6 +21,7 @@ export declare class OrderDTO {
     type_order_transfer_to_warehouse: string;
     status: STATES;
     product_delivery_photo_url: string;
+    tracking_code: string;
 }
 export declare class OrderUpdateDTO {
     shipment_type?: string;

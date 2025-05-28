@@ -45,17 +45,18 @@ let UsersService = class UsersService {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
-    async findUsersByRol(rol) {
+    async findUsersByRol({ search_term = '', role = '', }) {
         try {
-            const users = await this.userRepository.find({
-                where: { role: rol },
-            });
-            if (!users) {
-                throw new error_manager_1.ErrorManager({
-                    type: 'BAD_REQUEST',
-                    message: 'No se encontro resultado',
+            const queryBuilder = this.userRepository.createQueryBuilder('user');
+            if (search_term) {
+                queryBuilder.andWhere('LOWER(user.username) LIKE LOWER(:search)', {
+                    search: `%${search_term}%`,
                 });
             }
+            if (role) {
+                queryBuilder.andWhere('user.role = :role', { role });
+            }
+            const users = await queryBuilder.getMany();
             return users;
         }
         catch (error) {
