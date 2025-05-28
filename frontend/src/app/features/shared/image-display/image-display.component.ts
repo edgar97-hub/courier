@@ -1,8 +1,6 @@
 import {
   Component,
   Input,
-  OnChanges,
-  SimpleChanges,
   signal,
   WritableSignal,
   OnInit,
@@ -11,7 +9,9 @@ import {
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card'; // Opcional, para enmarcar la imagen
+import { MatCardModule } from '@angular/material/card';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ImageDialogComponent } from './image-dialog.component'; // Import ImageDialogComponent
 import { SettingsService } from '../../settings/services/settings.service';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -22,6 +22,7 @@ import { Subject, takeUntil } from 'rxjs';
     MatProgressSpinnerModule,
     MatIconModule,
     MatCardModule,
+    MatDialogModule,
   ],
   templateUrl: './image-display.component.html',
   styleUrls: ['./image-display.component.scss'],
@@ -44,7 +45,7 @@ export class ImageDisplayComponent implements OnInit {
   processedImageUrl: WritableSignal<string | null> = signal(null);
   private settingsService = inject(SettingsService);
   private destroy$ = new Subject<void>();
-  enlace: string | null = null;
+  private dialog = inject(MatDialog); // Inject MatDialog
 
   ngOnInit(): void {
     this.settingsService
@@ -74,11 +75,22 @@ export class ImageDisplayComponent implements OnInit {
             if (this.enableSpinner) {
               this.isLoading.set(true);
             }
+            this.openImageDialog(); // Open the dialog when the image is loaded
           }
         },
         error: (err) => {
           console.log('err', err);
         },
       });
+  }
+
+  openImageDialog(): void {
+    this.dialog.open(ImageDialogComponent, {
+      data: {
+        imageUrl: this.processedImageUrl(),
+        altText: this.altText,
+      },
+      panelClass: 'image-dialog', // Add a custom panel class
+    });
   }
 }

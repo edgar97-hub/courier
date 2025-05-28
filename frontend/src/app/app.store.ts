@@ -184,7 +184,7 @@ export const AppStore = signalStore(
         logout(): void {
           authService.logout();
           patchState(store, initialAppUiState);
-          snackbar.open('You have been logged out.', 'OK', {
+          snackbar.open('Se ha cerrado la sesión.', 'OK', {
             duration: 3000,
             verticalPosition: 'top',
           });

@@ -1,0 +1,52 @@
+<mat-card appearance="outlined" class="pdf-card">
+  <!-- NUEVA SECCIÓN DE CABECERA DE LA TARJETA -->
+  <mat-card-header class="pdf-card-header">
+    <mat-icon mat-card-avatar class="header-icon">gavel</mat-icon>
+    <!-- O 'description', 'article' -->
+    <mat-card-title class="header-title">Términos y Condiciones</mat-card-title>
+    <!-- <mat-card-subtitle class="header-subtitle"
+      >DINSIDES COURIER</mat-card-subtitle
+    > -->
+  </mat-card-header>
+  <!-- FIN DE NUEVA SECCIÓN DE CABECERA -->
+
+  <mat-card-content class="pdf-card-content">
+    @if (isLoading() && enableSpinner) {
+    <div class="overlay spinner-overlay">
+      <mat-progress-spinner
+        mode="indeterminate"
+        diameter="50"
+      ></mat-progress-spinner>
+      <p>Cargando términos y condiciones...</p>
+    </div>
+    } @else if (hasError() && enableErrorIcon) {
+    <div class="overlay error-overlay">
+      <mat-icon class="error-icon">error_outline</mat-icon>
+      <p>No se pudieron cargar los términos y condiciones.</p>
+      <button mat-stroked-button color="primary" (click)="retryLoad()">
+        Reintentar
+      </button>
+    </div>
+    } @if (safePdfUrl(); as finalPdfUrl) {
+    <iframe
+      [src]="finalPdfUrl"
+      type="application/pdf"
+      [style.width]="containerWidth"
+      [style.height]="containerHeight"
+      frameborder="0"
+      class="pdf-viewer"
+    >
+      Tu navegador no soporta la visualización de PDFs embebidos. Puedes
+      <a [href]="finalPdfUrl" target="_blank" rel="noopener noreferrer"
+        >descargarlo aquí</a
+      >.
+    </iframe>
+    } @else if (!isLoading()) {
+    <!-- Mostrar placeholder solo si no está cargando -->
+    <div class="overlay placeholder-overlay">
+      <mat-icon class="placeholder-icon">description</mat-icon>
+      <p>Términos y condiciones no disponibles.</p>
+    </div>
+    }
+  </mat-card-content>
+</mat-card>

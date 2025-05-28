@@ -156,7 +156,7 @@ export class TrackingPageComponent implements OnInit, OnDestroy {
     if (action.includes('ALMACEN')) return 'inventory_2';
     if (action.includes('REGISTRADO')) return 'receipt_long';
     if (action.includes('CANCELADO')) return 'cancel';
-    if (action.includes('RECHAZADO')) return 'report_problem';
+    if (action.includes('RECHAZADO EN PUNTO')) return 'report_problem';
     if (action.includes('REPROGRAMADO')) return 'event_repeat';
     return 'fiber_manual_record'; // Icono por defecto
   }

@@ -54,7 +54,7 @@ export const menuItems: MenuItem[] = [
     icon: 'format_list_bulleted',
     label: 'Pedidos',
     route: 'orders',
-    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'CLIENTE', 'RECEPCIONISTA'],
+    roles: ['ADMINISTRADOR', 'CLIENTE', 'RECEPCIONISTA'],
 
     subItems: [
       {
@@ -70,6 +70,12 @@ export const menuItems: MenuItem[] = [
     ],
   },
   {
+    icon: 'shopping_basket',
+    label: 'Pedidos',
+    route: 'orders',
+    roles: ['MOTORIZADO'],
+  },
+  {
     icon: 'list_alt',
     label: 'Pedidos entregados',
     route: 'orders-delivered',
@@ -79,6 +85,12 @@ export const menuItems: MenuItem[] = [
     icon: 'list_alt',
     label: 'Lista de cierre de caja',
     route: 'lista-cierre-caja',
+    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'CLIENTE', 'RECEPCIONISTA'],
+  },
+  {
+    icon: 'article',
+    label: 'Terminos y condiciones',
+    route: 'terms-and-conditions',
     roles: ['ADMINISTRADOR', 'MOTORIZADO', 'CLIENTE', 'RECEPCIONISTA'],
   },
 ];

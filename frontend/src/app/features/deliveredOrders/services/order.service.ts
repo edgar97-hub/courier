@@ -149,7 +149,7 @@ export class OrderService {
         'EN TRANSITO',
         'ENTREGADO',
         'CANCELADO',
-        'RECHAZADO',
+        'RECHAZADO EN PUNTO',
         'REPROGRAMADO',
       ]);
       observer.complete();
@@ -341,8 +341,6 @@ export class OrderService {
       )
       .pipe(catchError(this.handleError));
   }
-
- 
 
   getAvailableDrivers(searchTerm: string): Observable<any> {
     const headers = this.getAuthHeaders();

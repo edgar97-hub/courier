@@ -149,7 +149,7 @@ export class OrderService {
         'EN TRANSITO',
         'ENTREGADO',
         'CANCELADO',
-        'RECHAZADO',
+        'RECHAZADO EN PUNTO',
         'REPROGRAMADO',
       ]);
       observer.complete();

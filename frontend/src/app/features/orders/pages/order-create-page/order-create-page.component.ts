@@ -65,12 +65,12 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
 
   // Controles para la sección final
   pickupOptionControl = new FormControl(
-    'RECOGER_DOMICILIO',
+    'RECOGER EN DOMICILIO',
     Validators.required
   ); // Valor por defecto como en la imagen
   termsAcceptedControl = new FormControl(false, Validators.requiredTrue);
 
-  pickupOptions: string[] = ['RECOGER_DOMICILIO', 'ENTREGAR_EN_ALMACEN']; // Ejemplo
+  pickupOptions: string[] = ['RECOGER EN DOMICILIO', 'ENTREGAR EN ALMACEN']; // Ejemplo
 
   private orderService = inject(OrderService);
   private router = inject(Router);
@@ -151,10 +151,11 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
         ...item,
         type_order_transfer_to_warehouse: this.pickupOptionControl.value,
       })),
-      pickup_option: this.pickupOptionControl.value || 'RECOGER_DOMICILIO',
+      pickup_option: this.pickupOptionControl.value || 'RECOGER EN DOMICILIO',
       terms_accepted: true, // Ya validado arriba
     };
-
+    console.log('payload', payload);
+    // return;
     this.orderService
       .createBatchOrders(payload)
       .pipe(

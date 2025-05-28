@@ -99,6 +99,21 @@ export class AuthService {
   getAccessToken(): string | null {
     return localStorage.getItem(ACCESS_TOKEN_KEY);
   }
+refreshToken(): Observable<AuthResponse> {
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+    if (!refreshToken) {
+      this.logout();
+      return of({} as AuthResponse);
+    }
+    const body = { refreshToken: refreshToken };
+    return this.http.post<any>(environment.apiUrl + '/auth/refresh', body).pipe(
+      tap((authResponse: AuthResponse) => {
+        this.storeTokens(authResponse.accessToken, authResponse.refreshToken);
+        console.log('AuthService: Token refreshed successfully.');
+      }),
+      catchError(this.handleError)
+    );
+  }
 
   login(credentials: Credentials): Observable<AuthResponse> {
     const body = { email: credentials.email, password: credentials.password };

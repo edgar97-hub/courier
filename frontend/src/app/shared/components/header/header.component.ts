@@ -40,7 +40,7 @@ import { MatDialog } from '@angular/material/dialog';
         </button>
         <button mat-menu-item (click)="appStore.logout()">
           <mat-icon>logout</mat-icon>
-          Log out
+          Cerrar sesión
         </button>
       </mat-menu>
       }

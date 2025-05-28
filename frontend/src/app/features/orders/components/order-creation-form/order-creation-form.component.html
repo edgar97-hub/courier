@@ -6,6 +6,60 @@
   <h2 class="form-section-title">Registrar pedido</h2>
 
   <!-- Sección 1: Datos de Envío y Destinatario -->
+  <mat-form-field
+    appearance="outline"
+    class="full-width driver-search-field"
+    *ngIf="!isCustomer()"
+  >
+    <mat-label>Buscar y Seleccionar cliente</mat-label>
+    <input
+      type="text"
+      placeholder="Escriba el nombre del cliente..."
+      aria-label="cliente"
+      matInput
+      [formControl]="driverSearchCtrl"
+      [matAutocomplete]="autoDriver"
+    />
+    <button
+      *ngIf="driverSearchCtrl.value && !isLoadingDrivers"
+      matSuffix
+      mat-icon-button
+      aria-label="Limpiar"
+      (click)="clearSelection()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+    <mat-icon matSuffix *ngIf="!driverSearchCtrl.value && !isLoadingDrivers"
+      >person_search</mat-icon
+    >
+    <mat-progress-spinner
+      *ngIf="isLoadingDrivers"
+      matSuffix
+      mode="indeterminate"
+      diameter="20"
+    ></mat-progress-spinner>
+
+    <mat-autocomplete
+      #autoDriver="matAutocomplete"
+      [displayWith]="displayDriverName"
+      (optionSelected)="onDriverSelected($event)"
+    >
+      @for (driver of filteredDrivers$ | async; track driver.id) {
+      <mat-option [value]="driver">
+        <div class="driver-option">
+          <span>{{ driver.username }}</span>
+        </div>
+      </mat-option>
+      } @if ((filteredDrivers$ | async)?.length === 0 && !isLoadingDrivers &&
+      driverSearchCtrl.value) {
+      <mat-option disabled>No se encontraron motorizados.</mat-option>
+      }
+    </mat-autocomplete>
+
+    <mat-error *ngIf="orderForm.get('customer_id')?.hasError('required')"
+      >Requerido</mat-error
+    >
+  </mat-form-field>
   <div class="form-grid">
     <mat-form-field appearance="outline">
       <mat-label>Tipo de envío</mat-label>

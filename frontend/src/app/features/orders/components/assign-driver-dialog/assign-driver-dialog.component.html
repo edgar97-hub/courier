@@ -57,7 +57,9 @@
           >
             <mat-icon>close</mat-icon>
           </button>
-          <mat-icon matSuffix *ngIf="!driverSearchCtrl.value && !isLoadingDrivers"
+          <mat-icon
+            matSuffix
+            *ngIf="!driverSearchCtrl.value && !isLoadingDrivers"
             >person_search</mat-icon
           >
           <mat-progress-spinner
@@ -77,9 +79,6 @@
               <div class="driver-option">
                 <mat-icon class="driver-option-icon">two_wheeler</mat-icon>
                 <span>{{ driver.username }}</span>
-                <!-- <span class="driver-status" *ngIf="driver.isAvailable === false"
-                  >(No disponible)</span
-                > -->
               </div>
             </mat-option>
             } @if ((filteredDrivers$ | async)?.length === 0 && !isLoadingDrivers

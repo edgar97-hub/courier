@@ -101,6 +101,7 @@ export class AssignDriverDialogComponent implements OnInit, OnDestroy {
       distinctUntilChanged(),
       switchMap((searchTerm) => {
         this.isLoadingDrivers = true;
+        console.log('searchTerm', searchTerm);
         return this.orderService.getAvailableDrivers(searchTerm || '').pipe(
           tap(() => (this.isLoadingDrivers = false)),
           catchError(() => {

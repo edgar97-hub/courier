@@ -106,6 +106,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     'delivery_district_name',
     'delivery_date',
     'amount_to_collect_at_delivery',
+    'tracking_code',
     // 'recipient_phone', // Puedes decidir cuáles mostrar por defecto
     // 'createdAt',
     // 'shipping_cost',
@@ -260,7 +261,11 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   getAvailableStatuses(order: Order_): OrderStatus[] {
     switch (order.status) {
       case OrderStatus.REGISTRADO:
-        return [OrderStatus.RECOGIDO, OrderStatus.CANCELADO];
+        return [
+          OrderStatus.RECOGIDO,
+          OrderStatus.EN_ALMACEN,
+          OrderStatus.CANCELADO,
+        ];
       case OrderStatus.RECOGIDO:
         return [OrderStatus.EN_ALMACEN, OrderStatus.CANCELADO];
       case OrderStatus.EN_ALMACEN:

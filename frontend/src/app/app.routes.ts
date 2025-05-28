@@ -71,6 +71,14 @@ export const routes: Routes = [
         title: 'Tarifas de Envío',
       },
       {
+        path: 'terms-and-conditions',
+        loadComponent: () =>
+          import(
+            './features/shared/terms-and-conditions-display/terms-and-conditions-display.component'
+          ).then((m) => m.TermsConditionsDisplayComponent),
+        title: '',
+      },
+      {
         path: 'districts',
         loadChildren: () =>
           import('./features/districts/districts.routes').then(
@@ -78,14 +86,6 @@ export const routes: Routes = [
           ),
         title: 'Gestión de Distritos',
       },
-      //  {
-      //   path: 'districts',
-      //   loadChildren: () =>
-      //     import('./features/users/pages/user-detail-page/user-detail-page.component').then(
-      //       (m) => m.D
-      //     ),
-      //   title: 'Gestión de Distritos',
-      // },
       {
         path: 'orders',
         loadChildren: () =>

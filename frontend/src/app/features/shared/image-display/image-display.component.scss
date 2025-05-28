@@ -1,4 +1,33 @@
-@use "@angular/material" as mat;
+.button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.image-button {
+  font-size: 1.2em;
+  padding: 0.5em 1em;
+  border-radius: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.image-button {
+  font-size: 1.2em;
+  padding: 0.5em 1em;
+  border-radius: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background-color: cadetblue;
+}
 
 :host {
   display: block; // Asegura que el componente ocupe su espacio
@@ -32,19 +61,6 @@
   }
 }
 
-.displayed-image {
-  display: block;
-  width: 60%;
-  height: 700px;
-  transition: opacity 0.5s ease-in-out; // Transición suave para mostrar la imagen
-  &.visible {
-    opacity: 1; // Mostrar cuando esté cargada
-  }
-  &.hidden {
-    display: none; // Ocultar completamente si no se usa o hay error/carga
-  }
-}
-
 .overlay {
   position: absolute;
   top: 0;
@@ -55,7 +71,7 @@
   flex-direction: column; // Para icono y texto
   justify-content: center;
   align-items: center;
-  z-index: 1; // Para estar encima de la imagen si la imagen aún no es visible
+  //z-index: 1; // Para estar encima de la imagen si la imagen aún no es visible
 }
 
 .spinner-overlay {

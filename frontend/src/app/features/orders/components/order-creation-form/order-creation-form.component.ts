@@ -12,6 +12,7 @@ import {
 import { CommonModule, DatePipe } from '@angular/common';
 import {
   FormBuilder,
+  FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators,
@@ -24,8 +25,17 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { Subject, Observable, Subscription } from 'rxjs';
-import { takeUntil, tap, distinctUntilChanged, map } from 'rxjs/operators';
+import { Subject, Observable, Subscription, of } from 'rxjs';
+import {
+  takeUntil,
+  tap,
+  distinctUntilChanged,
+  map,
+  startWith,
+  debounceTime,
+  switchMap,
+  catchError,
+} from 'rxjs/operators';
 
 import { PackageCalculatorComponent } from '../package-calculator/package-calculator.component';
 import { OrderService } from '../../services/order.service';
@@ -34,7 +44,12 @@ import {
   ProgressSpinnerMode,
   MatProgressSpinnerModule,
 } from '@angular/material/progress-spinner';
-
+import {
+  MatAutocompleteModule,
+  MatAutocompleteSelectedEvent,
+} from '@angular/material/autocomplete';
+import { User } from '../../../users/models/user.model';
+import { AppStore } from '../../../../app.store';
 @Component({
   selector: 'app-order-creation-form',
   standalone: true,
@@ -51,6 +66,7 @@ import {
     MatDividerModule,
     PackageCalculatorComponent,
     MatProgressSpinnerModule,
+    MatAutocompleteModule,
   ],
   templateUrl: './order-creation-form.component.html',
   styleUrls: ['./order-creation-form.component.scss'],
@@ -79,6 +95,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
 
   calculatedShippingCost: WritableSignal<number> = signal(0);
   isCalculatingShipping: WritableSignal<boolean> = signal(false);
+  appStore = inject(AppStore);
 
   // Para mostrar el nombre del distrito seleccionado, no solo el ID
   selectedDistrictName = computed(() => {
@@ -93,6 +110,13 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   _districtsCache: DistrictOption[] = [];
 
+  drivers$: Observable<User[]> = of([]); // Observable para la lista de motorizados
+  isLoadingDrivers = false;
+  selectedDriver: User | null = null;
+
+  driverSearchCtrl = new FormControl('');
+  filteredDrivers$: Observable<User[]>;
+
   constructor() {
     this.minDeliveryDate = new Date(); // No se puede entregar en el pasado
     this.deliveryDistricts$ = this.orderService.getDeliveryDistricts().pipe(
@@ -103,8 +127,50 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       // tap((districts) => (this._districtsCache = districts)) // Cachear para buscar nombre
     );
     this.buildForm();
+
+    this.filteredDrivers$ = this.driverSearchCtrl.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((searchTerm) => {
+        this.isLoadingDrivers = true;
+        console.log('searchTerm', searchTerm);
+        return this.orderService.getCustomers(searchTerm || '').pipe(
+          tap(() => (this.isLoadingDrivers = false)),
+          catchError(() => {
+            this.isLoadingDrivers = false;
+            return of([]); // Devuelve array vacío en caso de error
+          })
+        );
+      }),
+      takeUntil(this.destroy$)
+    );
+  }
+  isCustomer(): boolean {
+    const userRole = this.appStore.currentUser()?.role;
+    return userRole === 'CLIENTE';
+  }
+  displayDriverName(driver: User | null): string {
+    return driver && driver.username ? driver.username : '';
+  }
+  onDriverSelected(event: MatAutocompleteSelectedEvent): void {
+    this.selectedDriver = event.option.value as User;
+    console.log('cliente selected:', this.selectedDriver);
+
+    this.orderForm.get('customer_id')?.setValue(this.selectedDriver.id);
+    this.orderForm.markAllAsTouched();
+    console.log('Order form is invalid:', this.getFormErrors(this.orderForm));
+    const formValue = this.orderForm.getRawValue(); // getRawValue para incluir campos deshabilitados (como los de paquete estándar)
+    console.log('formValue', formValue);
   }
 
+  clearSelection(): void {
+    this.selectedDriver = null;
+    this.driverSearchCtrl.setValue('');
+    this.orderForm.markAllAsTouched();
+    this.orderForm.get('customer_id')?.setValue(null);
+    console.log('Order form is invalid:', this.getFormErrors(this.orderForm));
+  }
   ngOnInit(): void {
     // Emitir validez del formulario cuando cambie
     this.orderForm.statusChanges
@@ -204,8 +270,17 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   }
 
   private buildForm(): void {
-    const todayString = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
+    let customer_id = null;
+    if (this.appStore.currentUser()?.id) {
+      customer_id = this.appStore.currentUser()?.id;
+    }
 
+    // var d = new Date();
+    // let date = d.toLocaleString('en-US', { timeZone: 'America/Bogota' });
+    // console.log('date', date);
+    // const todayString = this.datePipe.transform(date, 'yyyy-MM-dd');
+    const todayString = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
+    // console.log('customer_id', customer_id);
     this.orderForm = this.fb.group({
       shipment_type: [this.shipmentTypes[0], Validators.required],
       recipient_name: ['', Validators.required],
@@ -213,10 +288,11 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
         '',
         [Validators.required, Validators.pattern('^[0-9]{9}$')],
       ],
+      customer_id: [customer_id, Validators.required],
       delivery_district_id: [null, Validators.required],
       delivery_address: ['', [Validators.required, Validators.minLength(6)]],
       delivery_coordinates: [''],
-      delivery_date: [todayString, Validators.required], // String en formato YYYY-MM-DD
+      delivery_date: [null, Validators.required], // String en formato YYYY-MM-DD
       package_details: this.fb.group({
         // Sub-FormGroup para PackageCalculatorComponent
         package_size_type: ['standard', Validators.required],

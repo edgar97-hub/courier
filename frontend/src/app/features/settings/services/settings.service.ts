@@ -42,11 +42,6 @@ export class SettingsService {
 
   // Obtener la configuración actual
   loadSettings(): Observable<AppSettings> {
-    // Si ya tenemos datos en el subject y no queremos forzar recarga, podríamos devolverlos
-    // if (this.settingsSubject.value) {
-    //   return of(this.settingsSubject.value);
-    // }
-
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
       return throwError(() => new Error('Not authenticated to fetch users.'));

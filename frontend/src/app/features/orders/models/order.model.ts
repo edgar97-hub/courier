@@ -49,6 +49,9 @@ export interface NewOrderData {
   // Para mostrar en la tabla temporal
   delivery_district_name?: string; // Nombre del distrito para UI
   temp_id?: string; // ID temporal para la lista local
+
+  // para el cliente
+  customer_id?: string;
 }
 
 // Para el payload final que se envía al backend con el lote de pedidos
@@ -105,7 +108,7 @@ export enum OrderStatus {
   ENTREGADO = 'ENTREGADO',
   // NO_ENTREGADO = 'NO_ENTREGADO',
   CANCELADO = 'CANCELADO',
-  RECHAZADO = 'RECHAZADO',
+  RECHAZADO = 'RECHAZADO EN PUNTO',
   // INCIDENCIA = 'INCIDENCIA',
   REPROGRAMADO = 'REPROGRAMADO',
 }

@@ -1,0 +1,133 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%; // Permitir que el componente se expanda a la altura del padre
+}
+
+.pdf-card {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px; // Bordes suaves
+  // background-color: #ffffff; // Fondo blanco ya es por defecto para mat-card
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06); // Sombra moderna
+  overflow: hidden; // Importante para que el iframe no rompa los bordes redondeados
+}
+
+.pdf-card-header {
+  // background-color: #d32f2f; // Rojo similar al de tu imagen (ajusta el tono)
+  background-color: #67c1f6; // Un rojo un poco más oscuro (Material Red 700)
+  color: white;
+  padding: 16px 24px; // Buen padding
+  // border-bottom: 1px solid rgba(0,0,0,0.12); // Opcional: si quieres un separador
+  // No necesitas flex aquí si mat-card-header ya lo maneja bien.
+
+  .header-icon {
+    // Para el mat-card-avatar
+    // background-color: rgba(255,255,255,0.2); // Fondo sutil para el icono si quieres
+    // border-radius: 50%;
+    // padding: 8px;
+    // display: flex;
+    // align-items: center;
+    // justify-content: center;
+    // margin-right: 16px; // Espacio si usas avatar
+    // font-size: 24px; // Tamaño del icono de avatar
+  }
+
+  .mat-mdc-card-header-text {
+    // Contenedor para título y subtítulo
+    margin: 0; // Quitar margen por defecto si es necesario
+  }
+
+  .header-title {
+    font-size: 1.25rem; // Tamaño del título
+    font-weight: 500; // Peso de la fuente
+    line-height: 1.4;
+    margin: 0; // Quitar margen
+  }
+
+  .header-subtitle {
+    font-size: 0.85rem;
+    opacity: 0.9; // Un poco transparente
+    line-height: 1.3;
+    margin: 0;
+  }
+}
+
+.pdf-card-content {
+  flex-grow: 1; // Ocupar el espacio restante
+  padding: 0; // El iframe ocupará todo
+  position: relative; // Para los overlays
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #eeeeee; // Un gris muy claro para el fondo del visor
+}
+
+.pdf-viewer {
+  border: none;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  // background-color: rgba(238, 238, 238, 0.95); // Fondo del overlay ligeramente transparente del mismo color que .pdf-card-content
+  background-color: rgba(255, 255, 255, 0.9); // O blanco semitransparente
+  z-index: 10;
+  padding: 20px;
+  text-align: center;
+  box-sizing: border-box;
+  border-radius: 0 0 8px 8px; // Aplicar bordes redondeados abajo si el header tiene arriba
+
+  p {
+    margin-top: 16px;
+    font-size: 1rem;
+    color: #424242; // Un gris oscuro para el texto
+  }
+
+  button {
+    // Estilo para el botón de reintentar en el overlay de error
+    margin-top: 20px;
+    font-weight: 500;
+  }
+}
+
+.spinner-overlay {
+  mat-progress-spinner {
+    margin-bottom: 8px; // Espacio entre spinner y texto
+  }
+  p {
+    font-weight: 500;
+    color: #212121;
+  }
+}
+
+.error-overlay,
+.placeholder-overlay {
+  .error-icon,
+  .placeholder-icon {
+    font-size: 52px; // Ligeramente más pequeño
+    width: 52px;
+    height: 52px;
+    margin-bottom: 12px;
+  }
+}
+
+.error-icon {
+  color: #c62828; // Mismo rojo que el header
+}
+
+.placeholder-icon {
+  color: #757575; // Gris medio
+}
