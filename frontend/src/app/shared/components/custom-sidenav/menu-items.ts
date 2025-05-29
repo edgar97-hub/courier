@@ -82,8 +82,8 @@ export const menuItems: MenuItem[] = [
     roles: ['ADMINISTRADOR', 'MOTORIZADO', 'CLIENTE', 'RECEPCIONISTA'],
   },
   {
-    icon: 'list_alt',
-    label: 'Lista de cierre de caja',
+    icon: 'analytics',
+    label: 'Reportes',
     route: 'lista-cierre-caja',
     roles: ['ADMINISTRADOR', 'MOTORIZADO', 'CLIENTE', 'RECEPCIONISTA'],
   },

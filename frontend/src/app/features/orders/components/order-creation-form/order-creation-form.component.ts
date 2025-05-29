@@ -354,6 +354,10 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   }
 
   resetFormForNextOrder(): void {
+    this.selectedDriver = null;
+    this.driverSearchCtrl.setValue('');
+    this.orderForm.get('customer_id')?.setValue(null);
+
     const defaultShipmentType =
       this.orderForm.get('shipment_type')?.value || this.shipmentTypes[0];
     const defaultPaymentMethod =
