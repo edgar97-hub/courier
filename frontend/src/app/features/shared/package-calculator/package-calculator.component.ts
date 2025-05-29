@@ -148,6 +148,7 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
           return tarifa;
         }
       }
+      return;
     }
 
     if (
@@ -180,7 +181,7 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
 
         if (tarifasDistrito) {
           let tarifa = getTarifa(peso_cobrado, tarifasDistrito);
-          precio = tarifa.price || 0;
+          precio = tarifa?.price || 0;
         }
       }
       console.log('peso_cobrado', peso_cobrado);

@@ -291,7 +291,7 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
           if (filtrados) {
             console.log('filtrados', filtrados);
             let tarifa = getTarifa(peso_cobrado, filtrados);
-            precio = tarifa.price || 0;
+            precio = tarifa?.price || 0;
           }
         }
       }
