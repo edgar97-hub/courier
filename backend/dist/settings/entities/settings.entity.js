@@ -20,11 +20,15 @@ __decorate([
     __metadata("design:type", String)
 ], SettingsEntity.prototype, "business_name", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], SettingsEntity.prototype, "ruc", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
 ], SettingsEntity.prototype, "address", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
 ], SettingsEntity.prototype, "phone_number", void 0);
 __decorate([

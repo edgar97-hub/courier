@@ -182,14 +182,66 @@ export class OrdersController {
   }
 
   @PublicAccess()
-  @Get(':id/pdf')
-  async getOrderPdf(
+  @Get(':id/pdf-a4')
+  async getOrderPdfA4(
     @Param('id') orderId: string,
+    @Req() req: Request,
     @Res() res: Response,
   ): Promise<void> {
     try {
       await this.orderPdfGeneratorService.streamOrderPdfToResponse(
         orderId,
+        req,
+        res,
+      );
+    } catch (error) {
+      console.error('Error in PDF streaming controller:', error);
+      if (!res.headersSent) {
+        if (error instanceof NotFoundException) {
+          res.status(404).send({ message: error.message });
+        } else {
+          res.status(500).send({ message: 'Error generating PDF stream' });
+        }
+      }
+    }
+  }
+
+  @PublicAccess()
+  @Get(':id/pdf-a4-landscape')
+  async getOrderPdfA4Landscape(
+    @Param('id') orderId: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<void> {
+    try {
+      await this.orderPdfGeneratorService.streamOrderPdfLandscapeToResponse(
+        orderId,
+        req,
+        res,
+      );
+    } catch (error) {
+      console.error('Error in PDF streaming controller:', error);
+      if (!res.headersSent) {
+        if (error instanceof NotFoundException) {
+          res.status(404).send({ message: error.message });
+        } else {
+          res.status(500).send({ message: 'Error generating PDF stream' });
+        }
+      }
+    }
+  }
+
+  @PublicAccess()
+  @Get(':id/pdf-ticket-80mm')
+  async getOrderPdfTicket80mm(
+    @Param('id') orderId: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<void> {
+    try {
+      await this.orderPdfGeneratorService.streamOrderPdf80mmToResponse(
+        orderId,
+        req,
         res,
       );
     } catch (error) {

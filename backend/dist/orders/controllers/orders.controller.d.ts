@@ -32,5 +32,7 @@ export declare class OrdersController {
     assignDriverToOrder(id: string, body: any, req: any): Promise<any>;
     rescheduleOrder(id: string, body: any, req: any): Promise<any>;
     deleteOrder(id: string): Promise<import("typeorm").DeleteResult | undefined>;
-    getOrderPdf(orderId: string, res: Response): Promise<void>;
+    getOrderPdfA4(orderId: string, req: Request, res: Response): Promise<void>;
+    getOrderPdfA4Landscape(orderId: string, req: Request, res: Response): Promise<void>;
+    getOrderPdfTicket80mm(orderId: string, req: Request, res: Response): Promise<void>;
 }

@@ -79,6 +79,14 @@ export const routes: Routes = [
         title: '',
       },
       {
+        path: 'package-calculator',
+        loadComponent: () =>
+          import(
+            './features/shared/package-calculator/package-calculator.component'
+          ).then((m) => m.PackageCalculatorComponent),
+        title: '',
+      },
+      {
         path: 'districts',
         loadChildren: () =>
           import('./features/districts/districts.routes').then(

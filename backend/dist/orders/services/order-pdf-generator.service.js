@@ -20,12 +20,15 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const PDFMake = require("pdfmake");
 const date_fns_1 = require("date-fns");
+const node_fetch_1 = require("node-fetch");
+const settings_entity_1 = require("../../settings/entities/settings.entity");
 let OrderPdfGeneratorService = class OrderPdfGeneratorService {
-    constructor(orderRepository) {
+    constructor(orderRepository, settingRepository) {
         this.orderRepository = orderRepository;
+        this.settingRepository = settingRepository;
         this.printer = new PDFMake(pdf_fonts_config_1.pdfMakeFonts);
     }
-    async streamOrderPdfToResponse(orderId, res) {
+    async streamOrderPdfToResponseTest(orderId, res) {
         const order = await this.orderRepository.findOne({
             where: { id: orderId },
         });
@@ -376,11 +379,1010 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
         pdfDoc.pipe(res);
         pdfDoc.end();
     }
+    async streamOrderPdfToResponse(orderId, req, res) {
+        const order = await this.orderRepository.findOne({
+            where: { id: orderId },
+            relations: ['user'],
+        });
+        if (!order) {
+            throw new common_1.NotFoundException(`Pedido con ID ${orderId} no encontrado.`);
+        }
+        const [setting] = await this.settingRepository.find({
+            order: {
+                id: 'ASC',
+            },
+            take: 1,
+        });
+        if (!setting) {
+            throw new common_1.NotFoundException(`empresa no encontrado`);
+        }
+        async function imageToBase64(imageUrl) {
+            try {
+                const response = await (0, node_fetch_1.default)(imageUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const arrayBuffer = await response.arrayBuffer();
+                const buffer = Buffer.from(new Uint8Array(arrayBuffer));
+                const base64String = buffer.toString('base64');
+                const contentType = response.headers.get('content-type') || 'image/png';
+                return `data:${contentType};base64,${base64String}`;
+            }
+            catch (error) {
+                console.error('Error fetching image:', error);
+                return null;
+            }
+        }
+        const formatDate = (dateInput) => {
+            if (!dateInput)
+                return 'No especificada';
+            try {
+                const date = typeof dateInput === 'string' &&
+                    !dateInput.includes('T') &&
+                    dateInput.match(/^\d{4}-\d{2}-\d{2}$/)
+                    ? new Date(dateInput + 'T00:00:00Z')
+                    : new Date(dateInput);
+                if (isNaN(date.getTime()))
+                    return 'Fecha inválida';
+                return (0, date_fns_1.format)(date, 'dd/MM/yyyy');
+            }
+            catch (e) {
+                return typeof dateInput === 'string' ? dateInput : 'Fecha inválida';
+            }
+        };
+        const formatCurrency = (amount) => {
+            if (amount === null || amount === undefined || isNaN(amount))
+                return 'S/ 0.00';
+            return `S/ ${Number(amount).toFixed(2)}`;
+        };
+        const getValue = (value, defaultValue = 'N/A') => {
+            if (value === null ||
+                value === undefined ||
+                (typeof value === 'string' && value.trim() === '')) {
+                return defaultValue;
+            }
+            return value.toString().trim();
+        };
+        const userName = order.user
+            ? getValue(order.user.username || order.user.email, 'Sistema')
+            : 'Sistema';
+        const LOGO_BASE64_STRING = await imageToBase64(setting?.logo_url);
+        const documentDefinition = {
+            pageSize: 'A4',
+            pageMargins: [30, 70, 30, 40],
+            header: (currentPage, pageCount) => ({
+                margin: [30, 15, 30, 10],
+                table: {
+                    widths: [60, '*'],
+                    body: [
+                        [
+                            {
+                                image: LOGO_BASE64_STRING,
+                                width: 60,
+                                alignment: 'left',
+                            },
+                            {
+                                stack: [
+                                    {
+                                        text: 'ORDEN DE SERVICIO',
+                                        style: 'mainTitleInHeader',
+                                        alignment: 'center',
+                                        margin: [0, 0, 0, 8],
+                                    },
+                                    {
+                                        columns: [
+                                            {
+                                                text: setting.business_name.toUpperCase(),
+                                                style: 'headerCompanyNameSmall',
+                                                alignment: 'left',
+                                                width: '*',
+                                            },
+                                            {
+                                                text: `Pedido N°: ${getValue(order.code, 'N/D')}`,
+                                                style: 'headerOrderCodeSmall',
+                                                alignment: 'right',
+                                                width: 'auto',
+                                            },
+                                        ],
+                                    },
+                                ],
+                                margin: [0, 0, 0, 0],
+                            },
+                        ],
+                    ],
+                },
+                layout: 'noBorders',
+            }),
+            footer: {
+                columns: [
+                    {
+                        text: `Generado: ${(0, date_fns_1.format)(new Date(), 'dd/MM/yyyy HH:mm')}`,
+                        alignment: 'left',
+                        style: 'footerText',
+                        margin: [30, 0, 0, 0],
+                    },
+                ],
+                margin: [0, 10, 0, 10],
+            },
+            content: [
+                {
+                    style: 'infoSection',
+                    margin: [0, 55, 0, 10],
+                    table: {
+                        widths: ['auto', '*'],
+                        body: [
+                            [
+                                { text: 'Tipo de Envío:', style: 'label' },
+                                {
+                                    text: getValue(order.shipment_type).toUpperCase(),
+                                    style: 'value',
+                                },
+                            ],
+                            [
+                                { text: 'Fecha Entrega Prog.:', style: 'label' },
+                                {
+                                    text: formatDate(order.delivery_date),
+                                    style: 'valueImportant',
+                                },
+                            ],
+                        ],
+                    },
+                    layout: 'noBorders',
+                },
+                { text: 'DESTINATARIO', style: 'sectionTitle', margin: [0, 20, 0, 8] },
+                {
+                    style: 'infoSection',
+                    table: {
+                        widths: ['auto', '*'],
+                        body: [
+                            [
+                                { text: 'Nombre:', style: 'label' },
+                                { text: getValue(order.recipient_name), style: 'value' },
+                            ],
+                            [
+                                { text: 'Teléfono:', style: 'label' },
+                                { text: getValue(order.recipient_phone), style: 'value' },
+                            ],
+                            [
+                                { text: 'Distrito:', style: 'label' },
+                                {
+                                    text: getValue(order.delivery_district_name).toUpperCase(),
+                                    style: 'value',
+                                },
+                            ],
+                            [
+                                { text: 'Dirección:', style: 'label' },
+                                { text: getValue(order.delivery_address), style: 'valueSmall' },
+                            ],
+                        ],
+                    },
+                    layout: 'noBorders',
+                },
+                {
+                    text: 'DETALLES DE COBRO',
+                    style: 'sectionTitle',
+                    margin: [0, 20, 0, 8],
+                },
+                {
+                    style: 'infoSection',
+                    table: {
+                        widths: ['auto', '*'],
+                        body: [
+                            [
+                                { text: 'Monto a Cobrar:', style: 'label' },
+                                {
+                                    text: formatCurrency(order.amount_to_collect_at_delivery),
+                                    style: 'valueHighlight',
+                                },
+                            ],
+                            [
+                                { text: 'Método de Pago:', style: 'label' },
+                                {
+                                    text: getValue(order.payment_method_for_collection).toUpperCase(),
+                                    style: 'value',
+                                },
+                            ],
+                        ],
+                    },
+                    layout: 'noBorders',
+                },
+                { text: 'OBSERVACIONES', style: 'sectionTitle', margin: [0, 20, 0, 8] },
+                {
+                    text: getValue(order.observations, 'Ninguna.'),
+                    style: 'paragraph',
+                    margin: [0, 0, 0, 20],
+                },
+                {
+                    text: 'INFORMACIÓN ADICIONAL',
+                    style: 'sectionTitle',
+                    margin: [0, 10, 0, 8],
+                },
+                {
+                    style: 'infoSection',
+                    table: {
+                        widths: ['auto', '*'],
+                        body: [
+                            [
+                                { text: 'Registrado por:', style: 'label' },
+                                { text: userName, style: 'valueSmall' },
+                            ],
+                        ],
+                    },
+                    layout: 'noBorders',
+                },
+            ],
+            styles: {
+                headerCompanyNameSmall: {
+                    fontSize: 10,
+                    bold: false,
+                    color: '#455a64',
+                },
+                headerOrderCodeSmall: {
+                    fontSize: 10,
+                    bold: true,
+                    color: '#3498db',
+                },
+                mainTitleInHeader: {
+                    fontSize: 18,
+                    bold: true,
+                    color: '#333333',
+                },
+                headerCompanyName: {
+                    fontSize: 14,
+                    bold: true,
+                    color: '#2c3e50',
+                },
+                headerOrderCode: {
+                    fontSize: 12,
+                    color: '#3498db',
+                },
+                mainTitle: {
+                    fontSize: 18,
+                    bold: true,
+                    color: '#333333',
+                },
+                sectionTitle: {
+                    fontSize: 12,
+                    bold: true,
+                    color: '#2c3e50',
+                    decoration: 'underline',
+                    decorationStyle: 'solid',
+                    decorationColor: '#3498db',
+                    margin: [0, 15, 0, 5],
+                },
+                infoSection: {
+                    margin: [0, 0, 0, 10],
+                },
+                label: {
+                    fontSize: 10,
+                    bold: true,
+                    color: '#555555',
+                    margin: [0, 0, 10, 4],
+                    width: 'auto',
+                },
+                value: {
+                    fontSize: 10,
+                    color: '#333333',
+                    margin: [0, 0, 0, 4],
+                },
+                valueSmall: {
+                    fontSize: 9,
+                    color: '#444444',
+                    margin: [0, 0, 0, 4],
+                },
+                valueImportant: {
+                    fontSize: 10,
+                    bold: true,
+                    color: '#e74c3c',
+                    margin: [0, 0, 0, 4],
+                },
+                valueHighlight: {
+                    fontSize: 12,
+                    bold: true,
+                    color: '#2980b9',
+                    margin: [0, 0, 0, 4],
+                },
+                paragraph: {
+                    fontSize: 10,
+                    color: '#444444',
+                    lineHeight: 1.3,
+                },
+                smallNote: {
+                    fontSize: 8,
+                    italics: true,
+                    color: '#7f8c8d',
+                },
+                footerText: {
+                    fontSize: 8,
+                    color: '#AEAEAE',
+                },
+            },
+            defaultStyle: {
+                font: 'Roboto',
+                fontSize: 10,
+                lineHeight: 1.2,
+            },
+        };
+        try {
+            const pdfDoc = this.printer.createPdfKitDocument(documentDefinition);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `inline; filename="guia_simplificada_${order.code || order.id}.pdf"`);
+            pdfDoc.pipe(res);
+            pdfDoc.end();
+        }
+        catch (error) {
+            console.error('Error generando PDF:', error);
+            throw new common_1.InternalServerErrorException('No se pudo generar el PDF del pedido.');
+        }
+    }
+    async streamOrderPdfLandscapeToResponse(orderId, req, res) {
+        const order = await this.orderRepository.findOne({
+            where: { id: orderId },
+            relations: ['user'],
+        });
+        if (!order) {
+            throw new common_1.NotFoundException(`Pedido con ID ${orderId} no encontrado.`);
+        }
+        const [setting] = await this.settingRepository.find({
+            order: {
+                id: 'ASC',
+            },
+            take: 1,
+        });
+        if (!setting) {
+            throw new common_1.NotFoundException(`empresa no encontrado`);
+        }
+        async function imageToBase64(imageUrl) {
+            try {
+                const response = await (0, node_fetch_1.default)(imageUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const arrayBuffer = await response.arrayBuffer();
+                const buffer = Buffer.from(new Uint8Array(arrayBuffer));
+                const base64String = buffer.toString('base64');
+                const contentType = response.headers.get('content-type') || 'image/png';
+                return `data:${contentType};base64,${base64String}`;
+            }
+            catch (error) {
+                console.error('Error fetching image:', error);
+                return null;
+            }
+        }
+        const formatDate = (dateInput) => {
+            if (!dateInput)
+                return 'No especificada';
+            try {
+                const date = typeof dateInput === 'string' &&
+                    !dateInput.includes('T') &&
+                    dateInput.match(/^\d{4}-\d{2}-\d{2}$/)
+                    ? new Date(dateInput + 'T00:00:00Z')
+                    : new Date(dateInput);
+                if (isNaN(date.getTime()))
+                    return 'Fecha inválida';
+                return (0, date_fns_1.format)(date, 'dd/MM/yyyy');
+            }
+            catch (e) {
+                return typeof dateInput === 'string' ? dateInput : 'Fecha inválida';
+            }
+        };
+        const formatCurrency = (amount) => {
+            if (amount === null || amount === undefined || isNaN(amount))
+                return 'S/ 0.00';
+            return `S/ ${Number(amount).toFixed(2)}`;
+        };
+        const getValue = (value, defaultValue = 'N/A') => {
+            if (value === null ||
+                value === undefined ||
+                (typeof value === 'string' && value.trim() === '')) {
+                return defaultValue;
+            }
+            return value.toString().trim();
+        };
+        const userName = order.user
+            ? getValue(order.user.username || order.user.email, 'Sistema')
+            : 'Sistema';
+        const LOGO_BASE64_STRING = await imageToBase64(setting?.logo_url);
+        const A4_LANDSCAPE_WIDTH_POINTS = 841.89;
+        const PAGE_MARGIN_HORIZONTAL = 40;
+        const CONTENT_WIDTH_TOTAL = A4_LANDSCAPE_WIDTH_POINTS - 2 * PAGE_MARGIN_HORIZONTAL;
+        const LEFT_COLUMN_WIDTH = Math.floor(CONTENT_WIDTH_TOTAL / 2) - 120;
+        const RIGHT_COLUMN_WIDTH = '*';
+        const documentDefinition = {
+            pageSize: 'A4',
+            pageOrientation: 'landscape',
+            pageMargins: [PAGE_MARGIN_HORIZONTAL, 70, PAGE_MARGIN_HORIZONTAL, 30],
+            header: (currentPage, pageCount) => ({
+                margin: [PAGE_MARGIN_HORIZONTAL, 15, PAGE_MARGIN_HORIZONTAL, 5],
+                table: {
+                    widths: [LEFT_COLUMN_WIDTH, RIGHT_COLUMN_WIDTH],
+                    body: [
+                        [
+                            {
+                                table: {
+                                    widths: [200, '*'],
+                                    body: [
+                                        [
+                                            {
+                                                stack: [
+                                                    {
+                                                        text: 'ORDEN DE SERVICIO',
+                                                        style: 'mainTitleInHeader',
+                                                        alignment: 'center',
+                                                        margin: [0, 0, 0, 8],
+                                                    },
+                                                    {
+                                                        columns: [
+                                                            {
+                                                                text: setting.business_name.toUpperCase(),
+                                                                style: 'headerCompanyNameSmall',
+                                                                alignment: 'left',
+                                                                width: '*',
+                                                            },
+                                                            {
+                                                                text: `Pedido N°: ${getValue(order.code, 'N/D')}`,
+                                                                style: 'headerOrderCodeSmall',
+                                                                alignment: 'right',
+                                                                width: 'auto',
+                                                            },
+                                                        ],
+                                                    },
+                                                ],
+                                                margin: [0, 0, 0, 0],
+                                            },
+                                        ],
+                                    ],
+                                },
+                                layout: 'noBorders',
+                            },
+                            { text: '' },
+                        ],
+                    ],
+                },
+                layout: 'noBorders',
+            }),
+            footer: (currentPage, pageCount) => ({
+                margin: [PAGE_MARGIN_HORIZONTAL, 10, PAGE_MARGIN_HORIZONTAL, 10],
+                table: {
+                    widths: [LEFT_COLUMN_WIDTH, RIGHT_COLUMN_WIDTH],
+                    body: [
+                        [
+                            {
+                                columns: [
+                                    {
+                                        text: `Generado: ${(0, date_fns_1.format)(new Date(), 'dd/MM/yyyy HH:mm')}`,
+                                        alignment: 'left',
+                                        style: 'footerText',
+                                        width: '*',
+                                    },
+                                ],
+                            },
+                            { text: '' },
+                        ],
+                    ],
+                },
+                layout: 'noBorders',
+            }),
+            content: [
+                {
+                    table: {
+                        widths: [LEFT_COLUMN_WIDTH, RIGHT_COLUMN_WIDTH],
+                        body: [
+                            [
+                                {
+                                    stack: [
+                                        {
+                                            canvas: [
+                                                {
+                                                    type: 'line',
+                                                    x1: 0,
+                                                    y1: 0,
+                                                    x2: LEFT_COLUMN_WIDTH,
+                                                    y2: 0,
+                                                    lineWidth: 0.5,
+                                                    lineColor: '#AEAEAE',
+                                                },
+                                            ],
+                                            margin: [0, 0, 0, 10],
+                                        },
+                                        {
+                                            style: 'infoSection',
+                                            table: {
+                                                widths: ['auto', '*'],
+                                                body: [
+                                                    [
+                                                        { text: 'Tipo de Envío:', style: 'label' },
+                                                        {
+                                                            text: getValue(order.shipment_type).toUpperCase(),
+                                                            style: 'value',
+                                                        },
+                                                    ],
+                                                    [
+                                                        { text: 'Fecha Entrega Prog.:', style: 'label' },
+                                                        {
+                                                            text: formatDate(order.delivery_date),
+                                                            style: 'valueImportant',
+                                                        },
+                                                    ],
+                                                ],
+                                            },
+                                            layout: 'noBorders',
+                                        },
+                                        {
+                                            text: 'DESTINATARIO',
+                                            style: 'sectionTitle',
+                                            margin: [0, 15, 0, 8],
+                                        },
+                                        {
+                                            style: 'infoSection',
+                                            table: {
+                                                widths: ['auto', '*'],
+                                                body: [
+                                                    [
+                                                        { text: 'Nombre:', style: 'label' },
+                                                        {
+                                                            text: getValue(order.recipient_name),
+                                                            style: 'value',
+                                                        },
+                                                    ],
+                                                    [
+                                                        { text: 'Teléfono:', style: 'label' },
+                                                        {
+                                                            text: getValue(order.recipient_phone),
+                                                            style: 'value',
+                                                        },
+                                                    ],
+                                                    [
+                                                        { text: 'Distrito:', style: 'label' },
+                                                        {
+                                                            text: getValue(order.delivery_district_name).toUpperCase(),
+                                                            style: 'value',
+                                                        },
+                                                    ],
+                                                    [
+                                                        { text: 'Dirección:', style: 'label' },
+                                                        {
+                                                            text: getValue(order.delivery_address),
+                                                            style: 'valueSmall',
+                                                        },
+                                                    ],
+                                                ],
+                                            },
+                                            layout: 'noBorders',
+                                        },
+                                        {
+                                            text: 'DETALLES DE COBRO',
+                                            style: 'sectionTitle',
+                                            margin: [0, 15, 0, 8],
+                                        },
+                                        {
+                                            style: 'infoSection',
+                                            table: {
+                                                widths: ['auto', '*'],
+                                                body: [
+                                                    [
+                                                        { text: 'Monto a Cobrar:', style: 'label' },
+                                                        {
+                                                            text: formatCurrency(order.amount_to_collect_at_delivery),
+                                                            style: 'valueHighlight',
+                                                        },
+                                                    ],
+                                                    [
+                                                        { text: 'Método de Pago:', style: 'label' },
+                                                        {
+                                                            text: getValue(order.payment_method_for_collection).toUpperCase(),
+                                                            style: 'value',
+                                                        },
+                                                    ],
+                                                ],
+                                            },
+                                            layout: 'noBorders',
+                                        },
+                                        {
+                                            text: 'OBSERVACIONES',
+                                            style: 'sectionTitle',
+                                            margin: [0, 15, 0, 8],
+                                        },
+                                        {
+                                            text: getValue(order.observations, 'Ninguna.'),
+                                            style: 'paragraph',
+                                            margin: [0, 0, 0, 15],
+                                        },
+                                        {
+                                            text: 'INFORMACIÓN ADICIONAL',
+                                            style: 'sectionTitle',
+                                            margin: [0, 10, 0, 8],
+                                        },
+                                        {
+                                            style: 'infoSection',
+                                            table: {
+                                                widths: ['auto', '*'],
+                                                body: [
+                                                    [
+                                                        { text: 'Registrado por:', style: 'label' },
+                                                        { text: userName, style: 'valueSmall' },
+                                                    ],
+                                                ],
+                                            },
+                                            layout: 'noBorders',
+                                        },
+                                    ],
+                                },
+                                {
+                                    text: '',
+                                },
+                            ],
+                        ],
+                    },
+                    layout: 'noBorders',
+                },
+            ],
+            styles: {
+                headerCompanyNameSmall: { fontSize: 10, color: '#455a64' },
+                headerOrderCodeSmall: { fontSize: 10, bold: true, color: '#3498db' },
+                mainTitleInHeader: { fontSize: 18, bold: true, color: '#333333' },
+                sectionTitle: {
+                    fontSize: 11,
+                    bold: true,
+                    color: '#2c3e50',
+                    decoration: 'underline',
+                    decorationStyle: 'solid',
+                    decorationColor: '#3498db',
+                    margin: [0, 10, 0, 5],
+                },
+                infoSection: {
+                    margin: [0, 0, 0, 8],
+                },
+                label: {
+                    fontSize: 9,
+                    bold: true,
+                    color: '#555555',
+                    margin: [0, 0, 8, 3],
+                    width: 'auto',
+                },
+                value: { fontSize: 9, color: '#333333', margin: [0, 0, 0, 3] },
+                valueSmall: { fontSize: 8, color: '#444444', margin: [0, 0, 0, 3] },
+                valueImportant: {
+                    fontSize: 9,
+                    bold: true,
+                    color: '#e74c3c',
+                    margin: [0, 0, 0, 3],
+                },
+                valueHighlight: {
+                    fontSize: 11,
+                    bold: true,
+                    color: '#2980b9',
+                    margin: [0, 0, 0, 3],
+                },
+                paragraph: {
+                    fontSize: 9,
+                    color: '#444444',
+                    lineHeight: 1.2,
+                    margin: [0, 0, 0, 10],
+                },
+                footerText: { fontSize: 8, color: '#AEAEAE' },
+            },
+            defaultStyle: {
+                font: 'Roboto',
+                fontSize: 9,
+                lineHeight: 1.1,
+                color: '#333333',
+            },
+        };
+        try {
+            const pdfDoc = this.printer.createPdfKitDocument(documentDefinition);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `inline; filename="guia_simplificada_${order.code || order.id}.pdf"`);
+            pdfDoc.pipe(res);
+            pdfDoc.end();
+        }
+        catch (error) {
+            console.error('Error generando PDF:', error);
+            throw new common_1.InternalServerErrorException('No se pudo generar el PDF del pedido.');
+        }
+    }
+    async streamOrderPdf80mmToResponse(orderId, req, res) {
+        const order = await this.orderRepository.findOne({
+            where: { id: orderId },
+            relations: ['user'],
+        });
+        if (!order) {
+            throw new common_1.NotFoundException(`Pedido con ID ${orderId} no encontrado.`);
+        }
+        const [setting] = await this.settingRepository.find({
+            order: {
+                id: 'ASC',
+            },
+            take: 1,
+        });
+        if (!setting) {
+            throw new common_1.NotFoundException(`empresa no encontrado`);
+        }
+        const host = req.get('host');
+        async function imageToBase64(imageUrl) {
+            try {
+                const response = await (0, node_fetch_1.default)(imageUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const arrayBuffer = await response.arrayBuffer();
+                const buffer = Buffer.from(new Uint8Array(arrayBuffer));
+                const base64String = buffer.toString('base64');
+                const contentType = response.headers.get('content-type') || 'image/png';
+                return `data:${contentType};base64,${base64String}`;
+            }
+            catch (error) {
+                console.error('Error fetching image:', error);
+                return null;
+            }
+        }
+        const formatDate = (dateInput) => {
+            if (!dateInput)
+                return 'No especificada';
+            try {
+                const date = typeof dateInput === 'string' &&
+                    !dateInput.includes('T') &&
+                    dateInput.match(/^\d{4}-\d{2}-\d{2}$/)
+                    ? new Date(dateInput + 'T00:00:00Z')
+                    : new Date(dateInput);
+                if (isNaN(date.getTime()))
+                    return 'Fecha inválida';
+                return (0, date_fns_1.format)(date, 'dd/MM/yyyy');
+            }
+            catch (e) {
+                return typeof dateInput === 'string' ? dateInput : 'Fecha inválida';
+            }
+        };
+        const formatCurrency = (amount) => {
+            if (amount === null || amount === undefined || isNaN(amount))
+                return 'S/ 0.00';
+            return `S/ ${Number(amount).toFixed(2)}`;
+        };
+        const getValue = (value, defaultValue = 'N/A') => {
+            if (value === null ||
+                value === undefined ||
+                (typeof value === 'string' && value.trim() === '')) {
+                return defaultValue;
+            }
+            return value.toString().trim();
+        };
+        const userName = order.user
+            ? getValue(order.user.username || order.user.email, 'Sistema')
+            : 'Sistema';
+        const TICKET_WIDTH_MM = 80;
+        const TICKET_MARGIN_MM = 7;
+        const MM_TO_POINTS = 2.834645669;
+        const TICKET_PAGE_WIDTH_PT = TICKET_WIDTH_MM * MM_TO_POINTS;
+        const TICKET_MARGIN_PT = TICKET_MARGIN_MM * MM_TO_POINTS;
+        const CONTENT_WIDTH_PT = TICKET_PAGE_WIDTH_PT - 2 * TICKET_MARGIN_PT;
+        const LOGO_BASE64_STRING = await imageToBase64(setting?.logo_url);
+        const documentDefinitionTicket = {
+            pageSize: { width: TICKET_PAGE_WIDTH_PT, height: 'auto' },
+            pageMargins: [TICKET_MARGIN_PT, 10, TICKET_MARGIN_PT, 10],
+            content: [
+                {
+                    image: LOGO_BASE64_STRING,
+                    width: 60,
+                    alignment: 'center',
+                    margin: [0, 0, 0, 5],
+                },
+                {
+                    text: setting.business_name.toUpperCase(),
+                    style: 'ticketCompanyName',
+                    alignment: 'center',
+                },
+                {
+                    text: 'RUC:' + setting.ruc,
+                    style: 'ticketInfoSmall',
+                    alignment: 'center',
+                },
+                {
+                    text: 'Tel: ' + setting.phone_number,
+                    style: 'ticketInfoSmall',
+                    alignment: 'center',
+                    margin: [0, 0, 0, 10],
+                },
+                {
+                    text: '--------------------------------------',
+                    style: 'ticketSeparator',
+                    alignment: 'center',
+                },
+                {
+                    text: `GUÍA DE ENVÍO`,
+                    style: 'ticketMainTitle',
+                    alignment: 'center',
+                },
+                {
+                    text: `Pedido N°: ${getValue(order.code, 'N/D')}`,
+                    style: 'ticketOrderCode',
+                    alignment: 'center',
+                    margin: [0, 0, 0, 8],
+                },
+                {
+                    text: `Fecha Reg: ${(0, date_fns_1.format)(new Date(order.createdAt || Date.now()), 'dd/MM/yy HH:mm')}`,
+                    style: 'ticketInfoSmall',
+                    alignment: 'center',
+                    margin: [0, 0, 0, 10],
+                },
+                {
+                    text: '--------------------------------------',
+                    style: 'ticketSeparator',
+                    alignment: 'center',
+                },
+                {
+                    text: `Tipo Envío: ${getValue(order.shipment_type).toUpperCase()}`,
+                    style: 'ticketDetail',
+                },
+                {
+                    text: `Fecha Entrega Prog.: ${formatDate(order.delivery_date)}`,
+                    style: 'ticketDetailImportant',
+                },
+                {
+                    text: 'DESTINATARIO:',
+                    style: 'ticketSectionTitle',
+                    margin: [0, 8, 0, 2],
+                },
+                {
+                    text: `Nombre: ${getValue(order.recipient_name)}`,
+                    style: 'ticketDetail',
+                },
+                {
+                    text: `Teléfono: ${getValue(order.recipient_phone)}`,
+                    style: 'ticketDetail',
+                },
+                {
+                    text: `Distrito: ${getValue(order.delivery_district_name).toUpperCase()}`,
+                    style: 'ticketDetail',
+                },
+                {
+                    text: `Dirección: ${getValue(order.delivery_address)}`,
+                    style: 'ticketDetailSmallWrap',
+                },
+                {
+                    text: 'COBRO EN ENTREGA:',
+                    style: 'ticketSectionTitle',
+                    margin: [0, 8, 0, 2],
+                },
+                {
+                    text: `Monto: ${formatCurrency(order.amount_to_collect_at_delivery)}`,
+                    style: 'ticketDetailHighlight',
+                },
+                {
+                    text: `Método: ${getValue(order.payment_method_for_collection).toUpperCase()}`,
+                    style: 'ticketDetail',
+                },
+                {
+                    text: 'OBSERVACIONES:',
+                    style: 'ticketSectionTitle',
+                    margin: [0, 8, 0, 2],
+                },
+                {
+                    text: getValue(order.observations, 'Ninguna.'),
+                    style: 'ticketDetailSmallWrap',
+                    margin: [0, 0, 0, 10],
+                },
+                {
+                    text: '--------------------------------------',
+                    style: 'ticketSeparator',
+                    alignment: 'center',
+                },
+                {
+                    text: `Atendido por: ${userName}`,
+                    style: 'ticketInfoSmall',
+                    alignment: 'center',
+                },
+                {
+                    qr: order.tracking_code || `PEDIDO-${order.code}`,
+                    fit: '80',
+                    alignment: 'center',
+                    margin: [0, 10, 0, 10],
+                },
+                {
+                    text: `Tracking: ${getValue(order.tracking_code, 'N/A')}`,
+                    style: 'ticketInfoSmall',
+                    alignment: 'center',
+                    margin: [0, 0, 0, 10],
+                },
+                {
+                    text: '¡Gracias por su preferencia!',
+                    style: 'ticketFooter',
+                    alignment: 'center',
+                },
+                {
+                    text: host,
+                    style: 'ticketFooterSmall',
+                    alignment: 'center',
+                },
+            ],
+            styles: {
+                ticketCompanyName: {
+                    fontSize: 10,
+                    bold: true,
+                    margin: [0, 0, 0, 1],
+                },
+                ticketInfoSmall: {
+                    fontSize: 7,
+                    color: '#333333',
+                    margin: [0, 0, 0, 1],
+                },
+                ticketSeparator: {
+                    fontSize: 8,
+                    margin: [0, 2, 0, 2],
+                    color: '#555555',
+                },
+                ticketMainTitle: {
+                    fontSize: 11,
+                    bold: true,
+                    margin: [0, 2, 0, 2],
+                },
+                ticketOrderCode: {
+                    fontSize: 10,
+                    bold: true,
+                    margin: [0, 0, 0, 2],
+                },
+                ticketSectionTitle: {
+                    fontSize: 9,
+                    bold: true,
+                    margin: [0, 5, 0, 1],
+                },
+                ticketDetail: {
+                    fontSize: 8,
+                    margin: [0, 0, 0, 2],
+                    lineHeight: 1.1,
+                },
+                ticketDetailImportant: {
+                    fontSize: 8,
+                    bold: true,
+                    color: '#d32f2f',
+                    margin: [0, 0, 0, 2],
+                },
+                ticketDetailHighlight: {
+                    fontSize: 10,
+                    bold: true,
+                    color: '#000000',
+                    margin: [0, 0, 0, 2],
+                },
+                ticketDetailSmallWrap: {
+                    fontSize: 7.5,
+                    margin: [0, 0, 0, 2],
+                    lineHeight: 1.1,
+                },
+                ticketFooter: {
+                    fontSize: 8,
+                    bold: true,
+                    margin: [0, 5, 0, 1],
+                },
+                ticketFooterSmall: {
+                    fontSize: 7,
+                    margin: [0, 0, 0, 5],
+                },
+            },
+            defaultStyle: {
+                font: 'Roboto',
+                fontSize: 8,
+                color: '#000000',
+                lineHeight: 1,
+            },
+        };
+        try {
+            const pdfDoc = this.printer.createPdfKitDocument(documentDefinitionTicket);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `inline; filename="guia_simplificada_${order.code || order.id}.pdf"`);
+            pdfDoc.pipe(res);
+            pdfDoc.end();
+        }
+        catch (error) {
+            console.error('Error generando PDF:', error);
+            throw new common_1.InternalServerErrorException('No se pudo generar el PDF del pedido.');
+        }
+    }
 };
 exports.OrderPdfGeneratorService = OrderPdfGeneratorService;
 exports.OrderPdfGeneratorService = OrderPdfGeneratorService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(orders_entity_1.OrdersEntity)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __param(1, (0, typeorm_1.InjectRepository)(settings_entity_1.SettingsEntity)),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository])
 ], OrderPdfGeneratorService);
 //# sourceMappingURL=order-pdf-generator.service.js.map

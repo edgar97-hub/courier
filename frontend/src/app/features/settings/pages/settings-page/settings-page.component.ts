@@ -81,6 +81,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     this.settingsForm = this.fb.group({
       id: [settings.id],
       business_name: [settings.business_name, Validators.required],
+      ruc: [settings.ruc, Validators.required],
       address: [settings.address],
       phone_number: [settings.phone_number],
       logo_url: [settings.logo_url],
@@ -118,6 +119,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
             this.settingsForm.patchValue({
               ...loadedSettings,
               id: loadedSettings[0].id,
+              ruc: loadedSettings[0].ruc,
               business_name: loadedSettings[0].business_name,
               address: loadedSettings[0].address,
               phone_number: loadedSettings[0].phone_number,

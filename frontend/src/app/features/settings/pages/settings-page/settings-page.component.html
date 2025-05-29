@@ -27,6 +27,14 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
+          <mat-label>RUC</mat-label>
+          <input matInput formControlName="ruc" required />
+          <mat-error *ngIf="settingsForm.get('ruc')?.hasError('required')">
+            Se requiere el ruc.
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
           <mat-label>Direccón</mat-label>
           <input matInput formControlName="address" />
         </mat-form-field>

@@ -6,10 +6,13 @@ export class SettingsEntity extends BaseEntity {
   @Column()
   business_name: string;
 
-  @Column()
+  @Column({ default: '' })
+  ruc: string;
+
+  @Column({ default: '' })
   address: string;
 
-  @Column()
+  @Column({ default: '' })
   phone_number: string;
 
   @Column({ nullable: false, default: '' })

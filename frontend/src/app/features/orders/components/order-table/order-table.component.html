@@ -206,9 +206,19 @@
               Motorizado</span
             >
           </button>
-          <button mat-menu-item (click)="onViewPdf(order)">
+          <button mat-menu-item (click)="onViewPdfA4(order)">
             <mat-icon>picture_as_pdf</mat-icon>
-            <span>Visualizar</span>
+            <span>PDF formato A4</span>
+          </button>
+
+          <button mat-menu-item (click)="onViewPdfA4Landscape(order)">
+            <mat-icon>picture_as_pdf</mat-icon>
+            <span>PDF formato A4 Landscape</span>
+          </button>
+
+          <button mat-menu-item (click)="onViewPdfTicket80mm(order)">
+            <mat-icon>picture_as_pdf</mat-icon>
+            <span>PDF formato ticket</span>
           </button>
           <button mat-menu-item (click)="onSeguimiento(order)">
             <mat-icon>timeline</mat-icon>

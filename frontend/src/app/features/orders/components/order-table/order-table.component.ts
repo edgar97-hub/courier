@@ -167,12 +167,21 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     return false;
   }
 
-  onViewPdf(order: Order_): void {
-    // const pdfUrl = `http://127.0.0.1:8000/api/orders/${order.id}/pdf`;
-    const pdfUrl = environment.apiUrl + '/orders/' + order.id + '/pdf';
+  onViewPdfA4(order: Order_): void {
+    const pdfUrl = environment.apiUrl + '/orders/' + order.id + '/pdf-a4';
     window.open(pdfUrl, '_blank');
-    this.viewPdfClicked.emit(order);
   }
+
+  onViewPdfA4Landscape(order: Order_): void {
+    const pdfUrl = environment.apiUrl + '/orders/' + order.id + '/pdf-a4-landscape';
+    window.open(pdfUrl, '_blank');
+  }
+
+  onViewPdfTicket80mm(order: Order_): void {
+    const pdfUrl = environment.apiUrl + '/orders/' + order.id + '/pdf-ticket-80mm';
+    window.open(pdfUrl, '_blank');
+  }
+
 
   onSeguimiento(order: Order): void {
     window.open('/tracking?code=' + order.tracking_code, '_blank');

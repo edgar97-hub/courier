@@ -4,7 +4,6 @@ export type MenuItem = {
   route?: string;
   subItems?: MenuItem[];
   roles?: string[];
-  key?: string;
 };
 
 export const menuItems: MenuItem[] = [
@@ -85,6 +84,12 @@ export const menuItems: MenuItem[] = [
     icon: 'analytics',
     label: 'Reportes',
     route: 'lista-cierre-caja',
+    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'CLIENTE', 'RECEPCIONISTA'],
+  },
+  {
+    icon: 'calculate',
+    label: 'Calculadora',
+    route: 'package-calculator',
     roles: ['ADMINISTRADOR', 'MOTORIZADO', 'CLIENTE', 'RECEPCIONISTA'],
   },
   {

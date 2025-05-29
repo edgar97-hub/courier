@@ -155,7 +155,7 @@ import { MenuItem } from '../menu-items';
       [@expandContractMenu]="isSubmenuOpen() ? 'expanded' : 'collapsed'"
       class="submenu-container"
     >
-      @for(subItem of item().subItems; track subItem.key) {
+      @for(subItem of item().subItems; track subItem.label) {
       <app-menu-item
         [item]="subItem"
         [collapsed]="collapsed()"

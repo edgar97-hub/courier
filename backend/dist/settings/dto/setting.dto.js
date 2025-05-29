@@ -24,6 +24,11 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
+], SettingDTO.prototype, "ruc", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
 ], SettingDTO.prototype, "address", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
@@ -99,6 +104,11 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], SettingUpdateDTO.prototype, "business_name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], SettingUpdateDTO.prototype, "ruc", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)

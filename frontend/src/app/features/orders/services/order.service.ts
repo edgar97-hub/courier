@@ -235,6 +235,8 @@ export class OrderService {
               apiResponse[0].standard_measurements_weight +
               'kg';
 
+              
+
             let info_text =
               'MEDIDAS MAXIMAS (Largo ' +
               apiResponse[0].maximum_measurements_length +

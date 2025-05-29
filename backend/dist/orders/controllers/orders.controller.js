@@ -84,9 +84,41 @@ let OrdersController = class OrdersController {
     async deleteOrder(id) {
         return await this.ordersService.deleteOrder(id);
     }
-    async getOrderPdf(orderId, res) {
+    async getOrderPdfA4(orderId, req, res) {
         try {
-            await this.orderPdfGeneratorService.streamOrderPdfToResponse(orderId, res);
+            await this.orderPdfGeneratorService.streamOrderPdfToResponse(orderId, req, res);
+        }
+        catch (error) {
+            console.error('Error in PDF streaming controller:', error);
+            if (!res.headersSent) {
+                if (error instanceof common_1.NotFoundException) {
+                    res.status(404).send({ message: error.message });
+                }
+                else {
+                    res.status(500).send({ message: 'Error generating PDF stream' });
+                }
+            }
+        }
+    }
+    async getOrderPdfA4Landscape(orderId, req, res) {
+        try {
+            await this.orderPdfGeneratorService.streamOrderPdfLandscapeToResponse(orderId, req, res);
+        }
+        catch (error) {
+            console.error('Error in PDF streaming controller:', error);
+            if (!res.headersSent) {
+                if (error instanceof common_1.NotFoundException) {
+                    res.status(404).send({ message: error.message });
+                }
+                else {
+                    res.status(500).send({ message: 'Error generating PDF stream' });
+                }
+            }
+        }
+    }
+    async getOrderPdfTicket80mm(orderId, req, res) {
+        try {
+            await this.orderPdfGeneratorService.streamOrderPdf80mmToResponse(orderId, req, res);
         }
         catch (error) {
             console.error('Error in PDF streaming controller:', error);
@@ -228,13 +260,34 @@ __decorate([
 ], OrdersController.prototype, "deleteOrder", null);
 __decorate([
     (0, public_decorator_1.PublicAccess)(),
-    (0, common_1.Get)(':id/pdf'),
+    (0, common_1.Get)(':id/pdf-a4'),
     __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Res)()),
+    __param(1, (0, common_1.Req)()),
+    __param(2, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", Promise)
-], OrdersController.prototype, "getOrderPdf", null);
+], OrdersController.prototype, "getOrderPdfA4", null);
+__decorate([
+    (0, public_decorator_1.PublicAccess)(),
+    (0, common_1.Get)(':id/pdf-a4-landscape'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
+    __param(2, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "getOrderPdfA4Landscape", null);
+__decorate([
+    (0, public_decorator_1.PublicAccess)(),
+    (0, common_1.Get)(':id/pdf-ticket-80mm'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
+    __param(2, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "getOrderPdfTicket80mm", null);
 exports.OrdersController = OrdersController = __decorate([
     (0, swagger_1.ApiTags)('Orders'),
     (0, common_1.Controller)('orders'),

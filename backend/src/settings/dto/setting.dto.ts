@@ -15,6 +15,10 @@ export class SettingDTO {
 
   @ApiProperty()
   @IsString()
+  ruc: string;
+
+  @ApiProperty()
+  @IsString()
   address: string;
 
   @ApiProperty()
@@ -72,6 +76,10 @@ export class SettingDTO {
 export class SettingUpdateDTO {
   @ApiProperty()
   business_name: string;
+
+  @ApiProperty()
+  @IsString()
+  ruc: string;
 
   @ApiProperty()
   address: string;
