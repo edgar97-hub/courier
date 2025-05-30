@@ -9,12 +9,12 @@
   <mat-form-field
     appearance="outline"
     class="full-width driver-search-field"
-    *ngIf="!isCustomer()"
+    *ngIf="!isCompany()"
   >
-    <mat-label>Buscar y Seleccionar cliente</mat-label>
+    <mat-label>Buscar y Seleccionar empresa</mat-label>
     <input
       type="text"
-      placeholder="Escriba el nombre del cliente..."
+      placeholder="Escriba el nombre del la empresa..."
       aria-label="cliente"
       matInput
       [formControl]="driverSearchCtrl"
@@ -56,7 +56,7 @@
       }
     </mat-autocomplete>
 
-    <mat-error *ngIf="orderForm.get('customer_id')?.hasError('required')"
+    <mat-error *ngIf="orderForm.get('company_id')?.hasError('required')"
       >Requerido</mat-error
     >
   </mat-form-field>

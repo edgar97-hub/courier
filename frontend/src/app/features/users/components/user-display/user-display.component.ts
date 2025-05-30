@@ -41,8 +41,8 @@ export class UserDisplayComponent {
   @Input() userData!: UserFormData | null; // Recibe los datos del usuario
 
   // Para la lógica condicional de secciones basada en el rol del usuario mostrado
-  get isCustomerRole(): boolean {
-    return this.userData?.role === 'CLIENTE';
+  get isCompanyRole(): boolean {
+    return this.userData?.role === 'EMPRESA';
   }
 
   // Helper para mostrar 'Sí' o 'No' para booleanos

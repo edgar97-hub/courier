@@ -4,7 +4,7 @@ exports.ACCESS_LEVEL = exports.STATES = exports.ROLES = void 0;
 var ROLES;
 (function (ROLES) {
     ROLES["ADMIN"] = "ADMINISTRADOR";
-    ROLES["CUSTOMER"] = "CLIENTE";
+    ROLES["COMPANY"] = "EMPRESA";
     ROLES["MOTORIZED"] = "MOTORIZADO";
     ROLES["RECEPTIONIST"] = "RECEPCIONISTA";
 })(ROLES || (exports.ROLES = ROLES = {}));

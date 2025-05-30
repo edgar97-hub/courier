@@ -91,9 +91,9 @@ export class OrdersEntity extends BaseEntity {
   @JoinColumn({ name: 'assigned_driver_id' })
   assigned_driver: UsersEntity;
 
-  @ManyToOne(() => UsersEntity, (user) => user.customerOrdersIncludes)
-  @JoinColumn({ name: 'customer_id' })
-  customer: UsersEntity;
+  @ManyToOne(() => UsersEntity, (user) => user.companyOrdersIncludes)
+  @JoinColumn({ name: 'company_id' })
+  company: UsersEntity;
 
   @OneToMany(() => OrderLogEntity, (log) => log.order)
   logs: OrderLogEntity[];

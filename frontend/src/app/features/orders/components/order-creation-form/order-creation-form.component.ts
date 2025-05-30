@@ -135,7 +135,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       switchMap((searchTerm) => {
         this.isLoadingDrivers = true;
         console.log('searchTerm', searchTerm);
-        return this.orderService.getCustomers(searchTerm || '').pipe(
+        return this.orderService.getCompanies(searchTerm || '').pipe(
           tap(() => (this.isLoadingDrivers = false)),
           catchError(() => {
             this.isLoadingDrivers = false;
@@ -146,9 +146,9 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     );
   }
-  isCustomer(): boolean {
+  isCompany(): boolean {
     const userRole = this.appStore.currentUser()?.role;
-    return userRole === 'CLIENTE';
+    return userRole === 'EMPRESA';
   }
   displayDriverName(driver: User | null): string {
     return driver && driver.username ? driver.username : '';
@@ -157,7 +157,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     this.selectedDriver = event.option.value as User;
     console.log('cliente selected:', this.selectedDriver);
 
-    this.orderForm.get('customer_id')?.setValue(this.selectedDriver.id);
+    this.orderForm.get('company_id')?.setValue(this.selectedDriver.id);
     this.orderForm.markAllAsTouched();
     console.log('Order form is invalid:', this.getFormErrors(this.orderForm));
     const formValue = this.orderForm.getRawValue(); // getRawValue para incluir campos deshabilitados (como los de paquete estándar)
@@ -168,7 +168,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     this.selectedDriver = null;
     this.driverSearchCtrl.setValue('');
     this.orderForm.markAllAsTouched();
-    this.orderForm.get('customer_id')?.setValue(null);
+    this.orderForm.get('company_id')?.setValue(null);
     console.log('Order form is invalid:', this.getFormErrors(this.orderForm));
   }
   ngOnInit(): void {
@@ -270,9 +270,9 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   }
 
   private buildForm(): void {
-    let customer_id = null;
+    let company_id = null;
     if (this.appStore.currentUser()?.id) {
-      customer_id = this.appStore.currentUser()?.id;
+      company_id = this.appStore.currentUser()?.id;
     }
 
     // var d = new Date();
@@ -280,7 +280,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     // console.log('date', date);
     // const todayString = this.datePipe.transform(date, 'yyyy-MM-dd');
     const todayString = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
-    // console.log('customer_id', customer_id);
+    
     this.orderForm = this.fb.group({
       shipment_type: [this.shipmentTypes[0], Validators.required],
       recipient_name: ['', Validators.required],
@@ -288,7 +288,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
         '',
         [Validators.required, Validators.pattern('^[0-9]{9}$')],
       ],
-      customer_id: [customer_id, Validators.required],
+      company_id: [company_id, Validators.required],
       delivery_district_id: [null, Validators.required],
       delivery_address: ['', [Validators.required, Validators.minLength(6)]],
       delivery_coordinates: [''],
@@ -356,7 +356,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   resetFormForNextOrder(): void {
     this.selectedDriver = null;
     this.driverSearchCtrl.setValue('');
-    this.orderForm.get('customer_id')?.setValue(null);
+    this.orderForm.get('company_id')?.setValue(null);
 
     const defaultShipmentType =
       this.orderForm.get('shipment_type')?.value || this.shipmentTypes[0];

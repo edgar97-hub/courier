@@ -379,14 +379,14 @@ export class OrderService {
       .pipe(catchError(this.handleError));
   }
 
-  getCustomers(searchTerm: string): Observable<any> {
+  getCompanies(searchTerm: string): Observable<any> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
       return throwError(() => new Error('Not authenticated to fetch users.'));
     }
     let params = new HttpParams()
       .set('search_term', searchTerm)
-      .set('role', 'CLIENTE');
+      .set('role', 'EMPRESA');
 
     return this.http
       .get<any>(`${this.apiUrlUsers}/filtered`, { params, headers })

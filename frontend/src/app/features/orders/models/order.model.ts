@@ -51,7 +51,7 @@ export interface NewOrderData {
   temp_id?: string; // ID temporal para la lista local
 
   // para el cliente
-  customer_id?: string;
+  company_id?: string;
 }
 
 // Para el payload final que se envía al backend con el lote de pedidos

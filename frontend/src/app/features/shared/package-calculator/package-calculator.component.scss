@@ -38,13 +38,14 @@
 }
 
 .calculator-card-content {
-  padding: 14px;
+  // padding: 5px;
+  // border: 1px solid black;
 }
 
 .standard-package-info {
   font-size: 1em;
   color: #455a64; // Azul grisáceo
-  margin-bottom: 14px;
+  margin-bottom: 15px;
   padding: 12px;
   background-color: #eceff1; // Azul grisáceo muy claro
   border-left: 4px solid #5c6bc0; // Índigo más claro para el borde
@@ -86,18 +87,23 @@
 .calculate-action-container {
   display: flex;
   justify-content: space-around;
+  align-items: center;
   margin-top: 10px;
   margin-bottom: 10px;
+  // border: 1px solid black;
 }
 
 .calculate-button {
-  min-width: 200px;
+  // min-width: 200px;
   padding: 10px 24px;
+  // height: 50px !important;
   font-size: 1em;
   font-weight: 500;
-  letter-spacing: 0.5px;
+  // letter-spacing: 0.5px;
   border-radius: 6px;
-  color: #3f51b5;
+  color: #f7f8fe;
+  background-color: #3f51b5;
+  // border: 1px solid black;
   cursor: pointer; // <--- AÑADIR ESTA LÍNEA
 }
 

@@ -75,18 +75,7 @@ export class UserFormComponent implements OnInit {
     //   'enableSmsNotifications',
     //   'notes',
     // ];
-    // if (role !== 'CUSTOMER') {
-    //   // Si no es CUSTOMER, deshabilita y limpia los campos de las otras secciones
-    //   sectionsToToggle.forEach((controlName) => {
-    //     this.userForm.get(controlName)?.disable();
-    //     this.userForm.get(controlName)?.reset(); // Opcional: limpiar el valor
-    //   });
-    // } else {
-    //   // Si es CUSTOMER, habilita los campos
-    //   sectionsToToggle.forEach((controlName) => {
-    //     this.userForm.get(controlName)?.enable();
-    //   });
-    // }
+ 
   }
 
   private initForm(): void {
@@ -95,7 +84,7 @@ export class UserFormComponent implements OnInit {
       username: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', []],
-      role: ['CUSTOMER'],
+      role: ['COMPANY'],
 
       business_type: ['', []],
       business_name: ['', []],

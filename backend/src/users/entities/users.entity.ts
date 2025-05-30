@@ -81,6 +81,6 @@ export class UsersEntity extends BaseEntity implements IUser {
   @OneToMany(() => OrdersEntity, (order) => order.assigned_driver)
   assignedDriversIncludes: OrdersEntity[];
 
-  @OneToMany(() => OrdersEntity, (order) => order.customer)
-  customerOrdersIncludes: OrdersEntity[];
+  @OneToMany(() => OrdersEntity, (order) => order.company)
+  companyOrdersIncludes: OrdersEntity[];
 }

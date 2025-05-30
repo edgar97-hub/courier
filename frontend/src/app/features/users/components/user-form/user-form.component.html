@@ -79,7 +79,7 @@
             <mat-select formControlName="role" required>
               <mat-option value="ADMINISTRADOR">Administrador</mat-option>
               <mat-option value="MOTORIZADO">Motorizado</mat-option>
-              <mat-option value="CLIENTE">Cliente</mat-option>
+              <mat-option value="EMPRESA">Empresa</mat-option>
               <mat-option value="RECEPCIONISTA">Recepcionista</mat-option>
             </mat-select>
             <mat-error
@@ -92,7 +92,7 @@
           </mat-form-field>
         </div>
       </div>
-      <ng-container *ngIf="roleControl.value === 'CLIENTE'">
+      <ng-container *ngIf="roleControl.value === 'EMPRESA'">
         <mat-divider class="section-divider"></mat-divider>
 
         <div class="form-section">

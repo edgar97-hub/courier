@@ -153,7 +153,7 @@ export class OrdersService {
           orderToCreate.type_order_transfer_to_warehouse =
             orderDto.type_order_transfer_to_warehouse;
           orderToCreate.user = { id: idUser } as UsersEntity;
-          orderToCreate.customer = { id: orderDto.customer_id } as UsersEntity;
+          orderToCreate.company = { id: orderDto.company_id } as UsersEntity;
           orderToCreate.tracking_code = await generateTrackingCode();
 
           const savedOrder = await queryRunner.manager.save(
@@ -571,8 +571,8 @@ export class OrdersService {
         where.status = status as STATES;
       }
 
-      if (role === ROLES.CUSTOMER) {
-        where.customer = { id: idUser };
+      if (role === ROLES.COMPANY) {
+        where.company = { id: idUser };
       }
 
       if (role === ROLES.MOTORIZED) {
@@ -587,7 +587,7 @@ export class OrdersService {
       return this.orderRepository
         .findAndCount({
           where,
-          relations: ['user', 'assigned_driver', 'customer'],
+          relations: ['user', 'assigned_driver', 'company'],
           order: {
             [sortBy]: sortDirection.toUpperCase() as 'ASC' | 'DESC',
           },
@@ -643,8 +643,8 @@ export class OrdersService {
         where.status = status as STATES;
       }
 
-      if (role === ROLES.CUSTOMER) {
-        where.customer = { id: idUser };
+      if (role === ROLES.COMPANY) {
+        where.company = { id: idUser };
       }
 
       if (role === ROLES.MOTORIZED) {
@@ -659,6 +659,7 @@ export class OrdersService {
       return this.orderRepository
         .findAndCount({
           where,
+          relations: ['user', 'assigned_driver', 'company'],
           order: {
             [sortBy]: sortDirection.toUpperCase() as 'ASC' | 'DESC',
           },

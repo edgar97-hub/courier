@@ -123,7 +123,7 @@ let OrdersService = class OrdersService {
                     orderToCreate.type_order_transfer_to_warehouse =
                         orderDto.type_order_transfer_to_warehouse;
                     orderToCreate.user = { id: idUser };
-                    orderToCreate.customer = { id: orderDto.customer_id };
+                    orderToCreate.company = { id: orderDto.company_id };
                     orderToCreate.tracking_code = await generateTrackingCode();
                     const savedOrder = await queryRunner.manager.save(orders_entity_1.OrdersEntity, orderToCreate);
                     createdOrders.push(savedOrder);
@@ -408,8 +408,8 @@ let OrdersService = class OrdersService {
             if (status) {
                 where.status = status;
             }
-            if (role === roles_1.ROLES.CUSTOMER) {
-                where.customer = { id: idUser };
+            if (role === roles_1.ROLES.COMPANY) {
+                where.company = { id: idUser };
             }
             if (role === roles_1.ROLES.MOTORIZED) {
                 where.assigned_driver = { id: idUser };
@@ -421,7 +421,7 @@ let OrdersService = class OrdersService {
             return this.orderRepository
                 .findAndCount({
                 where,
-                relations: ['user', 'assigned_driver', 'customer'],
+                relations: ['user', 'assigned_driver', 'company'],
                 order: {
                     [sortBy]: sortDirection.toUpperCase(),
                 },
@@ -454,8 +454,8 @@ let OrdersService = class OrdersService {
             if (status) {
                 where.status = status;
             }
-            if (role === roles_1.ROLES.CUSTOMER) {
-                where.customer = { id: idUser };
+            if (role === roles_1.ROLES.COMPANY) {
+                where.company = { id: idUser };
             }
             if (role === roles_1.ROLES.MOTORIZED) {
                 where.assigned_driver = { id: idUser };
@@ -467,6 +467,7 @@ let OrdersService = class OrdersService {
             return this.orderRepository
                 .findAndCount({
                 where,
+                relations: ['user', 'assigned_driver', 'company'],
                 order: {
                     [sortBy]: sortDirection.toUpperCase(),
                 },

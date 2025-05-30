@@ -31,10 +31,7 @@ export class RolesGuard implements CanActivate {
     );
 
     const admin = this.reflector.get<string>(ADMIN_KEY, context.getHandler());
-    // interface IRequest extends Request {
-    //   roleUser: any;
-    //   idUser: any;
-    // }
+
     const req = context.switchToHttp().getRequest<Request>();
 
     const { roleUser } = req;

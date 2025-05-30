@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const getFontPath = (fontName: string) => {
- 
   return path.join(process.cwd(), 'public/assets', 'fonts', fontName);
 };
 

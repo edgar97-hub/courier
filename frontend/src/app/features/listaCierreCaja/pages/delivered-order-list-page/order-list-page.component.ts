@@ -157,10 +157,24 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
             order.payment_method_for_shipping_cost === 'POS'
               ? order.shipping_cost
               : 0;
+
+          let diferencia = 0;
+          if (order.pago_directo_monto_cobrar === 0) {
+            if (
+              order.efectivo_costo_servicio ||
+              order.pago_directo_costo_servicio ||
+              order.pos_costo_servicio
+            ) {
+              order.shipping_cost = 0;
+            }
+            diferencia =
+              order.amount_to_collect_at_delivery - order.shipping_cost;
+          }
+
           return {
-            'N° PEDIDO': order.id,
+            'N° PEDIDO': order.code,
             'TIPO DE PEDIDO': order.shipment_type,
-            EMPRESA: 'NO REGISTRADO',
+            EMPRESA: order.company?.username,
             CLIENTE: order.recipient_name,
             DISTRITO: order.delivery_district_name,
             'FECHA DE REGISTRO': order.createdAt
@@ -177,8 +191,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
             'PAGO DIRECTO (COSTO ENVIO)': order.pago_directo_costo_servicio,
             'POS (COSTO ENVIO)': order.pos_costo_servicio,
 
-            DIRERENCIA:
-              order.amount_to_collect_at_delivery - order.shipping_cost,
+            DIRERENCIA: diferencia,
 
             // 'TELEFONO DESTINATARIO 9 DIGITOS': order.recipient_phone,
             // 'DIRECCION DE ENTREGA': order.delivery_address,
@@ -204,14 +217,14 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
           'Pedidos'
         );
         this.snackBar.dismiss();
-        this.snackBar.open('Excel file exported successfully!', 'OK', {
+        this.snackBar.open('Archivo de Excel exportado exitosamente!', 'OK', {
           duration: 3500,
           panelClass: ['success-snackbar'],
         });
       } else {
         this.snackBar.dismiss();
         this.snackBar.open(
-          'No data available to export with current filters.',
+          'No hay datos disponibles para exportar con los filtros actuales.',
           'OK',
           { duration: 3000 }
         );
@@ -219,10 +232,14 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Error during Excel export process:', error);
       this.snackBar.dismiss();
-      this.snackBar.open('An error occurred during Excel export.', 'Close', {
-        duration: 3000,
-        panelClass: ['error-snackbar'],
-      });
+      this.snackBar.open(
+        'Se produjo un error durante la exportación a Excel.',
+        'Close',
+        {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+        }
+      );
     } finally {
       this.isLoading = false;
     }

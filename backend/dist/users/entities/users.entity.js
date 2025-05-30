@@ -117,9 +117,9 @@ __decorate([
     __metadata("design:type", Array)
 ], UsersEntity.prototype, "assignedDriversIncludes", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => orders_entity_1.OrdersEntity, (order) => order.customer),
+    (0, typeorm_1.OneToMany)(() => orders_entity_1.OrdersEntity, (order) => order.company),
     __metadata("design:type", Array)
-], UsersEntity.prototype, "customerOrdersIncludes", void 0);
+], UsersEntity.prototype, "companyOrdersIncludes", void 0);
 exports.UsersEntity = UsersEntity = __decorate([
     (0, typeorm_1.Entity)({ name: 'users' })
 ], UsersEntity);

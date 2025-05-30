@@ -11,13 +11,13 @@ export const menuItems: MenuItem[] = [
     icon: 'list_alt',
     label: 'Tarifas',
     route: 'tarifas',
-    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'CLIENTE', 'RECEPCIONISTA'],
+    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'EMPRESA', 'RECEPCIONISTA'],
   },
   {
     icon: 'list_alt',
     label: 'Detalles del negocio',
     route: 'users/detail/',
-    roles: ['CLIENTE'],
+    roles: ['EMPRESA'],
   },
   {
     icon: 'format_list_bulleted',
@@ -53,7 +53,7 @@ export const menuItems: MenuItem[] = [
     icon: 'format_list_bulleted',
     label: 'Pedidos',
     route: 'orders',
-    roles: ['ADMINISTRADOR', 'CLIENTE', 'RECEPCIONISTA'],
+    roles: ['ADMINISTRADOR', 'EMPRESA', 'RECEPCIONISTA'],
 
     subItems: [
       {
@@ -78,24 +78,24 @@ export const menuItems: MenuItem[] = [
     icon: 'list_alt',
     label: 'Pedidos entregados',
     route: 'orders-delivered',
-    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'CLIENTE', 'RECEPCIONISTA'],
+    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'EMPRESA', 'RECEPCIONISTA'],
   },
   {
     icon: 'analytics',
     label: 'Reportes',
     route: 'lista-cierre-caja',
-    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'CLIENTE', 'RECEPCIONISTA'],
+    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'EMPRESA', 'RECEPCIONISTA'],
   },
   {
     icon: 'calculate',
     label: 'Calculadora',
     route: 'package-calculator',
-    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'CLIENTE', 'RECEPCIONISTA'],
+    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'EMPRESA', 'RECEPCIONISTA'],
   },
   {
     icon: 'article',
     label: 'Terminos y condiciones',
     route: 'terms-and-conditions',
-    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'CLIENTE', 'RECEPCIONISTA'],
+    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'EMPRESA', 'RECEPCIONISTA'],
   },
 ];
