@@ -21,6 +21,7 @@ const auth_guard_1 = require("../../auth/guards/auth.guard");
 const roles_guard_1 = require("../../auth/guards/roles.guard");
 const setting_dto_1 = require("../dto/setting.dto");
 const settings_service_1 = require("../services/settings.service");
+const public_decorator_1 = require("../../auth/decorators/public.decorator");
 let SettingsController = class SettingsController {
     constructor(usersService) {
         this.usersService = usersService;
@@ -48,6 +49,9 @@ let SettingsController = class SettingsController {
     }
     async uploadFile(file, request) {
         return await this.usersService.uploadFile(file, request);
+    }
+    async getBackgroundImage(res) {
+        return await this.usersService.getBackgroundImage(res);
     }
 };
 exports.SettingsController = SettingsController;
@@ -129,6 +133,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Request]),
     __metadata("design:returntype", Promise)
 ], SettingsController.prototype, "uploadFile", null);
+__decorate([
+    (0, public_decorator_1.PublicAccess)(),
+    (0, common_1.Get)('company/background-image'),
+    __param(0, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], SettingsController.prototype, "getBackgroundImage", null);
 exports.SettingsController = SettingsController = __decorate([
     (0, swagger_1.ApiTags)('Settings'),
     (0, common_1.Controller)('settings'),

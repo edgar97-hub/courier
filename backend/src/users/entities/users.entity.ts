@@ -72,6 +72,9 @@ export class UsersEntity extends BaseEntity implements IUser {
   @Column({ default: '' })
   owner_bank_account: string;
 
+  @Column({ default: '' })
+  name_account_number_owner: string;
+
   @Column({ type: 'enum', enum: ROLES, unique: false })
   role: ROLES;
 

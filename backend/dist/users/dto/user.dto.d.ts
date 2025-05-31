@@ -20,6 +20,7 @@ export declare class UserDTO {
     owner_document_number: string;
     owner_email_address: string;
     owner_bank_account: string;
+    name_account_number_owner: string;
 }
 export declare class UserUpdateDTO {
     email: string;
@@ -42,6 +43,7 @@ export declare class UserUpdateDTO {
     owner_document_number: string;
     owner_email_address: string;
     owner_bank_account: string;
+    name_account_number_owner: string;
 }
 export declare class UserProfile {
     email: string;

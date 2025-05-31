@@ -176,6 +176,28 @@ let SettingsService = class SettingsService {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
+    async getBackgroundImage(res) {
+        try {
+            const setting = await this.userRepository.findOne({ where: {} });
+            let imageResponse;
+            if (setting?.background_image_url) {
+                imageResponse = await fetch(setting.background_image_url);
+            }
+            if (setting?.background_image_url) {
+                console.log(`Fetching logo from: ${setting.background_image_url}`);
+                const imageResponse = await fetch(setting.background_image_url);
+                if (imageResponse.ok && imageResponse.body) {
+                    const contentType = imageResponse.headers.get('content-type');
+                    res.setHeader('Content-Type', contentType || 'image/png');
+                    const { pipeline } = await Promise.resolve().then(() => require('stream/promises'));
+                    await pipeline(imageResponse.body, res);
+                }
+            }
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
 };
 exports.SettingsService = SettingsService;
 exports.SettingsService = SettingsService = __decorate([

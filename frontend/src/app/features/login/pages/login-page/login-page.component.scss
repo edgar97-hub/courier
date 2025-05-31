@@ -3,7 +3,10 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh; // Ocupa toda la altura de la vista
-  background-color: #f0f2f5; // Un color de fondo suave para la página
+  // background-image: url('https://wallpapers.com/images/featured-full/fondo-de-espacio-htygkta8z6o3mcx2.jpg'); // Imagen de fondo
+  background-size: cover; // Cubre todo el espacio
+  background-position: center; // Centra la imagen
+  background-repeat: no-repeat; // Evita que la imagen se repita
   padding: 20px;
 }
 
@@ -18,6 +21,7 @@
   padding: 24px; // Padding interno generoso
   border-radius: 8px; // Bordes redondeados
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); // Sombra más pronunciada
+  background-color: rgba(255, 255, 255, 0.9); // Fondo blanco semitransparente para la tarjeta
 }
 
 .login-card-header {
@@ -29,6 +33,7 @@
     font-weight: 500;
     color: #3f51b5; // Color primario de Material
     margin-bottom: 8px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); // Añade una sombra al texto
   }
 
   mat-card-subtitle {
@@ -38,7 +43,6 @@
 }
 
 .card-content {
-  border: 1px solid black;
   display: flex;
   flex-direction: column;
   gap: 2;

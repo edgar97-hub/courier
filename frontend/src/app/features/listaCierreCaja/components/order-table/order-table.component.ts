@@ -86,6 +86,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
 
   displayedColumns: string[] = [
     'code',
+    'company',
     'recipient_name',
     'delivery_district_name',
     'motorizado',
@@ -94,11 +95,11 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
 
     'efectivo_monto_cobrar',
     'pago_directo_monto_cobrar',
-    'pos_monto_cobrar',
+    // 'pos_monto_cobrar',
 
     'efectivo_costo_servicio',
     'pago_directo_costo_servicio',
-    'pos_costo_servicio',
+    // 'pos_costo_servicio',
     'usuario_creacion',
     // 'recipient_phone',
     // 'delivery_address',

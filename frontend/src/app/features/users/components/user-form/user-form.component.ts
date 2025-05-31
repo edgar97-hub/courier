@@ -75,7 +75,6 @@ export class UserFormComponent implements OnInit {
     //   'enableSmsNotifications',
     //   'notes',
     // ];
- 
   }
 
   private initForm(): void {
@@ -104,6 +103,7 @@ export class UserFormComponent implements OnInit {
       owner_email_address: ['', []],
 
       owner_bank_account: ['', []],
+      name_account_number_owner: ['', []],
     });
   }
 

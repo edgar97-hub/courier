@@ -17,10 +17,7 @@ import { UsersService } from 'src/users/services/users.service';
 
 @Injectable()
 export class AccessLevelGuard implements CanActivate {
-  constructor(
-    private readonly reflector: Reflector,
-    private readonly userService: UsersService,
-  ) {}
+  constructor(private readonly reflector: Reflector) {}
   async canActivate(context: ExecutionContext) {
     const isPublic = this.reflector.get<boolean>(
       PUBLIC_KEY,
@@ -61,20 +58,9 @@ export class AccessLevelGuard implements CanActivate {
       }
     }
 
-    // if (roleUser === ROLES.ADMIN || roleUser === ROLES.CREATOR) {
-    //   return true;
-    // }
     if (roleUser === ROLES.ADMIN) {
       return true;
     }
-
-    const user = await this.userService.findUserById(idUser);
-
-    // DEVELOPER = 30,
-    // MANTEINER = 40,
-    // OWNER = 50,
-
-    //30 > 40
 
     return true;
   }

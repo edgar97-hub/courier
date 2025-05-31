@@ -86,6 +86,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
 
   displayedColumns: string[] = [
     'code',
+    'company',
     'shipment_type',
     'recipient_name',
     'recipient_phone',

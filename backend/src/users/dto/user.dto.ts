@@ -77,6 +77,9 @@ export class UserDTO {
 
   @ApiProperty()
   owner_bank_account: string;
+
+  @ApiProperty()
+  name_account_number_owner: string;
 }
 
 export class UserUpdateDTO {
@@ -146,6 +149,9 @@ export class UserUpdateDTO {
 
   @ApiProperty()
   owner_bank_account: string;
+
+  @ApiProperty()
+  name_account_number_owner: string;
 }
 
 export class UserProfile {

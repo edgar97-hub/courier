@@ -4,7 +4,8 @@ import { ErrorManager } from 'src/utils/error.manager';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { SettingDTO, SettingUpdateDTO } from '../dto/setting.dto';
 import { SettingsEntity } from '../entities/settings.entity';
-import { Express } from 'express';
+// import { Express, Response } from 'express';
+import { Response } from 'express';
 import { Multer } from 'multer';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -211,6 +212,31 @@ export class SettingsService {
       const host = (req as any).get('host');
       const absoluteUrl = `${protocol}://${host}${relativeUrl}`;
       return { file_url: absoluteUrl };
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  public async getBackgroundImage(res: Response): Promise<void> {
+    try {
+      const setting = await this.userRepository.findOne({ where: {} });
+
+      let imageResponse;
+      if (setting?.background_image_url) {
+        imageResponse = await fetch(setting.background_image_url);
+      }
+
+      if (setting?.background_image_url) {
+        console.log(`Fetching logo from: ${setting.background_image_url}`);
+        const imageResponse = await fetch(setting.background_image_url);
+
+        if (imageResponse.ok && imageResponse.body) {
+          const contentType = imageResponse.headers.get('content-type');
+          res.setHeader('Content-Type', contentType || 'image/png');
+          const { pipeline } = await import('stream/promises');
+          await pipeline(imageResponse.body, res);
+        }
+      }
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }

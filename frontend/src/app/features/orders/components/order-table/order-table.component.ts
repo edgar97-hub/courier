@@ -100,6 +100,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
 
   displayedColumns: string[] = [
     'code',
+    'company',
     'shipment_type',
     'recipient_name',
     'status', // Moví estado más a la izquierda para visibilidad
@@ -173,15 +174,16 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   }
 
   onViewPdfA4Landscape(order: Order_): void {
-    const pdfUrl = environment.apiUrl + '/orders/' + order.id + '/pdf-a4-landscape';
+    const pdfUrl =
+      environment.apiUrl + '/orders/' + order.id + '/pdf-a4-landscape';
     window.open(pdfUrl, '_blank');
   }
 
   onViewPdfTicket80mm(order: Order_): void {
-    const pdfUrl = environment.apiUrl + '/orders/' + order.id + '/pdf-ticket-80mm';
+    const pdfUrl =
+      environment.apiUrl + '/orders/' + order.id + '/pdf-ticket-80mm';
     window.open(pdfUrl, '_blank');
   }
-
 
   onSeguimiento(order: Order): void {
     window.open('/tracking?code=' + order.tracking_code, '_blank');

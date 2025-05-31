@@ -105,6 +105,10 @@ __decorate([
     __metadata("design:type", String)
 ], UsersEntity.prototype, "owner_bank_account", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], UsersEntity.prototype, "name_account_number_owner", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'enum', enum: roles_1.ROLES, unique: false }),
     __metadata("design:type", String)
 ], UsersEntity.prototype, "role", void 0);

@@ -14,6 +14,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../../../core/services/auth.service'; // Ajusta la ruta
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-register-page',
@@ -30,7 +31,10 @@ import { AuthService } from '../../../../core/services/auth.service'; // Ajusta 
     MatSnackBarModule,
   ],
   template: `
-    <div class="login-page-wrapper">
+    <div
+      class="login-page-wrapper"
+      [style.background-image]="'url(' + imageUrl + ')'"
+    >
       <mat-card class="login-card">
         <mat-card-header class="login-card-header">
           <button
@@ -100,6 +104,8 @@ import { AuthService } from '../../../../core/services/auth.service'; // Ajusta 
   styleUrls: ['../../../login/pages/login-page/login-page.component.scss'],
 })
 export class RegisterPageComponent {
+  imageUrl: string = environment.apiUrl + '/settings/company/background-image';
+
   private fb = inject(FormBuilder);
   private authService = inject(AuthService); // Asumimos que authService tendrá un método register
   private router = inject(Router);

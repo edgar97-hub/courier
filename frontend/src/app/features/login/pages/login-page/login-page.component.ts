@@ -7,6 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { LoginFormComponent } from '../../components/login-form/login-form.component';
 import { Credentials } from '../../models/credentials.interface';
 import { AppStore } from '../../../../app.store';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-login-page',
@@ -23,7 +24,7 @@ import { AppStore } from '../../../../app.store';
 })
 export class LoginPageComponent {
   readonly appStore = inject(AppStore);
-
+  imageUrl: string = environment.apiUrl + '/settings/company/background-image';
   constructor(private router: Router) {}
 
   async onLogin(credentials: Credentials): Promise<void> {

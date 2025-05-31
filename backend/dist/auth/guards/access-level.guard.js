@@ -14,11 +14,9 @@ const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
 const key_decorators_1 = require("../../constants/key-decorators");
 const roles_1 = require("../../constants/roles");
-const users_service_1 = require("../../users/services/users.service");
 let AccessLevelGuard = class AccessLevelGuard {
-    constructor(reflector, userService) {
+    constructor(reflector) {
         this.reflector = reflector;
-        this.userService = userService;
     }
     async canActivate(context) {
         const isPublic = this.reflector.get(key_decorators_1.PUBLIC_KEY, context.getHandler());
@@ -46,14 +44,12 @@ let AccessLevelGuard = class AccessLevelGuard {
         if (roleUser === roles_1.ROLES.ADMIN) {
             return true;
         }
-        const user = await this.userService.findUserById(idUser);
         return true;
     }
 };
 exports.AccessLevelGuard = AccessLevelGuard;
 exports.AccessLevelGuard = AccessLevelGuard = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [core_1.Reflector,
-        users_service_1.UsersService])
+    __metadata("design:paramtypes", [core_1.Reflector])
 ], AccessLevelGuard);
 //# sourceMappingURL=access-level.guard.js.map

@@ -1,6 +1,7 @@
 import { DeleteResult, Repository } from 'typeorm';
 import { SettingDTO, SettingUpdateDTO } from '../dto/setting.dto';
 import { SettingsEntity } from '../entities/settings.entity';
+import { Response } from 'express';
 export declare class SettingsService {
     private readonly userRepository;
     constructor(userRepository: Repository<SettingsEntity>);
@@ -22,4 +23,5 @@ export declare class SettingsService {
     uploadFile(file: Express.Multer.File, req: Request): Promise<{
         file_url: string;
     }>;
+    getBackgroundImage(res: Response): Promise<void>;
 }

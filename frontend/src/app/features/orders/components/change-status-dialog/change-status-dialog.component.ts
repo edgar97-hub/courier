@@ -96,7 +96,7 @@ export class ChangeStatusDialogComponent implements OnInit {
   // isUploadingImage: boolean = false;
   // uploadedImageUrl: string | null = null; // URL de la imagen después de subirla
 
-  readonly paymentMethods: string[] = ['Efectivo', 'Pago directo', 'POS'];
+  readonly paymentMethods: string[] = ['Efectivo', 'Pago directo'];
   showDeliveryDetails: boolean = false;
 
   public OrderStatusEnum = OrderStatus;

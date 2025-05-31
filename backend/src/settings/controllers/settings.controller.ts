@@ -8,12 +8,12 @@ import {
   Post,
   Put,
   Req,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Express } from 'express';
 import {
   ApiHeader,
   ApiHeaders,
@@ -27,6 +27,9 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { SettingDTO, SettingUpdateDTO } from '../dto/setting.dto';
 import { SettingsService } from '../services/settings.service';
+import { PublicAccess } from 'src/auth/decorators/public.decorator';
+
+import { Response } from 'express'; // ← IMPORTANTE
 
 @ApiTags('Settings')
 @Controller('settings')
@@ -108,5 +111,11 @@ export class SettingsController {
     @Req() request: Request,
   ) {
     return await this.usersService.uploadFile(file, request);
+  }
+
+  @PublicAccess()
+  @Get('company/background-image')
+  public async getBackgroundImage(@Res() res: Response): Promise<void> {
+    return await this.usersService.getBackgroundImage(res);
   }
 }

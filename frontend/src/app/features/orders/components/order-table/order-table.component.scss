@@ -39,7 +39,9 @@
 th.mat-header-cell {
   font-weight: 600; // Más peso para cabeceras
   color: var(--sys-on-surface-variant); // Un gris azulado oscuro
-  background-color: var(--sys-surface-container-low); // Fondo muy claro, casi blanco
+  background-color: var(
+    --sys-surface-container-low
+  ); // Fondo muy claro, casi blanco
   padding: 14px 18px; // Más padding
   border-bottom: 1px solid var(--sys-outline-variant); // Línea divisoria estándar
   text-transform: uppercase; // Opcional, para un look más formal
@@ -58,13 +60,17 @@ td.mat-cell {
   position: sticky;
   top: 0;
   z-index: 10; // Para que la cabecera se mantenga por encima al hacer scroll
-  background-color: var(--sys-surface-container-low); // El mismo que th.mat-header-cell
+  background-color: var(
+    --sys-surface-container-low
+  ); // El mismo que th.mat-header-cell
 }
 
 .data-row {
   transition: background-color 0.2s ease-in-out;
   &:hover {
-    background-color: var(--sys-surface-container-highest); // Un hover gris claro
+    background-color: var(
+      --sys-surface-container-highest
+    ); // Un hover gris claro
     cursor: pointer; // Si la fila es clickeable
   }
 }
@@ -94,7 +100,9 @@ td.mat-cell {
     color: var(--sys-on-surface-variant); // Color base para iconos de acción
     transition: color 0.2s ease;
     &:hover {
-      color: var(--sys-primary); // Color primario al hacer hover (o el color específico)
+      color: var(
+        --sys-primary
+      ); // Color primario al hacer hover (o el color específico)
     }
   }
 }
@@ -193,10 +201,12 @@ td.mat-cell {
 .status-en-almacen {
   background-color: var(--status-en-almacen-bg);
   color: var(--status-en-almacen-color);
+  white-space: nowrap;
 } // Azul primario con texto blanco
 .status-en-transito {
   background-color: var(--status-en-transito-bg);
   color: var(--status-en-transito-color);
+  white-space: nowrap;
 }
 .status-entregado {
   background-color: var(--status-entregado-bg);
@@ -205,6 +215,7 @@ td.mat-cell {
 .status-no-entregado {
   background-color: var(--status-no-entregado-bg);
   color: var(--status-no-entregado-color);
+  white-space: nowrap;
 } // Rojo peligro con texto blanco
 .status-cancelado {
   background-color: var(--status-cancelado-bg);
@@ -213,6 +224,7 @@ td.mat-cell {
 .status-rechazado-en-punto {
   background-color: var(--status-rechazado-bg);
   color: var(--status-rechazado-color);
+  white-space: nowrap;
 }
 .status-reprogramado {
   background-color: var(--status-reprogramado-bg);

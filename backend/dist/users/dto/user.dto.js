@@ -104,6 +104,10 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], UserDTO.prototype, "owner_bank_account", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], UserDTO.prototype, "name_account_number_owner", void 0);
 class UserUpdateDTO {
 }
 exports.UserUpdateDTO = UserUpdateDTO;
@@ -194,6 +198,10 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], UserUpdateDTO.prototype, "owner_bank_account", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], UserUpdateDTO.prototype, "name_account_number_owner", void 0);
 class UserProfile {
 }
 exports.UserProfile = UserProfile;

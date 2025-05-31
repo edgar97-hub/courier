@@ -1,5 +1,6 @@
 import { SettingDTO, SettingUpdateDTO } from '../dto/setting.dto';
 import { SettingsService } from '../services/settings.service';
+import { Response } from 'express';
 export declare class SettingsController {
     private readonly usersService;
     constructor(usersService: SettingsService);
@@ -17,4 +18,5 @@ export declare class SettingsController {
     uploadFile(file: Express.Multer.File, request: Request): Promise<{
         file_url: string;
     }>;
+    getBackgroundImage(res: Response): Promise<void>;
 }

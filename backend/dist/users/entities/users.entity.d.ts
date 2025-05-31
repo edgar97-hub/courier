@@ -24,6 +24,7 @@ export declare class UsersEntity extends BaseEntity implements IUser {
     owner_document_number: string;
     owner_email_address: string;
     owner_bank_account: string;
+    name_account_number_owner: string;
     role: ROLES;
     ordersIncludes: OrdersEntity[];
     assignedDriversIncludes: OrdersEntity[];
