@@ -118,4 +118,10 @@ export class SettingsController {
   public async getBackgroundImage(@Res() res: Response): Promise<void> {
     return await this.usersService.getBackgroundImage(res);
   }
+
+  @PublicAccess()
+  @Get('company/logo-image')
+  public async getLogoImage(@Res() res: Response): Promise<void> {
+    return await this.usersService.getLogoImage(res);
+  }
 }

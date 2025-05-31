@@ -21,12 +21,16 @@ const auth_guard_1 = require("../../auth/guards/auth.guard");
 const roles_guard_1 = require("../../auth/guards/roles.guard");
 const user_dto_1 = require("../dto/user.dto");
 const users_service_1 = require("../services/users.service");
+const public_decorator_1 = require("../../auth/decorators/public.decorator");
 let UsersController = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
     }
     async registerUser(body) {
         return await this.usersService.createUser(body);
+    }
+    async registerCompany(body) {
+        return await this.usersService.registerCompany(body);
     }
     async findAllUsers() {
         return await this.usersService.findUsers();
@@ -64,6 +68,14 @@ __decorate([
     __metadata("design:paramtypes", [user_dto_1.UserDTO]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "registerUser", null);
+__decorate([
+    (0, public_decorator_1.PublicAccess)(),
+    (0, common_1.Post)('register-company'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [user_dto_1.UserCompany]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "registerCompany", null);
 __decorate([
     (0, common_1.Get)('all'),
     __metadata("design:type", Function),

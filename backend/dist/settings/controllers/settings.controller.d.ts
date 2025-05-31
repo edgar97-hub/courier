@@ -19,4 +19,5 @@ export declare class SettingsController {
         file_url: string;
     }>;
     getBackgroundImage(res: Response): Promise<void>;
+    getLogoImage(res: Response): Promise<void>;
 }

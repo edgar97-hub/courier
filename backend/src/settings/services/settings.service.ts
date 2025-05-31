@@ -241,4 +241,29 @@ export class SettingsService {
       throw ErrorManager.createSignatureError(error.message);
     }
   }
+
+  public async getLogoImage(res: Response): Promise<void> {
+    try {
+      const setting = await this.userRepository.findOne({ where: {} });
+
+      let imageResponse;
+      if (setting?.logo_url) {
+        imageResponse = await fetch(setting.logo_url);
+      }
+
+      if (setting?.logo_url) {
+        console.log(`Fetching logo from: ${setting.logo_url}`);
+        const imageResponse = await fetch(setting.logo_url);
+
+        if (imageResponse.ok && imageResponse.body) {
+          const contentType = imageResponse.headers.get('content-type');
+          res.setHeader('Content-Type', contentType || 'image/png');
+          const { pipeline } = await import('stream/promises');
+          await pipeline(imageResponse.body, res);
+        }
+      }
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
 }

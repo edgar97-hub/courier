@@ -17,8 +17,14 @@ import { AdminAccess } from 'src/auth/decorators/admin.decorator';
 import { AccessLevelGuard } from 'src/auth/guards/access-level.guard';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { UserDTO, UserProfile, UserUpdateDTO } from '../dto/user.dto';
+import {
+  UserCompany,
+  UserDTO,
+  UserProfile,
+  UserUpdateDTO,
+} from '../dto/user.dto';
 import { UsersService } from '../services/users.service';
+import { PublicAccess } from 'src/auth/decorators/public.decorator';
 
 @ApiTags('Users')
 @Controller('users')
@@ -33,30 +39,17 @@ export class UsersController {
     return await this.usersService.createUser(body);
   }
 
+  @PublicAccess()
+  @Post('register-company')
+  public async registerCompany(@Body() body: UserCompany) {
+    return await this.usersService.registerCompany(body);
+  }
+
   // @AdminAccess()
   @Get('all')
   public async findAllUsers() {
     return await this.usersService.findUsers();
   }
-
-  // public async findAllOrders(
-  //     @Query('page_number') pageNumber = 0,
-  //     @Query('page_size') pageSize = 0,
-  //     @Query('sort_field') sortField = 'created_at',
-  //     @Query('sort_direction') sortDirection = 'asc',
-  //     @Query('start_date') startDate?: string,
-  //     @Query('end_date') endDate?: string,
-  //     @Query('status') status?: string,
-  //   ) {
-  //     const queryParams = {
-  //       pageNumber,
-  //       pageSize,
-  //       sortField,
-  //       sortDirection,
-  //       startDate,
-  //       endDate,
-  //       status,
-  //     };
 
   @Get('filtered')
   public async findUsersByRol(

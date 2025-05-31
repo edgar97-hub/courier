@@ -3,7 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { ErrorManager } from 'src/utils/error.manager';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
-import { UserDTO, UserProfile, UserUpdateDTO } from '../dto/user.dto';
+import {
+  UserCompany,
+  UserDTO,
+  UserProfile,
+  UserUpdateDTO,
+} from '../dto/user.dto';
 import { UsersEntity } from '../entities/users.entity';
 import { ROLES } from 'src/constants/roles';
 
@@ -21,6 +26,22 @@ export class UsersService {
         Number(process.env.HASH_SALT),
       );
       return await this.userRepository.save(body);
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  public async registerCompany(body: UserCompany): Promise<UsersEntity> {
+    try {
+      body.password = await bcrypt.hash(
+        body.password,
+        Number(process.env.HASH_SALT),
+      );
+      body.role = ROLES.COMPANY;
+
+      const savedUser = await this.userRepository.save(body);
+      // const { password, ...userWithoutPassword } = savedUser;
+      return savedUser;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
@@ -73,32 +94,6 @@ export class UsersService {
     }
   }
 
-  // public async findUserById(id: string): Promise<UsersEntity> {
-  //   try {
-  //     return (await this.userRepository
-  //       .createQueryBuilder('user')
-  //       .where({ id })
-  //       .leftJoinAndSelect('user.projectsIncludes', 'projectsIncludes')
-  //       .leftJoinAndSelect('projectsIncludes.project', 'project')
-  //       .getOne()) as any;
-
-  //     // const user: UsersEntity = await this.userRepository
-  //     //   .createQueryBuilder('user')
-  //     //   .where({ id })
-  //     //   .leftJoinAndSelect('user.projectsIncludes', 'projectsIncludes')
-  //     //   .leftJoinAndSelect('projectsIncludes.project', 'project')
-  //     //   .getOne();
-  //     // if (!user) {
-  //     //   throw new ErrorManager({
-  //     //     type: 'BAD_REQUEST',
-  //     //     message: 'No se encontro resultado',
-  //     //   });
-  //     // }
-  //     // return user;
-  //   } catch (error) {
-  //     throw ErrorManager.createSignatureError(error.message);
-  //   }
-  // }
   public async findUserById(id: string): Promise<UsersEntity> {
     try {
       const user: UsersEntity = (await this.userRepository

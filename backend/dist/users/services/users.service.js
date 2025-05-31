@@ -19,6 +19,7 @@ const bcrypt = require("bcrypt");
 const error_manager_1 = require("../../utils/error.manager");
 const typeorm_2 = require("typeorm");
 const users_entity_1 = require("../entities/users.entity");
+const roles_1 = require("../../constants/roles");
 let UsersService = class UsersService {
     constructor(userRepository) {
         this.userRepository = userRepository;
@@ -27,6 +28,17 @@ let UsersService = class UsersService {
         try {
             body.password = await bcrypt.hash(body.password, Number(process.env.HASH_SALT));
             return await this.userRepository.save(body);
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
+    async registerCompany(body) {
+        try {
+            body.password = await bcrypt.hash(body.password, Number(process.env.HASH_SALT));
+            body.role = roles_1.ROLES.COMPANY;
+            const savedUser = await this.userRepository.save(body);
+            return savedUser;
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);

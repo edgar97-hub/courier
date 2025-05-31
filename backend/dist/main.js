@@ -17,8 +17,7 @@ async function bootstrap() {
             enableImplicitConversion: true,
         },
     }));
-    const reflector = app.get(core_1.Reflector);
-    app.useGlobalInterceptors(new common_1.ClassSerializerInterceptor(reflector));
+    app.useGlobalInterceptors(new common_1.ClassSerializerInterceptor(app.get(core_1.Reflector)));
     app.use(bodyParser.json({ limit: '50mb' }));
     app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
     const configservice = app.get(config_1.ConfigService);

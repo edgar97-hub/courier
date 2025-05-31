@@ -24,7 +24,9 @@ import { environment } from '../../../../../environments/environment';
 })
 export class LoginPageComponent {
   readonly appStore = inject(AppStore);
-  imageUrl: string = environment.apiUrl + '/settings/company/background-image';
+  backgroundImageUrl: string =
+    environment.apiUrl + '/settings/company/background-image';
+  logoImageUrl: string = environment.apiUrl + '/settings/company/logo-image';
   constructor(private router: Router) {}
 
   async onLogin(credentials: Credentials): Promise<void> {

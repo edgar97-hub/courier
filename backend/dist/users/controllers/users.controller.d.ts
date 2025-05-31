@@ -1,9 +1,10 @@
-import { UserDTO, UserProfile, UserUpdateDTO } from '../dto/user.dto';
+import { UserCompany, UserDTO, UserProfile, UserUpdateDTO } from '../dto/user.dto';
 import { UsersService } from '../services/users.service';
 export declare class UsersController {
     private readonly usersService;
     constructor(usersService: UsersService);
     registerUser(body: UserDTO): Promise<import("../entities/users.entity").UsersEntity>;
+    registerCompany(body: UserCompany): Promise<import("../entities/users.entity").UsersEntity>;
     findAllUsers(): Promise<import("../entities/users.entity").UsersEntity[]>;
     findUsersByRol(search_term: string, role: string): Promise<import("../entities/users.entity").UsersEntity[]>;
     findUserById(id: string): Promise<import("../entities/users.entity").UsersEntity>;

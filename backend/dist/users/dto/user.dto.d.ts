@@ -51,3 +51,9 @@ export declare class UserProfile {
     password?: string;
     photo_url: string;
 }
+export declare class UserCompany {
+    email: string;
+    username: string;
+    password?: string;
+    role?: ROLES;
+}

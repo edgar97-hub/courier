@@ -28,12 +28,12 @@ __decorate([
     __metadata("design:type", String)
 ], UsersEntity.prototype, "email", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ unique: true }),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], UsersEntity.prototype, "username", void 0);
 __decorate([
-    (0, class_transformer_1.Exclude)(),
     (0, typeorm_1.Column)(),
+    (0, class_transformer_1.Exclude)(),
     __metadata("design:type", String)
 ], UsersEntity.prototype, "password", void 0);
 __decorate([

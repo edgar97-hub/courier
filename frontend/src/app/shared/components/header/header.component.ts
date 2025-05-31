@@ -17,7 +17,7 @@ import { MatDialog } from '@angular/material/dialog';
     MatIcon,
     MatButtonModule,
     MatMenuModule,
-    ThemeToggleComponent,
+    // ThemeToggleComponent,
   ],
   template: `
     <mat-toolbar
@@ -27,7 +27,7 @@ import { MatDialog } from '@angular/material/dialog';
         <mat-icon>menu</mat-icon>
       </button>
       <div class="flex-1"></div>
-      <app-theme-toggle></app-theme-toggle>
+      <!-- <app-theme-toggle></app-theme-toggle> -->
 
       @if (appStore.currentUser(); as user) {
       <button mat-icon-button [mat-menu-trigger-for]="profileMenu">

@@ -157,7 +157,7 @@ export const AppStore = signalStore(
             );
             console.log('authResponse', authResponse);
             snackbar.open(
-              `Welcome back, ${authResponse.user.username}!`,
+              `Bienvenido de nuevo, ${authResponse.user.username}!`,
               'OK',
               {
                 duration: 3000,

@@ -37,29 +37,34 @@ import { environment } from '../../../../../environments/environment';
     >
       <mat-card class="login-card">
         <mat-card-header class="login-card-header">
-          <button
-            mat-icon-button
-            routerLink="/login"
-            class="back-button"
-            aria-label="Back to login"
-          >
-            <mat-icon>arrow_back</mat-icon>
-          </button>
-          <mat-card-title>Crear una cuenta</mat-card-title>
-          <mat-card-subtitle>¡Únase a nosotros hoy!</mat-card-subtitle>
+          <div class="logo-wrapper">
+            <!-- <img
+              src="{{ logoImageUrl }}"
+              style="max-width: 100px; border: 0px solid black"
+            /> -->
+            <mat-card-title style="margin-top: 10px"
+              >Regístrate gratis</mat-card-title
+            >
+          </div>
         </mat-card-header>
         <mat-card-content>
           <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Nombre</mat-label>
-              <input matInput formControlName="name" required />
+              <input matInput formControlName="username" required />
               <mat-error *ngIf="name?.hasError('required')"
                 >El nombre es obligatorio</mat-error
               >
             </mat-form-field>
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Correo</mat-label>
-              <input matInput formControlName="email" type="email" required />
+              <input
+                matInput
+                formControlName="userEmail"
+                type="email"
+                required
+                autocomplete="off"
+              />
               <mat-icon matSuffix>email</mat-icon>
               <mat-error *ngIf="email?.hasError('required')"
                 >Se requiere correo</mat-error
@@ -72,7 +77,7 @@ import { environment } from '../../../../../environments/environment';
               <mat-label>Password</mat-label>
               <input
                 matInput
-                formControlName="password"
+                formControlName="userPass"
                 type="password"
                 required
               />
@@ -96,7 +101,9 @@ import { environment } from '../../../../../environments/environment';
           </form>
         </mat-card-content>
         <mat-card-actions class="auth-card-actions">
-          <p>¿Ya tienes una cuenta?<a routerLink="/login">Iniciar sesión</a></p>
+          <p>
+            ¿Ya tienes una cuenta?<a routerLink="/login"> Iniciar sesión</a>
+          </p>
         </mat-card-actions>
       </mat-card>
     </div>
@@ -107,29 +114,29 @@ export class RegisterPageComponent {
   imageUrl: string = environment.apiUrl + '/settings/company/background-image';
 
   private fb = inject(FormBuilder);
-  private authService = inject(AuthService); // Asumimos que authService tendrá un método register
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
 
   registerForm: FormGroup;
   isLoading = false;
+  logoImageUrl: string = environment.apiUrl + '/settings/company/logo-image';
 
   constructor() {
     this.registerForm = this.fb.group({
-      name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      username: ['', Validators.required],
+      userEmail: ['', [Validators.required, Validators.email]],
+      userPass: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
 
   get name() {
-    return this.registerForm.get('name');
+    return this.registerForm.get('username');
   }
   get email() {
-    return this.registerForm.get('email');
+    return this.registerForm.get('userEmail');
   }
   get password() {
-    return this.registerForm.get('password');
+    return this.registerForm.get('userPass');
   }
 
   onSubmit(): void {
@@ -138,18 +145,48 @@ export class RegisterPageComponent {
       return;
     }
     this.isLoading = true;
-    const { name, email, password } = this.registerForm.value;
-    // Simulación: this.authService.register({ name, email, password })
-    console.log('Registering user:', { name, email, password });
-    setTimeout(() => {
-      // Simular llamada API
-      this.isLoading = false;
-      this.snackBar.open('Registration successful! Please log in.', 'OK', {
-        duration: 3000,
-        verticalPosition: 'top',
-        panelClass: ['success-snackbar'],
+    const { username, userEmail, userPass } = this.registerForm.value;
+
+    fetch(environment.apiUrl + '/users/register-company', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: username,
+        email: userEmail,
+        password: userPass,
+      }),
+    })
+      .then(async (response) => {
+        let res = await response.json();
+        this.isLoading = false;
+        if (res.message) {
+          this.snackBar.open('Ya existe un usuario con ese correo', 'OK', {
+            duration: 3000,
+            verticalPosition: 'top',
+            panelClass: ['success-snackbar'],
+          });
+        } else {
+          this.snackBar.open(
+            '¡Registro exitoso! Por favor, inicia sesión.',
+            'OK',
+            {
+              duration: 3000,
+              verticalPosition: 'top',
+              panelClass: ['success-snackbar'],
+            }
+          );
+          this.router.navigate(['/login']);
+        }
+      })
+      .catch((error) => {
+        this.isLoading = false;
+        this.snackBar.open('No se pudo registrar su informacion.', 'OK', {
+          duration: 3000,
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar'],
+        });
       });
-      this.router.navigate(['/login']);
-    }, 1500);
   }
 }

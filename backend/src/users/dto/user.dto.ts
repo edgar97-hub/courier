@@ -167,3 +167,22 @@ export class UserProfile {
   @ApiProperty()
   photo_url: string;
 }
+
+export class UserCompany {
+  @ApiProperty()
+  @IsString()
+  email: string;
+
+  @ApiProperty()
+  @IsString()
+  username: string;
+
+  @ApiProperty()
+  @IsString()
+  password?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsEnum(ROLES)
+  role?: ROLES;
+}

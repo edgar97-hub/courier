@@ -21,7 +21,12 @@
   padding: 24px; // Padding interno generoso
   border-radius: 8px; // Bordes redondeados
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); // Sombra más pronunciada
-  background-color: rgba(255, 255, 255, 0.9); // Fondo blanco semitransparente para la tarjeta
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.9
+  ); // Fondo blanco semitransparente para la tarjeta
 }
 
 .login-card-header {
@@ -84,11 +89,11 @@
   }
 }
 
-// Estilo para el snackbar de error (opcional, puede ir en styles.scss global)
-// ::ng-deep .error-snackbar {
-//   background-color: #d32f2f; // Un rojo de error
-//   color: white;
-// }
-// ::ng-deep .error-snackbar .mat-mdc-button.mat-mdc-button-base {
-//   color: white !important;
-// }
+.logo-wrapper {
+  // border: 1px solid black;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}

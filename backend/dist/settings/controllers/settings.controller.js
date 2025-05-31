@@ -53,6 +53,9 @@ let SettingsController = class SettingsController {
     async getBackgroundImage(res) {
         return await this.usersService.getBackgroundImage(res);
     }
+    async getLogoImage(res) {
+        return await this.usersService.getLogoImage(res);
+    }
 };
 exports.SettingsController = SettingsController;
 __decorate([
@@ -141,6 +144,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], SettingsController.prototype, "getBackgroundImage", null);
+__decorate([
+    (0, public_decorator_1.PublicAccess)(),
+    (0, common_1.Get)('company/logo-image'),
+    __param(0, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], SettingsController.prototype, "getLogoImage", null);
 exports.SettingsController = SettingsController = __decorate([
     (0, swagger_1.ApiTags)('Settings'),
     (0, common_1.Controller)('settings'),

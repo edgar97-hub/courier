@@ -1,10 +1,11 @@
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
-import { UserDTO, UserProfile, UserUpdateDTO } from '../dto/user.dto';
+import { UserCompany, UserDTO, UserProfile, UserUpdateDTO } from '../dto/user.dto';
 import { UsersEntity } from '../entities/users.entity';
 export declare class UsersService {
     private readonly userRepository;
     constructor(userRepository: Repository<UsersEntity>);
     createUser(body: UserDTO): Promise<UsersEntity>;
+    registerCompany(body: UserCompany): Promise<UsersEntity>;
     findUsers(): Promise<UsersEntity[]>;
     findUsersByRol({ search_term, role, }: {
         search_term?: string;
