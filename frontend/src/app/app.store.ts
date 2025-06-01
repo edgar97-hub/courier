@@ -166,7 +166,7 @@ export const AppStore = signalStore(
               }
             );
             authService.getCurrentUserFromBackend().subscribe();
-            router.navigate(['orders-delivered']);
+            router.navigate(['dashboard']);
           } catch (err: any) {
             const errorMessage =
               err.message || 'Login failed. Please try again.';

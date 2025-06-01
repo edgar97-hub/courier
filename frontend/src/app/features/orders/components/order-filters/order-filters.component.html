@@ -38,17 +38,15 @@
         [value]="status"
       >
         {{ status }}
-        <!-- Podrías usar un pipe para traducir aquí -->
       </mat-option>
     </mat-select>
   </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Buscar</mat-label>
-    <input matInput formControlName="search_term" placeholder="Buscar..." />
-  </mat-form-field>
-
   <div class="filter-actions">
+    <mat-form-field appearance="outline" style="margin-top: 15px">
+      <mat-label>Buscar</mat-label>
+      <input matInput formControlName="search_term" placeholder="Buscar..." />
+    </mat-form-field>
     <button
       mat-stroked-button
       color="primary"

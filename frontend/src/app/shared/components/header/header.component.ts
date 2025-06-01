@@ -9,6 +9,7 @@ import { MatSidenav } from '@angular/material/sidenav';
 import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
 import { ProfileEditDialogComponent } from '../profile-edit-dialog/profile-edit-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-header',
@@ -26,6 +27,18 @@ import { MatDialog } from '@angular/material/dialog';
       <button mat-icon-button (click)="toggleSidenav()">
         <mat-icon>menu</mat-icon>
       </button>
+      <a
+        mat-list-item
+        [href]="'dashboard'"
+        rel="noopener noreferrer"
+        matRipple
+        class="menu-link-item static-link"
+      >
+        <img
+          src="{{ logoImageUrl }}"
+          style="max-width: 100px; border: 0px solid black"
+        />
+      </a>
       <div class="flex-1"></div>
       <!-- <app-theme-toggle></app-theme-toggle> -->
 
@@ -57,7 +70,7 @@ import { MatDialog } from '@angular/material/dialog';
 export class HeaderComponent {
   appStore = inject(AppStore);
   router = inject(Router);
-
+  logoImageUrl: string = environment.apiUrl + '/settings/company/logo-image';
   @Input() sidenav!: MatSidenav;
   private dialog = inject(MatDialog);
 

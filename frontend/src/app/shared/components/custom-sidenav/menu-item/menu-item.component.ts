@@ -183,8 +183,6 @@ import { MenuItem } from '../menu-items';
   }
 
   .menu-item-label {
-    font-size: 0.9rem;
-    font-weight: 400;
     line-height: 1.5;
     white-space: nowrap;
     overflow: hidden;
@@ -233,8 +231,6 @@ import { MenuItem } from '../menu-items';
   .menu-item-icon {
     margin-right: 0; // Quitar margen si solo se muestra el icono
   }
-  // Centrar el icono si es necesario
-  // justify-content: center;
 }`,
   animations: [
     trigger('expandContractMenu', [
@@ -253,10 +249,7 @@ import { MenuItem } from '../menu-items';
 export class MenuItemComponent {
   item = input.required<MenuItem>();
   routeHistory = input<string>('');
-  // Este 'collapsed' viene del padre (CustomSidenav o MenuItem padre)
-  // Indica si el Sidenav general o el menú padre está en modo "solo icono"
   collapsed = input.required<boolean>();
-  // 'level' se usa para la indentación de los submenús
   level = input<number>(0);
 
   isSubmenuOpen = signal(false);
@@ -276,22 +269,7 @@ export class MenuItemComponent {
     if (this.hasSubitems()) {
       this.isSubmenuOpen.set(!this.isSubmenuOpen());
     }
-    // La navegación para rutas internas se maneja con routerLink
-    // La navegación para enlaces externos se maneja con href
   }
-
-  // Construir la ruta para routerLink
-  // buildRouterLink(): string | null {
-  //   const currentItem = this.item();
-  //   if (!currentItem.route && !this.hasSubitems()) return null; // No navegable si no tiene ruta ni subítems
-  //   if (!currentItem.route && this.hasSubitems()) return null; // Solo agrupador, no navegable
-
-  //   // Para la construcción de rutas relativas en submenús, es mejor manejar esto en el router padre o usar rutas absolutas
-  //   // Aquí asumimos que item.route es la ruta completa o relativa al padre inmediato
-
-  //   console.log('currentItem.route', currentItem.route);
-  //   return currentItem.route || null;
-  // }
 
   buildRouterLink(): string[] | null {
     const currentItem = this.item();

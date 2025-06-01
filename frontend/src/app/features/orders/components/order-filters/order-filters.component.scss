@@ -1,13 +1,14 @@
 .filters-container {
   display: flex;
   flex-wrap: wrap; // Para que se ajusten en pantallas pequeñas
-  gap: 16px; // Espacio entre campos
+  gap: 10px; // Espacio entre campos
   align-items: flex-start; // Alinear al inicio si tienen diferentes alturas
-  padding: 16px;
+  padding: 6px;
   background-color: var(--sys-surface-container-low);
   border-radius: 8px;
-  margin-bottom: 20px;
+  // margin-bottom: 10px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  // border: 1px solid black;
 }
 
 mat-form-field {
@@ -18,8 +19,11 @@ mat-form-field {
 .filter-actions {
   display: flex;
   gap: 10px;
-  align-items: center; // Alinear botones verticalmente con los campos
-  padding-top: 8px; // Pequeño ajuste si los campos tienen padding interno
+  align-items: center !important; // Alinear botones verticalmente con los campos
+  justify-content: center !important;
+  // padding-top: 8px; // Pequeño ajuste si los campos tienen padding interno
+  min-width: 100%;
+  // border: 1px solid black;
 }
 
 // Estilos responsivos opcionales
@@ -28,11 +32,11 @@ mat-form-field {
     width: calc(50% - 8px); // Dos campos por fila
     min-width: unset;
   }
-  .filter-actions {
-    width: 100%;
-    justify-content: flex-end;
-    padding-top: 16px;
-  }
+  // .filter-actions {
+  //   width: 100%;
+  //   justify-content: flex-end;
+  //   padding-top: 16px;
+  // }
 }
 
 @media (max-width: 480px) {

@@ -1,8 +1,10 @@
 import {
-  ComponentPortal,
   Overlay,
   OverlayModule
-} from "./chunk-UVEDXOB7.js";
+} from "./chunk-WDP24DJ7.js";
+import {
+  ComponentPortal
+} from "./chunk-TNB2NPLS.js";
 import {
   coerceBooleanProperty
 } from "./chunk-JXBCBRYI.js";
@@ -14,7 +16,7 @@ import {
   MatCommonModule,
   hasModifierKey,
   normalizePassiveListenerOptions
-} from "./chunk-IAF6TOJZ.js";
+} from "./chunk-FQD4CDPR.js";
 import {
   CdkScrollableModule,
   ScrollDispatcher
@@ -1047,4 +1049,4 @@ export {
   TooltipComponent,
   MatTooltipModule
 };
-//# sourceMappingURL=chunk-HI7CBFCV.js.map
+//# sourceMappingURL=chunk-4T4LGH2M.js.map

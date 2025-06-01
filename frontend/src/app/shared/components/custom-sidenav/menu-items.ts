@@ -9,6 +9,18 @@ export type MenuItem = {
 export const menuItems: MenuItem[] = [
   {
     icon: 'list_alt',
+    label: 'Dashboard',
+    route: 'dashboard',
+    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'EMPRESA', 'RECEPCIONISTA'],
+  },
+  {
+    icon: 'list_alt',
+    label: 'coverageMapLink',
+    route: 'dashboard',
+    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'EMPRESA', 'RECEPCIONISTA'],
+  },
+  {
+    icon: 'list_alt',
     label: 'Tarifas',
     route: 'tarifas',
     roles: ['ADMINISTRADOR', 'MOTORIZADO', 'EMPRESA', 'RECEPCIONISTA'],

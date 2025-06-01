@@ -9,12 +9,12 @@ import {
   isFakeTouchstartFromScreenReader
 } from "./chunk-ULF4TSYU.js";
 import {
-  BidiModule
-} from "./chunk-AOPTDWYV.js";
-import {
   _CdkPrivateStyleLoader,
   _bindEventWithOptions
-} from "./chunk-Q6AVZNXX.js";
+} from "./chunk-J76AEQOK.js";
+import {
+  BidiModule
+} from "./chunk-AOPTDWYV.js";
 import {
   coerceElement,
   coerceNumberProperty
@@ -2923,4 +2923,4 @@ export {
   MATERIAL_SANITY_CHECKS,
   MatCommonModule
 };
-//# sourceMappingURL=chunk-IAF6TOJZ.js.map
+//# sourceMappingURL=chunk-FQD4CDPR.js.map

@@ -1,0 +1,122 @@
+<div class="dashboard-container">
+  <div class="page-header">
+    <h1>Dashboard de Pedidos</h1>
+    <button
+      mat-stroked-button
+      (click)="loadDashboardData()"
+      [disabled]="isLoading"
+    >
+      <mat-icon>refresh</mat-icon> Actualizar Datos
+    </button>
+  </div>
+
+  <!-- Bloque Principal: Maneja carga, error y datos -->
+  @if (isLoading) {
+  <div class="full-page-spinner">
+    <mat-progress-spinner
+      mode="indeterminate"
+      diameter="60"
+    ></mat-progress-spinner>
+    <p>Cargando datos del dashboard...</p>
+  </div>
+  } @if (dashboardSummary$ | async; as summaryDetails) {
+  <!-- Resuelve el observable aquí -->
+  @if (summaryDetails) {
+  <!-- Verifica si summaryDetails (antes summary) no es null -->
+  <!-- Fila de KPIs -->
+  <div class="kpi-row">
+    <app-kpi-card
+      class="kpi-item"
+      title="Total Pedidos Hoy"
+      [value]="summaryDetails.kpis.totalOrdersToday"
+      icon="inventory_2"
+      colorClass="primary-kpi"
+      unit="pedidos"
+    >
+    </app-kpi-card>
+    <app-kpi-card
+      class="kpi-item"
+      title="En Tránsito"
+      [value]="summaryDetails.kpis.ordersInTransit"
+      icon="local_shipping"
+      colorClass="accent-kpi"
+      unit="pedidos"
+    >
+    </app-kpi-card>
+    <app-kpi-card
+      class="kpi-item"
+      title="Entregados Hoy"
+      [value]="summaryDetails.kpis.ordersDeliveredToday"
+      icon="check_circle_outline"
+      colorClass="success-kpi"
+      unit="pedidos"
+    >
+    </app-kpi-card>
+    <app-kpi-card
+      class="kpi-item"
+      title="Con Incidencias Hoy"
+      [value]="summaryDetails.kpis.ordersWithIssuesToday"
+      icon="report_problem"
+      colorClass="warn-kpi"
+      unit="pedidos"
+    >
+    </app-kpi-card>
+  </div>
+
+  <!-- Fila para Gráficos u otra información -->
+  <mat-grid-list
+    cols="3"
+    rowHeight="400px"
+    gutterSize="20px"
+    class="charts-grid"
+  >
+    <!-- Ajusta rowHeight -->
+    <mat-grid-tile [colspan]="2">
+      <!-- <app-status-distribution-chart
+        [data]="summaryDetails.statusDistribution"
+        chartTitle="Distribución de Pedidos por Estado Actual"
+      >
+      </app-status-distribution-chart> -->
+    </mat-grid-tile>
+    <!-- <mat-grid-tile [colspan]="1">
+      <mat-card class="info-placeholder-card">
+        <mat-card-title>Otra Información</mat-card-title>
+        <mat-card-content>
+          <p>Aquí podría ir otro gráfico o una lista importante.</p>
+        </mat-card-content>
+      </mat-card>
+    </mat-grid-tile> -->
+  </mat-grid-list>
+
+  } @else if (loadError) {
+  <!-- Se muestra si summaryDetails es null Y loadError es true -->
+  <div class="error-message-container">
+    <mat-icon color="warn">error_outline</mat-icon>
+    <p>
+      No se pudieron cargar los datos del dashboard. Intente de nuevo más tarde.
+    </p>
+    <button
+      mat-stroked-button
+      color="primary"
+      (click)="loadDashboardData()"
+      [disabled]="isLoading"
+    >
+      Reintentar
+    </button>
+  </div>
+  } } @else if (loadError && !isLoading) {
+  <!-- Caso adicional por si el async pipe no emite nada y hay error -->
+  <div class="error-message-container">
+    <mat-icon color="warn">error_outline</mat-icon>
+    <p>Fallo al cargar datos. Por favor, reintente.</p>
+    <button
+      mat-stroked-button
+      color="primary"
+      (click)="loadDashboardData()"
+      [disabled]="isLoading"
+    >
+      Reintentar
+    </button>
+  </div>
+  }
+</div>

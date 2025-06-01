@@ -1,0 +1,19 @@
+<div class="chart-container">
+  <h3 class="chart-title">{{ chartTitle }}</h3>
+  @if (chartData && chartData.length > 0) {
+  <ngx-charts-pie-chart
+    [view]="view"
+    [scheme]="colorScheme"
+    [results]="chartData"
+    [gradient]="gradient"
+    [legendPosition]="legendPosition"
+    [labels]="showLabels"
+    [doughnut]="isDoughnut"
+    (select)="onSelect($event)"
+  >
+    <!-- [legend]="showLegend" -->
+  </ngx-charts-pie-chart>
+  } @else {
+  <p class="no-data-message">No hay datos de estado para mostrar.</p>
+  }
+</div>

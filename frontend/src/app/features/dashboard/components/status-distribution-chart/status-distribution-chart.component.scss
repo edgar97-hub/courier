@@ -1,0 +1,28 @@
+.chart-container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px; // Espacio debajo del gráfico
+}
+
+.chart-title {
+  text-align: center;
+  font-size: 1.2em;
+  font-weight: 500;
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.no-data-message {
+  text-align: center;
+  padding: 30px;
+  color: #757575;
+  font-style: italic;
+}
+
+// ngx-charts a veces necesita estilos globales para los tooltips o leyendas
+// si no se ven bien. Puedes añadirlos a tu styles.scss global si es necesario.
+// ::ng-deep .ngx-charts-tooltip-area { /* ... */ }
+// ::ng-deep .ngx-charts .legend-title { /* ... */ }

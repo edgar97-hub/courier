@@ -1,0 +1,129 @@
+// No es necesario @use '@angular/material' as mat; si no usamos sus funciones de theming aquí.
+
+.kpi-card {
+  text-align: left;
+  border-radius: 8px;
+  // box-shadow: 0 2px 5px rgba(0,0,0,0.1); // Sombra sutil, puedes activarla si deseas
+  // transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  // &:hover {
+  //   transform: translateY(-3px);
+  //   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  // }
+
+  mat-card-header {
+    // Esto aplica a <mat-card-header> dentro de tu kpi-card.component.html
+    padding: 16px;
+  }
+}
+
+.kpi-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  margin-right: 16px;
+}
+
+.kpi-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: #ffffff; // Íconos siempre blancos sobre fondo de color
+}
+
+.kpi-title {
+  font-size: 0.9em;
+  color: #757575; // Gris medio (mat.gray-600)
+  margin-bottom: 4px !important; // Asegurar el margen
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500; // Un poco más de peso
+}
+
+.kpi-value {
+  font-size: 2em;
+  font-weight: 700;
+  line-height: 1.1;
+  // El color del valor se definirá por las clases de color específicas
+}
+
+.kpi-unit {
+  font-size: 0.6em;
+  font-weight: 400;
+  margin-left: 4px;
+  text-transform: lowercase;
+  // El color del unit heredará de .kpi-value o puedes definirlo
+}
+
+// Clases de color para las tarjetas KPI usando colores hexadecimales
+.kpi-card.default-kpi {
+  // background-color: #fafafa; // Fondo de tarjeta opcional
+  border-left: 5px solid #78909c; // Borde izquierdo con color (mat.blue-grey-400)
+  .kpi-icon-container {
+    background-color: #78909c;
+  } // mat.blue-grey-400
+  .kpi-value {
+    color: #37474f;
+  } // mat.blue-grey-700
+  .kpi-title {
+    color: #546e7a;
+  } // mat.blue-grey-600
+}
+
+.kpi-card.primary-kpi {
+  // background-color: #e8eaf6; // Fondo de tarjeta opcional (indigo-50)
+  border-left: 5px solid #3f51b5; // mat.indigo-500
+  .kpi-icon-container {
+    background-color: #3f51b5;
+  } // mat.indigo-500
+  .kpi-value {
+    color: #303f9f;
+  } // mat.indigo-700
+  .kpi-title {
+    color: #3949ab;
+  } // mat.indigo-600
+}
+
+.kpi-card.accent-kpi {
+  // background-color: #fce4ec; // Fondo de tarjeta opcional (pink-50)
+  border-left: 5px solid #e91e63; // mat.pink-500
+  .kpi-icon-container {
+    background-color: #e91e63;
+  } // mat.pink-500
+  .kpi-value {
+    color: #c2185b;
+  } // mat.pink-700
+  .kpi-title {
+    color: #d81b60;
+  } // mat.pink-600
+}
+
+.kpi-card.success-kpi {
+  // background-color: #e8f5e9; // Fondo de tarjeta opcional (green-50)
+  border-left: 5px solid #4caf50; // mat.green-600
+  .kpi-icon-container {
+    background-color: #4caf50;
+  } // mat.green-600
+  .kpi-value {
+    color: #388e3c;
+  } // mat.green-800
+  .kpi-title {
+    color: #43a047;
+  } // mat.green-700
+}
+
+.kpi-card.warn-kpi {
+  // background-color: #ffebee; // Fondo de tarjeta opcional (red-50)
+  border-left: 5px solid #f44336; // mat.red-500
+  .kpi-icon-container {
+    background-color: #f44336;
+  } // mat.red-500
+  .kpi-value {
+    color: #d32f2f;
+  } // mat.red-700
+  .kpi-title {
+    color: #e53935;
+  } // mat.red-600
+}

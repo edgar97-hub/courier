@@ -1,7 +1,8 @@
 import {
   Title
-} from "./chunk-WMKEZX3K.js";
+} from "./chunk-MMLXVATD.js";
 import "./chunk-75LT4S2V.js";
+import "./chunk-SRSN7S5F.js";
 import {
   HashLocationStrategy,
   LOCATION_INITIALIZED,
@@ -10,7 +11,6 @@ import {
   PathLocationStrategy,
   ViewportScroller
 } from "./chunk-AKCOSPLG.js";
-import "./chunk-SRSN7S5F.js";
 import {
   DOCUMENT
 } from "./chunk-HS6XMO6F.js";

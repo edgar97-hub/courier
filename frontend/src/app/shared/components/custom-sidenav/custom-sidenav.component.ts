@@ -30,7 +30,8 @@ import SidenavHeaderComponent from './sidenav-header/sidenav-header.component';
     <app-sidenav-header [collapsed]="collapsed()" />
 
     <mat-nav-list class="app-nav-list" [class.collapsed]="collapsed()">
-      @if (coverageMapLinkSignal(); as mapLink) {
+      @for (item of filteredMenuItems(); track item.label) { @if(item.label ===
+      "coverageMapLink"){ @if (coverageMapLinkSignal(); as mapLink) {
       <a
         mat-list-item
         [href]="mapLink"
@@ -42,9 +43,9 @@ import SidenavHeaderComponent from './sidenav-header/sidenav-header.component';
         <mat-icon matListItemIcon class="menu-item-icon">map</mat-icon>
         <span matListItemTitle>Mapa de cobertura</span>
       </a>
-      } @for (item of filteredMenuItems(); track item.label) {
+      } }@else{
       <app-menu-item [item]="item" [collapsed]="collapsed()" [level]="0" />
-      } @empty { @if (!coverageMapLinkSignal()) {
+      } } @empty { @if (!coverageMapLinkSignal()) {
       <mat-list-item disabled>
         <div matListItemTitle>No hay opciones de menú.</div>
       </mat-list-item>
