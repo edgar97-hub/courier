@@ -104,15 +104,14 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end" class="dialog-actions">
-    <button mat-stroked-button (click)="onCancel()" class="cancel-button">
+    <button mat-stroked-button class="cancel-button btn-corp-secondary" (click)="onCancel()">
       Cancelar
     </button>
     <button
       mat-flat-button
-      color="primary"
+      class="confirm-button btn-corp-primary"
       (click)="onConfirm()"
       [disabled]="!selectedDriver || isLoadingDrivers"
-      class="confirm-button"
     >
       {{ data.currentDriverId ? "Reasignar" : "Asignar" }} Motorizado
     </button>

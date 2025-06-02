@@ -95,6 +95,10 @@ h2.mat-mdc-dialog-title {
 
 mat-grid-list {
   padding: 0;
+
+  @media (max-width: 600px) {
+    cols: 1 !important; // Override inline style
+  }
 }
 
 mat-grid-tile {

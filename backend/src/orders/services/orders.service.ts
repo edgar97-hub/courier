@@ -18,6 +18,7 @@ import { ROLES, STATES } from 'src/constants/roles';
 import { EntityManager, Connection, DataSource } from 'typeorm'; // Importa Connection o DataSource
 import { UsersEntity } from 'src/users/entities/users.entity';
 import { OrderLogEntity } from '../entities/orderLog.entity';
+import { endOfDay, startOfDay } from 'date-fns';
 // import { customAlphabet } from 'nanoid';
 // const _nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 10);
 
@@ -347,7 +348,9 @@ export class OrdersService {
             rowHasErrors = true;
           } else {
             // orderEntity.delivery_date = parsedDate; // Guardar como objeto Date o string YYYY-MM-DD
-            orderEntity.delivery_date = day + '-' + month + '-' + year; // Guardar como objeto Date o string YYYY-MM-DD
+            orderEntity.delivery_date = new Date(
+              day + '-' + month + '-' + year,
+            ); // Guardar como objeto Date o string YYYY-MM-DD
           }
         } else {
           errors.push({
@@ -807,15 +810,15 @@ export class OrdersService {
       let previousValue = oldOrder.delivery_date;
       let newValue = updatedOrder?.delivery_date;
       let notes = body.reason;
-      const log = await this.orderLogRepository.create({
-        order: { id },
-        performedBy: { id: idUser },
-        action: action,
-        previousValue: previousValue,
-        newValue: newValue,
-        notes: notes,
-      });
-      await this.orderLogRepository.save(log);
+      // const log = await this.orderLogRepository.create({
+      //   // order: { id },
+      //   performedBy: { id: idUser },
+      //   action: action,
+      //   previousValue: previousValue,
+      //   newValue: newValue,
+      //   notes: notes,
+      // });
+      // await this.orderLogRepository.save(log);
       return updatedOrder;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
@@ -832,6 +835,112 @@ export class OrdersService {
         });
       }
       return order;
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  public async dashboardOrders(): Promise<any> {
+    // interface DashboardOrderStatusSummary {
+    //   status: STATES;
+    //   count: number;
+    //   label: string; // Un label legible para el frontend
+    // }
+    // interface DashboardData {
+    //   statusSummary: DashboardOrderStatusSummary[];
+    //   totalOrders: number;
+    //   // Puedes añadir más agregaciones aquí, ej:
+    //   // totalRevenue: number;
+    //   // averageDeliveryTime: number;
+    // }
+
+    try {
+      const todayStart = startOfDay(new Date());
+      const todayEnd = endOfDay(new Date());
+
+      // KPIs
+      const totalOrdersToday = await this.orderRepository.count({
+        where: { createdAt: Between(todayStart, todayEnd) },
+      });
+
+      const ordersInTransit = await this.orderRepository.count({
+        where: { status: STATES.IN_TRANSIT },
+      });
+
+      const ordersDeliveredToday = await this.orderRepository.count({
+        where: {
+          status: STATES.DELIVERED,
+          delivery_date: Between(todayStart, todayEnd),
+          updatedAt: Between(todayStart, todayEnd),
+        },
+      });
+
+      const rejectedToday = await this.orderRepository.count({
+        where: {
+          status: STATES.REJECTED,
+          updatedAt: Between(todayStart, todayEnd),
+        },
+      });
+      const cancelledToday = await this.orderRepository.count({
+        where: {
+          status: STATES.CANCELED,
+          updatedAt: Between(todayStart, todayEnd),
+        },
+      });
+      const ordersWithIssuesToday = rejectedToday + cancelledToday;
+
+      const relevantStatusesForDistribution: STATES[] = [
+        STATES.REGISTERED,
+        STATES.IN_WHAREHOUSE,
+        STATES.IN_TRANSIT,
+        STATES.DELIVERED,
+        STATES.REJECTED,
+        STATES.CANCELED,
+      ];
+
+      const statusCountsResult = await this.orderRepository
+        .createQueryBuilder('order')
+        .select('order.status', 'status_val')
+        .addSelect('COUNT(order.id)', 'count')
+        .where('order.status IN (:...statuses)', {
+          statuses: relevantStatusesForDistribution,
+        })
+        .groupBy('order.status')
+        .getRawMany<{ status_val: STATES; count: string }>();
+
+      const statusMap = new Map<STATES, number>();
+      statusCountsResult.forEach((item) => {
+        statusMap.set(item.status_val, parseInt(item.count, 10));
+      });
+
+      const statusDistribution: Array<{
+        name: STATES;
+        label: string;
+        value: number;
+      }> = [];
+      relevantStatusesForDistribution.forEach((status) => {
+        let label = status.toString().replace(/_/g, ' ');
+        label = label
+          .toLowerCase()
+          .split(' ')
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+        statusDistribution.push({
+          name: status, // El valor del enum
+          label: label, // El label legible
+          value: statusMap.get(status) || 0,
+        });
+      });
+
+      return {
+        kpis: {
+          totalOrdersToday,
+          ordersInTransit,
+          ordersDeliveredToday,
+          ordersWithIssuesToday,
+        },
+        statusDistribution,
+      };
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }

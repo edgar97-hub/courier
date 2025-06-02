@@ -22,6 +22,7 @@ const districts_entity_1 = require("../../districts/entities/districts.entity");
 const roles_1 = require("../../constants/roles");
 const typeorm_3 = require("typeorm");
 const orderLog_entity_1 = require("../entities/orderLog.entity");
+const date_fns_1 = require("date-fns");
 const EXCEL_HEADER_TO_ENTITY_KEY_MAP = {
     'TIPO DE ENVIO': 'shipment_type',
     'NOMBRE DEL DESTINATARIO': 'recipient_name',
@@ -260,7 +261,7 @@ let OrdersService = class OrdersService {
                         rowHasErrors = true;
                     }
                     else {
-                        orderEntity.delivery_date = day + '-' + month + '-' + year;
+                        orderEntity.delivery_date = new Date(day + '-' + month + '-' + year);
                     }
                 }
                 else {
@@ -594,15 +595,6 @@ let OrdersService = class OrdersService {
             let previousValue = oldOrder.delivery_date;
             let newValue = updatedOrder?.delivery_date;
             let notes = body.reason;
-            const log = await this.orderLogRepository.create({
-                order: { id },
-                performedBy: { id: idUser },
-                action: action,
-                previousValue: previousValue,
-                newValue: newValue,
-                notes: notes,
-            });
-            await this.orderLogRepository.save(log);
             return updatedOrder;
         }
         catch (error) {
@@ -619,6 +611,85 @@ let OrdersService = class OrdersService {
                 });
             }
             return order;
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
+    async dashboardOrders() {
+        try {
+            const todayStart = (0, date_fns_1.startOfDay)(new Date());
+            const todayEnd = (0, date_fns_1.endOfDay)(new Date());
+            const totalOrdersToday = await this.orderRepository.count({
+                where: { createdAt: (0, typeorm_2.Between)(todayStart, todayEnd) },
+            });
+            const ordersInTransit = await this.orderRepository.count({
+                where: { status: roles_1.STATES.IN_TRANSIT },
+            });
+            const ordersDeliveredToday = await this.orderRepository.count({
+                where: {
+                    status: roles_1.STATES.DELIVERED,
+                    delivery_date: (0, typeorm_2.Between)(todayStart, todayEnd),
+                    updatedAt: (0, typeorm_2.Between)(todayStart, todayEnd),
+                },
+            });
+            const rejectedToday = await this.orderRepository.count({
+                where: {
+                    status: roles_1.STATES.REJECTED,
+                    updatedAt: (0, typeorm_2.Between)(todayStart, todayEnd),
+                },
+            });
+            const cancelledToday = await this.orderRepository.count({
+                where: {
+                    status: roles_1.STATES.CANCELED,
+                    updatedAt: (0, typeorm_2.Between)(todayStart, todayEnd),
+                },
+            });
+            const ordersWithIssuesToday = rejectedToday + cancelledToday;
+            const relevantStatusesForDistribution = [
+                roles_1.STATES.REGISTERED,
+                roles_1.STATES.IN_WHAREHOUSE,
+                roles_1.STATES.IN_TRANSIT,
+                roles_1.STATES.DELIVERED,
+                roles_1.STATES.REJECTED,
+                roles_1.STATES.CANCELED,
+            ];
+            const statusCountsResult = await this.orderRepository
+                .createQueryBuilder('order')
+                .select('order.status', 'status_val')
+                .addSelect('COUNT(order.id)', 'count')
+                .where('order.status IN (:...statuses)', {
+                statuses: relevantStatusesForDistribution,
+            })
+                .groupBy('order.status')
+                .getRawMany();
+            const statusMap = new Map();
+            statusCountsResult.forEach((item) => {
+                statusMap.set(item.status_val, parseInt(item.count, 10));
+            });
+            const statusDistribution = [];
+            relevantStatusesForDistribution.forEach((status) => {
+                let label = status.toString().replace(/_/g, ' ');
+                label = label
+                    .toLowerCase()
+                    .split(' ')
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+                statusDistribution.push({
+                    name: status,
+                    label: label,
+                    value: statusMap.get(status) || 0,
+                });
+            });
+            return {
+                kpis: {
+                    totalOrdersToday,
+                    ordersInTransit,
+                    ordersDeliveredToday,
+                    ordersWithIssuesToday,
+                },
+                statusDistribution,
+            };
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);

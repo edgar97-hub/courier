@@ -19,7 +19,7 @@
   background-color: #f8f9fa; // Fondo muy claro para el header
 
   .header-avatar {
-    background-color: #3f51b5; // Azul índigo (similar a Material Primary)
+    background-color: #012147; // Azul índigo (similar a Material Primary)
     color: white;
     display: flex;
     justify-content: center;
@@ -48,7 +48,7 @@
   margin-bottom: 15px;
   padding: 12px;
   background-color: #eceff1; // Azul grisáceo muy claro
-  border-left: 4px solid #5c6bc0; // Índigo más claro para el borde
+  border-left: 4px solid #f97c06; // Índigo más claro para el borde
   border-radius: 4px;
 }
 
@@ -102,7 +102,7 @@
   // letter-spacing: 0.5px;
   border-radius: 6px;
   color: #f7f8fe;
-  background-color: #3f51b5;
+  background-color: #f97c06;
   // border: 1px solid black;
   cursor: pointer; // <--- AÑADIR ESTA LÍNEA
 }

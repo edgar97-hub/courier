@@ -36,8 +36,9 @@ export class OrdersEntity extends BaseEntity {
   @Column({ nullable: true })
   delivery_coordinates?: string;
 
-  @Column()
-  delivery_date?: string;
+  // @Column({ nullable: true })
+  @Column({ nullable: true, type: 'timestamp' })
+  delivery_date?: Date;
 
   @Column({ nullable: true })
   package_size_type?: string;

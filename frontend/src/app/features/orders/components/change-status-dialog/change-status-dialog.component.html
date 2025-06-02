@@ -83,22 +83,20 @@
           <label class="image-upload-label">Foto de Prueba de Entrega:</label>
           <div class="image-actions">
             <button
-              mat-stroked-button
+              mat-flat-button
               type="button"
-              color="primary"
+              class="camera-button btn-corp-primary"
               (click)="startCamera()"
-              class="camera-button"
               [disabled]="showCamera"
             >
               <mat-icon>photo_camera</mat-icon> Acceder a Cámara
             </button>
             <span class="or-divider">o</span>
             <button
-              mat-stroked-button
+              mat-flat-button
               type="button"
-              color="accent"
+              class="upload-button btn-corp-primary"
               (click)="triggerFileUpload()"
-              class="upload-button"
             >
               <mat-icon>attach_file</mat-icon> Subir Archivo
             </button>
@@ -122,9 +120,8 @@
             <button
               mat-fab
               extended
-              color="primary"
+              class="take-photo-button btn-corp-primary"
               (click)="takePhoto()"
-              class="take-photo-button"
               [disabled]="!stream"
             >
               <mat-icon>camera</mat-icon> Tomar Foto
@@ -232,21 +229,20 @@
       <button
         mat-stroked-button
         type="button"
+        class="cancel-button btn-corp-secondary"
         (click)="onCancel()"
-        class="cancel-button"
       >
         Cancelar
       </button>
       <button
         mat-flat-button
-        color="primary"
         type="submit"
         [disabled]="
           isConfirmDisabled() ||
           isUploadingImage ||
           (showCamera && !photoTaken && !imagePreviewUrl)
         "
-        class="confirm-button"
+        class="confirm-button btn-corp-primary"
       >
         {{ isUploadingImage ? "Subiendo..." : "Confirmar Cambio" }}
       </button>

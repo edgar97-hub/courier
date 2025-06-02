@@ -255,4 +255,10 @@ export class OrdersController {
       }
     }
   }
+
+  @PublicAccess()
+  @Get('dashboard/data')
+  async getDashboardSummary(): Promise<any> {
+    return this.ordersService.dashboardOrders();
+  }
 }

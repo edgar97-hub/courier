@@ -3,6 +3,7 @@
     <h1>Dashboard de Pedidos</h1>
     <button
       mat-stroked-button
+      class="btn-corp-secondary"
       (click)="loadDashboardData()"
       [disabled]="isLoading"
     >
@@ -96,8 +97,8 @@
       No se pudieron cargar los datos del dashboard. Intente de nuevo más tarde.
     </p>
     <button
-      mat-stroked-button
-      color="primary"
+      mat-flat-button
+      class="btn-corp-primary"
       (click)="loadDashboardData()"
       [disabled]="isLoading"
     >
@@ -110,8 +111,8 @@
     <mat-icon color="warn">error_outline</mat-icon>
     <p>Fallo al cargar datos. Por favor, reintente.</p>
     <button
-      mat-stroked-button
-      color="primary"
+      mat-flat-button
+      class="btn-corp-primary"
       (click)="loadDashboardData()"
       [disabled]="isLoading"
     >

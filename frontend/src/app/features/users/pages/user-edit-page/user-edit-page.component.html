@@ -22,8 +22,8 @@
 
     <button
       *ngIf="!isLoading && (user$ | async) && !isEditMode"
-      mat-stroked-button
-      color="accent"
+      mat-flat-button
+      class="btn-corp-primary"
       (click)="navigateToEdit()"
     >
       <mat-icon>edit</mat-icon> Edit User

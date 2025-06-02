@@ -28,19 +28,28 @@ mat-form-field {
 
 // Estilos responsivos opcionales
 @media (max-width: 768px) {
-  mat-form-field {
-    width: calc(50% - 8px); // Dos campos por fila
-    min-width: unset;
+  .filters-container {
+    flex-direction: column; // Stack form fields
   }
-  // .filter-actions {
-  //   width: 100%;
-  //   justify-content: flex-end;
-  //   padding-top: 16px;
-  // }
-}
 
-@media (max-width: 480px) {
   mat-form-field {
     width: 100%; // Un campo por fila
+    min-width: unset;
+  }
+  .filter-actions {
+    //   width: 100%;
+    //   justify-content: flex-end;
+    //   padding-top: 16px;
+    // }
+  }
+
+  @media (max-width: 480px) {
+    mat-form-field {
+      width: 100%; // Un campo por fila
+    }
+    .filter-actions {
+      flex-direction: column; // Stack buttons and search input
+      align-items: stretch !important; // Full width items
+    }
   }
 }

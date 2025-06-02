@@ -32,10 +32,9 @@
         </mat-form-field>
         <button
           mat-flat-button
-          color="primary"
           type="submit"
+          class="track-button btn-corp-primary"
           [disabled]="isLoading()"
-          class="track-button"
         >
           @if (isLoading()) {
           <mat-progress-spinner

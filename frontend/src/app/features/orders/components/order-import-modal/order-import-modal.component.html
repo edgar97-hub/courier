@@ -13,11 +13,10 @@
           los datos.
         </div>
         <a
-          mat-stroked-button
-          color="accent"
+          mat-flat-button
           [href]="enlace"
           target="_blank"
-          class="template-button"
+          class="template-button btn-corp-primary"
           matTooltip="Descargar la plantilla en formato .xlsx (.xls también soportado)"
         >
           <mat-icon>cloud_download</mat-icon> Descargar Plantilla
@@ -95,7 +94,7 @@
     <div class="file-input-container">
       <button
         mat-raised-button
-        color="primary"
+        class="btn-corp-primary"
         (click)="fileInput.click()"
         [disabled]="isUploading"
       >
@@ -155,12 +154,12 @@
             </div> -->
 
   <mat-dialog-actions align="end">
-    <button mat-stroked-button (click)="closeDialog()" [disabled]="isUploading">
+    <button mat-stroked-button class="btn-corp-secondary" (click)="closeDialog()" [disabled]="isUploading">
       Cancelar
     </button>
     <button
       mat-flat-button
-      color="primary"
+      class="btn-corp-primary"
       (click)="processImport()"
       [disabled]="!selectedFile || isUploading"
     >

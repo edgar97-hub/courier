@@ -206,7 +206,7 @@ import { MenuItem } from '../menu-items';
     // color: #3f51b5; // Color primario para el texto e icono activo
 
     .menu-item-icon, .menu-item-label {
-      color: #3f51b5; // Color primario
+      color: #f97c06; // Color primario
       font-weight: 500;
     }
   }

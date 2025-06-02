@@ -87,17 +87,16 @@
       <button
         mat-stroked-button
         type="button"
+        class="cancel-button btn-corp-secondary"
         (click)="onCancel()"
-        class="cancel-button"
       >
         Cancelar
       </button>
 
       <button
         mat-flat-button
-        color="primary"
         type="submit"
-        class="confirm-button"
+        class="confirm-button btn-corp-primary"
         [disabled]="rescheduleForm.invalid"
       >
         Confirmar Reprogramación

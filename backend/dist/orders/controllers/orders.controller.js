@@ -132,6 +132,9 @@ let OrdersController = class OrdersController {
             }
         }
     }
+    async getDashboardSummary() {
+        return this.ordersService.dashboardOrders();
+    }
 };
 exports.OrdersController = OrdersController;
 __decorate([
@@ -288,6 +291,13 @@ __decorate([
     __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "getOrderPdfTicket80mm", null);
+__decorate([
+    (0, public_decorator_1.PublicAccess)(),
+    (0, common_1.Get)('dashboard/data'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "getDashboardSummary", null);
 exports.OrdersController = OrdersController = __decorate([
     (0, swagger_1.ApiTags)('Orders'),
     (0, common_1.Controller)('orders'),

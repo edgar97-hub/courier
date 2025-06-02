@@ -38,6 +38,10 @@
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); // Responsivo
   gap: 20px;
   margin-bottom: 24px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr; // Stack KPIs on smaller screens
+  }
 }
 
 .kpi-item {
@@ -48,6 +52,19 @@
 .charts-grid {
   // mat-grid-list maneja su propio layout
   margin-bottom: 24px;
+}
+
+@media (max-width: 600px) {
+  .charts-grid {
+    display: flex;
+    flex-direction: column;
+
+    mat-grid-tile {
+      width: 100%;
+      height: auto !important; // Override inline styles
+      margin-bottom: 20px;
+    }
+  }
 }
 
 .info-placeholder-card {

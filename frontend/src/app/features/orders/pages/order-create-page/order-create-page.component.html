@@ -41,12 +41,11 @@
     </div>
 
     <div class="terms-section">
-      <mat-checkbox [formControl]="termsAcceptedControl" color="primary">
+      <mat-checkbox [formControl]="termsAcceptedControl">
         acepto los
-        <a href="/terminos-y-condiciones" target="_blank"
+        <a href="/terms-and-conditions" target="_blank" style="color: #012147; font-weight: bold;"
           >términos y condiciones</a
         >
-        de Dinsides Courier
       </mat-checkbox>
       <mat-error
         *ngIf="
@@ -62,8 +61,7 @@
     <div class="submit-batch-button-container">
       <button
         mat-flat-button
-        color="primary"
-        class="submit-all-button"
+        class="submit-all-button btn-corp-primary"
         (click)="submitAllOrders()"
         [disabled]="
           pendingOrders().length === 0 ||

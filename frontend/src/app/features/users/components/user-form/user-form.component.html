@@ -234,13 +234,13 @@
         </div>
       </ng-container>
       <mat-card-actions align="end" class="form-actions-sticky">
-        <button mat-stroked-button type="button" (click)="onCancel()">
+        <button mat-stroked-button type="button" class="btn-corp-secondary" (click)="onCancel()">
           Cancelar
         </button>
         <button
           mat-flat-button
-          color="primary"
           type="submit"
+          class="btn-corp-primary"
           [disabled]="isLoading || userForm.invalid"
         >
           {{ isLoading ? "Guardando..." : "Guardar Todo" }}

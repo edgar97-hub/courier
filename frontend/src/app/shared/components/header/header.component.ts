@@ -21,9 +21,7 @@ import { environment } from '../../../../environments/environment';
     // ThemeToggleComponent,
   ],
   template: `
-    <mat-toolbar
-      class="mat-elevation-z3 relative z-10 [view-transition-name:header]"
-    >
+    <mat-toolbar class="app-header">
       <button mat-icon-button (click)="toggleSidenav()">
         <mat-icon>menu</mat-icon>
       </button>
@@ -39,7 +37,7 @@ import { environment } from '../../../../environments/environment';
           style="max-width: 100px; border: 0px solid black"
         />
       </a>
-      <div class="flex-1"></div>
+      <div class="header-spacer"></div>
       <!-- <app-theme-toggle></app-theme-toggle> -->
 
       @if (appStore.currentUser(); as user) {
@@ -60,11 +58,17 @@ import { environment } from '../../../../environments/environment';
     </mat-toolbar>
   `,
   styles: `
-  
-    mat-toolbar {
-        --mat-toolbar-container-background-color: var(--mat-sys-surface-container-low);
+    .app-header {
+      position: relative;
+      z-index: 10;
+      border: 1px solid #B8B2B2;
+      /* mat-elevation-z3 is already handled by Angular Material's default styling for mat-toolbar */
+      /* [view-transition-name:header] is an Angular specific attribute, not a Tailwind class, so it remains */
     }
 
+    .header-spacer {
+      flex: 1;
+    }
   `,
 })
 export class HeaderComponent {

@@ -10,7 +10,7 @@ export declare class OrdersEntity extends BaseEntity {
     delivery_district_name?: string;
     delivery_address?: string;
     delivery_coordinates?: string;
-    delivery_date?: string;
+    delivery_date?: Date;
     package_size_type?: string;
     package_width_cm?: number;
     package_length_cm?: number;
