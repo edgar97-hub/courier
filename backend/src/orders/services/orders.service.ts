@@ -881,13 +881,13 @@ export class OrdersService {
           updatedAt: Between(todayStart, todayEnd),
         },
       });
-      const cancelledToday = await this.orderRepository.count({
-        where: {
-          status: STATES.CANCELED,
-          updatedAt: Between(todayStart, todayEnd),
-        },
-      });
-      const ordersWithIssuesToday = rejectedToday + cancelledToday;
+      // const cancelledToday = await this.orderRepository.count({
+      //   where: {
+      //     status: STATES.CANCELED,
+      //     updatedAt: Between(todayStart, todayEnd),
+      //   },
+      // });
+      const ordersWithIssuesToday = rejectedToday;
 
       const relevantStatusesForDistribution: STATES[] = [
         STATES.REGISTERED,

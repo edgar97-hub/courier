@@ -117,15 +117,21 @@
 }
 
 .dialog-actions {
-  padding: 16px 24px; // Padding estándar para acciones
-  border-top: 1px solid rgba(0, 0, 0, 0.12); // Separador sutil
-  background-color: var(--sys-surface-container-low); // Fondo ligeramente diferente para la sección de acciones
-
-  .cancel-button {
-    margin-right: 8px; // Espacio entre botones
+  padding: 16px 24px;
+  gap: 10px;
+  //   border-top: 1px solid mat.get-color-from-palette(mat.$gray-palette, 300);
+  //   background-color: mat.get-color-from-palette(mat.$gray-palette, 50);
+  button {
+    margin-left: 0px;
+    &:first-child {
+      margin-left: 0;
+    }
   }
-  .confirm-button {
-    // Puedes añadir estilos específicos si es necesario
+}
+@media (max-width: 480px) {
+  .dialog-actions {
+    gap: 10px;
+    flex-direction: row-reverse;
   }
 }
 

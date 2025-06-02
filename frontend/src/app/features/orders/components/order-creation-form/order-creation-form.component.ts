@@ -50,6 +50,7 @@ import {
 } from '@angular/material/autocomplete';
 import { User } from '../../../users/models/user.model';
 import { AppStore } from '../../../../app.store';
+
 @Component({
   selector: 'app-order-creation-form',
   standalone: true,
@@ -280,7 +281,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     // console.log('date', date);
     // const todayString = this.datePipe.transform(date, 'yyyy-MM-dd');
     const todayString = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
-    
+
     this.orderForm = this.fb.group({
       shipment_type: [this.shipmentTypes[0], Validators.required],
       recipient_name: ['', Validators.required],

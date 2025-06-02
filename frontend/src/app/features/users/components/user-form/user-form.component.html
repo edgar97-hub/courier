@@ -33,7 +33,7 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="form-field small-field">
-            <mat-label>Email</mat-label>
+            <mat-label>Correo</mat-label>
             <input matInput formControlName="email" type="email" required />
             <mat-error
               *ngIf="
@@ -234,7 +234,12 @@
         </div>
       </ng-container>
       <mat-card-actions align="end" class="form-actions-sticky">
-        <button mat-stroked-button type="button" class="btn-corp-secondary" (click)="onCancel()">
+        <button
+          mat-stroked-button
+          type="button"
+          class="btn-corp-secondary"
+          (click)="onCancel()"
+        >
           Cancelar
         </button>
         <button

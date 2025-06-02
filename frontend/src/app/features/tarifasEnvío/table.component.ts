@@ -32,7 +32,6 @@ import { MatListModule } from '@angular/material/list';
 import { PesoVolumetricoComponent } from './peso-volumetrico.component';
 import { DistrictService } from './district.service';
 import { DialogComponent } from './dialog.component';
-import { NgFor } from '@angular/common';
 
 export interface UserData {
   id: string;
@@ -66,7 +65,7 @@ export interface UserData {
           <!-- <mat-card-subtitle></mat-card-subtitle> -->
         </mat-card-header>
 
-        <mat-card-content class="flex gap-3 mt-3">
+        <mat-card-content class="flex gap-3 " style="padding:25px">
           <form
             [formGroup]="form_sta_mea"
             (ngSubmit)="onSubmitStandardMeasurement(form_sta_mea)"
@@ -107,7 +106,11 @@ export interface UserData {
               </mat-form-field>
             </div>
 
-            <button type="submit" class="mb-3 mt-5" mat-flat-button>
+            <button
+              type="submit"
+              class="mb-3 mt-5 btn-corp-primary"
+              mat-flat-button
+            >
               Guardar
             </button>
           </form>
@@ -117,7 +120,7 @@ export interface UserData {
       <mat-card appearance="outlined">
         <mat-card-header class="@apply mb-[10px]">
           <mat-card-title-group>
-            <mat-card-title
+            <mat-card-title style="margin:5px;margin-bottom:20px"
               >2. Configuración de cálculo para medida
               personalizada</mat-card-title
             >
@@ -133,11 +136,17 @@ export interface UserData {
               class="@apply flex justify-between items-center gap-3 flex-wrap"
             >
               <mat-card appearance="outlined">
-                <mat-card-header class="@apply mb-[5px]">
+                <mat-card-header
+                  class="@apply mb-[5px] "
+                  style="margin-left: 20px;"
+                >
                   <mat-card-title>Medidas máximas (cm):</mat-card-title>
                 </mat-card-header>
                 <mat-card-content>
-                  <div class="@apply flex justify-between items-center gap-3">
+                  <div
+                    class="@apply flex justify-between items-center gap-3"
+                    style="padding:20px;"
+                  >
                     <mat-form-field appearance="outline">
                       <mat-label>Ancho (cm)</mat-label>
                       <input
@@ -176,7 +185,7 @@ export interface UserData {
                 </mat-card-content>
               </mat-card>
 
-              <mat-form-field appearance="outline">
+              <mat-form-field appearance="outline" style="margin-top: 20px;">
                 <mat-label>Factor volumétrico</mat-label>
                 <input matInput formControlName="volumetric_factor" />
                 <mat-error appFieldError></mat-error>
@@ -185,7 +194,12 @@ export interface UserData {
 
             <app-peso-volumetrico></app-peso-volumetrico>
 
-            <button type="submit" class="mb-3 mt-5" mat-flat-button>
+            <button
+              type="submit"
+              class="mb-3 mt-5 btn-corp-primary"
+              style="margin-top: 10px;"
+              mat-flat-button
+            >
               Guardar
             </button>
           </form>

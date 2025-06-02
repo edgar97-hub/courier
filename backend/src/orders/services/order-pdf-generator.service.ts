@@ -437,7 +437,7 @@ export class OrderPdfGeneratorService {
   ): Promise<void> {
     const order = await this.orderRepository.findOne({
       where: { id: orderId },
-      relations: ['user'], // Cargar la relación con el usuario para obtener el nombre
+      relations: ['user', 'company'], // Cargar la relación con el usuario para obtener el nombre
     });
 
     if (!order) {
@@ -453,51 +453,29 @@ export class OrderPdfGeneratorService {
     if (!setting) {
       throw new NotFoundException(`empresa no encontrado`);
     }
-    async function imageToBase64(imageUrl) {
+
+    const formatDate = (dateInput: Date | string | undefined): string => {
+      if (!dateInput) return 'N/A';
       try {
-        const response = await fetch(imageUrl);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const arrayBuffer = await response.arrayBuffer();
-        const buffer = Buffer.from(new Uint8Array(arrayBuffer));
-        const base64String = buffer.toString('base64');
-        const contentType = response.headers.get('content-type') || 'image/png';
-
-        return `data:${contentType};base64,${base64String}`;
-      } catch (error) {
-        console.error('Error fetching image:', error);
-        return null;
-      }
-    }
-
-    // --- Helpers ---
-    const formatDate = (dateInput: string | Date | undefined): string => {
-      if (!dateInput) return 'No especificada';
-      try {
-        const date =
-          typeof dateInput === 'string' &&
-          !dateInput.includes('T') &&
-          dateInput.match(/^\d{4}-\d{2}-\d{2}$/)
-            ? new Date(dateInput + 'T00:00:00Z') // Asumir UTC si es solo fecha para evitar problemas de zona horaria
-            : new Date(dateInput);
-        if (isNaN(date.getTime())) return 'Fecha inválida';
+        const date = new Date(dateInput);
+        if (isNaN(date.getTime()))
+          return typeof dateInput === 'string' ? dateInput : 'Inválida';
         return format(date, 'dd/MM/yyyy');
-        // Para formato en español: return format(date, 'P', { locale: es });
       } catch (e) {
-        return typeof dateInput === 'string' ? dateInput : 'Fecha inválida';
+        return typeof dateInput === 'string' ? dateInput : 'Inválida';
       }
     };
 
-    const formatCurrency = (amount: number | undefined | null): string => {
+    const formatCurrency = (
+      amount: number | undefined | null,
+      currencySymbol: string = 'S/ ',
+    ): string => {
       if (amount === null || amount === undefined || isNaN(amount))
-        return 'S/ 0.00';
-      return `S/ ${Number(amount).toFixed(2)}`;
+        return `${currencySymbol}0.00`;
+      return `${currencySymbol}${Number(amount).toFixed(2)}`;
     };
 
-    const getValue = (value: any, defaultValue: string = 'N/A'): string => {
+    const getValue = (value: any, defaultValue: string = ''): string => {
       if (
         value === null ||
         value === undefined ||
@@ -507,289 +485,669 @@ export class OrderPdfGeneratorService {
       }
       return value.toString().trim();
     };
+    // --- End Helper Functions ---
 
-    const userName = order.user
-      ? getValue(order.user.username || order.user.email, 'Sistema')
-      : 'Sistema';
+    const pageSizeInPoints = 140 * 2.83465;
 
-    const LOGO_BASE64_STRING = await imageToBase64(setting?.logo_url);
-    const documentDefinition: TDocumentDefinitions = {
-      pageSize: 'A4',
-      pageMargins: [30, 70, 30, 40],
-      header: (currentPage: number, pageCount: number) => ({
-        margin: [30, 15, 30, 10], // Margen para todo el contenido del header
-        table: {
-          widths: [60, '*'], // Ancho para el logo, el resto para el texto
-          body: [
-            [
-              {
-                image: LOGO_BASE64_STRING,
-                width: 60,
-                alignment: 'left',
-              },
-              {
-                stack: [
-                  {
-                    text: 'ORDEN DE SERVICIO',
-                    style: 'mainTitleInHeader',
-                    alignment: 'center',
-                    margin: [0, 0, 0, 8],
-                  },
-                  {
-                    columns: [
-                      {
-                        text: setting.business_name.toUpperCase(),
-                        style: 'headerCompanyNameSmall', // Un estilo ligeramente más pequeño
-                        alignment: 'left', // Nombre de empresa a la izquierda de este sub-bloque
-                        width: '*', // Que ocupe el espacio necesario
-                      },
-                      {
-                        text: `Pedido N°: ${getValue(order.code, 'N/D')}`,
-                        style: 'headerOrderCodeSmall', // Un estilo ligeramente más pequeño
-                        alignment: 'right', // N° Pedido a la derecha de este sub-bloque
-                        width: 'auto', // Que se ajuste a su contenido
-                      },
-                    ],
-                  },
-                ],
-                margin: [0, 0, 0, 0],
-              },
-            ],
-          ],
+    const remittanceName = getValue(order.company.username, 'TU EMPRESA');
+    const productTableBody: any[][] = [
+      [
+        { text: 'Producto', style: 'tableHeaderRef', fillColor: '#EAEAEA' },
+        {
+          text: 'Cant.',
+          style: 'tableHeaderRef',
+          alignment: 'center',
+          fillColor: '#EAEAEA',
         },
-        layout: 'noBorders',
-      }),
-
-      footer: {
-        columns: [
-          {
-            text: `Generado: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`,
-            alignment: 'left',
-            style: 'footerText',
-            margin: [30, 0, 0, 0],
-          },
-        ],
-        margin: [0, 10, 0, 10], // Margen para que no se pegue al borde inferior
+        {
+          text: 'Precio unitario',
+          style: 'tableHeaderRef',
+          alignment: 'right',
+          fillColor: '#EAEAEA',
+        },
+        {
+          text: 'Precio',
+          style: 'tableHeaderRef',
+          alignment: 'right',
+          fillColor: '#EAEAEA',
+        },
+      ],
+      [
+        {
+          text: getValue(
+            order.item_description || order.delivery_district_name,
+            'Servicio Courier',
+          ),
+          style: 'tableCellRef',
+        },
+        { text: '1', style: 'tableCellRef', alignment: 'center' },
+        {
+          text: formatCurrency(order.shipping_cost),
+          style: 'tableCellRef',
+          alignment: 'right',
+        },
+        {
+          text: formatCurrency(order.shipping_cost),
+          style: 'tableCellRef',
+          alignment: 'right',
+        },
+      ],
+    ];
+    productTableBody.push([
+      { text: '', border: [true, true, true, true], fillColor: '#EAEAEA' },
+      { text: '', border: [true, true, true, true], fillColor: '#EAEAEA' },
+      {
+        text: 'Total',
+        style: 'tableTotalLabelRef',
+        alignment: 'right',
+        fillColor: '#EAEAEA',
+        border: [true, true, true, true],
       },
+      {
+        text: formatCurrency(order.shipping_cost),
+        style: 'tableTotalValueRef',
+        alignment: 'right',
+        fillColor: '#EAEAEA',
+        border: [true, true, true, true],
+      },
+    ]);
 
+    // Definición de cómo se dibujarán los bordes para cada celda que simula un campo
+    const fieldBorders: [boolean, boolean, boolean, boolean] = [
+      true,
+      true,
+      true,
+      true,
+    ]; // [left, top, right, bottom]
+    const fieldBorderColor = '#000000';
+    const fieldLineWidth = 0.5;
+
+    const createFieldContent = (
+      label: string,
+      value: string,
+      labelStyle?: any,
+      valueStyle?: any,
+    ): any => {
+      return {
+        stack: [
+          {
+            text: label.toUpperCase(),
+            style: ['fieldLabelRef', labelStyle || {}],
+            margin: [0, 0, 0, 0.5],
+          },
+          { text: getValue(value), style: ['fieldValueRef', valueStyle || {}] },
+        ],
+        margin: [2, 1.5, 2, 1.5], // Padding interno para el contenido dentro de la celda bordeada
+      };
+    };
+
+    // Función para crear una CELDA con el contenido del campo y sus bordes
+    const createFieldCell = (
+      label: string,
+      value: string,
+      labelStyle?: any,
+      valueStyle?: any,
+    ): any => {
+      return {
+        stack: createFieldContent(label, value, labelStyle, valueStyle).stack, // Tomamos el stack de la función anterior
+        margin: createFieldContent(label, value).margin, // Y su margin para el padding interno
+        border: fieldBorders,
+        borderColor: [
+          fieldBorderColor,
+          fieldBorderColor,
+          fieldBorderColor,
+          fieldBorderColor,
+        ],
+        lineWidth: fieldLineWidth, // No es una propiedad directa de TableCell, se controla por layout.
+        // Lo controlaremos con hLineWidth y vLineWidth en el layout de la tabla contenedora.
+      };
+    };
+
+    const documentDefinition: TDocumentDefinitions = {
+      pageSize: { width: pageSizeInPoints, height: pageSizeInPoints },
+      pageMargins: [30, 30, 30, 30],
+      defaultStyle: {
+        font: 'Roboto',
+        fontSize: 8,
+        lineHeight: 1.2,
+        color: '#000000',
+      },
       content: [
-        // --- Información del Envío ---
-        {
-          style: 'infoSection',
-          margin: [0, 55, 0, 10], // Margen para todo el contenido del header
+        // {
+        //   text: `PEDIDO N°: ${getValue(order.code, 'N/D')}`,
+        //   style: 'orderTitleRef',
+        //   alignment: 'center',
+        //   margin: [0, 0, 0, 10],
+        // },
 
+        // --- Filas de Información usando Tablas para el Layout ---
+        // Cada tabla representa una "fila" de campos de tu imagen
+        {
           table: {
-            widths: ['auto', '*'], // Primera columna se ajusta, segunda ocupa el resto
+            widths: ['*', '*'], // Anchos para las celdas en esta fila
             body: [
-              // Fila 1
               [
-                { text: 'Tipo de Envío:', style: 'label' },
-                {
-                  text: getValue(order.shipment_type).toUpperCase(),
-                  style: 'value',
-                },
-              ],
-              // Fila 2
-              [
-                { text: 'Fecha Entrega Prog.:', style: 'label' },
-                {
-                  text: formatDate(order.delivery_date),
-                  style: 'valueImportant',
-                },
+                createFieldCell(
+                  'REMITENTE',
+                  getValue(order.company.username, 'TU EMPRESA'),
+                ),
+                createFieldCell('DESTINATARIO', getValue(order.recipient_name)),
               ],
             ],
           },
-          layout: 'noBorders', // Sin bordes para esta tabla de layout
+          // El layout de la tabla contenedora de la fila NO debe tener bordes,
+          // ya que los bordes los aplicamos a cada CELDA individual.
+          layout: {
+            defaultBorder: false, // Sin bordes para la tabla contenedora en sí
+            // Los siguientes son para las CELDAS DENTRO de esta tabla si no se especifica un layout en la celda
+            hLineWidth: (i, node) => 0.5, // Grosor de línea horizontal
+            vLineWidth: (i, node) => 0.5, // Grosor de línea vertical
+            hLineColor: (i, node) => '#000000', // Color de línea
+            vLineColor: (i, node) => '#000000', // Color de línea
+            paddingTop: () => 0, // El padding ya está en el createFieldContent
+            paddingBottom: () => 0,
+            paddingLeft: () => 0,
+            paddingRight: () => 0,
+          },
+          margin: [0, 0, 0, 2], // Margen entre "filas" de campos
         },
-
-        // --- Información del Destinatario ---
-        { text: 'DESTINATARIO', style: 'sectionTitle', margin: [0, 20, 0, 8] },
         {
-          style: 'infoSection',
           table: {
-            widths: ['auto', '*'],
+            widths: ['32%', '32%', '36%'],
             body: [
               [
-                { text: 'Nombre:', style: 'label' },
-                { text: getValue(order.recipient_name), style: 'value' },
-              ],
-              [
-                { text: 'Teléfono:', style: 'label' },
-                { text: getValue(order.recipient_phone), style: 'value' },
-              ],
-              [
-                { text: 'Distrito:', style: 'label' },
-                {
-                  text: getValue(order.delivery_district_name).toUpperCase(),
-                  style: 'value',
-                },
-              ],
-              // Opcional: Dirección completa si es necesaria aunque no la pediste explícitamente para el resumen
-              [
-                { text: 'Dirección:', style: 'label' },
-                { text: getValue(order.delivery_address), style: 'valueSmall' },
+                createFieldCell('TELÉFONO', getValue(order.recipient_phone)),
+                createFieldCell('FECHA', formatDate(order.delivery_date)),
+                createFieldCell('TIPO DE ENVÍO', getValue(order.shipment_type)),
               ],
             ],
           },
-          layout: 'noBorders',
+          layout: {
+            defaultBorder: false,
+            hLineWidth: (i, node) => 0.5,
+            vLineWidth: (i, node) => 0.5,
+            hLineColor: () => '#000000',
+            vLineColor: () => '#000000',
+            paddingTop: () => 0,
+            paddingBottom: () => 0,
+            paddingLeft: () => 0,
+            paddingRight: () => 0,
+          },
+          margin: [0, 5, 0, 2],
         },
-
-        // --- Información de Cobro ---
         {
-          text: 'DETALLES DE COBRO',
-          style: 'sectionTitle',
-          margin: [0, 20, 0, 8],
-        },
-        {
-          style: 'infoSection',
           table: {
-            widths: ['auto', '*'],
+            widths: ['*'],
             body: [
               [
-                { text: 'Monto a Cobrar:', style: 'label' },
-                {
-                  text: formatCurrency(order.amount_to_collect_at_delivery),
-                  style: 'valueHighlight',
-                },
-              ],
-              [
-                { text: 'Método de Pago:', style: 'label' },
-                {
-                  text: getValue(
-                    order.payment_method_for_collection,
-                  ).toUpperCase(),
-                  style: 'value',
-                },
+                createFieldCell(
+                  'DIRECCIÓN DE ENTREGA',
+                  `${getValue(order.delivery_address)} - ${getValue(order.delivery_district_name).toUpperCase()}`,
+                ),
               ],
             ],
           },
-          layout: 'noBorders',
-        },
-
-        // --- Observaciones ---
-        { text: 'OBSERVACIONES', style: 'sectionTitle', margin: [0, 20, 0, 8] },
-        {
-          text: getValue(order.observations, 'Ninguna.'),
-          style: 'paragraph',
-          margin: [0, 0, 0, 20],
-        },
-
-        // --- Usuario que Registró ---
-        {
-          text: 'INFORMACIÓN ADICIONAL',
-          style: 'sectionTitle',
-          margin: [0, 10, 0, 8],
+          layout: {
+            defaultBorder: false,
+            hLineWidth: (i, node) => 0.5,
+            vLineWidth: (i, node) => 0.5,
+            hLineColor: () => '#000000',
+            vLineColor: () => '#000000',
+            paddingTop: () => 0,
+            paddingBottom: () => 0,
+            paddingLeft: () => 0,
+            paddingRight: () => 0,
+          },
+          margin: [0, 5, 0, 2],
         },
         {
-          style: 'infoSection',
           table: {
-            widths: ['auto', '*'],
+            widths: ['*', '*'],
             body: [
               [
-                { text: 'Registrado por:', style: 'label' },
-                { text: userName, style: 'valueSmall' },
+                createFieldCell(
+                  'MÉTODO DE PAGO',
+                  getValue(order.payment_method_for_collection),
+                ),
+                createFieldCell(
+                  'MONTO A COBRAR',
+                  formatCurrency(order.amount_to_collect_at_delivery),
+                  {},
+                  { bold: true },
+                ),
               ],
             ],
           },
-          layout: 'noBorders',
+          layout: {
+            defaultBorder: false,
+            hLineWidth: (i, node) => 0.5,
+            vLineWidth: (i, node) => 0.5,
+            hLineColor: () => '#000000',
+            vLineColor: () => '#000000',
+            paddingTop: () => 0,
+            paddingBottom: () => 0,
+            paddingLeft: () => 0,
+            paddingRight: () => 0,
+          },
+          margin: [0, 5, 0, 2],
+        },
+        {
+          table: {
+            widths: ['*', '*'],
+            body: [
+              [
+                createFieldCell(
+                  'TITULAR DE CUENTA',
+                  getValue(order.company.name_account_number_owner),
+                ),
+                createFieldCell(
+                  'N° CUENTA/REF.',
+                  order.company.owner_bank_account
+                    ? order.company.owner_bank_account
+                    : 'N/A',
+                ),
+              ],
+            ],
+          },
+          layout: {
+            defaultBorder: false,
+            hLineWidth: (i, node) => 0.5,
+            vLineWidth: (i, node) => 0.5,
+            hLineColor: () => '#000000',
+            vLineColor: () => '#000000',
+            paddingTop: () => 0,
+            paddingBottom: () => 0,
+            paddingLeft: () => 0,
+            paddingRight: () => 0,
+          },
+          margin: [0, 5, 0, 10],
+        },
+
+        { text: 'Pedido', style: 'sectionTitleRef', margin: [0, 0, 0, 3] },
+        {
+          table: {
+            widths: ['*', 25, 45, 45],
+            body: productTableBody,
+          },
+          layout: {
+            hLineWidth: (i, node) =>
+              i === 0 ||
+              i === 1 ||
+              i === node.table.body.length - 1 ||
+              i === node.table.body.length
+                ? 0.5
+                : 0.2,
+            vLineWidth: () => 0.5,
+            hLineColor: () => '#000000',
+            vLineColor: () => '#000000',
+            paddingTop: () => 1.5,
+            paddingBottom: () => 1.5,
+            paddingLeft: () => 2,
+            paddingRight: () => 2,
+            fillColor: (rowIndex) =>
+              rowIndex === 0 || rowIndex === productTableBody.length - 1
+                ? '#EAEAEA'
+                : null,
+          },
         },
       ],
 
-      // --- ESTILOS ---
       styles: {
-        headerCompanyNameSmall: {
-          fontSize: 10, // Reducido
-          bold: false, // Quizás no tan bold
-          color: '#455a64', // Mismo color o ligeramente más claro
-        },
-        headerOrderCodeSmall: {
-          fontSize: 10, // Reducido
+        // Los estilos se mantienen como en la versión anterior, ajusta fontSize y margin
+        orderTitleRef: { fontSize: 10, bold: true, alignment: 'center' },
+        fieldLabelRef: { fontSize: 9, bold: true, margin: [0, 0, 0, 0.5] },
+        fieldValueRef: { fontSize: 9, margin: [0, 0.5, 0, 0] }, // Quitamos el margen superior aquí
+        sectionTitleRef: { fontSize: 9, bold: true },
+
+        tableHeaderRef: {
           bold: true,
-          color: '#3498db',
-        },
-        mainTitleInHeader: {
-          fontSize: 18, // O el tamaño que desees para "ORDEN DE SERVICIO"
-          bold: true,
-          color: '#333333',
-          // alignment: 'center', // Ya está en el stack
-        },
-        //
-        headerCompanyName: {
-          fontSize: 14,
-          bold: true,
-          color: '#2c3e50', // Azul oscuro corporativo
-        },
-        headerOrderCode: {
-          fontSize: 12,
-          color: '#3498db', // Azul más brillante
-        },
-        mainTitle: {
-          fontSize: 18,
-          bold: true,
-          color: '#333333',
-        },
-        sectionTitle: {
-          fontSize: 12,
-          bold: true,
-          color: '#2c3e50', // Azul oscuro
-          decoration: 'underline',
-          decorationStyle: 'solid',
-          decorationColor: '#3498db', // Subrayado azul
-          margin: [0, 15, 0, 5], // Espacio antes y después
-        },
-        infoSection: {
-          margin: [0, 0, 0, 10], // Espacio después de cada bloque de información
-        },
-        label: {
-          fontSize: 10,
-          bold: true,
-          color: '#555555',
-          margin: [0, 0, 10, 4], // Margen derecho para separar de valor, y inferior
-          width: 'auto', // Asegura que no se expanda innecesariamente
-        },
-        value: {
-          fontSize: 10,
-          color: '#333333',
-          margin: [0, 0, 0, 4],
-        },
-        valueSmall: {
           fontSize: 9,
-          color: '#444444',
-          margin: [0, 0, 0, 4],
+          color: '#000000',
+          alignment: 'center',
         },
-        valueImportant: {
-          fontSize: 10,
-          bold: true,
-          color: '#e74c3c', // Rojo para destacar
-          margin: [0, 0, 0, 4],
-        },
-        valueHighlight: {
-          fontSize: 12, // Más grande para el monto
-          bold: true,
-          color: '#2980b9', // Azul
-          margin: [0, 0, 0, 4],
-        },
-        paragraph: {
-          fontSize: 10,
-          color: '#444444',
-          lineHeight: 1.3,
-        },
-        smallNote: {
-          fontSize: 8,
-          italics: true,
-          color: '#7f8c8d',
-        },
-        footerText: {
-          fontSize: 8,
-          color: '#AEAEAE', // Gris claro para el pie de página
-        },
-      },
-      defaultStyle: {
-        font: 'Roboto',
-        fontSize: 10, // Tamaño de fuente base
-        lineHeight: 1.2,
+        tableCellRef: { fontSize: 9, alignment: 'center' },
+        tableTotalLabelRef: { bold: true, fontSize: 9, margin: [0, 1, 0, 0] },
+        tableTotalValueRef: { bold: true, fontSize: 9, margin: [0, 1, 0, 0] },
       },
     };
+
+    // async function imageToBase64(imageUrl) {
+    //   try {
+    //     const response = await fetch(imageUrl);
+
+    //     if (!response.ok) {
+    //       throw new Error(`HTTP error! status: ${response.status}`);
+    //     }
+
+    //     const arrayBuffer = await response.arrayBuffer();
+    //     const buffer = Buffer.from(new Uint8Array(arrayBuffer));
+    //     const base64String = buffer.toString('base64');
+    //     const contentType = response.headers.get('content-type') || 'image/png';
+
+    //     return `data:${contentType};base64,${base64String}`;
+    //   } catch (error) {
+    //     console.error('Error fetching image:', error);
+    //     return null;
+    //   }
+    // }
+
+    // // --- Helpers ---
+    // const formatDate = (dateInput: string | Date | undefined): string => {
+    //   if (!dateInput) return 'No especificada';
+    //   try {
+    //     const date =
+    //       typeof dateInput === 'string' &&
+    //       !dateInput.includes('T') &&
+    //       dateInput.match(/^\d{4}-\d{2}-\d{2}$/)
+    //         ? new Date(dateInput + 'T00:00:00Z') // Asumir UTC si es solo fecha para evitar problemas de zona horaria
+    //         : new Date(dateInput);
+    //     if (isNaN(date.getTime())) return 'Fecha inválida';
+    //     return format(date, 'dd/MM/yyyy');
+    //     // Para formato en español: return format(date, 'P', { locale: es });
+    //   } catch (e) {
+    //     return typeof dateInput === 'string' ? dateInput : 'Fecha inválida';
+    //   }
+    // };
+
+    // const formatCurrency = (amount: number | undefined | null): string => {
+    //   if (amount === null || amount === undefined || isNaN(amount))
+    //     return 'S/ 0.00';
+    //   return `S/ ${Number(amount).toFixed(2)}`;
+    // };
+
+    // const getValue = (value: any, defaultValue: string = 'N/A'): string => {
+    //   if (
+    //     value === null ||
+    //     value === undefined ||
+    //     (typeof value === 'string' && value.trim() === '')
+    //   ) {
+    //     return defaultValue;
+    //   }
+    //   return value.toString().trim();
+    // };
+
+    // const userName = order.user
+    //   ? getValue(order.user.username || order.user.email, 'Sistema')
+    //   : 'Sistema';
+
+    // const LOGO_BASE64_STRING = await imageToBase64(setting?.logo_url);
+    // const documentDefinition: TDocumentDefinitions = {
+    //   pageSize: 'A4',
+    //   pageMargins: [30, 70, 30, 40],
+    //   header: (currentPage: number, pageCount: number) => ({
+    //     margin: [30, 15, 30, 10], // Margen para todo el contenido del header
+    //     table: {
+    //       widths: [60, '*'], // Ancho para el logo, el resto para el texto
+    //       body: [
+    //         [
+    //           {
+    //             image: LOGO_BASE64_STRING,
+    //             width: 60,
+    //             alignment: 'left',
+    //           },
+    //           {
+    //             stack: [
+    //               {
+    //                 text: 'ORDEN DE SERVICIO',
+    //                 style: 'mainTitleInHeader',
+    //                 alignment: 'center',
+    //                 margin: [0, 0, 0, 8],
+    //               },
+    //               {
+    //                 columns: [
+    //                   {
+    //                     text: setting.business_name.toUpperCase(),
+    //                     style: 'headerCompanyNameSmall', // Un estilo ligeramente más pequeño
+    //                     alignment: 'left', // Nombre de empresa a la izquierda de este sub-bloque
+    //                     width: '*', // Que ocupe el espacio necesario
+    //                   },
+    //                   {
+    //                     text: `Pedido N°: ${getValue(order.code, 'N/D')}`,
+    //                     style: 'headerOrderCodeSmall', // Un estilo ligeramente más pequeño
+    //                     alignment: 'right', // N° Pedido a la derecha de este sub-bloque
+    //                     width: 'auto', // Que se ajuste a su contenido
+    //                   },
+    //                 ],
+    //               },
+    //             ],
+    //             margin: [0, 0, 0, 0],
+    //           },
+    //         ],
+    //       ],
+    //     },
+    //     layout: 'noBorders',
+    //   }),
+
+    //   footer: {
+    //     columns: [
+    //       {
+    //         text: `Generado: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`,
+    //         alignment: 'left',
+    //         style: 'footerText',
+    //         margin: [30, 0, 0, 0],
+    //       },
+    //     ],
+    //     margin: [0, 10, 0, 10], // Margen para que no se pegue al borde inferior
+    //   },
+
+    //   content: [
+    //     // --- Información del Envío ---
+    //     {
+    //       style: 'infoSection',
+    //       margin: [0, 55, 0, 10], // Margen para todo el contenido del header
+
+    //       table: {
+    //         widths: ['auto', '*'], // Primera columna se ajusta, segunda ocupa el resto
+    //         body: [
+    //           // Fila 1
+    //           [
+    //             { text: 'Tipo de Envío:', style: 'label' },
+    //             {
+    //               text: getValue(order.shipment_type).toUpperCase(),
+    //               style: 'value',
+    //             },
+    //           ],
+    //           // Fila 2
+    //           [
+    //             { text: 'Fecha Entrega Prog.:', style: 'label' },
+    //             {
+    //               text: formatDate(order.delivery_date),
+    //               style: 'valueImportant',
+    //             },
+    //           ],
+    //         ],
+    //       },
+    //       layout: 'noBorders', // Sin bordes para esta tabla de layout
+    //     },
+
+    //     // --- Información del Destinatario ---
+    //     { text: 'DESTINATARIO', style: 'sectionTitle', margin: [0, 20, 0, 8] },
+    //     {
+    //       style: 'infoSection',
+    //       table: {
+    //         widths: ['auto', '*'],
+    //         body: [
+    //           [
+    //             { text: 'Nombre:', style: 'label' },
+    //             { text: getValue(order.recipient_name), style: 'value' },
+    //           ],
+    //           [
+    //             { text: 'Teléfono:', style: 'label' },
+    //             { text: getValue(order.recipient_phone), style: 'value' },
+    //           ],
+    //           [
+    //             { text: 'Distrito:', style: 'label' },
+    //             {
+    //               text: getValue(order.delivery_district_name).toUpperCase(),
+    //               style: 'value',
+    //             },
+    //           ],
+    //           // Opcional: Dirección completa si es necesaria aunque no la pediste explícitamente para el resumen
+    //           [
+    //             { text: 'Dirección:', style: 'label' },
+    //             { text: getValue(order.delivery_address), style: 'valueSmall' },
+    //           ],
+    //         ],
+    //       },
+    //       layout: 'noBorders',
+    //     },
+
+    //     // --- Información de Cobro ---
+    //     {
+    //       text: 'DETALLES DE COBRO',
+    //       style: 'sectionTitle',
+    //       margin: [0, 20, 0, 8],
+    //     },
+    //     {
+    //       style: 'infoSection',
+    //       table: {
+    //         widths: ['auto', '*'],
+    //         body: [
+    //           [
+    //             { text: 'Monto a Cobrar:', style: 'label' },
+    //             {
+    //               text: formatCurrency(order.amount_to_collect_at_delivery),
+    //               style: 'valueHighlight',
+    //             },
+    //           ],
+    //           [
+    //             { text: 'Método de Pago:', style: 'label' },
+    //             {
+    //               text: getValue(
+    //                 order.payment_method_for_collection,
+    //               ).toUpperCase(),
+    //               style: 'value',
+    //             },
+    //           ],
+    //         ],
+    //       },
+    //       layout: 'noBorders',
+    //     },
+
+    //     // --- Observaciones ---
+    //     { text: 'OBSERVACIONES', style: 'sectionTitle', margin: [0, 20, 0, 8] },
+    //     {
+    //       text: getValue(order.observations, 'Ninguna.'),
+    //       style: 'paragraph',
+    //       margin: [0, 0, 0, 20],
+    //     },
+
+    //     // --- Usuario que Registró ---
+    //     {
+    //       text: 'INFORMACIÓN ADICIONAL',
+    //       style: 'sectionTitle',
+    //       margin: [0, 10, 0, 8],
+    //     },
+    //     {
+    //       style: 'infoSection',
+    //       table: {
+    //         widths: ['auto', '*'],
+    //         body: [
+    //           [
+    //             { text: 'Registrado por:', style: 'label' },
+    //             { text: userName, style: 'valueSmall' },
+    //           ],
+    //         ],
+    //       },
+    //       layout: 'noBorders',
+    //     },
+    //   ],
+
+    //   // --- ESTILOS ---
+    //   styles: {
+    //     headerCompanyNameSmall: {
+    //       fontSize: 10, // Reducido
+    //       bold: false, // Quizás no tan bold
+    //       color: '#455a64', // Mismo color o ligeramente más claro
+    //     },
+    //     headerOrderCodeSmall: {
+    //       fontSize: 10, // Reducido
+    //       bold: true,
+    //       color: '#3498db',
+    //     },
+    //     mainTitleInHeader: {
+    //       fontSize: 18, // O el tamaño que desees para "ORDEN DE SERVICIO"
+    //       bold: true,
+    //       color: '#333333',
+    //       // alignment: 'center', // Ya está en el stack
+    //     },
+    //     //
+    //     headerCompanyName: {
+    //       fontSize: 14,
+    //       bold: true,
+    //       color: '#2c3e50', // Azul oscuro corporativo
+    //     },
+    //     headerOrderCode: {
+    //       fontSize: 12,
+    //       color: '#3498db', // Azul más brillante
+    //     },
+    //     mainTitle: {
+    //       fontSize: 18,
+    //       bold: true,
+    //       color: '#333333',
+    //     },
+    //     sectionTitle: {
+    //       fontSize: 12,
+    //       bold: true,
+    //       color: '#2c3e50', // Azul oscuro
+    //       decoration: 'underline',
+    //       decorationStyle: 'solid',
+    //       decorationColor: '#3498db', // Subrayado azul
+    //       margin: [0, 15, 0, 5], // Espacio antes y después
+    //     },
+    //     infoSection: {
+    //       margin: [0, 0, 0, 10], // Espacio después de cada bloque de información
+    //     },
+    //     label: {
+    //       fontSize: 10,
+    //       bold: true,
+    //       color: '#555555',
+    //       margin: [0, 0, 10, 4], // Margen derecho para separar de valor, y inferior
+    //       width: 'auto', // Asegura que no se expanda innecesariamente
+    //     },
+    //     value: {
+    //       fontSize: 10,
+    //       color: '#333333',
+    //       margin: [0, 0, 0, 4],
+    //     },
+    //     valueSmall: {
+    //       fontSize: 9,
+    //       color: '#444444',
+    //       margin: [0, 0, 0, 4],
+    //     },
+    //     valueImportant: {
+    //       fontSize: 10,
+    //       bold: true,
+    //       color: '#e74c3c', // Rojo para destacar
+    //       margin: [0, 0, 0, 4],
+    //     },
+    //     valueHighlight: {
+    //       fontSize: 12, // Más grande para el monto
+    //       bold: true,
+    //       color: '#2980b9', // Azul
+    //       margin: [0, 0, 0, 4],
+    //     },
+    //     paragraph: {
+    //       fontSize: 10,
+    //       color: '#444444',
+    //       lineHeight: 1.3,
+    //     },
+    //     smallNote: {
+    //       fontSize: 8,
+    //       italics: true,
+    //       color: '#7f8c8d',
+    //     },
+    //     footerText: {
+    //       fontSize: 8,
+    //       color: '#AEAEAE', // Gris claro para el pie de página
+    //     },
+    //   },
+    //   defaultStyle: {
+    //     font: 'Roboto',
+    //     fontSize: 10, // Tamaño de fuente base
+    //     lineHeight: 1.2,
+    //   },
+    // };
 
     // Crear y enviar el PDF
     try {
@@ -824,7 +1182,7 @@ export class OrderPdfGeneratorService {
   ): Promise<void> {
     const order = await this.orderRepository.findOne({
       where: { id: orderId },
-      relations: ['user'], // Cargar la relación con el usuario para obtener el nombre
+      relations: ['user', 'company'], // Cargar la relación con el usuario para obtener el nombre
     });
 
     if (!order) {
@@ -902,13 +1260,13 @@ export class OrderPdfGeneratorService {
     const LOGO_BASE64_STRING = await imageToBase64(setting?.logo_url);
 
     const A4_LANDSCAPE_WIDTH_POINTS = 841.89;
-    const PAGE_MARGIN_HORIZONTAL = 40;
+    const PAGE_MARGIN_HORIZONTAL = 105;
     const CONTENT_WIDTH_TOTAL =
       A4_LANDSCAPE_WIDTH_POINTS - 2 * PAGE_MARGIN_HORIZONTAL;
     // Ajustar LEFT_COLUMN_WIDTH para que sea un poco menos de la mitad para dar un margen
     // o si la línea divisoria se dibuja desde el borde de la celda.
     // Si LEFT_COLUMN_WIDTH es para el contenido DENTRO de los márgenes de la celda de la tabla principal:
-    const LEFT_COLUMN_WIDTH = Math.floor(CONTENT_WIDTH_TOTAL / 2) - 120; // Mitad menos un pequeño margen
+    const LEFT_COLUMN_WIDTH = Math.floor(CONTENT_WIDTH_TOTAL / 2) - 30; // Mitad menos un pequeño margen
     const RIGHT_COLUMN_WIDTH = '*';
 
     const documentDefinition: TDocumentDefinitions = {
@@ -936,7 +1294,7 @@ export class OrderPdfGeneratorService {
                       {
                         stack: [
                           {
-                            text: 'ORDEN DE SERVICIO',
+                            text: 'GUÍA DE ENVÍO',
                             style: 'mainTitleInHeader',
                             alignment: 'center',
                             margin: [0, 0, 0, 8],
@@ -973,43 +1331,40 @@ export class OrderPdfGeneratorService {
         layout: 'noBorders',
       }),
 
-      footer: (currentPage: number, pageCount: number) => ({
-        margin: [PAGE_MARGIN_HORIZONTAL, 10, PAGE_MARGIN_HORIZONTAL, 10],
-        table: {
-          widths: [LEFT_COLUMN_WIDTH, RIGHT_COLUMN_WIDTH],
-          body: [
-            [
-              // Contenido del footer para la columna izquierda
-              {
-                columns: [
-                  // Usar columns para alinear texto a izquierda y derecha en la misma línea
-                  {
-                    text: `Generado: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`,
-                    alignment: 'left',
-                    style: 'footerText',
-                    width: '*', // Ocupa el espacio disponible
-                  },
-                ],
-              },
-              // Columna derecha del footer (vacía)
-              { text: '' },
-            ],
-          ],
-        },
-        layout: 'noBorders',
-      }),
+      // footer: (currentPage: number, pageCount: number) => ({
+      //   margin: [PAGE_MARGIN_HORIZONTAL, 10, PAGE_MARGIN_HORIZONTAL, 10],
+      //   table: {
+      //     widths: [LEFT_COLUMN_WIDTH, RIGHT_COLUMN_WIDTH],
+      //     body: [
+      //       [
+      //         // Contenido del footer para la columna izquierda
+      //         {
+      //           columns: [
+      //             // Usar columns para alinear texto a izquierda y derecha en la misma línea
+      //             {
+      //               text: `Generado: ${format(new Date(), 'dd/MM/yyyy HH:mm')}`,
+      //               alignment: 'left',
+      //               style: 'footerText',
+      //               width: '*', // Ocupa el espacio disponible
+      //             },
+      //           ],
+      //         },
+      //         // Columna derecha del footer (vacía)
+      //         { text: '' },
+      //       ],
+      //     ],
+      //   },
+      //   layout: 'noBorders',
+      // }),
 
       content: [
-        // Tabla principal que divide la página en dos mitades
         {
           table: {
             widths: [LEFT_COLUMN_WIDTH, RIGHT_COLUMN_WIDTH],
             body: [
               [
-                // --- INICIO DEL CONTENIDO DE LA COLUMNA IZQUIERDA ---
                 {
                   stack: [
-                    // Línea divisoria (DEBAJO del header)
                     {
                       canvas: [
                         {
@@ -1042,6 +1397,13 @@ export class OrderPdfGeneratorService {
                             { text: 'Fecha Entrega Prog.:', style: 'label' },
                             {
                               text: formatDate(order.delivery_date),
+                              style: 'valueImportant',
+                            },
+                          ],
+                          [
+                            { text: 'Remitente:', style: 'label' },
+                            {
+                              text: order.company?.username,
                               style: 'valueImportant',
                             },
                           ],
@@ -1186,47 +1548,55 @@ export class OrderPdfGeneratorService {
       ],
 
       styles: {
-        headerCompanyNameSmall: { fontSize: 10, color: '#455a64' },
-        headerOrderCodeSmall: { fontSize: 10, bold: true, color: '#3498db' },
+        headerCompanyNameSmall: {
+          fontSize: 10,
+          // color: '#455a64'
+        },
+        headerOrderCodeSmall: {
+          fontSize: 12,
+          bold: true,
+          // color: '#3498db'
+        },
         mainTitleInHeader: { fontSize: 18, bold: true, color: '#333333' },
         // headerCompanyName: { fontSize: 14, bold: true, color: '#2c3e50' }, // Se usa Small ahora
         // headerOrderCode: { fontSize: 12, color: '#3498db' }, // Se usa Small ahora
         // mainTitle: { fontSize: 18, bold: true, color: '#333333' }, // Se usa InHeader ahora
         sectionTitle: {
-          fontSize: 11, // Ligeramente más pequeño para caber más
+          fontSize: 12, // Ligeramente más pequeño para caber más
           bold: true,
-          color: '#2c3e50',
-          decoration: 'underline',
-          decorationStyle: 'solid',
-          decorationColor: '#3498db',
+          // color: '#2c3e50',
+          // decoration: 'underline',
+          // decorationStyle: 'solid',
+          // decorationColor: '#3498db',
           margin: [0, 10, 0, 5], // Reducidos márgenes verticales
         },
         infoSection: {
           margin: [0, 0, 0, 8], // Reducido margen inferior
         },
         label: {
-          fontSize: 9, // Ligeramente más pequeño
+          fontSize: 14, // Ligeramente más pequeño
           bold: true,
           color: '#555555',
-          margin: [0, 0, 8, 3], // Reducidos márgenes
-          width: 'auto',
+          // margin: [0, 0, 8, 3], // Reducidos márgenes
+          width: '400px',
         },
-        value: { fontSize: 9, color: '#333333', margin: [0, 0, 0, 3] }, // Ligeramente más pequeño
-        valueSmall: { fontSize: 8, color: '#444444', margin: [0, 0, 0, 3] }, // Ligeramente más pequeño
+        value: { fontSize: 14, color: '#333333', margin: [0, 0, 0, 3] }, // Ligeramente más pequeño
+        valueSmall: { fontSize: 14, color: '#444444', margin: [0, 0, 0, 3] }, // Ligeramente más pequeño
         valueImportant: {
-          fontSize: 9,
+          fontSize: 14,
+          // width: 200,
           bold: true,
-          color: '#e74c3c',
+          // color: '#e74c3c',
           margin: [0, 0, 0, 3],
         },
         valueHighlight: {
-          fontSize: 11,
+          fontSize: 14,
           bold: true,
-          color: '#2980b9',
+          // color: '#2980b9',
           margin: [0, 0, 0, 3],
         },
         paragraph: {
-          fontSize: 9,
+          fontSize: 12,
           color: '#444444',
           lineHeight: 1.2,
           margin: [0, 0, 0, 10],
@@ -1276,7 +1646,7 @@ export class OrderPdfGeneratorService {
   ): Promise<void> {
     const order = await this.orderRepository.findOne({
       where: { id: orderId },
-      relations: ['user'], // Cargar la relación con el usuario para obtener el nombre
+      relations: ['user', 'company'], // Cargar la relación con el usuario para obtener el nombre
     });
 
     if (!order) {
@@ -1356,7 +1726,7 @@ export class OrderPdfGeneratorService {
 
     // --- Constantes para el ticket ---
     const TICKET_WIDTH_MM = 80;
-    const TICKET_MARGIN_MM = 7; // Margen a cada lado
+    const TICKET_MARGIN_MM = 13; // Margen a cada lado
     const MM_TO_POINTS = 2.834645669; // 1mm = 2.8346... pt (aproximado)
 
     const TICKET_PAGE_WIDTH_PT = TICKET_WIDTH_MM * MM_TO_POINTS;
@@ -1374,7 +1744,7 @@ export class OrderPdfGeneratorService {
       content: [
         {
           image: LOGO_BASE64_STRING, // Tu logo, asegúrate que sea pequeño y simple
-          width: 60, // Ajusta el ancho de tu logo para que quepa bien
+          width: 70, // Ajusta el ancho de tu logo para que quepa bien
           alignment: 'center',
           margin: [0, 0, 0, 5], // Margen inferior después del logo
         },
@@ -1430,6 +1800,10 @@ export class OrderPdfGeneratorService {
         {
           text: `Fecha Entrega Prog.: ${formatDate(order.delivery_date)}`,
           style: 'ticketDetailImportant',
+        },
+        {
+          text: `Remitente: ${order.company.username}`,
+          style: 'ticketDetail',
         },
 
         // --- DESTINATARIO ---
@@ -1533,7 +1907,7 @@ export class OrderPdfGeneratorService {
           margin: [0, 0, 0, 1],
         },
         ticketSeparator: {
-          fontSize: 8,
+          fontSize: 12,
           margin: [0, 2, 0, 2],
           color: '#555555',
         },
@@ -1550,11 +1924,11 @@ export class OrderPdfGeneratorService {
         ticketSectionTitle: {
           fontSize: 9,
           bold: true,
-          // textDecoration: 'underline', // Opcional
+          textDecoration: 'underline', // Opcional
           margin: [0, 5, 0, 1], // Espacio antes del título de sección
         },
         ticketDetail: {
-          fontSize: 8,
+          fontSize: 9,
           margin: [0, 0, 0, 2], // Espacio entre líneas de detalle
           lineHeight: 1.1,
         },
@@ -1591,7 +1965,7 @@ export class OrderPdfGeneratorService {
       },
       defaultStyle: {
         font: 'Roboto', // O una fuente monoespaciada si se ve mejor en ticketera
-        fontSize: 8, // Tamaño de fuente base muy pequeño para tickets
+        fontSize: 10, // Tamaño de fuente base muy pequeño para tickets
         color: '#000000', // Texto negro por defecto
         lineHeight: 1, // Interlineado compacto
       },

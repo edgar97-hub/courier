@@ -18,12 +18,8 @@
     <!-- ID Column -->
     <ng-container matColumnDef="code">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>N° Pedido</th>
-      <td mat-cell *matCellDef="let order" class="code-cell">
-        <a
-          (click)="onViewOrderDetails(order)"
-          matTooltip="Ver detalles del pedido"
-          >{{ order.code }}</a
-        >
+      <td mat-cell *matCellDef="let order" class="">
+        {{ order.code }}
       </td>
     </ng-container>
 
@@ -127,7 +123,9 @@
         <button
           mat-menu-item
           (click)="onViewOrderDetails(order)"
-          *ngIf="order.product_delivery_photo_url"
+          [style.visibility]="
+            order.product_delivery_photo_url ? 'visible' : 'hidden'
+          "
         >
           <mat-icon>photo</mat-icon>
         </button>
@@ -135,7 +133,9 @@
         <button
           mat-menu-item
           (click)="onViewPdf(order)"
-          *ngIf="order.product_delivery_photo_url"
+          [style.visibility]="
+            order.product_delivery_photo_url ? 'visible' : 'hidden'
+          "
         >
           <mat-icon>download</mat-icon>
         </button>

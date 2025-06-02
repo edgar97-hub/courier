@@ -42,7 +42,11 @@ import { environment } from '../../../../../environments/environment';
               src="{{ logoImageUrl }}"
               style="max-width: 100px; border: 0px solid black"
             /> -->
-            <mat-card-title style="margin-top: 10px"
+            <mat-card-title
+              style="margin-top: 10px;
+            color: #012147;
+            font-family: Montserrat, sans-serif !important;
+            "
               >Regístrate gratis</mat-card-title
             >
           </div>
@@ -91,8 +95,7 @@ import { environment } from '../../../../../environments/environment';
             </mat-form-field>
             <button
               mat-flat-button
-              color="primary"
-              class="full-width"
+              class="full-width btn-corp-primary"
               type="submit"
               [disabled]="isLoading || registerForm.invalid"
             >
@@ -102,7 +105,9 @@ import { environment } from '../../../../../environments/environment';
         </mat-card-content>
         <mat-card-actions class="auth-card-actions">
           <p>
-            ¿Ya tienes una cuenta?<a routerLink="/login"> Iniciar sesión</a>
+            ¿Ya tienes una cuenta?<a style="color: #012147" routerLink="/login">
+              Iniciar sesión</a
+            >
           </p>
         </mat-card-actions>
       </mat-card>

@@ -28,12 +28,12 @@ export interface ConfirmDialogData {
       <p>{{ data.message }}</p>
     </mat-dialog-content>
     <mat-dialog-actions align="end" class="dialog-actions">
-      <button mat-stroked-button (click)="onDismiss()">
+      <button mat-stroked-button (click)="onDismiss()" class="btn-corp-secondary">
         {{ data.cancelText || 'Cancel' }}
       </button>
       <button
         mat-flat-button
-        color="warn"
+        class="btn-corp-primary"
         (click)="onConfirm()"
         cdkFocusInitial
       >

@@ -184,6 +184,10 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
           precio = tarifa?.price || 0;
         }
       }
+
+      if (precio === 0) {
+        alert('No existe tarifa de envío asociada a ese distrito con ese peso');
+      }
       console.log('peso_cobrado', peso_cobrado);
       console.log('precio', precio);
       this.shippingCostCalculated.set(precio);

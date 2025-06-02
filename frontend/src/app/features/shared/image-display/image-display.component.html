@@ -26,13 +26,19 @@
 
   <!-- La Imagen (se muestra solo si hay URL y no hay error, o después de cargar) -->
   @if (processedImageUrl() && !hasError()) {
-  <div class="button-container">
+  <div style="border: 0px solid black">
     <button
-      mat-flat-button
-      class="btn-corp-primary"
+      mat-button
+      class="btn-corp-primary image-button"
+      style="
+        background-color: #f97c06;
+        color: aliceblue;
+        font-family: Montserrat;
+        border-radius: 9px;
+      "
       (click)="openImageDialog()"
     >
-      Ver Imagen
+      Ver Tarifa
     </button>
   </div>
   }

@@ -639,13 +639,7 @@ let OrdersService = class OrdersService {
                     updatedAt: (0, typeorm_2.Between)(todayStart, todayEnd),
                 },
             });
-            const cancelledToday = await this.orderRepository.count({
-                where: {
-                    status: roles_1.STATES.CANCELED,
-                    updatedAt: (0, typeorm_2.Between)(todayStart, todayEnd),
-                },
-            });
-            const ordersWithIssuesToday = rejectedToday + cancelledToday;
+            const ordersWithIssuesToday = rejectedToday;
             const relevantStatusesForDistribution = [
                 roles_1.STATES.REGISTERED,
                 roles_1.STATES.IN_WHAREHOUSE,

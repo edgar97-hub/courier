@@ -78,6 +78,7 @@ export class RescheduleOrderDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: RescheduleOrderDialogData
   ) {
     // Establecer la fecha mínima para reprogramar (ej. mañana)
+
     this.minDateForReschedule = this.data.minDate || new Date();
     if (!this.data.minDate) {
       // Si no se provee, por defecto mañana

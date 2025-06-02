@@ -187,6 +187,7 @@ import { MenuItem } from '../menu-items';
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    
   }
 
   .expand-indicator mat-icon,
@@ -207,7 +208,8 @@ import { MenuItem } from '../menu-items';
 
     .menu-item-icon, .menu-item-label {
       color: #f97c06; // Color primario
-      font-weight: 500;
+            font-weight: 700;
+
     }
   }
 

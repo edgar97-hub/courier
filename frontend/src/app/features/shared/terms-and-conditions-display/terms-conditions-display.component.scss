@@ -9,7 +9,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  border-radius: 8px; // Bordes suaves
+   border-radius: 0px !important; // Bordes suaves
   // background-color: #ffffff; // Fondo blanco ya es por defecto para mat-card
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06); // Sombra moderna
   overflow: hidden; // Importante para que el iframe no rompa los bordes redondeados
@@ -17,8 +17,9 @@
 
 .pdf-card-header {
   // background-color: #d32f2f; // Rojo similar al de tu imagen (ajusta el tono)
-  background-color: #67c1f6; // Un rojo un poco más oscuro (Material Red 700)
-  color: white;
+
+  color: #f7f8fe;
+  background-color: #012147;
   padding: 16px 24px; // Buen padding
   // border-bottom: 1px solid rgba(0,0,0,0.12); // Opcional: si quieres un separador
   // No necesitas flex aquí si mat-card-header ya lo maneja bien.
@@ -88,7 +89,7 @@
   padding: 20px;
   text-align: center;
   box-sizing: border-box;
-  border-radius: 0 0 8px 8px; // Aplicar bordes redondeados abajo si el header tiene arriba
+  border-radius: 0px !important; // Aplicar bordes redondeados abajo si el header tiene arriba
 
   p {
     margin-top: 16px;

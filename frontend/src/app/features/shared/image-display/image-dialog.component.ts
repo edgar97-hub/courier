@@ -11,8 +11,10 @@ import { MatButtonModule } from '@angular/material/button';
       [alt]="data.altText"
       style="width: 100%; height: auto;"
     />
-    <div mat-dialog-actions>
-      <button mat-button (click)="onNoClick()">Close</button>
+    <div mat-dialog-actions style="display: flex;justify-content:center;">
+      <button mat-button (click)="onNoClick()" class="btn-corp-primary">
+        Cerrar
+      </button>
     </div>
   `,
   styles: [

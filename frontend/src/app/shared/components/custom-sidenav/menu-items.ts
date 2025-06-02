@@ -55,7 +55,7 @@ export const menuItems: MenuItem[] = [
       },
       {
         icon: 'settings_applications',
-        label: 'ditritos',
+        label: 'Distritos',
         route: 'districts',
       },
     ],
@@ -90,13 +90,13 @@ export const menuItems: MenuItem[] = [
     icon: 'list_alt',
     label: 'Pedidos entregados',
     route: 'orders-delivered',
-    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'EMPRESA', 'RECEPCIONISTA'],
+    roles: ['ADMINISTRADOR', 'EMPRESA', 'RECEPCIONISTA'],
   },
   {
     icon: 'analytics',
     label: 'Reportes',
     route: 'lista-cierre-caja',
-    roles: ['ADMINISTRADOR', 'MOTORIZADO', 'EMPRESA', 'RECEPCIONISTA'],
+    roles: ['ADMINISTRADOR', 'EMPRESA', 'RECEPCIONISTA'],
   },
   {
     icon: 'calculate',

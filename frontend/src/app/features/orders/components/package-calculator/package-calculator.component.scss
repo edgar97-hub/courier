@@ -28,7 +28,7 @@ mat-radio-group {
 .custom-dimensions-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); // Responsivo
-  gap: 16px;
+  gap: 30px;
   margin-top: 16px;
   align-items: start; // Alinear campos si tienen diferente altura de error
 }

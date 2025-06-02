@@ -9,7 +9,7 @@
     <span class="order-code-chip"
       >Pedido N°: {{ data.order.code || data.order.id }}</span
     >
-    <button
+    <!-- <button
       mat-icon-button
       class="close-button"
       (click)="onCancel()"
@@ -17,7 +17,7 @@
       matTooltip="Cerrar"
     >
       <mat-icon>close</mat-icon>
-    </button>
+    </button> -->
   </div>
 
   <form [formGroup]="rescheduleForm" (ngSubmit)="onConfirm()">

@@ -96,7 +96,7 @@ export class UserListPageComponent implements OnInit, OnDestroy {
       width: '350px',
       data: {
         title: 'Confirm Delete',
-        message: `Are you sure you want to delete user "${user.username}" (ID: ${user.id})? This action cannot be undone.`,
+        message: `¿Estás seguro que deseas eliminar el usuario "${user.username}" (codigo: ${user.code})? Esta acción no se puede deshacer.`,
       },
     });
 

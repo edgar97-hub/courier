@@ -382,7 +382,7 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
     async streamOrderPdfToResponse(orderId, req, res) {
         const order = await this.orderRepository.findOne({
             where: { id: orderId },
-            relations: ['user'],
+            relations: ['user', 'company'],
         });
         if (!order) {
             throw new common_1.NotFoundException(`Pedido con ID ${orderId} no encontrado.`);
@@ -396,46 +396,25 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
         if (!setting) {
             throw new common_1.NotFoundException(`empresa no encontrado`);
         }
-        async function imageToBase64(imageUrl) {
-            try {
-                const response = await (0, node_fetch_1.default)(imageUrl);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const arrayBuffer = await response.arrayBuffer();
-                const buffer = Buffer.from(new Uint8Array(arrayBuffer));
-                const base64String = buffer.toString('base64');
-                const contentType = response.headers.get('content-type') || 'image/png';
-                return `data:${contentType};base64,${base64String}`;
-            }
-            catch (error) {
-                console.error('Error fetching image:', error);
-                return null;
-            }
-        }
         const formatDate = (dateInput) => {
             if (!dateInput)
-                return 'No especificada';
+                return 'N/A';
             try {
-                const date = typeof dateInput === 'string' &&
-                    !dateInput.includes('T') &&
-                    dateInput.match(/^\d{4}-\d{2}-\d{2}$/)
-                    ? new Date(dateInput + 'T00:00:00Z')
-                    : new Date(dateInput);
+                const date = new Date(dateInput);
                 if (isNaN(date.getTime()))
-                    return 'Fecha inválida';
+                    return typeof dateInput === 'string' ? dateInput : 'Inválida';
                 return (0, date_fns_1.format)(date, 'dd/MM/yyyy');
             }
             catch (e) {
-                return typeof dateInput === 'string' ? dateInput : 'Fecha inválida';
+                return typeof dateInput === 'string' ? dateInput : 'Inválida';
             }
         };
-        const formatCurrency = (amount) => {
+        const formatCurrency = (amount, currencySymbol = 'S/ ') => {
             if (amount === null || amount === undefined || isNaN(amount))
-                return 'S/ 0.00';
-            return `S/ ${Number(amount).toFixed(2)}`;
+                return `${currencySymbol}0.00`;
+            return `${currencySymbol}${Number(amount).toFixed(2)}`;
         };
-        const getValue = (value, defaultValue = 'N/A') => {
+        const getValue = (value, defaultValue = '') => {
             if (value === null ||
                 value === undefined ||
                 (typeof value === 'string' && value.trim() === '')) {
@@ -443,264 +422,268 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
             }
             return value.toString().trim();
         };
-        const userName = order.user
-            ? getValue(order.user.username || order.user.email, 'Sistema')
-            : 'Sistema';
-        const LOGO_BASE64_STRING = await imageToBase64(setting?.logo_url);
-        const documentDefinition = {
-            pageSize: 'A4',
-            pageMargins: [30, 70, 30, 40],
-            header: (currentPage, pageCount) => ({
-                margin: [30, 15, 30, 10],
-                table: {
-                    widths: [60, '*'],
-                    body: [
-                        [
-                            {
-                                image: LOGO_BASE64_STRING,
-                                width: 60,
-                                alignment: 'left',
-                            },
-                            {
-                                stack: [
-                                    {
-                                        text: 'ORDEN DE SERVICIO',
-                                        style: 'mainTitleInHeader',
-                                        alignment: 'center',
-                                        margin: [0, 0, 0, 8],
-                                    },
-                                    {
-                                        columns: [
-                                            {
-                                                text: setting.business_name.toUpperCase(),
-                                                style: 'headerCompanyNameSmall',
-                                                alignment: 'left',
-                                                width: '*',
-                                            },
-                                            {
-                                                text: `Pedido N°: ${getValue(order.code, 'N/D')}`,
-                                                style: 'headerOrderCodeSmall',
-                                                alignment: 'right',
-                                                width: 'auto',
-                                            },
-                                        ],
-                                    },
-                                ],
-                                margin: [0, 0, 0, 0],
-                            },
-                        ],
-                    ],
+        const pageSizeInPoints = 140 * 2.83465;
+        const remittanceName = getValue(order.company.username, 'TU EMPRESA');
+        const productTableBody = [
+            [
+                { text: 'Producto', style: 'tableHeaderRef', fillColor: '#EAEAEA' },
+                {
+                    text: 'Cant.',
+                    style: 'tableHeaderRef',
+                    alignment: 'center',
+                    fillColor: '#EAEAEA',
                 },
-                layout: 'noBorders',
-            }),
-            footer: {
-                columns: [
+                {
+                    text: 'Precio unitario',
+                    style: 'tableHeaderRef',
+                    alignment: 'right',
+                    fillColor: '#EAEAEA',
+                },
+                {
+                    text: 'Precio',
+                    style: 'tableHeaderRef',
+                    alignment: 'right',
+                    fillColor: '#EAEAEA',
+                },
+            ],
+            [
+                {
+                    text: getValue(order.item_description || order.delivery_district_name, 'Servicio Courier'),
+                    style: 'tableCellRef',
+                },
+                { text: '1', style: 'tableCellRef', alignment: 'center' },
+                {
+                    text: formatCurrency(order.shipping_cost),
+                    style: 'tableCellRef',
+                    alignment: 'right',
+                },
+                {
+                    text: formatCurrency(order.shipping_cost),
+                    style: 'tableCellRef',
+                    alignment: 'right',
+                },
+            ],
+        ];
+        productTableBody.push([
+            { text: '', border: [true, true, true, true], fillColor: '#EAEAEA' },
+            { text: '', border: [true, true, true, true], fillColor: '#EAEAEA' },
+            {
+                text: 'Total',
+                style: 'tableTotalLabelRef',
+                alignment: 'right',
+                fillColor: '#EAEAEA',
+                border: [true, true, true, true],
+            },
+            {
+                text: formatCurrency(order.shipping_cost),
+                style: 'tableTotalValueRef',
+                alignment: 'right',
+                fillColor: '#EAEAEA',
+                border: [true, true, true, true],
+            },
+        ]);
+        const fieldBorders = [
+            true,
+            true,
+            true,
+            true,
+        ];
+        const fieldBorderColor = '#000000';
+        const fieldLineWidth = 0.5;
+        const createFieldContent = (label, value, labelStyle, valueStyle) => {
+            return {
+                stack: [
                     {
-                        text: `Generado: ${(0, date_fns_1.format)(new Date(), 'dd/MM/yyyy HH:mm')}`,
-                        alignment: 'left',
-                        style: 'footerText',
-                        margin: [30, 0, 0, 0],
+                        text: label.toUpperCase(),
+                        style: ['fieldLabelRef', labelStyle || {}],
+                        margin: [0, 0, 0, 0.5],
                     },
+                    { text: getValue(value), style: ['fieldValueRef', valueStyle || {}] },
                 ],
-                margin: [0, 10, 0, 10],
+                margin: [2, 1.5, 2, 1.5],
+            };
+        };
+        const createFieldCell = (label, value, labelStyle, valueStyle) => {
+            return {
+                stack: createFieldContent(label, value, labelStyle, valueStyle).stack,
+                margin: createFieldContent(label, value).margin,
+                border: fieldBorders,
+                borderColor: [
+                    fieldBorderColor,
+                    fieldBorderColor,
+                    fieldBorderColor,
+                    fieldBorderColor,
+                ],
+                lineWidth: fieldLineWidth,
+            };
+        };
+        const documentDefinition = {
+            pageSize: { width: pageSizeInPoints, height: pageSizeInPoints },
+            pageMargins: [30, 30, 30, 30],
+            defaultStyle: {
+                font: 'Roboto',
+                fontSize: 8,
+                lineHeight: 1.2,
+                color: '#000000',
             },
             content: [
                 {
-                    style: 'infoSection',
-                    margin: [0, 55, 0, 10],
                     table: {
-                        widths: ['auto', '*'],
+                        widths: ['*', '*'],
                         body: [
                             [
-                                { text: 'Tipo de Envío:', style: 'label' },
-                                {
-                                    text: getValue(order.shipment_type).toUpperCase(),
-                                    style: 'value',
-                                },
-                            ],
-                            [
-                                { text: 'Fecha Entrega Prog.:', style: 'label' },
-                                {
-                                    text: formatDate(order.delivery_date),
-                                    style: 'valueImportant',
-                                },
+                                createFieldCell('REMITENTE', getValue(order.company.username, 'TU EMPRESA')),
+                                createFieldCell('DESTINATARIO', getValue(order.recipient_name)),
                             ],
                         ],
                     },
-                    layout: 'noBorders',
+                    layout: {
+                        defaultBorder: false,
+                        hLineWidth: (i, node) => 0.5,
+                        vLineWidth: (i, node) => 0.5,
+                        hLineColor: (i, node) => '#000000',
+                        vLineColor: (i, node) => '#000000',
+                        paddingTop: () => 0,
+                        paddingBottom: () => 0,
+                        paddingLeft: () => 0,
+                        paddingRight: () => 0,
+                    },
+                    margin: [0, 0, 0, 2],
                 },
-                { text: 'DESTINATARIO', style: 'sectionTitle', margin: [0, 20, 0, 8] },
                 {
-                    style: 'infoSection',
                     table: {
-                        widths: ['auto', '*'],
+                        widths: ['32%', '32%', '36%'],
                         body: [
                             [
-                                { text: 'Nombre:', style: 'label' },
-                                { text: getValue(order.recipient_name), style: 'value' },
-                            ],
-                            [
-                                { text: 'Teléfono:', style: 'label' },
-                                { text: getValue(order.recipient_phone), style: 'value' },
-                            ],
-                            [
-                                { text: 'Distrito:', style: 'label' },
-                                {
-                                    text: getValue(order.delivery_district_name).toUpperCase(),
-                                    style: 'value',
-                                },
-                            ],
-                            [
-                                { text: 'Dirección:', style: 'label' },
-                                { text: getValue(order.delivery_address), style: 'valueSmall' },
+                                createFieldCell('TELÉFONO', getValue(order.recipient_phone)),
+                                createFieldCell('FECHA', formatDate(order.delivery_date)),
+                                createFieldCell('TIPO DE ENVÍO', getValue(order.shipment_type)),
                             ],
                         ],
                     },
-                    layout: 'noBorders',
+                    layout: {
+                        defaultBorder: false,
+                        hLineWidth: (i, node) => 0.5,
+                        vLineWidth: (i, node) => 0.5,
+                        hLineColor: () => '#000000',
+                        vLineColor: () => '#000000',
+                        paddingTop: () => 0,
+                        paddingBottom: () => 0,
+                        paddingLeft: () => 0,
+                        paddingRight: () => 0,
+                    },
+                    margin: [0, 5, 0, 2],
                 },
                 {
-                    text: 'DETALLES DE COBRO',
-                    style: 'sectionTitle',
-                    margin: [0, 20, 0, 8],
-                },
-                {
-                    style: 'infoSection',
                     table: {
-                        widths: ['auto', '*'],
+                        widths: ['*'],
                         body: [
                             [
-                                { text: 'Monto a Cobrar:', style: 'label' },
-                                {
-                                    text: formatCurrency(order.amount_to_collect_at_delivery),
-                                    style: 'valueHighlight',
-                                },
-                            ],
-                            [
-                                { text: 'Método de Pago:', style: 'label' },
-                                {
-                                    text: getValue(order.payment_method_for_collection).toUpperCase(),
-                                    style: 'value',
-                                },
+                                createFieldCell('DIRECCIÓN DE ENTREGA', `${getValue(order.delivery_address)} - ${getValue(order.delivery_district_name).toUpperCase()}`),
                             ],
                         ],
                     },
-                    layout: 'noBorders',
+                    layout: {
+                        defaultBorder: false,
+                        hLineWidth: (i, node) => 0.5,
+                        vLineWidth: (i, node) => 0.5,
+                        hLineColor: () => '#000000',
+                        vLineColor: () => '#000000',
+                        paddingTop: () => 0,
+                        paddingBottom: () => 0,
+                        paddingLeft: () => 0,
+                        paddingRight: () => 0,
+                    },
+                    margin: [0, 5, 0, 2],
                 },
-                { text: 'OBSERVACIONES', style: 'sectionTitle', margin: [0, 20, 0, 8] },
                 {
-                    text: getValue(order.observations, 'Ninguna.'),
-                    style: 'paragraph',
-                    margin: [0, 0, 0, 20],
-                },
-                {
-                    text: 'INFORMACIÓN ADICIONAL',
-                    style: 'sectionTitle',
-                    margin: [0, 10, 0, 8],
-                },
-                {
-                    style: 'infoSection',
                     table: {
-                        widths: ['auto', '*'],
+                        widths: ['*', '*'],
                         body: [
                             [
-                                { text: 'Registrado por:', style: 'label' },
-                                { text: userName, style: 'valueSmall' },
+                                createFieldCell('MÉTODO DE PAGO', getValue(order.payment_method_for_collection)),
+                                createFieldCell('MONTO A COBRAR', formatCurrency(order.amount_to_collect_at_delivery), {}, { bold: true }),
                             ],
                         ],
                     },
-                    layout: 'noBorders',
+                    layout: {
+                        defaultBorder: false,
+                        hLineWidth: (i, node) => 0.5,
+                        vLineWidth: (i, node) => 0.5,
+                        hLineColor: () => '#000000',
+                        vLineColor: () => '#000000',
+                        paddingTop: () => 0,
+                        paddingBottom: () => 0,
+                        paddingLeft: () => 0,
+                        paddingRight: () => 0,
+                    },
+                    margin: [0, 5, 0, 2],
+                },
+                {
+                    table: {
+                        widths: ['*', '*'],
+                        body: [
+                            [
+                                createFieldCell('TITULAR DE CUENTA', getValue(order.company.name_account_number_owner)),
+                                createFieldCell('N° CUENTA/REF.', order.company.owner_bank_account
+                                    ? order.company.owner_bank_account
+                                    : 'N/A'),
+                            ],
+                        ],
+                    },
+                    layout: {
+                        defaultBorder: false,
+                        hLineWidth: (i, node) => 0.5,
+                        vLineWidth: (i, node) => 0.5,
+                        hLineColor: () => '#000000',
+                        vLineColor: () => '#000000',
+                        paddingTop: () => 0,
+                        paddingBottom: () => 0,
+                        paddingLeft: () => 0,
+                        paddingRight: () => 0,
+                    },
+                    margin: [0, 5, 0, 10],
+                },
+                { text: 'Pedido', style: 'sectionTitleRef', margin: [0, 0, 0, 3] },
+                {
+                    table: {
+                        widths: ['*', 25, 45, 45],
+                        body: productTableBody,
+                    },
+                    layout: {
+                        hLineWidth: (i, node) => i === 0 ||
+                            i === 1 ||
+                            i === node.table.body.length - 1 ||
+                            i === node.table.body.length
+                            ? 0.5
+                            : 0.2,
+                        vLineWidth: () => 0.5,
+                        hLineColor: () => '#000000',
+                        vLineColor: () => '#000000',
+                        paddingTop: () => 1.5,
+                        paddingBottom: () => 1.5,
+                        paddingLeft: () => 2,
+                        paddingRight: () => 2,
+                        fillColor: (rowIndex) => rowIndex === 0 || rowIndex === productTableBody.length - 1
+                            ? '#EAEAEA'
+                            : null,
+                    },
                 },
             ],
             styles: {
-                headerCompanyNameSmall: {
-                    fontSize: 10,
-                    bold: false,
-                    color: '#455a64',
-                },
-                headerOrderCodeSmall: {
-                    fontSize: 10,
+                orderTitleRef: { fontSize: 10, bold: true, alignment: 'center' },
+                fieldLabelRef: { fontSize: 9, bold: true, margin: [0, 0, 0, 0.5] },
+                fieldValueRef: { fontSize: 9, margin: [0, 0.5, 0, 0] },
+                sectionTitleRef: { fontSize: 9, bold: true },
+                tableHeaderRef: {
                     bold: true,
-                    color: '#3498db',
-                },
-                mainTitleInHeader: {
-                    fontSize: 18,
-                    bold: true,
-                    color: '#333333',
-                },
-                headerCompanyName: {
-                    fontSize: 14,
-                    bold: true,
-                    color: '#2c3e50',
-                },
-                headerOrderCode: {
-                    fontSize: 12,
-                    color: '#3498db',
-                },
-                mainTitle: {
-                    fontSize: 18,
-                    bold: true,
-                    color: '#333333',
-                },
-                sectionTitle: {
-                    fontSize: 12,
-                    bold: true,
-                    color: '#2c3e50',
-                    decoration: 'underline',
-                    decorationStyle: 'solid',
-                    decorationColor: '#3498db',
-                    margin: [0, 15, 0, 5],
-                },
-                infoSection: {
-                    margin: [0, 0, 0, 10],
-                },
-                label: {
-                    fontSize: 10,
-                    bold: true,
-                    color: '#555555',
-                    margin: [0, 0, 10, 4],
-                    width: 'auto',
-                },
-                value: {
-                    fontSize: 10,
-                    color: '#333333',
-                    margin: [0, 0, 0, 4],
-                },
-                valueSmall: {
                     fontSize: 9,
-                    color: '#444444',
-                    margin: [0, 0, 0, 4],
+                    color: '#000000',
+                    alignment: 'center',
                 },
-                valueImportant: {
-                    fontSize: 10,
-                    bold: true,
-                    color: '#e74c3c',
-                    margin: [0, 0, 0, 4],
-                },
-                valueHighlight: {
-                    fontSize: 12,
-                    bold: true,
-                    color: '#2980b9',
-                    margin: [0, 0, 0, 4],
-                },
-                paragraph: {
-                    fontSize: 10,
-                    color: '#444444',
-                    lineHeight: 1.3,
-                },
-                smallNote: {
-                    fontSize: 8,
-                    italics: true,
-                    color: '#7f8c8d',
-                },
-                footerText: {
-                    fontSize: 8,
-                    color: '#AEAEAE',
-                },
-            },
-            defaultStyle: {
-                font: 'Roboto',
-                fontSize: 10,
-                lineHeight: 1.2,
+                tableCellRef: { fontSize: 9, alignment: 'center' },
+                tableTotalLabelRef: { bold: true, fontSize: 9, margin: [0, 1, 0, 0] },
+                tableTotalValueRef: { bold: true, fontSize: 9, margin: [0, 1, 0, 0] },
             },
         };
         try {
@@ -718,7 +701,7 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
     async streamOrderPdfLandscapeToResponse(orderId, req, res) {
         const order = await this.orderRepository.findOne({
             where: { id: orderId },
-            relations: ['user'],
+            relations: ['user', 'company'],
         });
         if (!order) {
             throw new common_1.NotFoundException(`Pedido con ID ${orderId} no encontrado.`);
@@ -784,9 +767,9 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
             : 'Sistema';
         const LOGO_BASE64_STRING = await imageToBase64(setting?.logo_url);
         const A4_LANDSCAPE_WIDTH_POINTS = 841.89;
-        const PAGE_MARGIN_HORIZONTAL = 40;
+        const PAGE_MARGIN_HORIZONTAL = 105;
         const CONTENT_WIDTH_TOTAL = A4_LANDSCAPE_WIDTH_POINTS - 2 * PAGE_MARGIN_HORIZONTAL;
-        const LEFT_COLUMN_WIDTH = Math.floor(CONTENT_WIDTH_TOTAL / 2) - 120;
+        const LEFT_COLUMN_WIDTH = Math.floor(CONTENT_WIDTH_TOTAL / 2) - 30;
         const RIGHT_COLUMN_WIDTH = '*';
         const documentDefinition = {
             pageSize: 'A4',
@@ -806,7 +789,7 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                                             {
                                                 stack: [
                                                     {
-                                                        text: 'ORDEN DE SERVICIO',
+                                                        text: 'GUÍA DE ENVÍO',
                                                         style: 'mainTitleInHeader',
                                                         alignment: 'center',
                                                         margin: [0, 0, 0, 8],
@@ -834,28 +817,6 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                                     ],
                                 },
                                 layout: 'noBorders',
-                            },
-                            { text: '' },
-                        ],
-                    ],
-                },
-                layout: 'noBorders',
-            }),
-            footer: (currentPage, pageCount) => ({
-                margin: [PAGE_MARGIN_HORIZONTAL, 10, PAGE_MARGIN_HORIZONTAL, 10],
-                table: {
-                    widths: [LEFT_COLUMN_WIDTH, RIGHT_COLUMN_WIDTH],
-                    body: [
-                        [
-                            {
-                                columns: [
-                                    {
-                                        text: `Generado: ${(0, date_fns_1.format)(new Date(), 'dd/MM/yyyy HH:mm')}`,
-                                        alignment: 'left',
-                                        style: 'footerText',
-                                        width: '*',
-                                    },
-                                ],
                             },
                             { text: '' },
                         ],
@@ -901,6 +862,13 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                                                         { text: 'Fecha Entrega Prog.:', style: 'label' },
                                                         {
                                                             text: formatDate(order.delivery_date),
+                                                            style: 'valueImportant',
+                                                        },
+                                                    ],
+                                                    [
+                                                        { text: 'Remitente:', style: 'label' },
+                                                        {
+                                                            text: order.company?.username,
                                                             style: 'valueImportant',
                                                         },
                                                     ],
@@ -1018,44 +986,42 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                 },
             ],
             styles: {
-                headerCompanyNameSmall: { fontSize: 10, color: '#455a64' },
-                headerOrderCodeSmall: { fontSize: 10, bold: true, color: '#3498db' },
+                headerCompanyNameSmall: {
+                    fontSize: 10,
+                },
+                headerOrderCodeSmall: {
+                    fontSize: 12,
+                    bold: true,
+                },
                 mainTitleInHeader: { fontSize: 18, bold: true, color: '#333333' },
                 sectionTitle: {
-                    fontSize: 11,
+                    fontSize: 12,
                     bold: true,
-                    color: '#2c3e50',
-                    decoration: 'underline',
-                    decorationStyle: 'solid',
-                    decorationColor: '#3498db',
                     margin: [0, 10, 0, 5],
                 },
                 infoSection: {
                     margin: [0, 0, 0, 8],
                 },
                 label: {
-                    fontSize: 9,
+                    fontSize: 14,
                     bold: true,
                     color: '#555555',
-                    margin: [0, 0, 8, 3],
-                    width: 'auto',
+                    width: '400px',
                 },
-                value: { fontSize: 9, color: '#333333', margin: [0, 0, 0, 3] },
-                valueSmall: { fontSize: 8, color: '#444444', margin: [0, 0, 0, 3] },
+                value: { fontSize: 14, color: '#333333', margin: [0, 0, 0, 3] },
+                valueSmall: { fontSize: 14, color: '#444444', margin: [0, 0, 0, 3] },
                 valueImportant: {
-                    fontSize: 9,
+                    fontSize: 14,
                     bold: true,
-                    color: '#e74c3c',
                     margin: [0, 0, 0, 3],
                 },
                 valueHighlight: {
-                    fontSize: 11,
+                    fontSize: 14,
                     bold: true,
-                    color: '#2980b9',
                     margin: [0, 0, 0, 3],
                 },
                 paragraph: {
-                    fontSize: 9,
+                    fontSize: 12,
                     color: '#444444',
                     lineHeight: 1.2,
                     margin: [0, 0, 0, 10],
@@ -1084,7 +1050,7 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
     async streamOrderPdf80mmToResponse(orderId, req, res) {
         const order = await this.orderRepository.findOne({
             where: { id: orderId },
-            relations: ['user'],
+            relations: ['user', 'company'],
         });
         if (!order) {
             throw new common_1.NotFoundException(`Pedido con ID ${orderId} no encontrado.`);
@@ -1150,7 +1116,7 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
             ? getValue(order.user.username || order.user.email, 'Sistema')
             : 'Sistema';
         const TICKET_WIDTH_MM = 80;
-        const TICKET_MARGIN_MM = 7;
+        const TICKET_MARGIN_MM = 13;
         const MM_TO_POINTS = 2.834645669;
         const TICKET_PAGE_WIDTH_PT = TICKET_WIDTH_MM * MM_TO_POINTS;
         const TICKET_MARGIN_PT = TICKET_MARGIN_MM * MM_TO_POINTS;
@@ -1162,7 +1128,7 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
             content: [
                 {
                     image: LOGO_BASE64_STRING,
-                    width: 60,
+                    width: 70,
                     alignment: 'center',
                     margin: [0, 0, 0, 5],
                 },
@@ -1216,6 +1182,10 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                 {
                     text: `Fecha Entrega Prog.: ${formatDate(order.delivery_date)}`,
                     style: 'ticketDetailImportant',
+                },
+                {
+                    text: `Remitente: ${order.company.username}`,
+                    style: 'ticketDetail',
                 },
                 {
                     text: 'DESTINATARIO:',
@@ -1306,7 +1276,7 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                     margin: [0, 0, 0, 1],
                 },
                 ticketSeparator: {
-                    fontSize: 8,
+                    fontSize: 12,
                     margin: [0, 2, 0, 2],
                     color: '#555555',
                 },
@@ -1323,10 +1293,11 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                 ticketSectionTitle: {
                     fontSize: 9,
                     bold: true,
+                    textDecoration: 'underline',
                     margin: [0, 5, 0, 1],
                 },
                 ticketDetail: {
-                    fontSize: 8,
+                    fontSize: 9,
                     margin: [0, 0, 0, 2],
                     lineHeight: 1.1,
                 },
@@ -1359,7 +1330,7 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
             },
             defaultStyle: {
                 font: 'Roboto',
-                fontSize: 8,
+                fontSize: 10,
                 color: '#000000',
                 lineHeight: 1,
             },

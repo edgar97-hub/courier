@@ -23,7 +23,7 @@
           mat-stroked-button
           type="button"
           (click)="triggerFileInput()"
-          class="upload-button"
+          class="upload-button btn-corp-primary"
         >
           <mat-icon>photo_camera</mat-icon>
           <span>{{ selectedFile ? "Cambiar Foto" : "Subir Foto" }}</span>
@@ -89,12 +89,15 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end" class="dialog-actions">
-    <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+    <button mat-stroked-button (click)="onCancel()" class="btn-corp-secondary">
+      Cancelar
+    </button>
     <button
       mat-flat-button
       color="primary"
       (click)="onSubmit()"
       [disabled]="isLoading || profileForm.invalid"
+      class="btn-corp-primary"
     >
       {{ isLoading ? "Guardando..." : "Guardar Cambios" }}
     </button>

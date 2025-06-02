@@ -47,6 +47,8 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import localeEsPE from '@angular/common/locales/es-PE';
 import { routes } from './app.routes';
 registerLocaleData(localeEsPE, 'es-PE');
+import { MatPaginatorIntl } from '@angular/material/paginator'; // Importa MatPaginatorIntl
+import { CustomMatPaginatorIntl } from './core/internationalization/custom-mat-paginator-intl'; // Ajusta la rut
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -57,5 +59,6 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     DatePipe,
     { provide: LOCALE_ID, useValue: 'es-PE' },
+    { provide: MatPaginatorIntl, useClass: CustomMatPaginatorIntl },
   ],
 };

@@ -21,11 +21,13 @@
 }
 
 .image-button {
-  font-size: 1.2em;
-  padding: 0.5em 1em;
-  border-radius: 5px;
+  margin-top: 50px;
+  font-size: 1.2em !important;
+  // padding: 0.5em 1em;
+  // border-radius: 5px;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  border: none;
+  // letter-spacing: 1px;
  }
 
 :host {

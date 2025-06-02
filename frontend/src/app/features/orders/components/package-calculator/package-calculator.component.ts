@@ -30,6 +30,8 @@ import {
   ShippingCostResponse,
 } from '../../models/order.model';
 import { OrderService } from '../../services/order.service';
+import { AutoSelectDirective } from '../../../../shared/directives/auto-select.directive';
+
 
 @Component({
   selector: 'app-package-calculator',
@@ -42,6 +44,7 @@ import { OrderService } from '../../services/order.service';
     MatRadioModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    AutoSelectDirective,
   ],
   templateUrl: './package-calculator.component.html',
   styleUrls: ['./package-calculator.component.scss'],
@@ -299,6 +302,10 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
       // console.log('customData.package_weight_kg', customData.package_weight_kg);
       console.log('peso_cobrado', peso_cobrado);
       console.log('precio', precio);
+
+      if (precio === 0) {
+        alert('No existe tarifa de envío asociada a ese distrito con ese peso');
+      }
       this.shippingCostCalculated.emit(precio);
       this.isCalculating.set(false);
       this.calculationLoading.emit(false);

@@ -7,9 +7,16 @@
       <div class="logo-wrapper">
         <img
           src="{{ logoImageUrl }}"
-          style="max-width: 100px; border: 0px solid black"
+          style="width: 200px; border: 0px solid black"
         />
-        <mat-card-title style="margin-top: 10px">Iniciar sesión</mat-card-title>
+        <mat-card-title
+          style="
+            margin-top: 10px;
+            color: #012147;
+            font-family: Montserrat, sans-serif !important;
+          "
+          >Iniciar sesión</mat-card-title
+        >
       </div>
     </mat-card-header>
 
@@ -28,7 +35,9 @@
 
     <mat-card-actions class="login-card-actions">
       <p>
-        ¿No tienes una cuenta?<a routerLink="/register"> Regístrate Aquí</a>
+        ¿No tienes una cuenta?<a style="color: #012147" routerLink="/register">
+          Regístrate Aquí</a
+        >
       </p>
       <!-- <p><a routerLink="/forgot-password">¿Has olvidado tu contraseña?</a></p> -->
     </mat-card-actions>

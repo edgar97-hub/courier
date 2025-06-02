@@ -18,12 +18,8 @@
     <!-- ID Column -->
     <ng-container matColumnDef="code">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>N° Pedido</th>
-      <td mat-cell *matCellDef="let order" class="code-cell">
-        <a
-          (click)="onViewOrderDetails(order)"
-          matTooltip="Ver detalles del pedido"
-          >{{ order.code }}</a
-        >
+      <td mat-cell *matCellDef="let order" class="">
+        {{ order.code }}
       </td>
     </ng-container>
 

@@ -370,7 +370,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     console.log(`Open modal to reschedule order: ${order.code}`);
 
     const minRescheduleDate = new Date();
-    minRescheduleDate.setDate(minRescheduleDate.getDate() + 1);
+    minRescheduleDate.setDate(minRescheduleDate.getDate());
     interface RescheduleOrderDialogResult {
       newDeliveryDate: Date;
       reason: string;

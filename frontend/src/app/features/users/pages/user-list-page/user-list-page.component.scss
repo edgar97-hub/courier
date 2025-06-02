@@ -8,6 +8,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
   margin-bottom: 24px;
   padding-bottom: 16px;
   border-bottom: 1px solid #e0e0e0;
@@ -16,7 +18,6 @@
     margin: 0;
     font-size: 2em; // Más grande
     font-weight: 500; // Un poco de peso
-    color: #3f51b5; // Color primario de Material
   }
 
   button {

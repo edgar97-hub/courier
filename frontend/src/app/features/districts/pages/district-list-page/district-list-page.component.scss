@@ -3,7 +3,7 @@
 }
 
 .page-container {
-    // border: 1px solid black;
+  // border: 1px solid black;
   padding: 28px 32px; // Mayor padding para un look más espacioso
   background-color: var(
     --sys-background,
@@ -15,31 +15,24 @@
 }
 
 .page-header {
-  margin-bottom: 28px; // Mayor separación
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--sys-outline-variant, #e0e0e6);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
 
-  .page-title {
-    // Usar una clase específica para el título
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+
+  h1 {
     margin: 0;
-    font-size: 2em; // Más grande y prominente
-    font-weight: 600; // Un peso semi-bold
-    color: var(
-      --sys-primary,
-      #303f9f
-    ); // Color primario del tema, o un color de título específico
-    letter-spacing: -0.5px; // Sutil ajuste para fuentes modernas
+    font-size: 2em; // Más grande
+    font-weight: 500; // Un poco de peso
   }
 
-  .create-button {
+  button {
     font-weight: 500;
-    // Los botones mat-flat-button color="primary" deberían tomar el tema automáticamente
-    // Puedes añadir padding si es necesario
-    // padding: 0 20px;
-    // height: 40px;
-    mat-icon {
-      margin-right: 8px;
-    }
   }
 }
 

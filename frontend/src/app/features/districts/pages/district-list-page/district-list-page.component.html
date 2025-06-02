@@ -31,30 +31,40 @@
 </div>
  -->
 
-<div class="page-container" fxLayout="column" fxLayoutGap="24px"> <!-- Usando Flex Layout para espaciado -->
+<div class="page-container" fxLayout="column" fxLayoutGap="24px">
+  <!-- Usando Flex Layout para espaciado -->
 
   <div class="page-header" fxLayout="row" fxLayoutAlign="space-between center">
-    <h1 class="page-title">Gestión de Distritos y Tarifas</h1>
-    <button mat-flat-button class="btn-corp-primary create-button" (click)="navigateToCreate()">
+    <h1 class="page-title">Gestión de Distritos</h1>
+    <button
+      mat-flat-button
+      class="btn-corp-primary create-button"
+      (click)="navigateToCreate()"
+    >
       <mat-icon>add_circle_outline</mat-icon>
-      <span>Nuevo Distrito/Tarifa</span> <!-- Span para mejor control de estilos si es necesario -->
+      <span>Nuevo Distrito</span>
+      <!-- Span para mejor control de estilos si es necesario -->
     </button>
   </div>
 
   <mat-card appearance="outlined" class="filter-card">
     <mat-card-content fxLayout="row" fxLayoutAlign="start center">
       <mat-form-field appearance="outline" class="search-field" fxFlex>
-        <mat-label>Buscar por nombre o código</mat-label>
+        <mat-label>Buscar distrito por nombre</mat-label>
         <input
           matInput
           (keyup)="onSearchTermChange($event)"
           placeholder="Ej: Carabayllo, Lince, 101..."
           #searchInput
         />
-        <button mat-icon-button matSuffix *ngIf="searchInput.value" 
-        (click)="clearSearch(searchInput)" 
-        aria-label="Limpiar búsqueda">
-            <mat-icon>close</mat-icon>
+        <button
+          mat-icon-button
+          matSuffix
+          *ngIf="searchInput.value"
+          (click)="clearSearch(searchInput)"
+          aria-label="Limpiar búsqueda"
+        >
+          <mat-icon>close</mat-icon>
         </button>
         <mat-icon matSuffix *ngIf="!searchInput.value">search</mat-icon>
       </mat-form-field>
@@ -75,5 +85,4 @@
     (editDistrict)="navigateToEdit($event)"
     (deleteDistrict)="confirmAndDeleteDistrict($event)"
   ></app-district-table>
-
 </div>
