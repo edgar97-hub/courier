@@ -66,7 +66,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 
 .example-is-mobile .example-toolbar {
   position: fixed;
-  z-index: 2;
+  z-index: 100;
 }
 
 h1.example-app-name {
