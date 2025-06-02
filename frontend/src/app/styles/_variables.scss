@@ -1,0 +1,43 @@
+// src/app/styles/_variables.scss
+
+// ----- Colores Corporativos -----
+$corp-orange: #f97c06;
+$corp-blue-dark: #012147;
+$corp-white: #ffffff;
+$corp-black: #000000;
+
+// Colores Derivados o de UI (puedes añadir más según necesites)
+$text-primary: $corp-blue-dark;
+$text-secondary: $corp-black; // Para subtítulos y texto general
+$text-input-label: $corp-black;
+$text-input-value: $corp-black;
+$text-button-primary: $corp-white;
+$text-button-secondary: $corp-orange;
+
+$border-input-active: $corp-orange;
+$border-button-secondary: $corp-orange;
+
+$bg-button-primary: $corp-orange;
+$bg-button-primary-hover: darken(
+  $corp-orange,
+  8%
+); // Un naranja un poco más oscuro
+$bg-button-primary-active: darken($corp-orange, 12%);
+
+$bg-button-secondary: $corp-white; // Fondo blanco para el secundario
+$bg-button-secondary-hover: rgba(
+  $corp-orange,
+  0.08
+); // Naranja muy sutil para hover
+$bg-button-secondary-active: rgba($corp-orange, 0.12);
+
+$bg-table-header: $corp-blue-dark;
+$text-table-header: $corp-white;
+$text-table-cell: $corp-black;
+
+$bg-sidenav: $corp-blue-dark;
+$text-sidenav-icon: $corp-white;
+
+// Colores para estados (deshabilitado, etc.)
+$disabled-bg: #e0e0e0; // Un gris claro
+$disabled-text: #a0a0a0; // Un gris medio

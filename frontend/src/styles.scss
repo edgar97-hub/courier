@@ -1,35 +1,205 @@
-@use "./app/styles/colors.scss";
+// src/styles.scss
+
+// 1. DECLARACIONES @use SIEMPRE PRIMERO
+@use "@angular/material" as mat;
+@use "./app/styles/variables" as corp;
+
 @use "./app/styles/material.scss";
+// @use "./app/styles/tailwind.css";
+// @use "./app/styles/custom.scss";
 
-@use "./app/styles/tailwind.css";
+// ----- 2. DECLARACIÓN DE PLACEHOLDERS Y MIXINS GLOBALES -----
+%btn-corp-base {
+  border-radius: 20px !important;
+  padding: 6px 24px !important;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  line-height: 24px !important;
+  min-width: 100px !important;
+  transition: background-color 0.2s ease-out, border-color 0.2s ease-out,
+    color 0.2s ease-out, box-shadow 0.2s ease-out;
 
-@use "./app/styles/custom.scss";
-
-/* src/styles.css o src/styles.scss */
-
-// src/styles.scss (si usas SCSS)
-
-// Estos estilos deben estar en el nivel raíz de styles.scss, no anidados.
-::ng-deep .success-snackbar {
-  background-color: var(
-    --sys-primary-container
-  ) !important; // Añadir !important si es necesario
-  color: var(--sys-on-primary-container) !important;
-
-  // Para el botón de acción
-  .mat-mdc-button.mat-mdc-button-base .mdc-button__label, // MDC
-  .mat-simple-snackbar-action button {
-    // Pre-MDC
-    color: var(--sys-on-primary-container) !important;
+  .mat-mdc-progress-spinner {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 8px;
+    circle {
+      stroke: currentColor !important;
+    }
   }
 }
 
-::ng-deep .error-snackbar {
-  background-color: var(--sys-error-container) !important;
-  color: var(--sys-on-error-container) !important;
+// ----- 3. DECLARACIÓN DE FUENTES PERSONALIZADAS -----
+@font-face {
+  font-family: "Avantt";
+  src: url("/assets/fonts/Avant Italic/Avant Italic.ttf") format("truetype");
+  font-weight: normal;
+  font-style: italic;
+}
+@font-face {
+  font-family: "Montserrat";
+  src: url("/assets/fonts/Montserrat/static/Montserrat-Regular.ttf")
+    format("truetype");
+  font-weight: 400; // Regular
+  font-style: normal;
+}
+// (Añade más @font-face para otros pesos/estilos de Montserrat si los tienes y los vas a usar)
 
-  .mat-mdc-button.mat-mdc-button-base .mdc-button__label,
-  .mat-simple-snackbar-action button {
-    color: var(--sys-on-error-container) !important;
+// ----- 4. CONFIGURACIÓN GLOBAL DE TIPOGRAFÍA Y BASE -----
+body {
+  font-family: "Montserrat", sans-serif; // Fuente por defecto para el cuerpo
+  color: corp.$text-secondary; // Negro #000000
+  background-color: #f4f6f8; // Un fondo general claro para la app
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Si definiste "Avantt" como itálica en @font-face:
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.text-title-main,
+.text-title-section {
+  font-family: "Avantt", "Arial Narrow", sans-serif; // El navegador aplicará la itálica definida
+  font-style: italic; // Puedes ser explícito si la fuente "Avantt" también tiene una variante normal
+  color: corp.$text-primary; // Azul Oscuro #012147
+  font-weight: normal; // El archivo de fuente ya tiene su peso inherente
+}
+
+.text-title-main {
+  font-size: 2em !important;
+  margin-bottom: 0.75em !important;
+}
+
+.text-title-section {
+  font-size: 1.5em !important;
+  margin-bottom: 0.5em !important;
+}
+
+.text-subtitle,
+.text-info {
+  font-family: "Montserrat", sans-serif !important;
+  color: corp.$text-secondary !important; // Negro #000000
+}
+
+// ----- 5. ESTILOS GLOBALES PARA FORMULARIOS -----
+.mat-mdc-form-field {
+  &.mat-focused .mdc-floating-label {
+    color: corp.$border-input-active !important; // Naranja #F97C06
+  }
+  &.mat-focused .mdc-notched-outline__leading,
+  &.mat-focused .mdc-notched-outline__notch,
+  &.mat-focused .mdc-notched-outline__trailing {
+    border-color: corp.$border-input-active !important; // Naranja #F97C06
+  }
+  .mat-mdc-input-element {
+    caret-color: corp.$border-input-active !important; // Naranja #F97C06
+  }
+}
+// Etiquetas de campos
+.mat-mdc-form-field .mdc-floating-label,
+.mat-mdc-form-field .mat-mdc-form-field-label {
+  color: corp.$text-input-label !important; // Negro #000000
+}
+// Texto dentro de los campos
+.mat-mdc-form-field .mat-mdc-input-element {
+  color: corp.$text-input-value !important; // Negro #000000
+}
+
+// ----- 6. ESTILOS GLOBALES PARA BOTONES CORPORATIVOS -----
+.btn-corp-primary {
+  &.mat-mdc-button-base {
+    @extend %btn-corp-base;
+    background-color: corp.$bg-button-primary !important; // Naranja #F97C06
+    color: corp.$text-button-primary !important; // Blanco #FFFFFF
+    border: 1px solid transparent !important;
+
+    &:hover:not([disabled]) {
+      background-color: corp.$bg-button-primary-hover !important;
+    }
+    &:active:not([disabled]) {
+      background-color: corp.$bg-button-primary-active !important;
+    }
+    &[disabled],
+    &.mat-mdc-button-disabled {
+      background-color: corp.$disabled-bg !important;
+      color: corp.$disabled-text !important;
+      border-color: corp.$disabled-bg !important; // Para consistencia si el borde era visible
+    }
+  }
+}
+
+.btn-corp-secondary {
+  &.mat-mdc-button-base {
+    @extend %btn-corp-base;
+    background-color: corp.$bg-button-secondary !important; // Blanco #FFFFFF
+    color: corp.$text-button-secondary !important; // Naranja #F97C06
+    border: 1.5px solid corp.$border-button-secondary !important; // Borde Naranja
+
+    &:hover:not([disabled]) {
+      background-color: corp.$bg-button-secondary-hover !important;
+    }
+    &:active:not([disabled]) {
+      background-color: corp.$bg-button-secondary-active !important;
+    }
+    &[disabled],
+    &.mat-mdc-button-disabled {
+      border-color: corp.$disabled-bg !important;
+      color: corp.$disabled-text !important;
+      background-color: transparent !important;
+    }
+  }
+}
+
+// ----- 7. ESTILOS GLOBALES PARA TABLAS -----
+table.mat-mdc-table {
+  thead.mat-mdc-header-row,
+  tr.mat-mdc-header-row {
+    background-color: corp.$bg-table-header !important; // Azul Oscuro #012147
+  }
+  th.mat-mdc-header-cell {
+    color: corp.$text-table-header !important; // Blanco #FFFFFF
+    font-family: "Avantt", "Arial Narrow", sans-serif !important;
+    font-style: italic !important;
+    font-weight: normal !important;
+    padding: 12px 16px !important;
+  }
+  td.mat-mdc-cell {
+    color: corp.$text-table-cell; // Negro #000000
+    font-family: "Montserrat", sans-serif !important;
+    padding: 10px 16px !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+  }
+  tr.mat-mdc-row:hover td.mat-mdc-cell,
+  tr.mat-mdc-footer-row:hover td.mat-mdc-cell {
+    background-color: rgba(corp.$corp-orange, 0.05) !important;
+  }
+}
+
+// ----- 8. ESTILOS GLOBALES PARA SIDENAV -----
+.app-sidenav {
+  background-color: corp.$bg-sidenav !important; // Azul Oscuro #012147
+  .mat-mdc-list-item {
+    .mdc-list-item__primary-text,
+    .mat-mdc-list-item-icon {
+      color: corp.$text-sidenav-icon !important; // Blanco #FFFFFF
+    }
+    &.active-menu-item,
+    &.mat-mdc-list-item--activated {
+      background-color: rgba(corp.$corp-orange, 0.2) !important;
+      .mdc-list-item__primary-text,
+      .mat-mdc-list-item-icon {
+        color: corp.$corp-orange !important;
+      }
+    }
+    &:hover:not(.mat-mdc-list-item--activated):not(.active-menu-item) {
+      background-color: rgba(corp.$corp-white, 0.1) !important;
+    }
   }
 }

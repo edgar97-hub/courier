@@ -9,14 +9,25 @@ html:not(.dark-theme) {
   );
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: "Avantt Itálica", sans-serif;
-  color: #012147;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  // font-family: "Avantt Itálica", sans-serif;
+  // color: #c5d5ea;
 }
 
-p, label, span, div, input, textarea, button {
-  font-family: "Montserrat Regular", sans-serif;
-  color: #000000;
+p,
+label,
+span,
+div,
+input,
+textarea,
+button {
+  // font-family: "Montserrat Regular", sans-serif;
+  // color: #15044e;
 }
 body.dark-theme,
 html.dark-theme {

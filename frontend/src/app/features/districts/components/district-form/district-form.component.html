@@ -109,14 +109,19 @@
       </div>
     </mat-card-content>
     <mat-card-actions align="end">
-      <button mat-stroked-button type="button" (click)="onCancelClick()">
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="onCancelClick()"
+        class="btn-corp-secondary"
+      >
         Cancelar
       </button>
       <button
         mat-flat-button
-        color="primary"
         type="submit"
         [disabled]="isLoading || districtForm.invalid"
+        class="btn-corp-primary"
       >
         {{
           isLoading ? "Guardando..." : districtToEdit ? "Actualizar" : "Crear"

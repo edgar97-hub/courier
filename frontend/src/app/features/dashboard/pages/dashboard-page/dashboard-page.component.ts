@@ -21,7 +21,6 @@ import { MatCardModule } from '@angular/material/card';
   imports: [
     CommonModule,
     KpiCardComponent,
-    StatusDistributionChartComponent,
     MatGridListModule,
     MatProgressSpinnerModule,
     MatButtonModule, // Añadido
