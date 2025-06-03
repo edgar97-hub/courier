@@ -10,7 +10,10 @@ import { AppStore } from '../../../../app.store';
         class="profile-pic"
         [width]="profilePicSize()"
         [height]="profilePicSize()"
-        [src]="appStore.currentUser()?.photo_url"
+        [src]="
+          appStore.currentUser()?.photo_url ||
+          'https://previews.123rf.com/images/yupiramos/yupiramos1705/yupiramos170514532/77987159-perfil-del-hombre-joven-icono-de-ilustraci%C3%B3n-vectorial-de-dise%C3%B1o-gr%C3%A1fico.jpg'
+        "
       />
       <div class="user-info" [class.collapsed]="collapsed()">
         <h2 class="username">
@@ -39,7 +42,7 @@ import { AppStore } from '../../../../app.store';
     object-fit: cover; /* object-cover */
     object-position: center; /* object-center */
     border-radius: 9999px; /* rounded-full */
-    margin-bottom: 0.75rem; /* mb-3 */
+    margin-bottom: 0.65rem; /* mb-3 */
     aspect-ratio: 1 / 1; /* aspect-square */
   }
 

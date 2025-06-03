@@ -54,11 +54,10 @@ export class OrderFiltersComponent implements OnInit, OnDestroy {
   private datePipe = inject(DatePipe);
   private destroy$ = new Subject<void>();
 
-  private initialLoad = true;
   constructor() {
     this.filterForm = this.fb.group({
       delivery_date: [new Date()],
-      status: [null],
+      status: ['ENTREGADO'],
       search_term: [''],
     });
     this.orderStatuses$ = this.orderService.getOrderStatuses();
@@ -70,6 +69,7 @@ export class OrderFiltersComponent implements OnInit, OnDestroy {
     );
     this.emitSpecificFilters({
       delivery_date: this.filterForm.get('delivery_date')?.value,
+      status: 'ENTREGADO',
     });
 
     this.filterForm.valueChanges
@@ -100,17 +100,6 @@ export class OrderFiltersComponent implements OnInit, OnDestroy {
     );
     this.filtersChanged.emit(filtersToEmit);
   }
-  private emitInitialFilters(): void {
-    const initialDate = this.filterForm.get('delivery_date')?.value;
-    const initialFilters: Partial<OrderFilterCriteria> = {
-      delivery_date: initialDate
-        ? this.datePipe.transform(initialDate, 'yyyy-MM-dd')
-        : null,
-    };
-
-    this.filtersChanged.emit(initialFilters as OrderFilterCriteria);
-    this.initialLoad = false;
-  }
 
   applyAllFilters(formValues: any): void {
     const filters: OrderFilterCriteria = {
@@ -137,12 +126,12 @@ export class OrderFiltersComponent implements OnInit, OnDestroy {
   clearFilters(): void {
     this.filterForm.reset({
       delivery_date: new Date(),
-      status: null,
+      status: 'ENTREGADO',
       search_term: '',
     });
-    this.initialLoad = true;
     this.emitSpecificFilters({
       delivery_date: this.filterForm.get('delivery_date')?.value,
+      status: 'ENTREGADO',
     });
   }
 

@@ -93,6 +93,15 @@
         }}
       </td>
     </ng-container>
+    <!-- Type Column -->
+    <ng-container matColumnDef="motorizado">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="motorizado">
+        Motorizado
+      </th>
+      <td mat-cell *matCellDef="let order">
+        {{ order.assigned_driver?.username }}
+      </td>
+    </ng-container>
 
     <!-- Amount to Collect Column -->
     <ng-container matColumnDef="amount_to_collect_at_delivery">
@@ -210,13 +219,13 @@
           </button>
           <button mat-menu-item (click)="onViewPdfA4(order)">
             <mat-icon>picture_as_pdf</mat-icon>
-            <span>PDF formato A4</span>
+            <span>PDF Rotulado</span>
           </button>
 
-          <button mat-menu-item (click)="onViewPdfA4Landscape(order)">
+          <!-- <button mat-menu-item (click)="onViewPdfA4Landscape(order)">
             <mat-icon>picture_as_pdf</mat-icon>
             <span>PDF formato A4 Landscape</span>
-          </button>
+          </button> -->
 
           <button mat-menu-item (click)="onViewPdfTicket80mm(order)">
             <mat-icon>picture_as_pdf</mat-icon>

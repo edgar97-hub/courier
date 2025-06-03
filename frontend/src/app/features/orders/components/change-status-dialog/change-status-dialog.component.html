@@ -81,7 +81,24 @@
 
         <div class="image-upload-container">
           <label class="image-upload-label">Foto de Prueba de Entrega:</label>
-          <div class="image-actions">
+          <!-- 
+          
+            class="image-actions"
+
+
+-->
+          <div
+            style="
+              display: flex !important;
+              flex-direction: row !important;
+              justify-content: center !important;
+              align-items: center !important;
+              flex-wrap: wrap;
+              gap: 15px;
+              width: 100% !important;
+              /* border: 1px solid black; */
+            "
+          >
             <button
               mat-flat-button
               type="button"
@@ -91,12 +108,12 @@
             >
               <mat-icon>photo_camera</mat-icon> Acceder a Cámara
             </button>
-            <span class="or-divider">o</span>
+            <!-- <span class="or-divider">o</span> -->
             <button
               mat-flat-button
               type="button"
-              class="upload-button btn-corp-primary"
               (click)="triggerFileUpload()"
+              class="upload-button btn-corp-primary"
             >
               <mat-icon>attach_file</mat-icon> Subir Archivo
             </button>

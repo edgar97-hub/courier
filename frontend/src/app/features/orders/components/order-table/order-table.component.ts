@@ -106,6 +106,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     'status', // Moví estado más a la izquierda para visibilidad
     'delivery_district_name',
     'delivery_date',
+    'motorizado',
     'amount_to_collect_at_delivery',
     'tracking_code',
     // 'recipient_phone', // Puedes decidir cuáles mostrar por defecto

@@ -9,7 +9,7 @@ export type MenuItem = {
 export const menuItems: MenuItem[] = [
   {
     icon: 'list_alt',
-    label: 'Dashboard',
+    label: 'Inicio',
     route: 'dashboard',
     roles: ['ADMINISTRADOR', 'MOTORIZADO', 'EMPRESA', 'RECEPCIONISTA'],
   },
