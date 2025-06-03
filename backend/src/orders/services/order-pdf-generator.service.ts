@@ -431,13 +431,13 @@ export class OrderPdfGeneratorService {
    * @param res
    */
   async streamOrderPdfToResponse(
-    orderId: string, // Asumo que el ID es string (UUID)
+    orderId: string,
     req: Request,
     res: Response,
   ): Promise<void> {
     const order = await this.orderRepository.findOne({
       where: { id: orderId },
-      relations: ['user', 'company'], // Cargar la relación con el usuario para obtener el nombre
+      relations: ['user', 'company'],
     });
 
     if (!order) {
@@ -485,72 +485,69 @@ export class OrderPdfGeneratorService {
       }
       return value.toString().trim();
     };
-    // --- End Helper Functions ---
 
     const pageSizeInPoints = 140 * 2.83465;
-
-    const remittanceName = getValue(order.company.username, 'TU EMPRESA');
-    const productTableBody: any[][] = [
-      [
-        { text: 'Producto', style: 'tableHeaderRef', fillColor: '#EAEAEA' },
-        {
-          text: 'Cant.',
-          style: 'tableHeaderRef',
-          alignment: 'center',
-          fillColor: '#EAEAEA',
-        },
-        {
-          text: 'Precio unitario',
-          style: 'tableHeaderRef',
-          alignment: 'right',
-          fillColor: '#EAEAEA',
-        },
-        {
-          text: 'Precio',
-          style: 'tableHeaderRef',
-          alignment: 'right',
-          fillColor: '#EAEAEA',
-        },
-      ],
-      [
-        {
-          text: getValue(
-            order.item_description || order.delivery_district_name,
-            'Servicio Courier',
-          ),
-          style: 'tableCellRef',
-        },
-        { text: '1', style: 'tableCellRef', alignment: 'center' },
-        {
-          text: formatCurrency(order.shipping_cost),
-          style: 'tableCellRef',
-          alignment: 'right',
-        },
-        {
-          text: formatCurrency(order.shipping_cost),
-          style: 'tableCellRef',
-          alignment: 'right',
-        },
-      ],
-    ];
-    productTableBody.push([
-      { text: '', border: [true, true, true, true], fillColor: '#EAEAEA' },
-      { text: '', border: [true, true, true, true], fillColor: '#EAEAEA' },
-      {
-        text: 'Total',
-        style: 'tableTotalLabelRef',
-        alignment: 'right',
-        fillColor: '#EAEAEA',
-        border: [true, true, true, true],
-      },
-      {
-        text: formatCurrency(order.shipping_cost),
-        style: 'tableTotalValueRef',
-        alignment: 'right',
-        fillColor: '#EAEAEA',
-        border: [true, true, true, true],
-      },
-    ]);
+    // const productTableBody: any[][] = [
+    //   [
+    //     { text: 'Producto', style: 'tableHeaderRef', fillColor: '#EAEAEA' },
+    //     {
+    //       text: 'Cant.',
+    //       style: 'tableHeaderRef',
+    //       alignment: 'center',
+    //       fillColor: '#EAEAEA',
+    //     },
+    //     {
+    //       text: 'Precio unitario',
+    //       style: 'tableHeaderRef',
+    //       alignment: 'right',
+    //       fillColor: '#EAEAEA',
+    //     },
+    //     {
+    //       text: 'Precio',
+    //       style: 'tableHeaderRef',
+    //       alignment: 'right',
+    //       fillColor: '#EAEAEA',
+    //     },
+    //   ],
+    //   [
+    //     {
+    //       text: getValue(
+    //         order.item_description || order.delivery_district_name,
+    //         'Servicio Courier',
+    //       ),
+    //       style: 'tableCellRef',
+    //     },
+    //     { text: '1', style: 'tableCellRef', alignment: 'center' },
+    //     {
+    //       text: formatCurrency(order.shipping_cost),
+    //       style: 'tableCellRef',
+    //       alignment: 'right',
+    //     },
+    //     {
+    //       text: formatCurrency(order.shipping_cost),
+    //       style: 'tableCellRef',
+    //       alignment: 'right',
+    //     },
+    //   ],
+    // ];
+    // productTableBody.push([
+    //   { text: '', border: [true, true, true, true], fillColor: '#EAEAEA' },
+    //   { text: '', border: [true, true, true, true], fillColor: '#EAEAEA' },
+    //   {
+    //     text: 'Total',
+    //     style: 'tableTotalLabelRef',
+    //     alignment: 'right',
+    //     fillColor: '#EAEAEA',
+    //     border: [true, true, true, true],
+    //   },
+    //   {
+    //     text: formatCurrency(order.shipping_cost),
+    //     style: 'tableTotalValueRef',
+    //     alignment: 'right',
+    //     fillColor: '#EAEAEA',
+    //     border: [true, true, true, true],
+    //   },
+    // ]);
 
     // Definición de cómo se dibujarán los bordes para cada celda que simula un campo
     const fieldBorders: [boolean, boolean, boolean, boolean] = [
@@ -602,24 +599,84 @@ export class OrderPdfGeneratorService {
         // Lo controlaremos con hLineWidth y vLineWidth en el layout de la tabla contenedora.
       };
     };
+    async function imageToBase64(imageUrl) {
+      try {
+        const response = await fetch(imageUrl);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(new Uint8Array(arrayBuffer));
+        const base64String = buffer.toString('base64');
+        const contentType = response.headers.get('content-type') || 'image/png';
+
+        return `data:${contentType};base64,${base64String}`;
+      } catch (error) {
+        console.error('Error fetching image:', error);
+        return null;
+      }
+    }
+    const LOGO_BASE64_STRING = await imageToBase64(setting?.logo_url);
 
     const documentDefinition: TDocumentDefinitions = {
       pageSize: { width: pageSizeInPoints, height: pageSizeInPoints },
-      pageMargins: [30, 30, 30, 30],
+      //  pageMargins: [30, 30, 30, 30],
       defaultStyle: {
         font: 'Roboto',
         fontSize: 8,
         lineHeight: 1.2,
         color: '#000000',
       },
+      pageMargins: [30, 45, 30, 30],
+
+      header: (currentPage: number, pageCount: number) => ({
+        margin: [24, -20, 0, 0], // Margen para todo el contenido del header
+        table: {
+          widths: [90], // Ancho TOTAL para la celda del logo
+          body: [
+            [
+              {
+                image: LOGO_BASE64_STRING, // Tu string base64 del logo
+                // 'fit' escalará la imagen para que quepa dentro de 90pt de ancho,
+                // manteniendo la proporción. La altura se ajustará.
+                // Si quieres limitar también la altura, por ejemplo a 30pt: fit: [90, 30]
+                fit: [90, 90], // Intenta encajar en un cuadrado de 90x90 (ajusta el segundo 90 si quieres limitar altura)
+                alignment: 'center', // O 'center' si quieres centrarlo en la celda de 90pt
+              },
+            ],
+          ],
+        },
+        layout: 'noBorders', // <--- Es bueno tener esto para que la tabla no tenga bordes visibles
+      }),
+
       content: [
         // {
-        //   text: `PEDIDO N°: ${getValue(order.code, 'N/D')}`,
-        //   style: 'orderTitleRef',
-        //   alignment: 'center',
-        //   margin: [0, 0, 0, 10],
+        //   table: {
+        //     widths: [90], // Ancho TOTAL para la celda del logo
+        //     body: [
+        //       [
+        //         {
+        //           image: LOGO_BASE64_STRING, // Tu string base64 del logo
+        //           // 'fit' escalará la imagen para que quepa dentro de 90pt de ancho,
+        //           // manteniendo la proporción. La altura se ajustará.
+        //           // Si quieres limitar también la altura, por ejemplo a 30pt: fit: [90, 30]
+        //           fit: [70, 70], // Intenta encajar en un cuadrado de 90x90 (ajusta el segundo 90 si quieres limitar altura)
+        //           alignment: 'left', // O 'center' si quieres centrarlo en la celda de 90pt
+        //         },
+        //       ],
+        //     ],
+        //   },
+        //   layout: 'noBorders',
+        //   margin: [0, 0, 0, 0], // Margen entre "filas" de campos
         // },
-
+        {
+          text: setting.business_name,
+          style: 'orderTitleRef',
+          alignment: 'left',
+          margin: [0, 0, 0, 3],
+        },
         // --- Filas de Información usando Tablas para el Layout ---
         // Cada tabla representa una "fila" de campos de tu imagen
         {
@@ -760,36 +817,56 @@ export class OrderPdfGeneratorService {
             paddingLeft: () => 0,
             paddingRight: () => 0,
           },
-          margin: [0, 5, 0, 10],
+          margin: [0, 5, 0, 2],
         },
-
-        { text: 'Pedido', style: 'sectionTitleRef', margin: [0, 0, 0, 3] },
         {
           table: {
-            widths: ['*', 25, 45, 45],
-            body: productTableBody,
+            widths: ['*'],
+            body: [
+              [createFieldCell('PRODUCTO', getValue(order.item_description))],
+            ],
           },
           layout: {
-            hLineWidth: (i, node) =>
-              i === 0 ||
-              i === 1 ||
-              i === node.table.body.length - 1 ||
-              i === node.table.body.length
-                ? 0.5
-                : 0.2,
-            vLineWidth: () => 0.5,
+            defaultBorder: false,
+            hLineWidth: (i, node) => 0.5,
+            vLineWidth: (i, node) => 0.5,
             hLineColor: () => '#000000',
             vLineColor: () => '#000000',
-            paddingTop: () => 1.5,
-            paddingBottom: () => 1.5,
-            paddingLeft: () => 2,
-            paddingRight: () => 2,
-            fillColor: (rowIndex) =>
-              rowIndex === 0 || rowIndex === productTableBody.length - 1
-                ? '#EAEAEA'
-                : null,
+            paddingTop: () => 0,
+            paddingBottom: () => 0,
+            paddingLeft: () => 0,
+            paddingRight: () => 0,
           },
+          margin: [0, 5, 0, 2],
         },
+        // ,
+        // { text: 'Pedido', style: 'sectionTitleRef', margin: [0, 0, 0, 3] },
+        // {
+        //   table: {
+        //     widths: ['*', 25, 45, 45],
+        //     body: productTableBody,
+        //   },
+        //   layout: {
+        //     hLineWidth: (i, node) =>
+        //       i === 0 ||
+        //       i === 1 ||
+        //       i === node.table.body.length - 1 ||
+        //       i === node.table.body.length
+        //         ? 0.5
+        //         : 0.2,
+        //     vLineWidth: () => 0.5,
+        //     hLineColor: () => '#000000',
+        //     vLineColor: () => '#000000',
+        //     paddingTop: () => 1.5,
+        //     paddingBottom: () => 1.5,
+        //     paddingLeft: () => 2,
+        //     paddingRight: () => 2,
+        //     fillColor: (rowIndex) =>
+        //       rowIndex === 0 || rowIndex === productTableBody.length - 1
+        //         ? '#EAEAEA'
+        //         : null,
+        //   },
+        // },
       ],
 
       styles: {
@@ -1739,15 +1816,35 @@ export class OrderPdfGeneratorService {
       // El alto puede ser grande, ya que las ticketeras cortan el papel.
       // O puedes intentar calcularlo, pero es más fácil dejarlo flexible.
       pageSize: { width: TICKET_PAGE_WIDTH_PT, height: 'auto' }, // Ancho de 80mm, alto automático
-      pageMargins: [TICKET_MARGIN_PT, 10, TICKET_MARGIN_PT, 10], // [izq, arriba, der, abajo] - Márgenes pequeños
+      pageMargins: [TICKET_MARGIN_PT, 55, TICKET_MARGIN_PT, 10], // [izq, arriba, der, abajo] - Márgenes pequeños
+      // pageMargins: [30, 45, 30, 30],
 
-      content: [
-        {
-          image: LOGO_BASE64_STRING, // Tu logo, asegúrate que sea pequeño y simple
-          width: 70, // Ajusta el ancho de tu logo para que quepa bien
-          alignment: 'center',
-          margin: [0, 0, 0, 5], // Margen inferior después del logo
+      header: (currentPage: number, pageCount: number) => ({
+        margin: [63, -20, 0, 0], // Margen para todo el contenido del header
+        table: {
+          widths: [90], // Ancho TOTAL para la celda del logo
+          body: [
+            [
+              {
+                image: LOGO_BASE64_STRING, // Tu string base64 del logo
+                // 'fit' escalará la imagen para que quepa dentro de 90pt de ancho,
+                // manteniendo la proporción. La altura se ajustará.
+                // Si quieres limitar también la altura, por ejemplo a 30pt: fit: [90, 30]
+                fit: [90, 90], // Intenta encajar en un cuadrado de 90x90 (ajusta el segundo 90 si quieres limitar altura)
+                alignment: 'center', // O 'center' si quieres centrarlo en la celda de 90pt
+              },
+            ],
+          ],
         },
+        layout: 'noBorders', // <--- Es bueno tener esto para que la tabla no tenga bordes visibles
+      }),
+      content: [
+        // {
+        //   image: LOGO_BASE64_STRING, // Tu logo, asegúrate que sea pequeño y simple
+        //   width: 70, // Ajusta el ancho de tu logo para que quepa bien
+        //   alignment: 'center',
+        //   margin: [0, 0, 0, 0], // Margen inferior después del logo
+        // },
         {
           text: setting.business_name.toUpperCase(),
           style: 'ticketCompanyName',
@@ -1762,10 +1859,10 @@ export class OrderPdfGeneratorService {
           text: 'Tel: ' + setting.phone_number, // Reemplaza
           style: 'ticketInfoSmall',
           alignment: 'center',
-          margin: [0, 0, 0, 10], // Margen inferior
+          margin: [0, 0, 0, 0], // Margen inferior
         },
         {
-          text: '--------------------------------------', // Línea separadora simple
+          text: '----------------------------------------------', // Línea separadora simple
           style: 'ticketSeparator',
           alignment: 'center',
         },
@@ -1784,10 +1881,10 @@ export class OrderPdfGeneratorService {
           text: `Fecha Reg: ${format(new Date(order.createdAt || Date.now()), 'dd/MM/yy HH:mm')}`, // Usar fecha de creación del pedido
           style: 'ticketInfoSmall',
           alignment: 'center',
-          margin: [0, 0, 0, 10],
+          margin: [0, 0, 0, 0],
         },
         {
-          text: '--------------------------------------',
+          text: '----------------------------------------------',
           style: 'ticketSeparator',
           alignment: 'center',
         },
@@ -1858,7 +1955,7 @@ export class OrderPdfGeneratorService {
 
         // --- INFORMACIÓN ADICIONAL / PIE DE TICKET ---
         {
-          text: '--------------------------------------',
+          text: '----------------------------------------------',
           style: 'ticketSeparator',
           alignment: 'center',
         },

@@ -423,65 +423,6 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
             return value.toString().trim();
         };
         const pageSizeInPoints = 140 * 2.83465;
-        const remittanceName = getValue(order.company.username, 'TU EMPRESA');
-        const productTableBody = [
-            [
-                { text: 'Producto', style: 'tableHeaderRef', fillColor: '#EAEAEA' },
-                {
-                    text: 'Cant.',
-                    style: 'tableHeaderRef',
-                    alignment: 'center',
-                    fillColor: '#EAEAEA',
-                },
-                {
-                    text: 'Precio unitario',
-                    style: 'tableHeaderRef',
-                    alignment: 'right',
-                    fillColor: '#EAEAEA',
-                },
-                {
-                    text: 'Precio',
-                    style: 'tableHeaderRef',
-                    alignment: 'right',
-                    fillColor: '#EAEAEA',
-                },
-            ],
-            [
-                {
-                    text: getValue(order.item_description || order.delivery_district_name, 'Servicio Courier'),
-                    style: 'tableCellRef',
-                },
-                { text: '1', style: 'tableCellRef', alignment: 'center' },
-                {
-                    text: formatCurrency(order.shipping_cost),
-                    style: 'tableCellRef',
-                    alignment: 'right',
-                },
-                {
-                    text: formatCurrency(order.shipping_cost),
-                    style: 'tableCellRef',
-                    alignment: 'right',
-                },
-            ],
-        ];
-        productTableBody.push([
-            { text: '', border: [true, true, true, true], fillColor: '#EAEAEA' },
-            { text: '', border: [true, true, true, true], fillColor: '#EAEAEA' },
-            {
-                text: 'Total',
-                style: 'tableTotalLabelRef',
-                alignment: 'right',
-                fillColor: '#EAEAEA',
-                border: [true, true, true, true],
-            },
-            {
-                text: formatCurrency(order.shipping_cost),
-                style: 'tableTotalValueRef',
-                alignment: 'right',
-                fillColor: '#EAEAEA',
-                border: [true, true, true, true],
-            },
-        ]);
         const fieldBorders = [
             true,
             true,
@@ -517,16 +458,56 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                 lineWidth: fieldLineWidth,
             };
         };
+        async function imageToBase64(imageUrl) {
+            try {
+                const response = await (0, node_fetch_1.default)(imageUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const arrayBuffer = await response.arrayBuffer();
+                const buffer = Buffer.from(new Uint8Array(arrayBuffer));
+                const base64String = buffer.toString('base64');
+                const contentType = response.headers.get('content-type') || 'image/png';
+                return `data:${contentType};base64,${base64String}`;
+            }
+            catch (error) {
+                console.error('Error fetching image:', error);
+                return null;
+            }
+        }
+        const LOGO_BASE64_STRING = await imageToBase64(setting?.logo_url);
         const documentDefinition = {
             pageSize: { width: pageSizeInPoints, height: pageSizeInPoints },
-            pageMargins: [30, 30, 30, 30],
             defaultStyle: {
                 font: 'Roboto',
                 fontSize: 8,
                 lineHeight: 1.2,
                 color: '#000000',
             },
+            pageMargins: [30, 45, 30, 30],
+            header: (currentPage, pageCount) => ({
+                margin: [24, -20, 0, 0],
+                table: {
+                    widths: [90],
+                    body: [
+                        [
+                            {
+                                image: LOGO_BASE64_STRING,
+                                fit: [90, 90],
+                                alignment: 'center',
+                            },
+                        ],
+                    ],
+                },
+                layout: 'noBorders',
+            }),
             content: [
+                {
+                    text: setting.business_name,
+                    style: 'orderTitleRef',
+                    alignment: 'left',
+                    margin: [0, 0, 0, 3],
+                },
                 {
                     table: {
                         widths: ['*', '*'],
@@ -642,32 +623,27 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                         paddingLeft: () => 0,
                         paddingRight: () => 0,
                     },
-                    margin: [0, 5, 0, 10],
+                    margin: [0, 5, 0, 2],
                 },
-                { text: 'Pedido', style: 'sectionTitleRef', margin: [0, 0, 0, 3] },
                 {
                     table: {
-                        widths: ['*', 25, 45, 45],
-                        body: productTableBody,
+                        widths: ['*'],
+                        body: [
+                            [createFieldCell('PRODUCTO', getValue(order.item_description))],
+                        ],
                     },
                     layout: {
-                        hLineWidth: (i, node) => i === 0 ||
-                            i === 1 ||
-                            i === node.table.body.length - 1 ||
-                            i === node.table.body.length
-                            ? 0.5
-                            : 0.2,
-                        vLineWidth: () => 0.5,
+                        defaultBorder: false,
+                        hLineWidth: (i, node) => 0.5,
+                        vLineWidth: (i, node) => 0.5,
                         hLineColor: () => '#000000',
                         vLineColor: () => '#000000',
-                        paddingTop: () => 1.5,
-                        paddingBottom: () => 1.5,
-                        paddingLeft: () => 2,
-                        paddingRight: () => 2,
-                        fillColor: (rowIndex) => rowIndex === 0 || rowIndex === productTableBody.length - 1
-                            ? '#EAEAEA'
-                            : null,
+                        paddingTop: () => 0,
+                        paddingBottom: () => 0,
+                        paddingLeft: () => 0,
+                        paddingRight: () => 0,
                     },
+                    margin: [0, 5, 0, 2],
                 },
             ],
             styles: {
@@ -1124,14 +1100,24 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
         const LOGO_BASE64_STRING = await imageToBase64(setting?.logo_url);
         const documentDefinitionTicket = {
             pageSize: { width: TICKET_PAGE_WIDTH_PT, height: 'auto' },
-            pageMargins: [TICKET_MARGIN_PT, 10, TICKET_MARGIN_PT, 10],
-            content: [
-                {
-                    image: LOGO_BASE64_STRING,
-                    width: 70,
-                    alignment: 'center',
-                    margin: [0, 0, 0, 5],
+            pageMargins: [TICKET_MARGIN_PT, 55, TICKET_MARGIN_PT, 10],
+            header: (currentPage, pageCount) => ({
+                margin: [63, -20, 0, 0],
+                table: {
+                    widths: [90],
+                    body: [
+                        [
+                            {
+                                image: LOGO_BASE64_STRING,
+                                fit: [90, 90],
+                                alignment: 'center',
+                            },
+                        ],
+                    ],
                 },
+                layout: 'noBorders',
+            }),
+            content: [
                 {
                     text: setting.business_name.toUpperCase(),
                     style: 'ticketCompanyName',
@@ -1146,10 +1132,10 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                     text: 'Tel: ' + setting.phone_number,
                     style: 'ticketInfoSmall',
                     alignment: 'center',
-                    margin: [0, 0, 0, 10],
+                    margin: [0, 0, 0, 0],
                 },
                 {
-                    text: '--------------------------------------',
+                    text: '----------------------------------------------',
                     style: 'ticketSeparator',
                     alignment: 'center',
                 },
@@ -1168,10 +1154,10 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                     text: `Fecha Reg: ${(0, date_fns_1.format)(new Date(order.createdAt || Date.now()), 'dd/MM/yy HH:mm')}`,
                     style: 'ticketInfoSmall',
                     alignment: 'center',
-                    margin: [0, 0, 0, 10],
+                    margin: [0, 0, 0, 0],
                 },
                 {
-                    text: '--------------------------------------',
+                    text: '----------------------------------------------',
                     style: 'ticketSeparator',
                     alignment: 'center',
                 },
@@ -1232,7 +1218,7 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                     margin: [0, 0, 0, 10],
                 },
                 {
-                    text: '--------------------------------------',
+                    text: '----------------------------------------------',
                     style: 'ticketSeparator',
                     alignment: 'center',
                 },
