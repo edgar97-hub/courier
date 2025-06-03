@@ -26,6 +26,7 @@ import { MatCardModule } from '@angular/material/card';
     MatButtonModule, // Añadido
     MatIconModule, // Añadido
     MatCardModule,
+    StatusDistributionChartComponent
   ],
   templateUrl: './dashboard-page.component.html',
   styleUrls: ['./dashboard-page.component.scss'],

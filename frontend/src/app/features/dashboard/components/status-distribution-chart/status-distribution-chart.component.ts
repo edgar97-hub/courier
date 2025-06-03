@@ -15,7 +15,7 @@ export class StatusDistributionChartComponent implements OnChanges {
   @Input() chartTitle: string = 'Distribución por Estado';
 
   // Opciones de ngx-charts
-  view: [number, number] = [600, 350]; // Ancho, Alto del gráfico. Ajusta según necesites.
+  view: [number, number] = [400, 350]; // Ancho, Alto del gráfico. Ajusta según necesites.
   gradient: boolean = true;
   showLegend: boolean = true;
   legendPosition: any = 'below'; // 'right' o 'below'
@@ -44,6 +44,7 @@ export class StatusDistributionChartComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && this.data) {
       // ngx-charts espera un nuevo array para detectar cambios si los datos se actualizan
+      // console.log('this.data', this.data);
       this.chartData = [...this.data];
     }
   }

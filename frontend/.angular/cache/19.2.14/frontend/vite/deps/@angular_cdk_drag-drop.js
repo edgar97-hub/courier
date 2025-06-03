@@ -9,6 +9,10 @@ import {
   coerceArray
 } from "./chunk-DG6N4IH3.js";
 import {
+  _CdkPrivateStyleLoader,
+  _bindEventWithOptions
+} from "./chunk-72GBOMAZ.js";
+import {
   CdkScrollable,
   CdkScrollableModule,
   ScrollDispatcher,
@@ -19,10 +23,6 @@ import "./chunk-2O4WY5GE.js";
 import {
   Directionality
 } from "./chunk-UXGUB75P.js";
-import {
-  _CdkPrivateStyleLoader,
-  _bindEventWithOptions
-} from "./chunk-72GBOMAZ.js";
 import {
   coerceElement,
   coerceNumberProperty

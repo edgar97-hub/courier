@@ -57,7 +57,10 @@
 
 .charts-grid {
   // mat-grid-list maneja su propio layout
+  margin-top: 29px;
   margin-bottom: 24px;
+  // border: 1px solid black;
+  // height: auto !important; // Override inline styles
 }
 
 @media (max-width: 600px) {

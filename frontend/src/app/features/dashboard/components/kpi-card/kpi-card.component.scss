@@ -15,13 +15,17 @@
     padding: 16px;
   }
 }
+.card-header-kpi {
+  min-width: 350px !important;
+  // border: 1px solid black;
+}
 
 .kpi-icon-container {
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  width: 48px;
+  width: 68px;
   height: 48px;
   margin-right: 16px;
 }
