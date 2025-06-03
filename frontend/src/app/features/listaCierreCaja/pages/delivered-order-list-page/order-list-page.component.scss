@@ -57,15 +57,15 @@
   align-items: center;
 }
 
-.orders-grid {
- display: grid;
- grid-template-columns: 1fr; // Default to single column
- gap: 20px;
-}
+// .orders-grid {
+//  display: grid;
+//  grid-template-columns: 1fr; // Default to single column
+//  gap: 20px;
+// }
 
-@media (min-width: 768px) {
-  .orders-grid {
-    grid-template-columns: 1fr 1fr; // Two columns on larger screens
-  }
-}
+// @media (min-width: 768px) {
+//   .orders-grid {
+//     grid-template-columns: 1fr 1fr; // Two columns on larger screens
+//   }
+// }
  

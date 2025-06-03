@@ -57,14 +57,17 @@ export class OrderService {
       .set('page_size', pageSize.toString())
       .set('sort_field', sortField)
       .set('sort_direction', sortDirection);
-
+    console.log('filters', filters);
     if (filters) {
-      if (filters.start_date) {
-        params = params.set('start_date', filters.start_date);
+      if (filters.delivery_date) {
+        params = params.set('delivery_date', filters.delivery_date);
       }
-      if (filters.end_date) {
-        params = params.set('end_date', filters.end_date);
-      }
+      // if (filters.start_date) {
+      //   params = params.set('start_date', filters.start_date);
+      // }
+      // if (filters.end_date) {
+      //   params = params.set('end_date', filters.end_date);
+      // }
       if (filters.status) {
         params = params.set('status', filters.status);
       }

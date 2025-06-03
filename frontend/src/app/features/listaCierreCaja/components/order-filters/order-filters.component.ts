@@ -54,57 +54,100 @@ export class OrderFiltersComponent implements OnInit, OnDestroy {
   private datePipe = inject(DatePipe);
   private destroy$ = new Subject<void>();
 
+  private initialLoad = true;
   constructor() {
     this.filterForm = this.fb.group({
-      start_date: [null],
-      end_date: [null],
+      delivery_date: [new Date()],
       status: [null],
-      search_term: [''], // Para el input de búsqueda general en la tabla
+      search_term: [''],
     });
-    this.orderStatuses$ = this.orderService.getOrderStatuses(); // Carga los estados
+    this.orderStatuses$ = this.orderService.getOrderStatuses();
   }
 
   ngOnInit(): void {
-    // Emitir cambios cuando el formulario cambie, con un debounce para no emitir en cada keystroke
+    console.log(
+      'OrderFiltersComponent: ngOnInit - Instance Created/Initialized'
+    );
+    this.emitSpecificFilters({
+      delivery_date: this.filterForm.get('delivery_date')?.value,
+    });
+
     this.filterForm.valueChanges
       .pipe(
         takeUntil(this.destroy$),
-        debounceTime(400), // Espera 400ms después del último cambio
+        debounceTime(400),
         distinctUntilChanged(
           (prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)
-        ) // Solo emite si los valores realmente cambiaron
+        )
       )
-      .subscribe(() => {
-        this.applyFilters();
+      .subscribe((formValues) => {
+        this.applyAllFilters(formValues);
       });
   }
-
-  applyFilters(): void {
-    const formValues = this.filterForm.value;
-    const filters: OrderFilterCriteria = {
-      start_date: formValues.start_date
-        ? this.datePipe.transform(formValues.start_date, 'yyyy-MM-dd')
+  private emitSpecificFilters(criteria: Partial<OrderFilterCriteria>): void {
+    const filtersToEmit: OrderFilterCriteria = {
+      delivery_date: criteria.delivery_date
+        ? this.datePipe.transform(criteria.delivery_date, 'yyyy-MM-dd')
         : null,
-      end_date: formValues.end_date
-        ? this.datePipe.transform(formValues.end_date, 'yyyy-MM-dd')
+      status: criteria.status !== undefined ? criteria.status : null, // Si quieres enviar status null
+      search_term:
+        criteria.search_term !== undefined ? criteria.search_term : null, // Si quieres enviar search_term null
+      // Asegúrate de que el resto de los campos en OrderFilterCriteria sean opcionales o tengan un valor por defecto
+    };
+    console.log(
+      'OrderFiltersComponent: Emitting SPECIFIC filters',
+      filtersToEmit
+    );
+    this.filtersChanged.emit(filtersToEmit);
+  }
+  private emitInitialFilters(): void {
+    const initialDate = this.filterForm.get('delivery_date')?.value;
+    const initialFilters: Partial<OrderFilterCriteria> = {
+      delivery_date: initialDate
+        ? this.datePipe.transform(initialDate, 'yyyy-MM-dd')
+        : null,
+    };
+
+    this.filtersChanged.emit(initialFilters as OrderFilterCriteria);
+    this.initialLoad = false;
+  }
+
+  applyAllFilters(formValues: any): void {
+    const filters: OrderFilterCriteria = {
+      delivery_date: formValues.delivery_date
+        ? this.datePipe.transform(formValues.delivery_date, 'yyyy-MM-dd')
         : null,
       status: formValues.status || null,
       search_term: formValues.search_term?.trim() || null,
     };
-    console.log('OrderFiltersComponent: Emitting filters', filters);
+    this.filtersChanged.emit(filters);
+  }
+  applyFilters(): void {
+    const formValues = this.filterForm.value;
+    const filters: OrderFilterCriteria = {
+      delivery_date: formValues.delivery_date
+        ? this.datePipe.transform(formValues.delivery_date, 'yyyy-MM-dd')
+        : null,
+      status: formValues.status || null,
+      search_term: formValues.search_term?.trim() || null,
+    };
     this.filtersChanged.emit(filters);
   }
 
   clearFilters(): void {
     this.filterForm.reset({
-      start_date: null,
-      end_date: null,
+      delivery_date: new Date(),
       status: null,
       search_term: '',
+    });
+    this.initialLoad = true;
+    this.emitSpecificFilters({
+      delivery_date: this.filterForm.get('delivery_date')?.value,
     });
   }
 
   ngOnDestroy(): void {
+    console.log('OrderFiltersComponent: ngOnDestroy - Instance Destroyed');
     this.destroy$.next();
     this.destroy$.complete();
   }

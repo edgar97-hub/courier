@@ -31,6 +31,7 @@ import { environment } from '../../../../environments/environment';
         rel="noopener noreferrer"
         matRipple
         class="menu-link-item static-link"
+        style="display: flex;justify-content:center"
       >
         <img
           src="{{ logoImageUrl }}"

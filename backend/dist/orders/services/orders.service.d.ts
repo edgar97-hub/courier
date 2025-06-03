@@ -20,7 +20,7 @@ export declare class OrdersService {
         errors?: any[];
     }>;
     importOrdersFromExcelData(excelRows: any[], idUser: string): Promise<ImportResult | undefined>;
-    findOrders({ pageNumber, pageSize, sortField, sortDirection, startDate, endDate, status, }: {
+    findOrders({ pageNumber, pageSize, sortField, sortDirection, startDate, endDate, status, search_term, delivery_date, }: {
         pageNumber?: number;
         pageSize?: number;
         sortField?: string;
@@ -28,6 +28,8 @@ export declare class OrdersService {
         startDate?: string;
         endDate?: string;
         status?: string;
+        search_term?: string;
+        delivery_date?: string;
     }, req: any): Promise<{
         items: any;
         total_count: number;

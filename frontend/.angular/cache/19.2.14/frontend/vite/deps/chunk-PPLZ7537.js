@@ -1,13 +1,13 @@
 import {
+  BreakpointObserver
+} from "./chunk-ERYR2BX5.js";
+import {
   _getEventTarget,
   _getFocusedElementPierceShadowDom,
   _getShadowRoot,
   isFakeMousedownFromScreenReader,
   isFakeTouchstartFromScreenReader
 } from "./chunk-WES3YV56.js";
-import {
-  BreakpointObserver
-} from "./chunk-ERYR2BX5.js";
 import {
   BidiModule
 } from "./chunk-UXGUB75P.js";
@@ -2923,4 +2923,4 @@ export {
   MATERIAL_SANITY_CHECKS,
   MatCommonModule
 };
-//# sourceMappingURL=chunk-EMWGTMGK.js.map
+//# sourceMappingURL=chunk-PPLZ7537.js.map

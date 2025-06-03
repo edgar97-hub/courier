@@ -166,7 +166,12 @@ export const AppStore = signalStore(
               }
             );
             authService.getCurrentUserFromBackend().subscribe();
-            router.navigate(['dashboard']);
+            // console.log('authResponse.user.role', authResponse.user.role);
+            if (authResponse.user.role === 'EMPRESA') {
+              router.navigate(['/orders/create']);
+            } else {
+              router.navigate(['dashboard']);
+            }
           } catch (err: any) {
             const errorMessage =
               err.message || 'Login failed. Please try again.';

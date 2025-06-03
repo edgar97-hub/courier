@@ -1,11 +1,11 @@
 <form [formGroup]="filterForm" class="filters-container">
   <div style="min-width: 100%">
-    <mat-form-field appearance="outline" style="width:250px !important">
+    <mat-form-field appearance="outline" style="width: 250px !important">
       <mat-label>Fecha de entrega </mat-label>
       <input
         matInput
         [matDatepicker]="startDatePicker"
-        formControlName="start_date"
+        formControlName="delivery_date"
         placeholder="mm/dd/yyyy"
       />
       <mat-datepicker-toggle
@@ -30,7 +30,12 @@
     >
       <mat-icon>search</mat-icon> Buscar
     </button>
-    <button mat-stroked-button class="btn-corp-secondary" type="button" (click)="clearFilters()">
+    <button
+      mat-stroked-button
+      class="btn-corp-secondary"
+      type="button"
+      (click)="clearFilters()"
+    >
       <mat-icon>clear_all</mat-icon> Limpiar
     </button>
   </div>

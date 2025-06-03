@@ -20,11 +20,13 @@ mat-card-subtitle {
 
 .form-section {
   margin-bottom: 32px;
+  gap: 10px !important;
+  // border: 1px solid black;
 
   .section-title {
     font-size: 1.2em;
     font-weight: 500;
-    color: #3f51b5; // Color primario de Material (o tu color de tema)
+    // color: #3f51b5; // Color primario de Material (o tu color de tema)
     margin-bottom: 20px;
     display: flex;
     align-items: center;
@@ -42,7 +44,7 @@ mat-card-subtitle {
 // Grid para organizar campos (responsive)
 .form-grid {
   display: grid;
-  gap: 16px; // Espacio entre campos
+  gap: 20px; // Espacio entre campos
   // Por defecto, 1 columna en móviles, se ajustará con media queries
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 

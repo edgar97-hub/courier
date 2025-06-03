@@ -55,9 +55,12 @@ export class OrderFiltersComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   constructor() {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     this.filterForm = this.fb.group({
-      start_date: [null],
-      end_date: [null],
+      start_date: [firstDay],
+      end_date: [lastDay],
       status: [null],
       search_term: [''], // Para el input de búsqueda general en la tabla
     });

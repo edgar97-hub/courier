@@ -203,10 +203,12 @@ td.mat-cell {
 .status-en-almacen {
   background-color: #0d6efd;
   color: #fff;
+  white-space: nowrap;
 } // Azul primario con texto blanco
 .status-en-transito {
   background-color: #0c1a77;
   color: #d0c8c8;
+  white-space: nowrap;
 }
 .status-entregado {
   background-color: #198754;
@@ -215,6 +217,7 @@ td.mat-cell {
 .status-no-entregado {
   background-color: #dc3545;
   color: #fff;
+  white-space: nowrap;
 } // Rojo peligro con texto blanco
 .status-cancelado {
   background-color: #6c757d;
@@ -223,6 +226,7 @@ td.mat-cell {
 .status-rechazado-en-punto {
   background-color: #ff6b6b;
   color: #fff;
+  white-space: nowrap;
 }
 .status-reprogramado {
   background-color: #adb5bd;

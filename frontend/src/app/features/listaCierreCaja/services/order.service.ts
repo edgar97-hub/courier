@@ -59,12 +59,15 @@ export class OrderService {
       .set('sort_direction', sortDirection);
 
     if (filters) {
-      if (filters.start_date) {
-        params = params.set('start_date', filters.start_date);
+      if (filters.delivery_date) {
+        params = params.set('delivery_date', filters.delivery_date);
       }
-      if (filters.end_date) {
-        params = params.set('end_date', filters.end_date);
-      }
+      // if (filters.start_date) {
+      //   params = params.set('start_date', filters.start_date);
+      // }
+      // if (filters.end_date) {
+      //   params = params.set('end_date', filters.end_date);
+      // }
       if (filters.status) {
         params = params.set('status', filters.status);
       }
@@ -341,8 +344,6 @@ export class OrderService {
       )
       .pipe(catchError(this.handleError));
   }
-
- 
 
   getAvailableDrivers(searchTerm: string): Observable<any> {
     const headers = this.getAuthHeaders();

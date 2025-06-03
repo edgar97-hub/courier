@@ -5,7 +5,7 @@ export interface AuthResponse {
     id: string;
     username?: string;
     email?: string;
-    rol?: string;
+    role?: string;
   };
   expiresIn?: number; // Tiempo de expiración del token en segundos
 }

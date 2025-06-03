@@ -32,7 +32,8 @@
 }
 
 .orders-table {
-  width: 100%;
+  border: 1px solid black !important;
+  min-width: 100% !important;
   border-collapse: collapse; // Evita doble borde
 }
 

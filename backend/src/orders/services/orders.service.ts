@@ -538,6 +538,8 @@ export class OrdersService {
       startDate,
       endDate,
       status = '',
+      search_term = '',
+      delivery_date = '',
     }: {
       pageNumber?: number;
       pageSize?: number;
@@ -546,6 +548,8 @@ export class OrdersService {
       startDate?: string;
       endDate?: string;
       status?: string;
+      search_term?: string;
+      delivery_date?: string;
     },
     req,
   ): Promise<{
@@ -559,50 +563,83 @@ export class OrdersService {
 
     try {
       const skip = (pageNumber - 1) * pageSize;
-      const where: FindOptionsWhere<OrdersEntity> = {};
+      const query = this.orderRepository
+        .createQueryBuilder('order')
+        .leftJoinAndSelect('order.user', 'user')
+        .leftJoinAndSelect('order.assigned_driver', 'assigned_driver')
+        .leftJoinAndSelect('order.company', 'company');
 
-      if (startDate && endDate) {
-        const [startY, startM, startD] = startDate.split('-').map(Number);
-        const [endY, endM, endD] = endDate.split('-').map(Number);
-
-        const start = new Date(startY, startM - 1, startD, 0, 0, 0);
-        const end = new Date(endY, endM - 1, endD, 23, 59, 59);
-        where.createdAt = Between(start, end);
-      }
-
-      if (status) {
-        where.status = status as STATES;
-      }
-
-      if (role === ROLES.COMPANY) {
-        where.company = { id: idUser };
+      if (delivery_date) {
+        const start = new Date(delivery_date + 'T00:00:00');
+        const end = new Date(delivery_date + 'T23:59:59');
+        query.andWhere('order.delivery_date BETWEEN :start AND :end', {
+          start,
+          end,
+        });
+      } else {
+        if (startDate && endDate) {
+          const start = new Date(startDate + 'T00:00:00');
+          const end = new Date(endDate + 'T23:59:59');
+          query.andWhere('order.createdAt BETWEEN :start AND :end', {
+            start,
+            end,
+          });
+        }
       }
 
       if (role === ROLES.MOTORIZED) {
-        where.assigned_driver = { id: idUser };
+        query.andWhere('assigned_driver.id = :idUser', { idUser });
+      }
+      if (role === ROLES.COMPANY) {
+        query.andWhere('company.id = :idUser', { idUser });
       }
 
-      const sortFieldMap = {
-        registration_date: 'createdAt',
-      };
-      const sortBy = sortFieldMap[sortField] || sortField;
+      if (status) {
+        query.andWhere('order.status = :status', { status });
+      }
 
-      return this.orderRepository
-        .findAndCount({
-          where,
-          relations: ['user', 'assigned_driver', 'company'],
-          order: {
-            [sortBy]: sortDirection.toUpperCase() as 'ASC' | 'DESC',
-          },
-          skip,
-          take: pageSize,
-        })
-        .then(([items, total]) => ({
-          items,
-          total_count: total,
-          page_number: pageNumber,
-          page_size: pageSize,
-        }));
+      if (search_term) {
+        const term = `%${search_term}%`;
+        query.andWhere(
+          `(CAST(order.code AS TEXT) ILIKE :term OR 
+        user.username ILIKE :term OR 
+        assigned_driver.username ILIKE :term OR 
+        company.username ILIKE :term OR 
+        order.shipment_type ILIKE :term OR 
+        order.recipient_name ILIKE :term OR 
+        order.delivery_district_name ILIKE :term OR 
+        CAST(order.amount_to_collect_at_delivery AS TEXT) ILIKE :term OR
+        order.tracking_code ILIKE :term
+        )`,
+          { term },
+        );
+      }
+
+      // 🧭 Mapeo de campos ordenables
+      const sortFieldMap = {
+        registration_date: 'order.createdAt',
+        motorizado: 'assigned_driver.username',
+        usuario_creacion: 'user.username',
+      };
+
+      const sortBy = sortFieldMap[sortField] || `order.${sortField}`;
+      const direction =
+        sortDirection?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+
+      // 📦 Paginación y ordenamiento
+      query
+        .orderBy(sortBy, direction as 'ASC' | 'DESC')
+        .skip(skip)
+        .take(pageSize);
+
+      // ✅ Retornar
+      const [items, total] = await query.getManyAndCount();
+      return {
+        items,
+        total_count: total,
+        page_number: pageNumber,
+        page_size: pageSize,
+      };
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
