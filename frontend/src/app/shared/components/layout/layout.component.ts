@@ -10,6 +10,15 @@ import { AppStore } from '../../../app.store';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { MatListModule } from '@angular/material/list';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { NoticeService } from '../../../core/services/notice.service'; // Ajusta ruta
+import {
+  RouteSpecificNoticeDialogComponent,
+  RouteNoticeDialogData,
+} from '../../../features/shared/components/route-specific-notice-dialog/route-specific-notice-dialog.component'; // Ajusta ruta
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { Subject } from 'rxjs';
+import { filter, takeUntil, switchMap, tap } from 'rxjs/operators';
+import { Router, NavigationEnd, Event as RouterEvent } from '@angular/router'; // Event para tipar
 
 @Component({
   selector: 'app-layout',
@@ -104,6 +113,7 @@ export default class LayoutComponent implements OnDestroy {
       this.isMobile.set(this._mobileQuery.matches);
     this._mobileQuery.addEventListener('change', this._mobileQueryListener);
   }
+
   ngOnDestroy(): void {
     this._mobileQuery.removeEventListener('change', this._mobileQueryListener);
   }

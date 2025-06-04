@@ -1,5 +1,13 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../config/base.entity';
+export interface PromotionalSetItem {
+  id: string; // Para identificar cada set, ej. un UUID generado en el frontend
+  imageUrl: string | null;
+  linkUrl: string | null;
+  buttonText: string | null;
+  isActive?: boolean; // Opcional: para activar/desactivar un set
+  order?: number; // Opcional: para el orden de visualización
+}
 
 @Entity({ name: 'settings' })
 export class SettingsEntity extends BaseEntity {
@@ -15,16 +23,16 @@ export class SettingsEntity extends BaseEntity {
   @Column({ default: '' })
   phone_number: string;
 
-  @Column({ nullable: false, default: '' })
+  @Column({ default: '' })
   logo_url: string;
 
-  @Column({ nullable: false, default: '' })
+  @Column({ default: '' })
   terms_conditions_url: string;
 
-  @Column({ nullable: false, default: '' })
+  @Column({ default: '' })
   background_image_url: string;
 
-  @Column({ nullable: false, default: '' })
+  @Column({ default: '' })
   rates_image_url: string;
 
   @Column({ default: '' })
@@ -32,6 +40,16 @@ export class SettingsEntity extends BaseEntity {
 
   @Column({ default: '' })
   coverage_map_url: string;
+
+  @Column({ default: '' })
+  global_notice_image_url: string;
+
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    default: () => "'[]'",
+  })
+  promotional_sets: PromotionalSetItem[];
 
   //   @Column({
   //     type: 'jsonb',

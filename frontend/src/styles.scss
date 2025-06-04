@@ -119,6 +119,8 @@ h6,
 
 // ----- 6. ESTILOS GLOBALES PARA BOTONES CORPORATIVOS -----
 .btn-corp-primary {
+  font-weight: 700 !important; // Regular
+
   &.mat-mdc-button-base {
     @extend %btn-corp-base;
     background-color: corp.$bg-button-primary !important; // Naranja #F97C06
@@ -141,6 +143,8 @@ h6,
 }
 
 .btn-corp-secondary {
+  font-weight: 700 !important; // Regular
+
   &.mat-mdc-button-base {
     @extend %btn-corp-base;
     background-color: corp.$bg-button-secondary !important; // Blanco #FFFFFF
@@ -212,3 +216,5 @@ table.mat-mdc-table {
     }
   }
 }
+// @import "~slick-carousel/slick/slick.css"; // El '~' apunta a node_modules
+// @import "~slick-carousel/slick/slick-theme.css";

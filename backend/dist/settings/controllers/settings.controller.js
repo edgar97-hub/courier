@@ -32,6 +32,9 @@ let SettingsController = class SettingsController {
     async findAllUsers() {
         return await this.usersService.findUsers();
     }
+    async getPromotionalSets() {
+        return this.usersService.getPromotionalSets();
+    }
     async findUserById(id) {
         return await this.usersService.findUserById(id);
     }
@@ -56,6 +59,9 @@ let SettingsController = class SettingsController {
     async getLogoImage(res) {
         return await this.usersService.getLogoImage(res);
     }
+    async getGlobalNoticeImage(res) {
+        return await this.usersService.getGlobalNoticeImage(res);
+    }
 };
 exports.SettingsController = SettingsController;
 __decorate([
@@ -71,6 +77,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], SettingsController.prototype, "findAllUsers", null);
+__decorate([
+    (0, common_1.Get)('promotional-sets'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], SettingsController.prototype, "getPromotionalSets", null);
 __decorate([
     (0, swagger_1.ApiParam)({
         name: 'id',
@@ -152,6 +164,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], SettingsController.prototype, "getLogoImage", null);
+__decorate([
+    (0, public_decorator_1.PublicAccess)(),
+    (0, common_1.Get)('company/global-notice-image'),
+    __param(0, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], SettingsController.prototype, "getGlobalNoticeImage", null);
 exports.SettingsController = SettingsController = __decorate([
     (0, swagger_1.ApiTags)('Settings'),
     (0, common_1.Controller)('settings'),

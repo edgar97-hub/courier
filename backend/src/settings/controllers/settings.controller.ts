@@ -28,8 +28,8 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { SettingDTO, SettingUpdateDTO } from '../dto/setting.dto';
 import { SettingsService } from '../services/settings.service';
 import { PublicAccess } from 'src/auth/decorators/public.decorator';
-
-import { Response } from 'express'; // ← IMPORTANTE
+import { Response } from 'express';
+import { PromotionalSetItem } from '../entities/settings.entity';
 
 @ApiTags('Settings')
 @Controller('settings')
@@ -47,6 +47,11 @@ export class SettingsController {
   @Get('all')
   public async findAllUsers() {
     return await this.usersService.findUsers();
+  }
+
+  @Get('promotional-sets')
+  async getPromotionalSets(): Promise<PromotionalSetItem[]> {
+    return this.usersService.getPromotionalSets();
   }
 
   @ApiParam({
@@ -123,5 +128,11 @@ export class SettingsController {
   @Get('company/logo-image')
   public async getLogoImage(@Res() res: Response): Promise<void> {
     return await this.usersService.getLogoImage(res);
+  }
+
+  @PublicAccess()
+  @Get('company/global-notice-image')
+  public async getGlobalNoticeImage(@Res() res: Response): Promise<void> {
+    return await this.usersService.getGlobalNoticeImage(res);
   }
 }

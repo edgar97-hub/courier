@@ -1,3 +1,15 @@
+export interface PromotionalSetItem {
+  id: string; // UUID generado en el frontend para identificarlo y para el trackBy
+  imageUrl: string | null;
+  linkUrl: string | null;
+  buttonText: string | null;
+  isActive?: boolean;
+  order?: number;
+  // Propiedad temporal para manejar el archivo seleccionado en el frontend
+  imageFile?: File | null;
+  imagePreviewUrl?: string | null;
+}
+
 export interface AppSettings {
   id?: string; // Opcional, si tu backend devuelve un ID para el registro de configuración
   business_name: string | null;
@@ -10,6 +22,8 @@ export interface AppSettings {
   rates_image_url: string | null;
   excel_import_template_url: string | null;
   coverage_map_url: string | null;
+  global_notice_image_url: string | null;
+  promotional_sets: PromotionalSetItem[];
 }
 
 // Valor inicial para el formulario, útil si la API no devuelve nada la primera vez
@@ -24,4 +38,6 @@ export const initialAppSettings: AppSettings = {
   rates_image_url: null,
   excel_import_template_url: null,
   coverage_map_url: null,
+  global_notice_image_url: null,
+  promotional_sets: [],
 };

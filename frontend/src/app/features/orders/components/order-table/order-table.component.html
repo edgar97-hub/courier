@@ -128,29 +128,6 @@
         Acciones
       </th>
       <td mat-cell *matCellDef="let order" class="actions-cell">
-        <!-- Botón directo para EN_TRANSITO -->
-        <!-- <button
-          mat-icon-button
-          color="primary"
-          *ngIf="canMarkAs(order, OrderStatus.EN_TRANSITO)"
-          (click)="changeOrderStatus(order, OrderStatus.EN_TRANSITO)"
-          matTooltip="Marcar como En Tránsito"
-        >
-          <mat-icon>local_shipping</mat-icon>
-        </button> -->
-
-        <!-- Botón directo para ENTREGADO -->
-        <!-- <button
-          mat-icon-button
-          class="action-icon-delivered"
-          *ngIf="canMarkAs(order, OrderStatus.ENTREGADO)"
-          (click)="changeOrderStatus(order, OrderStatus.ENTREGADO)"
-          matTooltip="Marcar como Entregado"
-        >
-          <mat-icon>check_circle_outline</mat-icon>
-         </button> -->
-
-        <!-- Menú para más acciones -->
         <button
           mat-icon-button
           [matMenuTriggerFor]="orderActionMenu"
@@ -180,30 +157,6 @@
             <mat-icon>event_repeat</mat-icon>
             <span>Reprogramar</span>
           </button>
-          <!-- <button
-            mat-menu-item
-            (click)="openReportIssueModal(order)"
-            *ngIf="
-              canMarkAs(order, OrderStatus.NO_ENTREGADO) ||
-              canMarkAs(order, OrderStatus.INCIDENCIA)
-            "
-          >
-            <mat-icon color="warn">report_problem</mat-icon>
-            <span>Reportar Incidencia</span>
-          </button>
-          <mat-divider *ngIf="isAdminOrDriver()"></mat-divider>
-          <button
-            mat-menu-item
-            (click)="onUploadProof(order)"
-            *ngIf="
-              order.status === OrderStatus.EN_TRANSITO ||
-              order.status === OrderStatus.ENTREGADO
-            "
-          >
-            <mat-icon>camera_alt</mat-icon>
-            <span>Subir Prueba Entrega</span>
-          </button>
-         -->
           <button
             mat-menu-item
             (click)="openAssignDriverModal(order)"
@@ -221,11 +174,6 @@
             <mat-icon>picture_as_pdf</mat-icon>
             <span>PDF Rotulado</span>
           </button>
-
-          <!-- <button mat-menu-item (click)="onViewPdfA4Landscape(order)">
-            <mat-icon>picture_as_pdf</mat-icon>
-            <span>PDF formato A4 Landscape</span>
-          </button> -->
 
           <button mat-menu-item (click)="onViewPdfTicket80mm(order)">
             <mat-icon>picture_as_pdf</mat-icon>

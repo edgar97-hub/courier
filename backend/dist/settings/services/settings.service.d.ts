@@ -1,17 +1,18 @@
 import { DeleteResult, Repository } from 'typeorm';
 import { SettingDTO, SettingUpdateDTO } from '../dto/setting.dto';
-import { SettingsEntity } from '../entities/settings.entity';
+import { PromotionalSetItem, SettingsEntity } from '../entities/settings.entity';
 import { Response } from 'express';
 export declare class SettingsService {
     private readonly userRepository;
     constructor(userRepository: Repository<SettingsEntity>);
     createUser(body: SettingDTO): Promise<SettingsEntity>;
     findUsers(): Promise<SettingsEntity[]>;
-    findUserById(id: string): Promise<SettingsEntity>;
+    findUserById(id: string): Promise<SettingsEntity | null>;
     findBy({ key, value }: {
         key: keyof SettingDTO;
         value: any;
     }): Promise<SettingsEntity>;
+    getPromotionalSets(): Promise<PromotionalSetItem[] | []>;
     updateUser(body: SettingUpdateDTO, id: string): Promise<any | undefined>;
     deleteUser(id: string): Promise<DeleteResult | undefined>;
     uploadLogo(logoFile: Express.Multer.File, req: Request): Promise<{
@@ -25,4 +26,5 @@ export declare class SettingsService {
     }>;
     getBackgroundImage(res: Response): Promise<void>;
     getLogoImage(res: Response): Promise<void>;
+    getGlobalNoticeImage(res: Response): Promise<void>;
 }

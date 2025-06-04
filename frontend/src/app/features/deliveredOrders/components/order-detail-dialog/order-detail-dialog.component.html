@@ -1,13 +1,6 @@
-<div
-  class="dialog-container"
-  cdkDrag
-  cdkDragRootElement=".cdk-overlay-pane"
-  cdkDragHandle=".dialog-header-draggable"
->
+<div class="dialog-container">
   <div class="dialog-header dialog-header-draggable">
     <h2 mat-dialog-title class="dialog-title">Foto del Pedido</h2>
-    <!-- El order-code-chip es opcional, lo quito para simplificar como en tu captura de modal si solo muestra la foto -->
-    <!-- <span class="order-code-chip">N°: {{ data.orderCode }}</span> -->
     <button
       mat-icon-button
       class="close-button"
@@ -26,8 +19,6 @@
         alt="Foto del Pedido"
         class="evidence-image"
       />
-
-      <!-- MENSAJE DE ERROR/SIN IMAGEN: Se muestra si NO hay URL O si ha fallado la carga -->
       <div
         *ngIf="!data.order.product_delivery_photo_url || imageLoadFailed()"
         class="placeholder-container"
@@ -41,6 +32,8 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end" class="dialog-actions">
-    <button mat-flat-button class="btn-corp-primary" (click)="onClose()">Cerrar</button>
+    <button mat-flat-button class="btn-corp-primary" (click)="onClose()">
+      Cerrar
+    </button>
   </mat-dialog-actions>
 </div>

@@ -132,9 +132,13 @@ __decorate([
     __metadata("design:type", String)
 ], OrdersEntity.prototype, "tracking_code", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true, default: '' }),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], OrdersEntity.prototype, "product_delivery_photo_url", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], OrdersEntity.prototype, "observation_shipping_cost_modification", void 0);
 exports.OrdersEntity = OrdersEntity = __decorate([
     (0, typeorm_1.Entity)({ name: 'orders' })
 ], OrdersEntity);

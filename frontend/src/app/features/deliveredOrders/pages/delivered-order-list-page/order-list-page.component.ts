@@ -204,33 +204,26 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
         console.log('Orders fetched:', response);
       });
   }
+  
 
-   
-
-  handleStatusChanged(event: {
-    orderId: number | string;
-    newStatus: OrderStatus;
-    reason?: string | null;
-    proofOfDeliveryImageUrl?: string | null;
-    shippingCostPaymentMethod?: string | null;
-    collectionPaymentMethod?: string | null;
+  handleShippingCostChanged(event: {
+    orderId: string | number;
+    newShippingCost: number;
+    observation: string;
   }): void {
-    this.isLoading = true; // O una bandera de carga específica para la actualización
-    console.log('OrderListPage: Status change requested', event);
+    this.isLoading = true;
+    console.log('OrderListPage: Shipping cost change requested', event);
 
     this.orderService
-      .updateOrderStatus(
+      .updateOrderShippingCost(
         event.orderId,
-        event.newStatus,
-        event.reason || '',
-        event.proofOfDeliveryImageUrl,
-        event.shippingCostPaymentMethod,
-        event.collectionPaymentMethod
+        event.newShippingCost,
+        event.observation
       )
       .subscribe({
         next: (updatedOrder) => {
           this.snackBar.open(
-            `Estado del pedido ${updatedOrder.code} actualizado a ${event.newStatus}.`,
+            `Costo de envío del pedido ${updatedOrder.code} actualizado.`,
             'OK',
             { duration: 3000, panelClass: ['success-snackbar'] }
           );
@@ -238,7 +231,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.snackBar.open(
-            `Error al actualizar estado: ${err.message || 'Intente de nuevo'}`,
+            `Error al actualizar costo: ${err.message || 'Intente de nuevo'}`,
             'Cerrar',
             { duration: 5000, panelClass: ['error-snackbar'] }
           );
@@ -248,77 +241,35 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
           this.isLoading = false;
         },
       });
-  }
 
-  handleMotorizedChanged(event: {
-    orderId: number | string;
-    motorizedId: string;
-  }): void {
-    console.log('orderId', event.orderId);
-    console.log('motorizedId', event.motorizedId);
-    this.orderService
-      .assignDriverToOrder(event.orderId, event.motorizedId)
-      .subscribe({
-        next: (updatedOrder) => {
-          this.snackBar.open(
-            `Motorizado ${updatedOrder.assigned_driver?.username} asignado al pedido ${updatedOrder.code}.`,
-            'OK',
-            {
-              duration: 3000,
-              panelClass: ['success-snackbar'],
-            }
-          );
-          this.fetchOrders();
-        },
-        error: (err) => {
-          this.snackBar.open(
-            `Error al asignar motorizado: ${err.message || 'Intente de nuevo'}`,
-            'Cerrar',
-            {
-              duration: 5000,
-              panelClass: ['error-snackbar'],
-            }
-          );
-        },
-      });
-  }
-
-  handleRescheduleChanged(event: {
-    orderId: number | string;
-    newDate: Date;
-    reason?: string;
-  }): void {
-    const isoString = new Date(event.newDate).toISOString();
-    this.orderService
-      .rescheduleOrder(event.orderId, isoString || '', event.reason)
-      .subscribe({
-        next: (updatedOrder) => {
-          this.snackBar.open(
-            `Pedido ${
-              updatedOrder.code
-            } reprogramado para ${this.datePipe.transform(
-              updatedOrder.delivery_date,
-              'dd/MM/yyyy'
-            )}.`,
-            'OK',
-            {
-              duration: 3500,
-              panelClass: ['success-snackbar'],
-            }
-          );
-          this.fetchOrders();
-        },
-        error: (err) => {
-          this.snackBar.open(
-            `Error al reprogramar pedido: ${err.message || 'Intente de nuevo'}`,
-            'Cerrar',
-            {
-              duration: 5000,
-              panelClass: ['error-snackbar'],
-            }
-          );
-        },
-      });
+    // --- SIMULACIÓN --- (Reemplaza con la llamada real a tu API)
+    // setTimeout(() => {
+    //   this.snackBar.open(
+    //     `Costo de envío para pedido ${
+    //       event.orderId
+    //     } actualizado a S/${event.newShippingCost.toFixed(2)}. Motivo: ${
+    //       event.observation
+    //     } (Simulado)`,
+    //     'OK',
+    //     { duration: 4000, panelClass: ['success-snackbar'] }
+    //   );
+    //   // Simular la recarga de datos o la actualización local
+    //   const orderIndex = this.orders.findIndex((o) => o.id === event.orderId);
+    //   if (orderIndex > -1) {
+    //     const updatedOrders = [...this.orders];
+    //     updatedOrders[orderIndex] = {
+    //       ...updatedOrders[orderIndex],
+    //       shipping_cost: event.newShippingCost,
+    //       // Aquí deberías tener un lugar donde guardar/mostrar la 'observation_shipping_cost_modification'
+    //       // si tu modelo Order lo soporta directamente, o si se guarda en un log.
+    //       // Por ejemplo, si 'observations' es un campo general:
+    //       // observations: `${updatedOrders[orderIndex].observations || ''}\nMOD_COST_ENVIO: ${event.observation}`.trim()
+    //     };
+    //     this.orders = updatedOrders;
+    //   }
+    //   this.isLoading = false;
+    // }, 1000);
+    // --- FIN SIMULACIÓN ---
   }
 
   onFiltersChanged(filters: OrderFilterCriteria): void {

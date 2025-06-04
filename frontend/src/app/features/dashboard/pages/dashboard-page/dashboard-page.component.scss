@@ -124,3 +124,27 @@
   }
   // El color del botón vendrá de la directiva color="primary" o "accent"
 }
+
+.promotional-slider-section {
+  border: 1px solid black;
+  margin-bottom: 30px; // Espacio entre el slider y el siguiente contenido
+  // width: 100%; // El slider ya es block y tomará el ancho
+  // max-width: 1200px; // Opcional: un ancho máximo para el slider en pantallas grandes
+  // margin-left: auto;
+  // margin-right: auto;
+  border-radius: 8px; // Opcional: si quieres que el contenedor del slider tenga bordes
+  // overflow: hidden; // Si el slider en sí no tiene bordes redondeados
+  // box-shadow: 0 4px 12px rgba(0,0,0,0.1); // Opcional: sombra para el contenedor del slider
+}
+.kpi-header {
+  // Para el título "Resumen de Pedidos"
+  margin-top: 24px; // Espacio después del slider o del header de página
+  margin-bottom: 16px;
+  h2 {
+    font-size: 1.4em;
+    font-weight: 500;
+    color: #37474f; // Un color oscuro pero no negro
+    // border-bottom: 2px solid #3f51b5; // Opcional: un subrayado
+    // padding-bottom: 8px;
+  }
+}

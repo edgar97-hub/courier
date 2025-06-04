@@ -183,3 +183,86 @@ h2:first-of-type {
   color: #757575;
   font-size: 0.85em; // Un poco más pequeño
 }
+
+.section-divider {
+  margin: 32px 0; // Más espacio para separar secciones mayores
+}
+
+.section-header-with-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  h2 {
+    margin: 0; // Quitar margen por defecto de h2
+  }
+}
+
+.promotional-set-item {
+  margin-bottom: 24px;
+  padding: 16px; // Padding interno para la tarjeta del set
+  border-radius: 8px;
+
+  .item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px; // Espacio debajo del título del item
+    margin-bottom: 16px; // Espacio antes del contenido del item
+    border-bottom: 1px solid #eee; // Separador sutil
+
+    mat-card-title {
+      font-size: 1.1em; // Título del conjunto un poco más pequeño
+      font-weight: 500;
+    }
+  }
+
+  mat-card-content {
+    padding-top: 0; // Ya tenemos padding en el .promotional-set-item
+  }
+}
+
+.compact-upload {
+  // Para que la subida de imagen dentro del set sea más compacta
+  .section-subtitle {
+    font-size: 0.9em;
+    margin-bottom: 8px;
+  }
+  .logo-preview-container.small-preview {
+    height: 80px; // Preview más pequeña
+    width: auto;
+    max-width: 150px; // Limitar ancho de preview
+    margin-bottom: 8px;
+    border: 1px dashed #ccc;
+  }
+  .logo-preview {
+    // La imagen dentro de la preview
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+  }
+  .upload-button {
+    margin-top: 8px;
+    margin-bottom: 4px;
+  }
+  .hint {
+    margin-top: 0;
+  }
+}
+
+.is-active-toggle {
+  margin-top: 16px;
+  margin-bottom: 8px;
+  display: block; // Para que ocupe su línea
+}
+
+.item-divider {
+  margin-top: 0; // Quitar margen superior si el item ya tiene margen inferior
+  margin-bottom: 24px;
+}
+
+.selected-file-name {
+  font-style: italic;
+  color: #555;
+  font-size: 0.8em;
+}

@@ -29,8 +29,16 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss"],
-            "scripts": [],
+            "styles": [
+              "src/styles.scss",
+              "node_modules/slick-carousel/slick/slick.css",
+              "node_modules/slick-carousel/slick/slick-theme.css"
+            ],
+
+            "scripts": [
+              "node_modules/jquery/dist/jquery.min.js",
+              "node_modules/slick-carousel/slick/slick.min.js"
+            ],
             "stylePreprocessorOptions": {
               "includePaths": ["./node_modules"]
             }
@@ -40,8 +48,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "1.2MB",
+                  "maximumError": "1.5MB"
                 },
                 {
                   "type": "anyComponentStyle",

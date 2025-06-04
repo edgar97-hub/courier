@@ -36,7 +36,6 @@ export class OrdersEntity extends BaseEntity {
   @Column({ nullable: true })
   delivery_coordinates?: string;
 
-  // @Column({ nullable: true })
   @Column({ nullable: true, type: 'timestamp' })
   delivery_date?: Date;
 
@@ -102,6 +101,9 @@ export class OrdersEntity extends BaseEntity {
   @Column({ unique: true })
   tracking_code: string;
 
-  @Column({ nullable: true, default: '' })
+  @Column({ nullable: true })
   product_delivery_photo_url?: string;
+
+  @Column({ nullable: true })
+  observation_shipping_cost_modification?: string;
 }

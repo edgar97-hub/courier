@@ -169,14 +169,15 @@ export class OrderService {
       .pipe(catchError(this.handleError));
   }
 
-  updateOrderStatus(
+  updateOrderShippingCost(
     orderId: number | string,
-    newStatus: string,
-    reason?: string,
-    product_delivery_photo_url?: string | null,
-    payment_method_for_shipping_cost?: string | null,
-    payment_method_for_collection?: string | null
+    newValue: number,
+    notes?: string
   ): Observable<any> {
+    // event.orderId,
+    //   event.newShippingCost,
+    //   event.observation
+
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
       return throwError(() => new Error('Not authenticated to fetch users.'));
@@ -184,20 +185,11 @@ export class OrderService {
 
     let payload: any = {
       orderId,
-      reason,
-      newStatus,
-      action: 'CAMBIO DE ESTADO',
+      newValue,
+      notes,
+      action: 'MODIFICACIÓN DEL COSTO DE ENVÍO',
     };
-    if (product_delivery_photo_url) {
-      payload.product_delivery_photo_url = product_delivery_photo_url;
-    }
-    if (payment_method_for_shipping_cost) {
-      payload.payment_method_for_shipping_cost =
-        payment_method_for_shipping_cost;
-    }
-    if (payment_method_for_collection) {
-      payload.payment_method_for_collection = payment_method_for_collection;
-    }
+
     return this.http
       .post<{ success: boolean; message: string; batchId?: string }>(
         `${this.apiUrlOrders}/update-order-status`,

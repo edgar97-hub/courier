@@ -1,0 +1,166 @@
+// src/app/features/dashboard/components/image-slider/image-slider.component.scss
+:host {
+  display: block;
+  width: 100%;
+}
+
+.slick-slider-container {
+  width: 100%;
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  aspect-ratio: 16 / 5.5;
+  background-color: #e9ecef; // Color de fondo mientras carga o si la imagen no cubre
+
+  // Estilos para los controles de Slick Carousel usando ::ng-deep
+  // Esto es para sobreescribir o mejorar los estilos de slick-theme.css
+  ::ng-deep {
+    .slick-list {
+      border-radius: 10px; // Para que las imágenes se vean redondeadas
+      cursor: grab;
+      &:active {
+        cursor: grabbing;
+      }
+    }
+
+    .slick-dots {
+      bottom: 15px; // Posición de los puntos
+      li button:before {
+        font-size: 10px; // Tamaño de los puntos
+        color: white;
+        opacity: 0.5;
+        transition: opacity 0.3s ease;
+      }
+      li.slick-active button:before,
+      li:hover button:before {
+        opacity: 0.95; // Color del punto activo/hover
+      }
+    }
+
+    .slick-arrow {
+      // Estilo base para ambas flechas
+      z-index: 2; // Asegurar que estén por encima
+      width: 40px;
+      height: 40px;
+      background-color: rgba(0, 0, 0, 0.45); // Fondo semitransparente
+      border-radius: 50%; // Círculos
+      transition: background-color 0.3s ease, opacity 0.3s ease;
+      opacity: 0; // Ocultas por defecto, se muestran al hacer hover en el contenedor
+
+      &:before {
+        font-family: "slick"; // Crucial: esta es la fuente de iconos de slick-theme.css
+        font-size: 20px; // Tamaño del carácter de la flecha
+        line-height: 1; // Para centrar mejor el glifo de la fuente
+        color: white;
+        opacity: 0.8;
+      }
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.65);
+        &:before {
+          opacity: 1;
+        }
+      }
+    }
+
+    // Mostrar flechas al hacer hover sobre el contenedor del slider
+    // (El :hover debe estar en el contenedor que activa la visibilidad)
+    .slick-prev {
+      left: 20px;
+    }
+    .slick-next {
+      right: 20px;
+    }
+  }
+  // Este selector es más específico para el hover del contenedor
+  &:hover ::ng-deep .slick-arrow {
+    opacity: 1;
+  }
+}
+
+.slide-item {
+  outline: none; // Quitar outline en focus
+  position: relative;
+  height: 100%;
+  display: flex !important; // Necesario para slick
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  &.clickable {
+    cursor: pointer;
+  }
+}
+
+.slide-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; // 'cover' suele ser mejor para banners promocionales
+}
+
+.slide-caption-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 25px 0; // Espacio para el botón
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0) 100%
+  ); // Degradado más pronunciado
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease-in-out;
+}
+
+.slide-item:hover .slide-caption-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.slide-button {
+  background-color: #ff6f00; // Naranja (ajusta a tu tema)
+  color: white;
+  padding: 10px 25px; // Ajusta padding
+  border: none;
+  border-radius: 22px; // Botón más redondeado
+  font-weight: 500; // Ligeramente menos bold
+  font-size: 0.85em; // Un poco más pequeño
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease,
+    box-shadow 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+
+  &:hover {
+    background-color: #ef6c00;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  }
+  &:active {
+    transform: translateY(0px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.slider-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  aspect-ratio: 16 / 5.5;
+  background-color: #f0f0f0;
+  color: #a0a0a0;
+  border-radius: 10px;
+  font-style: italic;
+  border: 1px dashed #cccccc;
+  text-align: center;
+  padding: 20px;
+}

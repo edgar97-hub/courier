@@ -30,4 +30,5 @@ export declare class OrdersEntity extends BaseEntity {
     logs: OrderLogEntity[];
     tracking_code: string;
     product_delivery_photo_url?: string;
+    observation_shipping_cost_modification?: string;
 }

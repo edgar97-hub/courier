@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -14,6 +14,10 @@ import {
   DashboardSummary,
 } from '../../services/dashboard-data.service'; // KpiData y ChartDataEntry ya están en DashboardSummary
 import { MatCardModule } from '@angular/material/card';
+import { environment } from '../../../../../environments/environment';
+import { PromotionalSetItem } from '../../../settings/models/app-settings.interface';
+import { HttpClient } from '@angular/common/http';
+import { ImageSliderComponent } from '../../components/image-slider/image-slider.component'; // <--- IMPORTA EL SLIDER
 
 @Component({
   selector: 'app-dashboard-page',
@@ -26,24 +30,28 @@ import { MatCardModule } from '@angular/material/card';
     MatButtonModule, // Añadido
     MatIconModule, // Añadido
     MatCardModule,
-    StatusDistributionChartComponent
+    ImageSliderComponent,
   ],
   templateUrl: './dashboard-page.component.html',
   styleUrls: ['./dashboard-page.component.scss'],
 })
 export class DashboardPageComponent implements OnInit, OnDestroy {
+  private http = inject(HttpClient);
+
   private dashboardDataService = inject(DashboardDataService);
   private destroy$ = new Subject<void>();
+  private apiUrl = `${environment.apiUrl}/settings`;
 
   dashboardSummary$: Observable<DashboardSummary | null> | undefined; // Puede ser null si hay error
+  promotionalSlides = signal<PromotionalSetItem[]>([]); // Inicializa como array vacío
   isLoading = true; // Para la carga inicial de toda la data del dashboard
   loadError = false; // Para manejar errores de carga
 
   ngOnInit(): void {
-    this.loadDashboardData();
+    this.loadAllDashboardData();
   }
 
-  loadDashboardData(): void {
+  loadAllDashboardData(): void {
     this.isLoading = true;
     this.loadError = false; // Resetear error al reintentar
     this.dashboardSummary$ = this.dashboardDataService
@@ -53,21 +61,60 @@ export class DashboardPageComponent implements OnInit, OnDestroy {
         tap((summary) => {
           this.isLoading = false;
           if (!summary) {
-            // Si el servicio devuelve null en caso de error manejado internamente
             this.loadError = true;
           }
-          // console.log('Dashboard summary received:', summary);
         }),
         catchError((err) => {
           this.isLoading = false;
-          this.loadError = true; // Marcar que hubo un error
+          this.loadError = true;
           console.error('Dashboard Page: Error loading summary', err);
-          // El servicio ya podría haber manejado el mensaje al usuario,
-          // o podrías hacerlo aquí con MatSnackBar si lo prefieres.
           return of(null); // Devuelve un observable que emite null para que el async pipe no rompa
         })
       );
+
+    // Cargar slides promocionales
+    this.dashboardDataService
+      .getPromotionalSets()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (slides: any) => {
+          this.promotionalSlides.set(
+            slides.filter(
+              (slide: any) => slide.isActive !== false && slide.imageUrl
+            )
+          ); // Filtra activos y con imagen
+          // Marcamos la carga como completa después de que ambas llamadas (o las que sean) terminen.
+          // Si las llamadas son independientes, puedes usar forkJoin o simplemente el último finalize.
+        },
+        error: (err) => {
+          console.error(
+            'Dashboard Page: Error loading promotional slides',
+            err
+          );
+          // No necesariamente un error fatal para todo el dashboard
+        },
+        // complete: () => {
+        //   // Podrías poner isLoading a false aquí si esta es la última llamada,
+        //   // o usar un contador/forkJoin para todas las llamadas del dashboard.
+        //   // Para simplificar, lo pondremos aquí asumiendo que el summary es más rápido o igual.
+        //   this.dashboardSummary$
+        //     ?.pipe(takeUntil(this.destroy$))
+        //     .subscribe(() => (this.isLoading = false));
+        // },
+      });
   }
+
+  // getPromotionalSets(): Observable<PromotionalSetItem[]> {
+  //   return this.http
+  //     .get<PromotionalSetItem[]>(`${this.apiUrl}/promotional-sets`)
+  //     .pipe(
+  //       tap((sets) => console.log('Promotional sets loaded:', sets)),
+  //       catchError((err) => {
+  //         console.error('Error loading promotional sets:', err);
+  //         return of([]);
+  //       })
+  //     );
+  // }
 
   ngOnDestroy(): void {
     this.destroy$.next();

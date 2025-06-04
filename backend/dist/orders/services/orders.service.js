@@ -51,31 +51,49 @@ let OrdersService = class OrdersService {
         }
     }
     async updateOrderStatus(body, idUser) {
+        let log;
         try {
             const oldOrder = await this.orderRepository.findOne({
                 where: { id: body.payload.orderId },
             });
             if (!oldOrder)
                 throw new Error('Orden no encontrada');
-            await this.orderRepository.update(body.payload.orderId, {
-                status: body.payload.newStatus,
-                product_delivery_photo_url: body.payload.product_delivery_photo_url,
-                payment_method_for_collection: body.payload.payment_method_for_collection,
-                payment_method_for_shipping_cost: body.payload.payment_method_for_shipping_cost,
-            });
+            if (body.payload.action === 'CAMBIO DE ESTADO') {
+                await this.orderRepository.update(body.payload.orderId, {
+                    status: body.payload.newStatus,
+                    product_delivery_photo_url: body.payload.product_delivery_photo_url,
+                    payment_method_for_collection: body.payload.payment_method_for_collection,
+                    payment_method_for_shipping_cost: body.payload.payment_method_for_shipping_cost,
+                });
+                log = await this.orderLogRepository.create({
+                    order: { id: body.payload.orderId },
+                    performedBy: { id: idUser },
+                    action: body.payload.action,
+                    previousValue: oldOrder.status,
+                    newValue: body.payload.newStatus,
+                    notes: body.payload.reason,
+                });
+                await this.orderLogRepository.save(log);
+            }
+            if (body.payload.action === 'MODIFICACIÓN DEL COSTO DE ENVÍO') {
+                await this.orderRepository.update(body.payload.orderId, {
+                    shipping_cost: body.payload.newValue,
+                    observation_shipping_cost_modification: body.payload.notes,
+                });
+                log = await this.orderLogRepository.create({
+                    order: { id: body.payload.orderId },
+                    performedBy: { id: idUser },
+                    action: body.payload.action,
+                    previousValue: oldOrder.shipping_cost?.toString(),
+                    newValue: body.payload.newValue,
+                    notes: body.payload.notes,
+                });
+                await this.orderLogRepository.save(log);
+            }
             const updatedOrder = await this.orderRepository.findOne({
                 where: { id: body.payload.orderId },
                 relations: ['assigned_driver'],
             });
-            const log = await this.orderLogRepository.create({
-                order: { id: body.payload.orderId },
-                performedBy: { id: idUser },
-                action: body.payload.action,
-                previousValue: oldOrder.status,
-                newValue: body.payload.newStatus,
-                notes: body.payload.reason,
-            });
-            await this.orderLogRepository.save(log);
             return updatedOrder;
         }
         catch (error) {

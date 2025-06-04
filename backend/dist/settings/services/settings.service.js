@@ -43,19 +43,11 @@ let SettingsService = class SettingsService {
     }
     async findUserById(id) {
         try {
-            const user = (await this.userRepository
-                .createQueryBuilder('user')
-                .where({ id })
-                .leftJoinAndSelect('user.projectsIncludes', 'projectsIncludes')
-                .leftJoinAndSelect('projectsIncludes.project', 'project')
-                .getOne());
-            if (!user) {
-                throw new error_manager_1.ErrorManager({
-                    type: 'BAD_REQUEST',
-                    message: 'No se encontro resultado',
-                });
+            const configurations = await this.userRepository.find({ take: 1 });
+            if (!configurations || configurations.length === 0) {
+                return null;
             }
-            return user;
+            return configurations[0];
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
@@ -74,8 +66,23 @@ let SettingsService = class SettingsService {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
+    async getPromotionalSets() {
+        const config = await this.userRepository.find({ take: 1 });
+        if (!config || config.length === 0) {
+            return [];
+        }
+        return (config[0]?.promotional_sets
+            ?.filter((set) => set.isActive !== false)
+            .sort((a, b) => (a.order || 0) - (b.order || 0)) || []);
+    }
     async updateUser(body, id) {
         try {
+            if (body.promotional_sets !== undefined) {
+                body.promotional_sets = body.promotional_sets.map((set) => ({
+                    ...set,
+                    id: set.id || Date.now().toString(),
+                }));
+            }
             const user = await this.userRepository.update(id, body);
             if (user.affected === 0) {
                 throw new error_manager_1.ErrorManager({
@@ -208,6 +215,28 @@ let SettingsService = class SettingsService {
             if (setting?.logo_url) {
                 console.log(`Fetching logo from: ${setting.logo_url}`);
                 const imageResponse = await fetch(setting.logo_url);
+                if (imageResponse.ok && imageResponse.body) {
+                    const contentType = imageResponse.headers.get('content-type');
+                    res.setHeader('Content-Type', contentType || 'image/png');
+                    const { pipeline } = await Promise.resolve().then(() => require('stream/promises'));
+                    await pipeline(imageResponse.body, res);
+                }
+            }
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
+    async getGlobalNoticeImage(res) {
+        try {
+            const setting = await this.userRepository.findOne({ where: {} });
+            let imageResponse;
+            if (setting?.global_notice_image_url) {
+                imageResponse = await fetch(setting.global_notice_image_url);
+            }
+            if (setting?.global_notice_image_url) {
+                console.log(`Fetching logo from: ${setting.global_notice_image_url}`);
+                const imageResponse = await fetch(setting.global_notice_image_url);
                 if (imageResponse.ok && imageResponse.body) {
                     const contentType = imageResponse.headers.get('content-type');
                     res.setHeader('Content-Type', contentType || 'image/png');

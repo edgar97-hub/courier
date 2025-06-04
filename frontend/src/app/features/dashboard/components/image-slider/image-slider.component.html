@@ -1,0 +1,41 @@
+<!-- src/app/features/dashboard/components/image-slider/image-slider.component.html -->
+@if (slides && slides.length > 0) {
+<div class="slick-slider-container">
+  <ngx-slick-carousel class="carousel" #slickModal="slick-carousel">
+    <!-- (init) ya no necesita llamar a slickInit() explícitamente -->
+    <!-- (breakpoint)="$event" -->
+    <!-- (afterChange)="$event" -->
+    <!-- (beforeChange)="$event" -->
+    @for (slide of slides; track slide.id || $index) {
+    <div
+      ngxSlickItem
+      class="slide-item"
+      (click)="handleSlideClick(slide, $event)"
+      [class.clickable]="isClickableSlide(slide)"
+    >
+      <img
+        [src]="slide.imageUrl || 'assets/images/placeholder-banner.png'"
+        [alt]="slide.buttonText || 'Promotional Image'"
+        class="slide-image"
+      />
+      @if (slide.buttonText && slide.linkUrl) {
+      <div class="slide-caption-overlay">
+        <a
+          class="slide-button"
+          [href]="!slide.linkUrl.startsWith('/') ? slide.linkUrl : undefined"
+          [routerLink]="slide.linkUrl.startsWith('/') ? [slide.linkUrl] : null"
+          [target]="slide.linkUrl.startsWith('/') ? '_self' : '_blank'"
+          rel="noopener noreferrer"
+          (click)="$event.stopPropagation()"
+        >
+          {{ slide.buttonText }}
+        </a>
+      </div>
+      }
+    </div>
+    }
+  </ngx-slick-carousel>
+</div>
+} @else {
+<div class="slider-placeholder">Imágenes promocionales no disponibles.</div>
+}

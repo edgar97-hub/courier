@@ -30,6 +30,12 @@ import { Order, Order_, OrderStatus } from '../../models/order.model'; // Asegú
 import { OrderDetailDialogComponent } from '../order-detail-dialog/order-detail-dialog.component'; //
 import { environment } from '../../../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
+import {
+  EditShippingCostDialogComponent,
+  EditShippingCostDialogResult,
+  EditShippingCostDialogData,
+} from '../edit-shipping-cost-dialog/edit-shipping-cost-dialog.component'; // <--- IMPORTA EL NUEVO DIÁLOGO
+import { AppStore } from '../../../../app.store';
 
 @Component({
   selector: 'app-order-table',
@@ -53,6 +59,8 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./order-table.component.scss'],
 })
 export class OrderTableComponent implements AfterViewInit, OnChanges {
+  appStore = inject(AppStore);
+
   @Input() orders: Order_[] | null = [];
   @Input() isLoading: boolean = false;
   @Input() totalCount: number = 0;
@@ -82,7 +90,12 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
 
   @Output() viewPdfClicked = new EventEmitter<Order_>();
   @Output() viewDetailsClicked = new EventEmitter<Order_>();
-  // ... otros outputs para acciones específicas si las manejas en el componente padre
+  // ... (propiedades e inputs existentes) ...
+  @Output() shippingCostChanged = new EventEmitter<{
+    orderId: string | number;
+    newShippingCost: number;
+    observation: string;
+  }>(); // <--- NUEVO OUTPUT
 
   displayedColumns: string[] = [
     'code',
@@ -171,50 +184,6 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     window.open('/tracking?code=' + order.tracking_code, '_blank');
   }
 
-  changeOrderStatus(order: Order, newStatus: OrderStatus): void {
-    // Podrías mostrar un diálogo de confirmación aquí
-    // const dialogRef = this.dialog.open(ConfirmDialogComponent, { data: { title: 'Confirmar Cambio', message: `¿Marcar pedido ${order.code} como ${newStatus}?`}});
-    // dialogRef.afterClosed().subscribe(result => {
-    //   if (result) {
-    console.log(`Changing status of order ${order.code} to ${newStatus}`);
-    this.statusChanged.emit({ orderId: order.id, newStatus });
-    // Lógica para llamar al servicio y manejar la respuesta estaría en el componente padre
-    // Ejemplo: this.orderService.updateStatus(order.id, newStatus).subscribe(...);
-    // this.snackBar.open(`Pedido ${order.code} marcado como ${newStatus}`, 'OK', { duration: 2500 });
-    //   }
-    // });
-  }
-  getStatusClass(status: string | undefined | null): string {
-    if (!status) {
-      return 'status-desconocido'; // O una clase por defecto
-    }
-    const formattedStatus = status.toLowerCase().replace(/[\s_]+/g, '-');
-    return `status-${formattedStatus}`;
-  }
-
-  getAvailableStatuses(order: Order_): OrderStatus[] {
-    switch (order.status) {
-      case OrderStatus.REGISTRADO:
-        return [OrderStatus.RECOGIDO, OrderStatus.CANCELADO];
-      case OrderStatus.RECOGIDO:
-        return [OrderStatus.EN_ALMACEN, OrderStatus.CANCELADO];
-      case OrderStatus.EN_ALMACEN:
-        return [OrderStatus.EN_TRANSITO, OrderStatus.CANCELADO];
-      case OrderStatus.EN_TRANSITO:
-      case OrderStatus.EN_TRANSITO:
-        return [
-          OrderStatus.ENTREGADO,
-          OrderStatus.CANCELADO,
-          OrderStatus.RECHAZADO,
-          OrderStatus.REPROGRAMADO,
-        ];
-      case OrderStatus.REPROGRAMADO:
-        return [OrderStatus.EN_TRANSITO, OrderStatus.CANCELADO];
-      default:
-        return [];
-    }
-  }
-
   onViewOrderDetails(order: Order_): void {
     this.viewDetailsClicked.emit(order);
     this.dialog.open(OrderDetailDialogComponent, {
@@ -229,13 +198,6 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     });
   }
 
-  onUploadProof(order: Order): void {
-    console.log('Upload proof for order:', order.code);
-    this.snackBar.open('Función "Subir Prueba" no implementada.', 'OK', {
-      duration: 2000,
-    });
-  }
-
   onReschedule(order: Order): void {
     console.log('Reschedule order:', order.code);
     this.snackBar.open('Función "Reprogramar" no implementada.', 'OK', {
@@ -243,15 +205,54 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     });
   }
 
-  isAdminOrDriver(): boolean {
-    // const userRole = this.appStore.currentUser()?.role;
-    // return userRole === 'ADMINISTRADOR' || userRole === 'MOTORIZADO';
-    return true; // Placeholder
-  }
+  openEditShippingCostModal(order: Order_): void {
+    if (
+      !order.id ||
+      order.shipping_cost === undefined ||
+      order.shipping_cost === null
+    ) {
+      console.error(
+        'Order ID or current shipping cost is missing for editing.',
+        order
+      );
+      // Podrías mostrar un snackbar aquí
+      this.snackBar.open(
+        'No se puede modificar el costo: faltan datos del pedido.',
+        'Cerrar',
+        { duration: 3000 }
+      );
+      return;
+    }
 
-  isAdminUser(): boolean {
-    // const userRole = this.appStore.currentUser()?.role;
-    // return userRole === 'ADMINISTRADOR';
-    return true; // Placeholder
+    const dialogRef = this.dialog.open<
+      EditShippingCostDialogComponent,
+      EditShippingCostDialogData,
+      EditShippingCostDialogResult
+    >(EditShippingCostDialogComponent, {
+      width: '500px', // Ajusta el ancho
+      data: {
+        orderCode: order.code || order.id.toString(), // Muestra el código o ID
+        currentShippingCost: order.shipping_cost,
+      },
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // Si el usuario confirmó y no cerró con undefined
+        console.log('Edit Shipping Cost Dialog result:', result);
+        this.shippingCostChanged.emit({
+          orderId: order.id, // o order.code si tu API usa eso
+          newShippingCost: result.newShippingCost,
+          observation: result.observation,
+        });
+      } else {
+        console.log('Edición de costo de envío cancelada.');
+      }
+    });
+  }
+  hashavePermissionEdit(): boolean {
+    const userRole = this.appStore.currentUser()?.role;
+    return userRole === 'ADMINISTRADOR' || userRole === 'RECEPCIONISTA';
   }
 }

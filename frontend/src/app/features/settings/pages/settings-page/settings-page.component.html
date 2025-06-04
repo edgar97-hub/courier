@@ -78,7 +78,7 @@
             <mat-icon>cloud_upload</mat-icon>
             {{
               selectedLogoFile
-                ? "Change Logo (" + selectedLogoFile.name + ")"
+                ? "Cambiar Logo (" + selectedLogoFile.name + ")"
                 : "Subir nuevo logotipo"
             }}
           </button>
@@ -142,7 +142,7 @@
             <mat-icon>cloud_upload</mat-icon>
             {{
               selectedRatesImageFile
-                ? "Change imagen (" + selectedRatesImageFile.name + ")"
+                ? "Cambiar imagen (" + selectedRatesImageFile.name + ")"
                 : "Subir nueva imagen"
             }}
           </button>
@@ -241,7 +241,7 @@
             <mat-icon>cloud_upload</mat-icon>
             {{
               selectedTermsFile
-                ? "Change PDF (" + selectedTermsFile.name + ")"
+                ? "Cambiar PDF (" + selectedTermsFile.name + ")"
                 : "Subir nuevo PDF"
             }}
           </button>
@@ -251,6 +251,162 @@
           <p class="mat-caption hint" *ngIf="selectedTermsFile">
             Selected: {{ selectedTermsFile.name }}
           </p>
+        </div>
+
+        <div class="logo-section file-upload-section">
+          <p class="mat-body-1 section-subtitle">imagen para avisos globales</p>
+          <div class="logo-preview-container">
+            <img
+              [src]="globalNoticeImagePreviewUrl"
+              alt="Vista previa de imagen para avisos globales"
+              class="logo-preview"
+            />
+          </div>
+          <input
+            type="file"
+            (change)="onLogoFileSelected6($event)"
+            #logoUploadInput6
+            accept="image/png, image/jpeg, image/svg+xml"
+            style="display: none"
+          />
+          <button
+            mat-stroked-button
+            type="button"
+            class="upload-button btn-corp-secondary"
+            (click)="logoUploadInput6.click()"
+          >
+            <mat-icon>cloud_upload</mat-icon>
+            {{
+              selectedGlobalNoticeImageFile
+                ? "Cambiar imagen (" + selectedGlobalNoticeImageFile.name + ")"
+                : "Subir nueva imagen"
+            }}
+          </button>
+          <p class="mat-caption hint">Recomendado: PNG, JPG, SVG. Max 2MB.</p>
+        </div>
+
+        <!-- =============================================== -->
+        <!-- === NUEVA SECCIÓN: CONJUNTOS PROMOCIONALES === -->
+        <!-- =============================================== -->
+        <mat-divider class="section-divider"></mat-divider>
+        <div class="section-header-with-action">
+          <h2>Conjuntos Promocionales/Banners (Máx. 3)</h2>
+          <button
+            mat-stroked-button
+            class="btn-corp-primary"
+            type="button"
+            (click)="addPromotionalSet()"
+            [disabled]="promotionalSetsFormArray.length >= 3"
+          >
+            <mat-icon>add_circle_outline</mat-icon> Añadir Conjunto
+          </button>
+        </div>
+
+        <div formArrayName="promotional_sets">
+          <!-- Usamos @for con el FormArray -->
+          @for (setGroup of promotionalSetsFormArray.controls; track
+          setGroup.get('id')?.value; let i = $index; let last = $last) {
+          <mat-card
+            appearance="outlined"
+            class="promotional-set-item"
+            [formGroupName]="i"
+          >
+            <mat-card-header class="item-header">
+              <mat-card-title>Conjunto {{ i + 1 }}</mat-card-title>
+              <button
+                mat-icon-button
+                color="warn"
+                type="button"
+                (click)="removePromotionalSet(i)"
+                matTooltip="Eliminar este conjunto"
+              >
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </mat-card-header>
+            <mat-card-content>
+              <!-- Campo oculto para el ID del set -->
+              <input type="hidden" formControlName="id" />
+
+              <!-- Subida de Imagen para el Set -->
+              <div class="file-upload-section compact-upload">
+                <p class="mat-body-1">Imagen del Conjunto</p>
+                <div class="logo-preview-container small-preview">
+                  <img
+                    [src]="
+                      setGroup.get('imagePreviewUrl')?.value ||
+                      'assets/images/placeholder-image.png'
+                    "
+                    alt="Vista previa de imagen del conjunto {{ i + 1 }}"
+                    class="logo-preview"
+                  />
+                </div>
+                <input
+                  type="file"
+                  (change)="onPromotionalSetFileSelected($event, i)"
+                  #promoSetUploadInput
+                  accept="image/png, image/jpeg, image/svg+xml"
+                  style="display: none"
+                />
+                <button
+                  mat-stroked-button
+                  type="button"
+                  class="upload-button btn-corp-secondary"
+                  (click)="promoSetUploadInput.click()"
+                >
+                  <mat-icon>cloud_upload</mat-icon>
+                  {{
+                    setGroup.get("imageFile")?.value
+                      ? "Cambiar Imagen"
+                      : "Subir Imagen"
+                  }}
+                </button>
+                @if(setGroup.get('imageFile')?.value; as file) {
+                <p class="mat-caption hint selected-file-name">
+                  Seleccionado: {{ file.name }}
+                </p>
+                }
+              </div>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Enlace (URL)</mat-label>
+                <input
+                  matInput
+                  formControlName="linkUrl"
+                  placeholder="https://ejemplo.com/oferta"
+                />
+                <mat-icon matSuffix>link</mat-icon>
+                @if(setGroup.get('linkUrl')?.hasError('pattern')) {
+                <mat-error
+                  >Ingrese una URL válida (ej. http:// o https://).</mat-error
+                >
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Texto del Botón</mat-label>
+                <input
+                  matInput
+                  formControlName="buttonText"
+                  placeholder="Ej: Ver Más, Comprar Ahora"
+                  maxlength="30"
+                />
+                @if(setGroup.get('buttonText')?.hasError('maxlength')) {
+                <mat-error>Máximo 30 caracteres.</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-slide-toggle
+                formControlName="isActive"
+                color="primary"
+                class="is-active-toggle"
+              >
+                Activo
+              </mat-slide-toggle>
+            </mat-card-content>
+          </mat-card>
+          @if (!last) {
+          <mat-divider class="item-divider"></mat-divider>
+          } }
         </div>
 
         <mat-card-actions align="end" class="form-actions">

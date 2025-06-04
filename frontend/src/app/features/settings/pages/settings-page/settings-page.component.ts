@@ -5,6 +5,7 @@ import {
   FormGroup,
   ReactiveFormsModule,
   Validators,
+  FormArray,
 } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -21,7 +22,13 @@ import { SettingsService } from '../../services/settings.service';
 import {
   AppSettings,
   initialAppSettings,
+  PromotionalSetItem,
 } from '../../models/app-settings.interface';
+
+import { MatDividerModule } from '@angular/material/divider'; // Para separar los sets
+import { MatSlideToggleModule } from '@angular/material/slide-toggle'; // Para isActive
+
+import { v4 as uuidv4 } from 'uuid'; // Para generar IDs únicos para los sets
 
 @Component({
   selector: 'app-settings-page',
@@ -36,6 +43,8 @@ import {
     MatIconModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
+    MatDividerModule, // Añadido
+    MatSlideToggleModule, // Añadido
   ],
   templateUrl: './settings-page.component.html',
   styleUrls: ['./settings-page.component.scss'],
@@ -49,7 +58,6 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
   isLoadingInitialData = true;
   isSaving = false;
 
-  // Para el logo
   currentLogoUrl: string | null = null;
   selectedLogoFile: File | null = null;
   logoPreviewUrl: string | null = null;
@@ -65,12 +73,19 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
   currentExcelImportTemplateUrl: string | null = null;
   selectedExcelImportTemplateFile: File | null = null;
 
-  // --- NUEVO PARA TÉRMINOS Y CONDICIONES PDF ---
   currentTermsUrl: string | null = null;
   selectedTermsFile: File | null = null;
-  // No necesitamos una preview visual para el PDF, solo el nombre del archivo.
+
+  currentGlobalNoticeImageUrl: string | null = null;
+  selectedGlobalNoticeImageFile: File | null = null;
+  globalNoticeImagePreviewUrl: string | null = null;
 
   private destroy$ = new Subject<void>();
+
+  // Getter para acceder fácilmente al FormArray de promotional_sets
+  get promotionalSetsFormArray(): FormArray {
+    return this.settingsForm.get('promotional_sets') as FormArray;
+  }
 
   ngOnInit(): void {
     this.buildForm(initialAppSettings);
@@ -86,10 +101,16 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
       phone_number: [settings.phone_number],
       logo_url: [settings.logo_url],
       terms_conditions_url: [settings.terms_conditions_url],
+      global_notice_image_url: [settings.global_notice_image_url],
 
       background_image_url: [settings.background_image_url],
       rates_image_url: [settings.rates_image_url],
       coverage_map_url: [settings.coverage_map_url],
+      promotional_sets: this.fb.array(
+        settings.promotional_sets.map((set) =>
+          this.createPromotionalSetGroup(set)
+        )
+      ),
     });
     this.currentLogoUrl = settings.logo_url;
     this.logoPreviewUrl = settings.logo_url;
@@ -103,6 +124,21 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     this.currentExcelImportTemplateUrl = settings.excel_import_template_url;
 
     this.currentTermsUrl = settings.terms_conditions_url;
+
+    this.currentGlobalNoticeImageUrl = settings.global_notice_image_url;
+    this.globalNoticeImagePreviewUrl = settings.global_notice_image_url;
+
+    // Inicializar previews para imágenes de promotional_sets
+    this.promotionalSetsFormArray.controls.forEach((control, index) => {
+      const set = settings.promotional_sets[index];
+      if (set && control) {
+        (control as FormGroup).addControl(
+          'imagePreviewUrl',
+          this.fb.control(set.imageUrl)
+        );
+        (control as FormGroup).addControl('imageFile', this.fb.control(null)); // Para el archivo a subir
+      }
+    });
   }
 
   private loadCurrentSettings(): void {
@@ -114,38 +150,79 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
         finalize(() => (this.isLoadingInitialData = false))
       )
       .subscribe({
-        next: (loadedSettings: any) => {
-          if (loadedSettings.length) {
-            this.settingsForm.patchValue({
-              ...loadedSettings,
-              id: loadedSettings[0].id,
-              ruc: loadedSettings[0].ruc,
-              business_name: loadedSettings[0].business_name,
-              address: loadedSettings[0].address,
-              phone_number: loadedSettings[0].phone_number,
+        next: (response: any) => {
+          const loadedSettings =
+            response && response.length > 0 ? response[0] : initialAppSettings;
+          // Limpiar el FormArray antes de poblarlo para evitar duplicados
+          // while (this.promotionalSetsFormArray.length !== 0) {
+          //   this.promotionalSetsFormArray.removeAt(0);
+          // }
+          this.promotionalSetsFormArray.clear();
+          // Añadir los FormGroups para los sets cargados
+          (loadedSettings.promotional_sets || []).forEach(
+            (set: PromotionalSetItem) => {
+              this.promotionalSetsFormArray.push(
+                this.createPromotionalSetGroup(set)
+              );
+            }
+          );
+          // Luego, parchear el resto del formulario
+          this.settingsForm.patchValue({
+            ...loadedSettings, // Parchea campos comunes
+            promotional_sets: [], // Evita que patchValue intente parchear el FormArray directamente aquí
+          });
 
-              logo_url: loadedSettings[0].logo_url,
-              terms_conditions_url: loadedSettings[0].terms_conditions_url,
-              background_image_url: loadedSettings[0].background_image_url,
-              rates_image_url: loadedSettings[0].rates_image_url,
-              coverage_map_url: loadedSettings[0].coverage_map_url,
-            });
-            this.currentLogoUrl = loadedSettings[0].logo_url;
-            this.logoPreviewUrl = loadedSettings[0].logo_url;
+          // ... (actualización de previews para logo, background, etc. como antes) ...
+          this.currentLogoUrl = loadedSettings.logo_url;
+          this.logoPreviewUrl = loadedSettings.logo_url;
+          // ... (resto de las previews)
+          this.currentBackgroundImageUrl = loadedSettings.background_image_url;
+          this.backgroundImagePreviewUrl = loadedSettings.background_image_url;
+          this.currentRatesImageUrl = loadedSettings.rates_image_url;
+          this.ratesImagePreviewUrl = loadedSettings.rates_image_url;
+          this.currentExcelImportTemplateUrl =
+            loadedSettings.excel_import_template_url;
+          this.currentTermsUrl = loadedSettings.terms_conditions_url;
+          this.currentGlobalNoticeImageUrl =
+            loadedSettings.global_notice_image_url;
+          this.globalNoticeImagePreviewUrl =
+            loadedSettings.global_notice_image_url;
+          // if (loadedSettings.length) {
+          //   this.settingsForm.patchValue({
+          //     ...loadedSettings,
+          //     id: loadedSettings[0].id,
+          //     ruc: loadedSettings[0].ruc,
+          //     business_name: loadedSettings[0].business_name,
+          //     address: loadedSettings[0].address,
+          //     phone_number: loadedSettings[0].phone_number,
 
-            this.currentBackgroundImageUrl =
-              loadedSettings[0].background_image_url;
-            this.backgroundImagePreviewUrl =
-              loadedSettings[0].background_image_url;
+          //     logo_url: loadedSettings[0].logo_url,
+          //     terms_conditions_url: loadedSettings[0].terms_conditions_url,
+          //     background_image_url: loadedSettings[0].background_image_url,
+          //     rates_image_url: loadedSettings[0].rates_image_url,
+          //     coverage_map_url: loadedSettings[0].coverage_map_url,
+          //   });
+          //   this.currentLogoUrl = loadedSettings[0].logo_url;
+          //   this.logoPreviewUrl = loadedSettings[0].logo_url;
 
-            this.currentRatesImageUrl = loadedSettings[0].rates_image_url;
-            this.ratesImagePreviewUrl = loadedSettings[0].rates_image_url;
+          //   this.currentBackgroundImageUrl =
+          //     loadedSettings[0].background_image_url;
+          //   this.backgroundImagePreviewUrl =
+          //     loadedSettings[0].background_image_url;
 
-            this.currentExcelImportTemplateUrl =
-              loadedSettings[0].excel_import_template_url;
+          //   this.currentRatesImageUrl = loadedSettings[0].rates_image_url;
+          //   this.ratesImagePreviewUrl = loadedSettings[0].rates_image_url;
 
-            this.currentTermsUrl = loadedSettings[0].terms_conditions_url;
-          }
+          //   this.currentExcelImportTemplateUrl =
+          //     loadedSettings[0].excel_import_template_url;
+
+          //   this.currentTermsUrl = loadedSettings[0].terms_conditions_url;
+
+          //   this.currentGlobalNoticeImageUrl =
+          //     loadedSettings[0].global_notice_image_url;
+          //   this.globalNoticeImagePreviewUrl =
+          //     loadedSettings[0].global_notice_image_url;
+          // }
         },
         error: (err) => {
           this.snackBar.open(
@@ -161,6 +238,85 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
       });
   }
 
+  hasPendingFileUploads(): boolean {
+    if (
+      this.selectedLogoFile ||
+      this.selectedBackgroundImageFile ||
+      /* ... otros selectedFile ... */ this.selectedTermsFile ||
+      this.selectedGlobalNoticeImageFile ||
+      this.selectedExcelImportTemplateFile
+    ) {
+      return true;
+    }
+    for (const control of this.promotionalSetsFormArray.controls) {
+      if ((control as FormGroup).get('imageFile')?.value) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private createPromotionalSetGroup(
+    set: PromotionalSetItem | null = null
+  ): FormGroup {
+    const newId = set?.id || uuidv4(); // Genera un nuevo ID si no existe
+    return this.fb.group({
+      id: [newId, Validators.required], // ID es importante para el trackBy y manejo
+      imageUrl: [set?.imageUrl || null], // URL de la imagen (se actualizará después de subir)
+      linkUrl: [set?.linkUrl || null, [Validators.pattern('https?://.+')]], // Validación básica de URL
+      buttonText: [set?.buttonText || null, [Validators.maxLength(30)]],
+      isActive: [set?.isActive === undefined ? true : set.isActive], // Por defecto activo
+      order: [set?.order || 0],
+      // Estos son solo para el frontend, no se envían directamente al backend así
+      imageFile: [null],
+      imagePreviewUrl: [set?.imageUrl || null],
+    });
+  }
+
+  // Añadir un nuevo conjunto promocional (hasta 3)
+  addPromotionalSet(): void {
+    if (this.promotionalSetsFormArray.length < 3) {
+      const newSetGroup = this.createPromotionalSetGroup();
+      this.promotionalSetsFormArray.push(newSetGroup);
+      this.settingsForm.markAsDirty();
+    } else {
+      this.snackBar.open(
+        'Se permite un máximo de 3 conjuntos promocionales.',
+        'OK',
+        { duration: 3000, verticalPosition: 'top' }
+      );
+    }
+  }
+
+  // Eliminar un conjunto promocional
+  removePromotionalSet(index: number): void {
+    this.promotionalSetsFormArray.removeAt(index);
+    this.settingsForm.markAsDirty();
+  }
+
+  // Manejar selección de archivo para imagen de un conjunto promocional
+  onPromotionalSetFileSelected(event: Event, index: number): void {
+    const element = event.target as HTMLInputElement;
+    const fileList: FileList | null = element.files;
+    const setGroup = this.promotionalSetsFormArray.at(index) as FormGroup;
+
+    if (fileList && fileList.length > 0) {
+      const file = fileList[0];
+      setGroup.patchValue({ imageFile: file });
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        setGroup.patchValue({ imagePreviewUrl: e.target.result });
+      };
+      reader.readAsDataURL(file);
+      this.settingsForm.markAsDirty();
+    } else {
+      // Si se cancela la selección, podrías revertir al imageUrl original o limpiar
+      setGroup.patchValue({
+        imageFile: null,
+        imagePreviewUrl: setGroup.get('imageUrl')?.value || null,
+      });
+    }
+  }
   onLogoFileSelected(event: Event): void {
     const element = event.target as HTMLInputElement;
     const fileList: FileList | null = element.files;
@@ -223,6 +379,23 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  onLogoFileSelected6(event: Event): void {
+    const element = event.target as HTMLInputElement;
+    const fileList: FileList | null = element.files;
+    if (fileList && fileList.length > 0) {
+      this.selectedGlobalNoticeImageFile = fileList[0];
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.globalNoticeImagePreviewUrl = e.target.result;
+      };
+      reader.readAsDataURL(this.selectedGlobalNoticeImageFile);
+      this.settingsForm.get('global_notice_image_url')?.markAsDirty();
+    } else {
+      this.selectedGlobalNoticeImageFile = null;
+      this.globalNoticeImagePreviewUrl = this.currentGlobalNoticeImageUrl;
+    }
+  }
+
   onTermsFileSelected(event: Event): void {
     const element = event.target as HTMLInputElement;
     const fileList: FileList | null = element.files;
@@ -251,6 +424,45 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
 
     this.isSaving = true;
     let formValues = { ...this.settingsForm.value } as AppSettings;
+
+    // Subir imágenes de los promotional_sets una por una
+    const promotionalSetsData: PromotionalSetItem[] = [];
+    for (let i = 0; i < this.promotionalSetsFormArray.length; i++) {
+      const setGroup = this.promotionalSetsFormArray.at(i) as FormGroup;
+      const setData = { ...setGroup.value }; // Copia los valores del form group
+
+      if (setData.imageFile) {
+        // Si se seleccionó un nuevo archivo de imagen para este set
+        try {
+          const uploadResponse = await this.settingsService
+            .uploadFile(setData.imageFile) // Asume que uploadFile devuelve { file_url: string }
+            .pipe(first(), takeUntil(this.destroy$))
+            .toPromise();
+          setData.imageUrl = uploadResponse?.file_url || setData.imageUrl; // Actualiza con la nueva URL o mantiene la anterior si falla
+        } catch (error) {
+          console.error(
+            `Error uploading promotional set image ${i + 1}:`,
+            error
+          );
+          this.snackBar.open(
+            `Error al cargar imagen del conjunto ${i + 1}.`,
+            'OK',
+            {
+              duration: 3000,
+              verticalPosition: 'top',
+              panelClass: ['error-snackbar'],
+            }
+          );
+          // Considera si quieres detener el guardado o continuar sin esta imagen
+        }
+      }
+      // Eliminar las propiedades temporales del frontend antes de enviar al backend
+      delete setData.imageFile;
+      delete setData.imagePreviewUrl;
+      promotionalSetsData.push(setData as PromotionalSetItem);
+    }
+    formValues.promotional_sets = promotionalSetsData;
+
     if (this.selectedLogoFile) {
       try {
         const uploadResponse = await this.settingsService
@@ -387,6 +599,33 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
         return;
       }
     }
+
+    if (this.selectedGlobalNoticeImageFile) {
+      try {
+        const uploadResponse = await this.settingsService
+          .uploadFile(this.selectedGlobalNoticeImageFile)
+          .pipe(first(), takeUntil(this.destroy$))
+          .toPromise();
+        if (uploadResponse?.file_url) {
+          formValues.global_notice_image_url = uploadResponse.file_url;
+        } else {
+          throw new Error('Logo URL not returned from upload.');
+        }
+      } catch (error) {
+        console.error('Logo upload failed:', error);
+        this.snackBar.open(
+          'Error al cargar el logotipo. No se guardaron los ajustes.',
+          'Close',
+          {
+            duration: 4000,
+            panelClass: ['error-snackbar'],
+            verticalPosition: 'top',
+          }
+        );
+        this.isSaving = false;
+        return;
+      }
+    }
     this.settingsService
       .saveSettings(formValues)
       .pipe(
@@ -400,26 +639,34 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
             verticalPosition: 'top',
             panelClass: ['success-snackbar'],
           });
-          this.settingsForm.patchValue(savedSettings);
+          this.buildForm(savedSettings); // Reconstruye el form con los datos guardados (incluye promotional_sets)
+          // this.settingsForm.patchValue(savedSettings);
           this.settingsForm.markAsPristine();
-          this.currentLogoUrl = savedSettings.logo_url;
-          this.logoPreviewUrl = savedSettings.logo_url;
+
+          // this.currentLogoUrl = savedSettings.logo_url;
+          // this.logoPreviewUrl = savedSettings.logo_url;
           this.selectedLogoFile = null;
 
-          this.currentBackgroundImageUrl = savedSettings.background_image_url;
-          this.backgroundImagePreviewUrl = savedSettings.background_image_url;
+          // this.currentBackgroundImageUrl = savedSettings.background_image_url;
+          // this.backgroundImagePreviewUrl = savedSettings.background_image_url;
           this.selectedBackgroundImageFile = null;
 
-          this.currentRatesImageUrl = savedSettings.rates_image_url;
-          this.ratesImagePreviewUrl = savedSettings.rates_image_url;
+          // this.currentRatesImageUrl = savedSettings.rates_image_url;
+          // this.ratesImagePreviewUrl = savedSettings.rates_image_url;
           this.selectedRatesImageFile = null;
 
-          this.currentExcelImportTemplateUrl =
-            savedSettings.excel_import_template_url;
+          // this.currentExcelImportTemplateUrl =
+          //   savedSettings.excel_import_template_url;
           this.selectedExcelImportTemplateFile = null;
 
-          this.currentTermsUrl = savedSettings.terms_conditions_url;
+          // this.currentTermsUrl = savedSettings.terms_conditions_url;
           this.selectedTermsFile = null;
+
+          // this.currentGlobalNoticeImageUrl =
+          //   savedSettings.global_notice_image_url;
+          // this.globalNoticeImagePreviewUrl =
+          //   savedSettings.global_notice_image_url;
+          this.selectedGlobalNoticeImageFile = null;
         },
         error: (err) => {
           this.snackBar.open(
@@ -437,10 +684,10 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
 
   onDiscardChanges(): void {
     this.loadCurrentSettings();
-    this.selectedLogoFile = null;
-    this.selectedTermsFile = null;
-    this.settingsForm.markAsPristine();
-    this.snackBar.open('Changes discarded.', 'OK', {
+    // this.selectedLogoFile = null;
+    // this.selectedTermsFile = null;
+    // this.settingsForm.markAsPristine();
+    this.snackBar.open('Cambios descartados.', 'OK', {
       duration: 2000,
       verticalPosition: 'top',
     });

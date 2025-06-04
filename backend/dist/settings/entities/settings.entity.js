@@ -32,19 +32,19 @@ __decorate([
     __metadata("design:type", String)
 ], SettingsEntity.prototype, "phone_number", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: false, default: '' }),
+    (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
 ], SettingsEntity.prototype, "logo_url", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: false, default: '' }),
+    (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
 ], SettingsEntity.prototype, "terms_conditions_url", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: false, default: '' }),
+    (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
 ], SettingsEntity.prototype, "background_image_url", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: false, default: '' }),
+    (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
 ], SettingsEntity.prototype, "rates_image_url", void 0);
 __decorate([
@@ -55,6 +55,18 @@ __decorate([
     (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
 ], SettingsEntity.prototype, "coverage_map_url", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], SettingsEntity.prototype, "global_notice_image_url", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'jsonb',
+        nullable: true,
+        default: () => "'[]'",
+    }),
+    __metadata("design:type", Array)
+], SettingsEntity.prototype, "promotional_sets", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: false, type: 'float', default: 0.0 }),
     __metadata("design:type", Number)
