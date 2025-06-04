@@ -248,23 +248,23 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       });
   }
 
-  private resetPackageTypeSelection(): void {
-    const packageTypeControl =
-      this.packageDetailsFormGroup.get('package_size_type');
-    if (packageTypeControl) {
-      // Opción A: Desmarcar todo (si mat-radio-group lo permite sin un valor)
-      // packageTypeControl.reset(null, { emitEvent: false }); // emitEvent: false para evitar bucles si hay otras suscripciones
-      // Opción B: Resetear a un valor por defecto, por ejemplo 'standard'
-      // packageTypeControl.setValue('standard', { emitEvent: true }); // emitEvent: true para que PackageCalculator reaccione
-      // console.log('Package type reset to standard');
-      // Si reseteas a 'standard', el PackageCalculatorComponent (si está bien implementado)
-      // debería deshabilitar los campos custom y recalcular el costo para estándar.
-      // Si reseteas a null, PackageCalculatorComponent debería manejar ese estado.
-    }
-    // También reseteamos el costo de envío calculado
-    this.calculatedShippingCost.set(0); // O null
-    this.isCalculatingShipping.set(false);
-  }
+  // private resetPackageTypeSelection(): void {
+  //   const packageTypeControl =
+  //     this.packageDetailsFormGroup.get('package_size_type');
+  //   if (packageTypeControl) {
+  //     // Opción A: Desmarcar todo (si mat-radio-group lo permite sin un valor)
+  //     // packageTypeControl.reset(null, { emitEvent: false }); // emitEvent: false para evitar bucles si hay otras suscripciones
+  //     // Opción B: Resetear a un valor por defecto, por ejemplo 'standard'
+  //     // packageTypeControl.setValue('standard', { emitEvent: true }); // emitEvent: true para que PackageCalculator reaccione
+  //     // console.log('Package type reset to standard');
+  //     // Si reseteas a 'standard', el PackageCalculatorComponent (si está bien implementado)
+  //     // debería deshabilitar los campos custom y recalcular el costo para estándar.
+  //     // Si reseteas a null, PackageCalculatorComponent debería manejar ese estado.
+  //   }
+  //   // También reseteamos el costo de envío calculado
+  //   this.calculatedShippingCost.set(0); // O null
+  //   this.isCalculatingShipping.set(false);
+  // }
 
   get packageDetailsFormGroup(): FormGroup {
     return this.orderForm.get('package_details') as FormGroup;
@@ -272,7 +272,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
 
   private buildForm(): void {
     let company_id = null;
-    if (this.appStore.currentUser()?.id) {
+    if (this.isCompany()) {
       company_id = this.appStore.currentUser()?.id;
     }
 
@@ -280,7 +280,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     // let date = d.toLocaleString('en-US', { timeZone: 'America/Bogota' });
     // console.log('date', date);
     // const todayString = this.datePipe.transform(date, 'yyyy-MM-dd');
-    const todayString = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
+    // const todayString = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
 
     this.orderForm = this.fb.group({
       shipment_type: [this.shipmentTypes[0], Validators.required],
@@ -295,14 +295,12 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       delivery_coordinates: [''],
       delivery_date: [null, Validators.required], // String en formato YYYY-MM-DD
       package_details: this.fb.group({
-        // Sub-FormGroup para PackageCalculatorComponent
         package_size_type: ['standard', Validators.required],
         package_width_cm: [{ value: 0, disabled: true }],
         package_length_cm: [{ value: 0, disabled: true }],
         package_height_cm: [{ value: 0, disabled: true }],
         package_weight_kg: [{ value: 0, disabled: true }],
       }),
-      // shipping_cost se maneja con la señal `calculatedShippingCost`
       item_description: ['', Validators.required],
       amount_to_collect_at_delivery: [
         0,
@@ -314,6 +312,42 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       ],
       observations: [''],
     });
+
+    // this.orderForm = this.fb.group({
+    //   shipment_type: [this.shipmentTypes[0], Validators.required],
+    //   recipient_name: ['wwwwwwwww', Validators.required],
+    //   recipient_phone: [
+    //     951954633,
+    //     [Validators.required, Validators.pattern('^[0-9]{9}$')],
+    //   ],
+    //   company_id: ['wwwwwwwww', Validators.required],
+    //   delivery_district_id: ['wwwwwwwww', Validators.required],
+    //   delivery_address: [
+    //     'wwwwwwwww',
+    //     [Validators.required, Validators.minLength(6)],
+    //   ],
+    //   delivery_coordinates: ['wwwwwwwww'],
+    //   delivery_date: ['2025-06-03', Validators.required], // String en formato YYYY-MM-DD
+    //   package_details: this.fb.group({
+    //     // Sub-FormGroup para PackageCalculatorComponent
+    //     package_size_type: ['standard', Validators.required],
+    //     package_width_cm: [{ value: 0, disabled: true }],
+    //     package_length_cm: [{ value: 0, disabled: true }],
+    //     package_height_cm: [{ value: 0, disabled: true }],
+    //     package_weight_kg: [{ value: 0, disabled: true }],
+    //   }),
+    //   // shipping_cost se maneja con la señal `calculatedShippingCost`
+    //   item_description: ['wwwwwwwww', Validators.required],
+    //   amount_to_collect_at_delivery: [
+    //     0,
+    //     [Validators.required, Validators.min(0)],
+    //   ],
+    //   payment_method_for_collection: [
+    //     this.paymentMethodsForCollection[0],
+    //     Validators.required,
+    //   ],
+    //   observations: [''],
+    // });
   }
 
   // Método llamado por el evento del PackageCalculatorComponent
@@ -346,7 +380,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
         .toString(36)
         .substring(2, 7)}`, // ID temporal único
     };
-    console.log('newOrderData', newOrderData);
+    // console.log('newOrderData', newOrderData);
     // delete newOrderData.package_details; // Eliminar el subgrupo anidado
 
     console.log('Submitting New Order Data:', newOrderData);
@@ -357,18 +391,22 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   resetFormForNextOrder(): void {
     this.selectedDriver = null;
     this.driverSearchCtrl.setValue('');
-    this.orderForm.get('company_id')?.setValue(null);
+    let company_id = null;
+    if (this.isCompany()) {
+      company_id = this.orderForm.get('company_id')?.value;
+    }
 
     const defaultShipmentType =
       this.orderForm.get('shipment_type')?.value || this.shipmentTypes[0];
     const defaultPaymentMethod =
       this.orderForm.get('payment_method_for_collection')?.value ||
       this.paymentMethodsForCollection[0];
-    const todayString = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
+    // const todayString = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
 
     this.orderForm.reset({
+      company_id: company_id,
       shipment_type: defaultShipmentType,
-      delivery_date: todayString,
+      delivery_date: null,
       package_details: { package_size_type: 'standard' }, // Resetear subformulario también
       amount_to_collect_at_delivery: 0,
       payment_method_for_collection: defaultPaymentMethod,

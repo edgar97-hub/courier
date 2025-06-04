@@ -70,7 +70,7 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
   ); // Valor por defecto como en la imagen
   termsAcceptedControl = new FormControl(false, Validators.requiredTrue);
 
-  pickupOptions: string[] = ['RECOGER EN DOMICILIO', 'ENTREGAR EN ALMACEN']; // Ejemplo
+  pickupOptions: string[] = ['RECOGER EN DOMICILIO', 'ENTREGAR EN ALMACEN']; 
 
   private orderService = inject(OrderService);
   private router = inject(Router);

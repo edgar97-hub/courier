@@ -9,6 +9,7 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const path_1 = require("path");
 const bodyParser = require("body-parser");
+const lima_timezone_interceptor_1 = require("./interceptors/lima-timezone.interceptor");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.use(morgan('dev'));
@@ -18,6 +19,7 @@ async function bootstrap() {
         },
     }));
     app.useGlobalInterceptors(new common_1.ClassSerializerInterceptor(app.get(core_1.Reflector)));
+    app.useGlobalInterceptors(new lima_timezone_interceptor_1.TimezoneInterceptor());
     app.use(bodyParser.json({ limit: '50mb' }));
     app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
     const configservice = app.get(config_1.ConfigService);

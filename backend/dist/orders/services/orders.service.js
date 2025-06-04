@@ -413,11 +413,9 @@ let OrdersService = class OrdersService {
             }
             else {
                 if (startDate && endDate) {
-                    const start = new Date(startDate + 'T00:00:00');
-                    const end = new Date(endDate + 'T23:59:59');
-                    query.andWhere('order.createdAt BETWEEN :start AND :end', {
-                        start,
-                        end,
+                    query.andWhere(`order.createdAt AT TIME ZONE 'UTC' AT TIME ZONE 'America/Lima' BETWEEN :start AND :end`, {
+                        start: `${startDate} 00:00:00`,
+                        end: `${endDate} 23:59:59`,
                     });
                 }
             }
