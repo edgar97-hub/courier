@@ -144,7 +144,7 @@
           <button
             mat-menu-item
             (click)="openChangeStatusModal(order)"
-            *ngIf="isAdminOrDriver()"
+            *ngIf="isAdminOrDriver(order)"
           >
             <mat-icon>swap_horiz</mat-icon>
             <span>Cambiar Estado General</span>

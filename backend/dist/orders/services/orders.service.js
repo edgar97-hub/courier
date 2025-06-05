@@ -438,7 +438,6 @@ let OrdersService = class OrdersService {
                 }
             }
             if (role === roles_1.ROLES.MOTORIZED) {
-                query.andWhere('assigned_driver.id = :idUser', { idUser });
             }
             if (role === roles_1.ROLES.COMPANY) {
                 query.andWhere('company.id = :idUser', { idUser });

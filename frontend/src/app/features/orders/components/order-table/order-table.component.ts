@@ -400,9 +400,23 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     });
   }
 
-  isAdminOrDriver(): boolean {
+  isAdminOrDriver(order: Order_): boolean {
+    let hasPermission = false;
     const userRole = this.appStore.currentUser()?.role;
-    return userRole === 'ADMINISTRADOR' || userRole === 'MOTORIZADO';
+    // console.log(
+    //   'order',
+    //   order.assigned_driver?.id === this.appStore.currentUser()?.id
+    // );
+    if (
+      userRole === 'MOTORIZADO' &&
+      order.assigned_driver?.id === this.appStore.currentUser()?.id
+    ) {
+      hasPermission = true;
+    }
+    if (userRole === 'ADMINISTRADOR') {
+      hasPermission = true;
+    }
+    return hasPermission;
   }
 
   isAdminOrReceptionist(): boolean {

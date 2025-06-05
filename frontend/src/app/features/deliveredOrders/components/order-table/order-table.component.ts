@@ -90,12 +90,11 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
 
   @Output() viewPdfClicked = new EventEmitter<Order_>();
   @Output() viewDetailsClicked = new EventEmitter<Order_>();
-  // ... (propiedades e inputs existentes) ...
   @Output() shippingCostChanged = new EventEmitter<{
     orderId: string | number;
     newShippingCost: number;
     observation: string;
-  }>(); // <--- NUEVO OUTPUT
+  }>();
 
   displayedColumns: string[] = [
     'code',
@@ -108,6 +107,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     'amount_to_collect_at_delivery',
     // 'delivery_date',
     'shipping_cost',
+    'observation_shipping_cost_modification',
     // 'recipient_phone', // Puedes decidir cuáles mostrar por defecto
     // 'createdAt',
     // 'shipping_cost',
@@ -118,10 +118,8 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  // Inyectar servicios de Material
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
-  // private orderService = inject(OrderService); // Inyecta tu servicio de pedidos
 
   readonly OrderStatus = OrderStatus; // Para usar la enum en la plantilla
 

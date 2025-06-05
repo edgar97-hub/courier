@@ -94,19 +94,8 @@ td.mat-cell {
   text-align: center !important;
 }
 .actions-cell {
-  display: flex;
   text-align: center;
   white-space: nowrap;
-  button.mat-icon-button {
-    margin: 0 2px; // Espacio mínimo
-    color: var(--sys-on-surface-variant); // Color base para iconos de acción
-    transition: color 0.2s ease;
-    &:hover {
-      color: var(
-        --sys-primary
-      ); // Color primario al hacer hover (o el color específico)
-    }
-  }
 }
 
 .action-icon-delivered {

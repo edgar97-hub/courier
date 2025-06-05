@@ -88,8 +88,7 @@
       </th>
       <td mat-cell *matCellDef="let order" class="align-right amount-cell">
         {{
-          order.amount_to_collect_at_delivery
-            | currency : "PEN" : "" : "1.2-2"
+          order.amount_to_collect_at_delivery | currency : "PEN" : "" : "1.2-2"
         }}
       </td>
     </ng-container>
@@ -104,15 +103,24 @@
       </td>
     </ng-container>
 
-    <!-- Delivery Date Column -->
-    <!-- <ng-container matColumnDef="delivery_date">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>F. Entrega</th>
-      <td mat-cell *matCellDef="let order">
-        {{
-          order.delivery_date ? (order.delivery_date | date : "dd/MM/yy") : "-"
-        }}
+    <ng-container matColumnDef="observation_shipping_cost_modification">
+      <th
+        mat-header-cell
+        *matHeaderCellDef
+        mat-sort-header
+        class="align-center"
+      >
+        Motivo del ajuste del costo envio
+      </th>
+      <td
+        mat-cell
+        *matCellDef="let order"
+        class="truncate-texts"
+        [matTooltip]="order.observation_shipping_cost_modification"
+      >
+        {{ order.observation_shipping_cost_modification }}
       </td>
-    </ng-container> -->
+    </ng-container>
 
     <!-- Actions Column -->
     <ng-container matColumnDef="actions">
@@ -123,7 +131,6 @@
         <button
           mat-icon-button
           [matMenuTriggerFor]="orderActionMenu"
-          aria-label="Más acciones del pedido"
           class="action-icon-neutral"
         >
           <mat-icon>more_vert</mat-icon>

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { delay, map } from 'rxjs/operators';
+import { catchError, delay, map } from 'rxjs/operators';
 import { RouteNoticeDialogData } from '../../features/shared/components/route-specific-notice-dialog/route-specific-notice-dialog.component'; // Ajusta ruta
 import { environment } from '../../../environments/environment';
 
@@ -55,15 +55,15 @@ export class NoticeService {
       };
     }
 
-    if (routePath.includes('orders/create')) {
-      noticeData = {
-        title: '¡Bienvenido al Dashboard!',
-        message:
-          'Recuerda revisar tus tareas pendientes y las últimas actualizaciones.',
-        imageUrl: global_notice_url,
-        confirmButtonText: 'Cerrar',
-      };
-    }
+    // if (routePath.includes('orders/create')) {
+    //   noticeData = {
+    //     title: '¡Bienvenido al Dashboard!',
+    //     message:
+    //       'Recuerda revisar tus tareas pendientes y las últimas actualizaciones.',
+    //     imageUrl: global_notice_url,
+    //     confirmButtonText: 'Cerrar',
+    //   };
+    // }
 
     // else if (routePath.includes('users')) {
     //   noticeData = {
@@ -92,7 +92,46 @@ export class NoticeService {
 
     return of(null); // No hay aviso para esta ruta
   }
+  // NUEVO: Método para obtener el aviso global (post-login o general)
+  getGlobalLoginNotice(): Observable<RouteNoticeDialogData | null> {
+    let noticeData: RouteNoticeDialogData | null = null;
+    let global_notice_url =
+      environment.apiUrl + '/settings/company/global-notice-image';
+    environment;
+    noticeData = {
+      title: '¡Bienvenido al Dashboard!',
+      message:
+        'Recuerda revisar tus tareas pendientes y las últimas actualizaciones.',
+      imageUrl: global_notice_url,
+      confirmButtonText: 'Cerrar',
+    };
+    return of(noticeData).pipe(delay(100)); // Simula una pequeña demora
 
+    // console.log('NoticeService: Fetching global login notice...');
+    // Este aviso podría ser siempre el mismo o configurable.
+    // Aquí usaremos la imagen global configurada en Settings.
+    // return this.settingsService.getGlobalNoticeImageUrl().pipe(
+    //   // Asume que tienes este método en SettingsService
+    //   map((imageUrl) => {
+    //     if (imageUrl) {
+    //       return {
+    //         // Puedes definir un título, mensaje, etc. por defecto o también desde config
+    //         title: '¡Bienvenido/a!',
+    //         message: 'Gracias por iniciar sesión. Tenemos novedades para ti.',
+    //         imageUrl: imageUrl,
+    //         buttonText: 'Ver Novedades',
+    //         linkUrl: '/novedades', // Opcional: un enlace
+    //         isGlobalNotice: true, // Una bandera para diferenciarlo si es necesario
+    //       };
+    //     }
+    //     return null; // No hay aviso global si no hay imagen configurada
+    //   }),
+    //   catchError((err) => {
+    //     console.error('Error fetching global notice image URL:', err);
+    //     return of(null);
+    //   })
+    // );
+  }
   private markNoticeAsViewed(noticeId: string): void {
     this.viewedNotices.add(noticeId);
     try {

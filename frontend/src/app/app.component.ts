@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, effect, inject, Injector, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { AppStore } from './app.store';
 import { NgIf } from '@angular/common';
@@ -31,7 +31,7 @@ export class AppComponent implements OnInit {
   private destroy$ = new Subject<void>();
   private currentNoticeDialogRef: MatDialogRef<RouteSpecificNoticeDialogComponent> | null =
     null;
-
+  private justShowedRouteNotice = false;
   constructor(private authService: AuthService) {}
 
   ngOnInit() {
@@ -57,6 +57,7 @@ export class AppComponent implements OnInit {
         ),
         switchMap((event: NavigationEnd) => {
           const currentRoute = event.urlAfterRedirects.split('?')[0];
+          console.log('currentRoute', currentRoute);
           return this.noticeService.getNoticeForRoute(currentRoute);
         }),
         filter(
@@ -69,9 +70,58 @@ export class AppComponent implements OnInit {
         if (this.currentNoticeDialogRef) {
           this.currentNoticeDialogRef.close();
         }
+        this.justShowedRouteNotice = true;
         this.openRouteNoticeDialog(noticeData);
+        setTimeout(() => (this.justShowedRouteNotice = false), 500);
       });
+
+    let previousIsAuthenticated = this.appStore.isAuthenticated(); // Valor inicial
+
+    effect(
+      () => {
+        const currentIsAuthenticated = this.appStore.isAuthenticated();
+        console.log(
+          'AppComponent Auth Effect: PrevAuth:',
+          previousIsAuthenticated,
+          'CurrAuth:',
+          currentIsAuthenticated
+        );
+        if (!previousIsAuthenticated && currentIsAuthenticated) {
+          // El usuario ACABA de iniciar sesión
+          console.log(
+            'AppComponent: User just logged in. Checking for global notice.'
+          );
+          if (!this.justShowedRouteNotice) {
+            // No mostrar si un aviso por ruta se mostró en el mismo ciclo
+            this.noticeService
+              .getGlobalLoginNotice()
+              .pipe(
+                filter(
+                  (noticeData): noticeData is RouteNoticeDialogData =>
+                    noticeData !== null
+                ),
+                takeUntil(this.destroy$)
+              )
+              .subscribe((globalNoticeData) => {
+                console.log(
+                  'AppComponent: Global login notice received:',
+                  globalNoticeData
+                );
+                // this.openRouteNoticeDialog(globalNoticeData);
+              });
+          } else {
+            console.log(
+              'AppComponent: Skipping global notice as route notice was just shown.'
+            );
+          }
+        }
+        previousIsAuthenticated = currentIsAuthenticated; // Actualizar para la próxima comprobación
+      },
+      { injector: this.injector }
+    ); // Pasar el injector si es necesario para servicios dentro del effect
   }
+  private injector = inject(Injector);
+
   openRouteNoticeDialog(data: RouteNoticeDialogData): void {
     const isMobile = window.innerWidth < 768; // Detección simple de móvil
 
