@@ -21,7 +21,7 @@ export declare class OrdersController {
         page_number: number;
         page_size: number;
     }>;
-    getFilteredOrders(req: any, pageNumber?: number, pageSize?: number, sortField?: string, sortDirection?: string, startDate?: string, endDate?: string, status?: string): Promise<{
+    getFilteredOrders(req: any, pageNumber?: number, pageSize?: number, sortField?: string, sortDirection?: string, startDate?: string, endDate?: string, status?: string, search_term?: string, delivery_date?: string): Promise<{
         items: any;
         total_count: number;
     }>;

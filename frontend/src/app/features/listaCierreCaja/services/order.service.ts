@@ -106,6 +106,9 @@ export class OrderService {
       .set('sort_direction', sortDirection);
 
     if (filters) {
+      if (filters.delivery_date) {
+        params = params.set('delivery_date', filters.delivery_date);
+      }
       if (filters.start_date) {
         params = params.set('start_date', filters.start_date);
       }

@@ -1,40 +1,54 @@
-<!-- src/app/features/dashboard/components/image-slider/image-slider.component.html -->
 @if (slides && slides.length > 0) {
-<div class="slick-slider-container">
-  <ngx-slick-carousel class="carousel" #slickModal="slick-carousel">
-    <!-- (init) ya no necesita llamar a slickInit() explícitamente -->
-    <!-- (breakpoint)="$event" -->
-    <!-- (afterChange)="$event" -->
-    <!-- (beforeChange)="$event" -->
-    @for (slide of slides; track slide.id || $index) {
-    <div
-      ngxSlickItem
-      class="slide-item"
-      (click)="handleSlideClick(slide, $event)"
-      [class.clickable]="isClickableSlide(slide)"
-    >
-      <img
-        [src]="slide.imageUrl || 'assets/images/placeholder-banner.png'"
-        [alt]="slide.buttonText || 'Promotional Image'"
-        class="slide-image"
-      />
-      @if (slide.buttonText && slide.linkUrl) {
-      <div class="slide-caption-overlay">
-        <a
-          class="slide-button"
-          [href]="!slide.linkUrl.startsWith('/') ? slide.linkUrl : undefined"
-          [routerLink]="slide.linkUrl.startsWith('/') ? [slide.linkUrl] : null"
-          [target]="slide.linkUrl.startsWith('/') ? '_self' : '_blank'"
-          rel="noopener noreferrer"
-          (click)="$event.stopPropagation()"
-        >
-          {{ slide.buttonText }}
-        </a>
+<div class="swiper-slider-container">
+  <div class="swiper" #swiperContainerRef>
+    <div class="swiper-wrapper">
+      @for (slide of slides; track slide.id || $index) {
+      <div class="swiper-slide slide-item-swiper">
+        <img
+          [src]="slide.imageUrl || 'assets/images/placeholder-banner.png'"
+          [alt]="slide.buttonText || 'Promotional Image'"
+          class="slide-image-swiper"
+        />
+        @if (slide.buttonText && slide.linkUrl) {
+        <div class="slide-caption-overlay-swiper">
+          <a
+            class="slide-button-swiper"
+            [href]="isExternalUrl(slide.linkUrl) ? slide.linkUrl : undefined"
+            [target]="isExternalUrl(slide.linkUrl) ? '_blank' : '_self'"
+            rel="noopener noreferrer"
+            (click)="$event.stopPropagation()"
+          >
+            {{ slide.buttonText }}
+          </a>
+        </div>
+        }
       </div>
       }
     </div>
-    }
-  </ngx-slick-carousel>
+
+    <!-- Paginación (Dots): Swiper los generará dentro de este div -->
+    <div class="swiper-pagination custom-swiper-pagination"></div>
+  </div>
+  <!-- Fin de .swiper -->
+
+  <!-- Botones de Navegación Personalizados FUERA del contenedor .swiper -->
+  <!-- para que Swiper no intente controlarlos directamente a menos que se lo digas -->
+  @if (showNavigation && slides.length > 1) {
+  <button
+    class="custom-swiper-button custom-swiper-button-prev"
+    (click)="slidePrevCustom()"
+    aria-label="Anterior"
+  >
+    <mat-icon>keyboard_arrow_left</mat-icon>
+  </button>
+  <button
+    class="custom-swiper-button custom-swiper-button-next"
+    (click)="slideNextCustom()"
+    aria-label="Siguiente"
+  >
+    <mat-icon>keyboard_arrow_right</mat-icon>
+  </button>
+  }
 </div>
 } @else {
 <div class="slider-placeholder">Imágenes promocionales no disponibles.</div>

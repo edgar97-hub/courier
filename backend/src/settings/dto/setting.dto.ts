@@ -114,7 +114,6 @@ export class SettingUpdateDTO {
   business_name: string;
 
   @ApiProperty()
-  @IsString()
   ruc: string;
 
   @ApiProperty()

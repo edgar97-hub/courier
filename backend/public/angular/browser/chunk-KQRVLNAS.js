@@ -1,0 +1,1 @@
+import{bb as n}from"./chunk-VKMHQIGG.js";var e=class i{transform(r,t="-"){return r==null||typeof r=="string"&&r.trim()===""?t:r}static \u0275fac=function(t){return new(t||i)};static \u0275pipe=n({name:"default",type:i,pure:!0})};export{e as a};

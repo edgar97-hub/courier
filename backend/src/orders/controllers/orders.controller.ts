@@ -100,10 +100,12 @@ export class OrdersController {
     @Query('page_number') pageNumber = 0,
     @Query('page_size') pageSize = 0,
     @Query('sort_field') sortField = 'created_at',
-    @Query('sort_direction') sortDirection = 'desc',
+    @Query('sort_direction') sortDirection = 'asc',
     @Query('start_date') startDate?: string,
     @Query('end_date') endDate?: string,
     @Query('status') status?: string,
+    @Query('search_term') search_term?: string,
+    @Query('delivery_date') delivery_date?: string,
   ) {
     const queryParams = {
       pageNumber,
@@ -113,6 +115,8 @@ export class OrdersController {
       startDate,
       endDate,
       status,
+      search_term,
+      delivery_date,
     };
     return await this.ordersService.getFilteredOrders(queryParams, req);
   }

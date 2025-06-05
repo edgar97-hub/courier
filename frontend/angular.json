@@ -29,16 +29,8 @@
                 "input": "public"
               }
             ],
-            "styles": [
-              "src/styles.scss",
-              "node_modules/slick-carousel/slick/slick.css",
-              "node_modules/slick-carousel/slick/slick-theme.css"
-            ],
+            "styles": ["src/styles.scss"],
 
-            "scripts": [
-              "node_modules/jquery/dist/jquery.min.js",
-              "node_modules/slick-carousel/slick/slick.min.js"
-            ],
             "stylePreprocessorOptions": {
               "includePaths": ["./node_modules"]
             }

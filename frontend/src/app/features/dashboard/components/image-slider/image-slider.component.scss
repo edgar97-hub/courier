@@ -1,114 +1,69 @@
 // src/app/features/dashboard/components/image-slider/image-slider.component.scss
+
 :host {
   display: block;
   width: 100%;
 }
 
-.slick-slider-container {
+.swiper-slider-container {
   width: 100%;
-  position: relative;
-  border-radius: 10px;
+  position: relative; // Para posicionar los botones de navegación personalizados
+  border-radius: 12px;
   overflow: hidden;
-  aspect-ratio: 16 / 5.5;
-  background-color: #e9ecef; // Color de fondo mientras carga o si la imagen no cubre
+  aspect-ratio: 16 / 5.2; // Ajusta para que no sea demasiado alto o bajo
+  background-color: #e0e0e0; // Fondo placeholder
 
-  // Estilos para los controles de Slick Carousel usando ::ng-deep
-  // Esto es para sobreescribir o mejorar los estilos de slick-theme.css
-  ::ng-deep {
-    .slick-list {
-      border-radius: 10px; // Para que las imágenes se vean redondeadas
-      cursor: grab;
-      &:active {
-        cursor: grabbing;
-      }
-    }
-
-    .slick-dots {
-      bottom: 15px; // Posición de los puntos
-      li button:before {
-        font-size: 10px; // Tamaño de los puntos
-        color: white;
-        opacity: 0.5;
-        transition: opacity 0.3s ease;
-      }
-      li.slick-active button:before,
-      li:hover button:before {
-        opacity: 0.95; // Color del punto activo/hover
-      }
-    }
-
-    .slick-arrow {
-      // Estilo base para ambas flechas
-      z-index: 2; // Asegurar que estén por encima
-      width: 40px;
-      height: 40px;
-      background-color: rgba(0, 0, 0, 0.45); // Fondo semitransparente
-      border-radius: 50%; // Círculos
-      transition: background-color 0.3s ease, opacity 0.3s ease;
-      opacity: 0; // Ocultas por defecto, se muestran al hacer hover en el contenedor
-
-      &:before {
-        font-family: "slick"; // Crucial: esta es la fuente de iconos de slick-theme.css
-        font-size: 20px; // Tamaño del carácter de la flecha
-        line-height: 1; // Para centrar mejor el glifo de la fuente
-        color: white;
-        opacity: 0.8;
-      }
-      &:hover {
-        background-color: rgba(0, 0, 0, 0.65);
-        &:before {
-          opacity: 1;
-        }
-      }
-    }
-
-    // Mostrar flechas al hacer hover sobre el contenedor del slider
-    // (El :hover debe estar en el contenedor que activa la visibilidad)
-    .slick-prev {
-      left: 20px;
-    }
-    .slick-next {
-      right: 20px;
-    }
-  }
-  // Este selector es más específico para el hover del contenedor
-  &:hover ::ng-deep .slick-arrow {
+  &:hover .custom-swiper-button {
+    // Mostrar botones al hacer hover en el contenedor
     opacity: 1;
   }
 }
 
-.slide-item {
-  outline: none; // Quitar outline en focus
-  position: relative;
+.swiper {
+  // Este es el contenedor al que Swiper se adjunta
+  width: 100%;
   height: 100%;
-  display: flex !important; // Necesario para slick
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  border-radius: 12px; // Heredar redondeo
+}
 
+// Swiper añade estas clases por defecto, podemos estilizarlas
+.swiper-slide {
+  // Cada slide
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; // Para el object-fit de la imagen
+  background-color: #f0f0f0; // Fondo de cada slide mientras carga la imagen
+}
+
+.slide-item-swiper {
+  // Tu contenido dentro del swiper-slide
+  position: relative;
+  width: 100%;
+  height: 100%;
   &.clickable {
     cursor: pointer;
   }
 }
 
-.slide-image {
+.slide-image-swiper {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover; // 'cover' suele ser mejor para banners promocionales
+  object-fit: cover; // 'cover' suele ser mejor para banners
 }
 
-.slide-caption-overlay {
+.slide-caption-overlay-swiper {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  padding: 25px 0; // Espacio para el botón
+  padding: 20px 0 25px 0; // Más padding inferior
   background: linear-gradient(
     to top,
     rgba(0, 0, 0, 0.7) 0%,
     rgba(0, 0, 0, 0) 100%
-  ); // Degradado más pronunciado
+  );
   display: flex;
   justify-content: center;
   align-items: flex-end;
@@ -118,36 +73,125 @@
   transition: opacity 0.4s ease-in-out;
 }
 
-.slide-item:hover .slide-caption-overlay {
+.slide-item-swiper:hover .slide-caption-overlay-swiper {
   opacity: 1;
   pointer-events: auto;
 }
 
-.slide-button {
-  background-color: #ff6f00; // Naranja (ajusta a tu tema)
+.slide-button-swiper {
+  background-color: #ff6f00; // Naranja (puedes usar variables CSS de tu tema)
   color: white;
-  padding: 10px 25px; // Ajusta padding
+  padding: 10px 28px;
   border: none;
-  border-radius: 22px; // Botón más redondeado
-  font-weight: 500; // Ligeramente menos bold
-  font-size: 0.85em; // Un poco más pequeño
+  border-radius: 22px;
+  font-weight: 500;
+  font-size: 0.9em;
   text-decoration: none;
   text-transform: uppercase;
   letter-spacing: 0.7px;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease,
     box-shadow 0.2s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+  pointer-events: auto;
 
   &:hover {
     background-color: #ef6c00;
     transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
   }
   &:active {
     transform: translateY(0px);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
+}
+
+// --- ESTILOS PARA CONTROLES DE SWIPER PERSONALIZADOS ---
+
+// Paginación (Dots)
+.custom-swiper-pagination {
+  // El div que le pasamos a Swiper como 'el'
+  position: absolute;
+  bottom: 12px; // Posición de los dots
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10; // Por encima de los slides
+  display: flex;
+  gap: 8px;
+
+  // Swiper crea los bullets con estas clases si las especificaste en la config
+  .custom-swiper-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.4); // Dots inactivos
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    outline: none;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.7);
+    }
+
+    &.custom-swiper-dot-active {
+      // Clase para el dot activo
+      background-color: #ffffff; // Dot activo blanco
+      transform: scale(1.2);
+    }
+  }
+}
+
+// Botones de Navegación (Prev/Next)
+.custom-swiper-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10; // Por encima de los slides
+  width: 40px; // Tamaño del botón
+  height: 40px;
+  background-color: #3f51b5; // Azul como en tu imagen de referencia
+  color: white; // Color del icono
+  border-radius: 50%; // Círculos
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none; // Quitar borde por defecto de button
+  padding: 0; // Quitar padding por defecto de button
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, opacity 0.3s ease, transform 0.2s ease;
+  opacity: 0; // Oculto por defecto
+
+  mat-icon {
+    font-size: 28px; // Tamaño del icono de flecha
+    width: 28px;
+    height: 28px;
+    line-height: 28px; // Para centrar mejor el icono
+  }
+
+  &:hover {
+    background-color: #303f9f; // Azul más oscuro al hacer hover
+    transform: translateY(-50%) scale(1.05); // Ligero efecto al hacer hover
+  }
+
+  &.swiper-button-disabled {
+    // Clase que Swiper añade cuando no hay más slides en esa dirección (si loop=false)
+    opacity: 0.3 !important; // Hacerlo más transparente y no interactuable
+    cursor: default;
+    pointer-events: none;
+  }
+}
+
+.swiper-slider-container:hover .custom-swiper-button {
+  opacity: 0.9; // Mostrar botones al hacer hover sobre el contenedor del slider
+}
+
+.custom-swiper-button-prev {
+  left: 15px;
+}
+
+.custom-swiper-button-next {
+  right: 15px;
 }
 
 .slider-placeholder {
@@ -164,3 +208,46 @@
   text-align: center;
   padding: 20px;
 }
+
+// // En image-slider.component.scss
+// .custom-swiper-pagination {
+//   bor
+//   position: absolute;
+//   bottom: 12px;
+//   left: 50%;
+//   transform: translateX(-50%);
+//   z-index: 10;
+//   display: flex;
+//   gap: 8px;
+
+//   // Swiper crea los spans con estas clases si las especificaste en la config
+//   .custom-swiper-dot {
+//     // Esta es la clase que definiste en bulletClass
+//     width: 10px;
+//     height: 10px;
+//     border-radius: 50%;
+//     background-color: rgba(
+//       255,
+//       255,
+//       255,
+//       0.4
+//     ); // Dots inactivos (blanco semitransparente)
+//     opacity: 0.8; // Ligeramente transparentes
+//     cursor: pointer;
+//     transition: background-color 0.3s ease, opacity 0.3s ease,
+//       transform 0.3s ease;
+//     outline: none;
+
+//     &:hover {
+//       background-color: rgba(255, 255, 255, 0.7);
+//       opacity: 1;
+//     }
+
+//     &.custom-swiper-dot-active {
+//       // Esta es la clase que definiste en bulletActiveClass
+//       background-color: #ffffff; // Dot activo blanco
+//       opacity: 1;
+//       transform: scale(1.2); // Hacer el dot activo un poco más grande
+//     }
+//   }
+// }

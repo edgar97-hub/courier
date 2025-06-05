@@ -8,6 +8,12 @@
 // @use "./app/styles/tailwind.css";
 // @use "./app/styles/custom.scss";
 
+@import "swiper/scss"; // Core Swiper
+@import "swiper/scss/navigation"; // Para los botones de navegación
+@import "swiper/scss/pagination"; // Para los puntos de paginación
+@import "swiper/scss/autoplay"; // Si usas autoplay
+@import "swiper/scss/effect-fade"; // Si usas efecto fade
+
 // ----- 2. DECLARACIÓN DE PLACEHOLDERS Y MIXINS GLOBALES -----
 %btn-corp-base {
   border-radius: 20px !important;
@@ -216,5 +222,6 @@ table.mat-mdc-table {
     }
   }
 }
+
 // @import "~slick-carousel/slick/slick.css"; // El '~' apunta a node_modules
 // @import "~slick-carousel/slick/slick-theme.css";

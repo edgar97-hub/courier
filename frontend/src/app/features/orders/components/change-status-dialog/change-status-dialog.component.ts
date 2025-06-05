@@ -97,6 +97,11 @@ export class ChangeStatusDialogComponent implements OnInit {
   // uploadedImageUrl: string | null = null; // URL de la imagen después de subirla
 
   readonly paymentMethods: string[] = ['Efectivo', 'Pago directo'];
+  readonly paymentMethodsCostoEnvio: string[] = [
+    'Efectivo (Pago a COURIER)',
+    'Pago directo (Pago a COURIER)',
+    'Pago directo (Pago a EMPRESA)',
+  ];
   showDeliveryDetails: boolean = false;
 
   public OrderStatusEnum = OrderStatus;

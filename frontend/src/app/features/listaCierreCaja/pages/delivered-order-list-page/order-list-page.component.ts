@@ -136,8 +136,9 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
         'EFECTIVO (MONTO COBRAR)': number | null;
         'PAGO DIRECTO (MONTO COBRAR)': number | null;
         'COSTO ENVIO': number | null;
-        'EFECTIVO (COSTO ENVIO)': number | null;
-        'PAGO DIRECTO (COSTO ENVIO)': number | null;
+        'PAGO EFECTIVO A COURIER (COSTO ENVIO)': number | null;
+        'PAGO DIRECTO A COURIER (COSTO ENVIO)': number | null;
+        'PAGO DIRECTO A EMPRESA (COSTO ENVIO)': number | null;
         DIFERENCIA: number | null;
       }
 
@@ -146,12 +147,14 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
         efectivo_monto_cobrar: 0,
         pago_directo_monto_cobrar: 0,
         shipping_cost: 0,
-        efectivo_costo_servicio: 0,
-        pago_directo_costo_servicio: 0,
+        efectivo_courier_costo_servicio: 0,
+        pago_directo_courier_costo_servicio: 0,
+        pago_directo_empresa_costo_servicio: 0,
         diferencia: 0,
       };
 
       const allFilteredOrders = await this.getAllFilteredOrdersForExport();
+      console.log('allFilteredOrders', allFilteredOrders);
       if (allFilteredOrders && allFilteredOrders.length > 0) {
         const dataForSheet: ExcelOrderRow[] = allFilteredOrders.map(
           (order: any) => {
@@ -166,13 +169,21 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
                 : 0;
 
             // costo de envio
-            order.efectivo_costo_servicio =
-              order.payment_method_for_shipping_cost === 'Efectivo'
+            order.efectivo_courier_costo_servicio =
+              order.payment_method_for_shipping_cost ===
+              'Efectivo (Pago a COURIER)'
                 ? order.shipping_cost
                 : 0;
 
-            order.pago_directo_costo_servicio =
-              order.payment_method_for_shipping_cost === 'Pago directo'
+            order.pago_directo_courier_costo_servicio =
+              order.payment_method_for_shipping_cost ===
+              'Pago directo (Pago a COURIER)'
+                ? order.shipping_cost
+                : 0;
+
+            order.pago_directo_empresa_costo_servicio =
+              order.payment_method_for_shipping_cost ===
+              'Pago directo (Pago a EMPRESA)'
                 ? order.shipping_cost
                 : 0;
 
@@ -180,8 +191,8 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
             let monto_a_cobrar = order.amount_to_collect_at_delivery;
             if (order.amount_to_collect_at_delivery !== 0) {
               let costo_servicio_pagado_cliente_al_courier =
-                order.efectivo_costo_servicio ||
-                order.pago_directo_costo_servicio;
+                order.efectivo_courier_costo_servicio ||
+                order.pago_directo_courier_costo_servicio;
 
               /**
                * si el pago del monto a cobrar se hizo por pago directo,
@@ -207,6 +218,9 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
               if (costo_servicio_pagado_cliente_al_courier === 0) {
                 diferencia = monto_a_cobrar - order.shipping_cost;
               }
+              // else{
+              //   diferencia =
+              // }
             }
 
             totals.amount_to_collect_at_delivery +=
@@ -214,9 +228,12 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
             totals.efectivo_monto_cobrar += order.efectivo_monto_cobrar;
             totals.pago_directo_monto_cobrar += order.pago_directo_monto_cobrar;
             totals.shipping_cost += Number(order.shipping_cost) || 0;
-            totals.efectivo_costo_servicio += order.efectivo_costo_servicio;
-            totals.pago_directo_costo_servicio +=
-              order.pago_directo_costo_servicio;
+            totals.efectivo_courier_costo_servicio +=
+              order.efectivo_courier_costo_servicio;
+            totals.pago_directo_courier_costo_servicio +=
+              order.pago_directo_courier_costo_servicio;
+            totals.pago_directo_empresa_costo_servicio +=
+              order.pago_directo_empresa_costo_servicio;
             totals.diferencia += diferencia;
 
             return {
@@ -234,8 +251,12 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
               'PAGO DIRECTO (MONTO COBRAR)': order.pago_directo_monto_cobrar,
 
               'COSTO ENVIO': order.shipping_cost,
-              'EFECTIVO (COSTO ENVIO)': order.efectivo_costo_servicio,
-              'PAGO DIRECTO (COSTO ENVIO)': order.pago_directo_costo_servicio,
+              'PAGO EFECTIVO A COURIER (COSTO ENVIO)':
+                order.efectivo_courier_costo_servicio,
+              'PAGO DIRECTO A COURIER (COSTO ENVIO)':
+                order.pago_directo_courier_costo_servicio,
+              'PAGO DIRECTO A EMPRESA (COSTO ENVIO)':
+                order.pago_directo_empresa_costo_servicio,
               DIFERENCIA: diferencia,
             };
           }
@@ -252,8 +273,9 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
           'EFECTIVO (MONTO COBRAR)': null,
           'PAGO DIRECTO (MONTO COBRAR)': null,
           'COSTO ENVIO': null,
-          'EFECTIVO (COSTO ENVIO)': null,
-          'PAGO DIRECTO (COSTO ENVIO)': null,
+          'PAGO EFECTIVO A COURIER (COSTO ENVIO)': null,
+          'PAGO DIRECTO A COURIER (COSTO ENVIO)': null,
+          'PAGO DIRECTO A EMPRESA (COSTO ENVIO)': null,
           DIFERENCIA: null,
         };
         const totalsRow = {
@@ -268,8 +290,12 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
           'EFECTIVO (MONTO COBRAR)': totals.efectivo_monto_cobrar,
           'PAGO DIRECTO (MONTO COBRAR)': totals.pago_directo_monto_cobrar,
           'COSTO ENVIO': totals.shipping_cost,
-          'EFECTIVO (COSTO ENVIO)': totals.efectivo_costo_servicio,
-          'PAGO DIRECTO (COSTO ENVIO)': totals.pago_directo_costo_servicio,
+          'PAGO EFECTIVO A COURIER (COSTO ENVIO)':
+            totals.efectivo_courier_costo_servicio,
+          'PAGO DIRECTO A COURIER (COSTO ENVIO)':
+            totals.pago_directo_courier_costo_servicio,
+          'PAGO DIRECTO A EMPRESA (COSTO ENVIO)':
+            totals.pago_directo_empresa_costo_servicio,
           DIFERENCIA: totals.diferencia,
         };
 
@@ -337,6 +363,37 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
       .subscribe((response: PaginatedOrdersResponse) => {
         // ['Efectivo', 'Pago directo', 'POS'];
         response.items.forEach((order) => {
+          // order.efectivo_monto_cobrar =
+          //   order.payment_method_for_collection === 'Efectivo'
+          //     ? order.amount_to_collect_at_delivery
+          //     : 0;
+
+          // order.pago_directo_monto_cobrar =
+          //   order.payment_method_for_collection === 'Pago directo'
+          //     ? order.amount_to_collect_at_delivery
+          //     : 0;
+
+          // order.pos_monto_cobrar =
+          //   order.payment_method_for_collection === 'POS'
+          //     ? order.amount_to_collect_at_delivery
+          //     : 0;
+
+          // // costo de envio
+          // order.efectivo_costo_servicio =
+          //   order.payment_method_for_shipping_cost === 'Efectivo'
+          //     ? order.shipping_cost
+          //     : 0;
+
+          // order.pago_directo_costo_servicio =
+          //   order.payment_method_for_shipping_cost === 'Pago directo'
+          //     ? order.shipping_cost
+          //     : 0;
+
+          // order.pos_costo_servicio =
+          //   order.payment_method_for_shipping_cost === 'POS'
+          //     ? order.shipping_cost
+          //     : 0;
+
           order.efectivo_monto_cobrar =
             order.payment_method_for_collection === 'Efectivo'
               ? order.amount_to_collect_at_delivery
@@ -347,24 +404,22 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
               ? order.amount_to_collect_at_delivery
               : 0;
 
-          order.pos_monto_cobrar =
-            order.payment_method_for_collection === 'POS'
-              ? order.amount_to_collect_at_delivery
-              : 0;
-
           // costo de envio
-          order.efectivo_costo_servicio =
-            order.payment_method_for_shipping_cost === 'Efectivo'
+          order.efectivo_courier_costo_servicio =
+            order.payment_method_for_shipping_cost ===
+            'Efectivo (Pago a COURIER)'
               ? order.shipping_cost
               : 0;
 
-          order.pago_directo_costo_servicio =
-            order.payment_method_for_shipping_cost === 'Pago directo'
+          order.pago_directo_courier_costo_servicio =
+            order.payment_method_for_shipping_cost ===
+            'Pago directo (Pago a COURIER)'
               ? order.shipping_cost
               : 0;
 
-          order.pos_costo_servicio =
-            order.payment_method_for_shipping_cost === 'POS'
+          order.pago_directo_empresa_costo_servicio =
+            order.payment_method_for_shipping_cost ===
+            'Pago directo (Pago a EMPRESA)'
               ? order.shipping_cost
               : 0;
         });

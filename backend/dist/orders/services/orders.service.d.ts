@@ -36,12 +36,16 @@ export declare class OrdersService {
         page_number: number;
         page_size: number;
     }>;
-    getFilteredOrders({ sortField, sortDirection, startDate, endDate, status, }: {
+    getFilteredOrders({ pageNumber, pageSize, sortField, sortDirection, startDate, endDate, status, search_term, delivery_date, }: {
+        pageNumber?: number;
+        pageSize?: number;
         sortField?: string;
         sortDirection?: string;
         startDate?: string;
         endDate?: string;
         status?: string;
+        search_term?: string;
+        delivery_date?: string;
     }, req: any): Promise<{
         items: any;
         total_count: number;

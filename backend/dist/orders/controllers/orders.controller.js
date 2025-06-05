@@ -50,7 +50,7 @@ let OrdersController = class OrdersController {
         };
         return await this.ordersService.findOrders(queryParams, req);
     }
-    async getFilteredOrders(req, pageNumber = 0, pageSize = 0, sortField = 'created_at', sortDirection = 'desc', startDate, endDate, status) {
+    async getFilteredOrders(req, pageNumber = 0, pageSize = 0, sortField = 'created_at', sortDirection = 'asc', startDate, endDate, status, search_term, delivery_date) {
         const queryParams = {
             pageNumber,
             pageSize,
@@ -59,6 +59,8 @@ let OrdersController = class OrdersController {
             startDate,
             endDate,
             status,
+            search_term,
+            delivery_date,
         };
         return await this.ordersService.getFilteredOrders(queryParams, req);
     }
@@ -189,8 +191,10 @@ __decorate([
     __param(5, (0, common_1.Query)('start_date')),
     __param(6, (0, common_1.Query)('end_date')),
     __param(7, (0, common_1.Query)('status')),
+    __param(8, (0, common_1.Query)('search_term')),
+    __param(9, (0, common_1.Query)('delivery_date')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, String, String, String]),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "getFilteredOrders", null);
 __decorate([

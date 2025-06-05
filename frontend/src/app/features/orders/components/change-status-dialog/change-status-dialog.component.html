@@ -60,7 +60,7 @@
           placeholder="Describa el motivo del cambio de estado..."
         ></textarea>
         <mat-hint align="start" *ngIf="isReasonMandatory(selectedStatus)">
-          Es importante detallar el motivo para este estados.
+          Es importante detallar el motivo de este estado.
         </mat-hint>
         <mat-error
           *ngIf="
@@ -199,7 +199,7 @@
             name="shippingCostPaymentMethod"
           >
             <mat-option
-              *ngFor="let method of paymentMethods"
+              *ngFor="let method of paymentMethodsCostoEnvio"
               [value]="method"
               >{{ method }}</mat-option
             >

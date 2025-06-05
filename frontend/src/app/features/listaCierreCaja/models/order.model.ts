@@ -166,9 +166,11 @@ export interface Order_ {
   pago_directo_monto_cobrar?: number;
   pos_monto_cobrar?: number;
 
-  efectivo_costo_servicio?: number;
-  pago_directo_costo_servicio?: number;
-  pos_costo_servicio?: number;
+  efectivo_courier_costo_servicio?: number;
+  pago_directo_courier_costo_servicio?: number;
+  pago_directo_empresa_costo_servicio?: number;
+  // pago_directo_costo_servicio?: number;
+  // pos_costo_servicio?: number;
 }
 
 export interface Motorized {

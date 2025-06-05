@@ -82,7 +82,6 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
 
   @Output() viewPdfClicked = new EventEmitter<Order_>();
   @Output() viewDetailsClicked = new EventEmitter<Order_>();
-  // ... otros outputs para acciones específicas si las manejas en el componente padre
 
   displayedColumns: string[] = [
     'code',
@@ -97,8 +96,9 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     'pago_directo_monto_cobrar',
     // 'pos_monto_cobrar',
 
-    'efectivo_costo_servicio',
-    'pago_directo_costo_servicio',
+    'efectivo_courier_costo_servicio',
+    'pago_directo_courier_costo_servicio',
+    'pago_directo_empresa_costo_servicio',
     // 'pos_costo_servicio',
     'usuario_creacion',
     // 'recipient_phone',
