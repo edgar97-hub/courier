@@ -53,7 +53,7 @@ import { Router, NavigationEnd, Event as RouterEvent } from '@angular/router'; /
           fixedTopGap="56"
           [style.width]="sidenavWidth()"
         >
-          <app-custom-sidenav />
+          <app-custom-sidenav [sidenavParentRef]="snav" [isMobile]="isMobile()" />
         </mat-sidenav>
         <mat-sidenav-content class="content">
           <router-outlet></router-outlet>
@@ -89,9 +89,6 @@ h1.example-app-name {
 .example-is-mobile .example-sidenav-container {
   flex: 1 0 auto;
 }
-
-  
-
   `,
 })
 export default class LayoutComponent implements OnDestroy {

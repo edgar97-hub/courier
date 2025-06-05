@@ -186,7 +186,12 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
       }
 
       if (precio === 0) {
-        alert('No existe tarifa de envío asociada a ese distrito con ese peso');
+        alert(
+          'No hay ninguna tarifa asociada con el peso (' +
+            peso_cobrado +
+            ') del distrito seleccionado.'
+        );
+        // no hay un peso volumétrico asociado a una tarifa del distrito seleccionado
       }
       console.log('peso_cobrado', peso_cobrado);
       console.log('precio', precio);

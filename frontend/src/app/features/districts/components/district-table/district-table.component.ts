@@ -56,7 +56,7 @@ export class DistrictTableComponent implements AfterViewInit, OnChanges {
   displayedColumns: string[] = [
     'code',
     'name',
-    'weight_range', // Columna combinada para peso
+    'weight_range', 
     'price',
     'isStandard',
     'actions',

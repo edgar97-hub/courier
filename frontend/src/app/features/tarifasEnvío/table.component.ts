@@ -31,7 +31,6 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
 import { PesoVolumetricoComponent } from './peso-volumetrico.component';
 import { DistrictService } from './district.service';
-import { DialogComponent } from './dialog.component';
 
 export interface UserData {
   id: string;
@@ -110,8 +109,9 @@ export interface UserData {
               type="submit"
               class="mb-3 mt-5 btn-corp-primary"
               mat-flat-button
+              [disabled]="isLoading"
             >
-              Guardar
+              {{ isLoading ? 'Guardando...' : 'Guardar' }}
             </button>
           </form>
         </mat-card-content>
@@ -199,8 +199,9 @@ export interface UserData {
               class="mb-3 mt-5 btn-corp-primary"
               style="margin-top: 10px;"
               mat-flat-button
+              [disabled]="isLoading2"
             >
-              Guardar
+              {{ isLoading2 ? 'Guardando...' : 'Guardar' }}
             </button>
           </form>
         </mat-card-content>
@@ -221,10 +222,11 @@ export default class TableComponent {
     'actions',
   ];
 
-  dataSource: MatTableDataSource<any>;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatTable) table!: MatTable<any>;
+  isLoading = false;
+  isLoading2 = false;
 
   districtService = inject(DistrictService);
   settingService = inject(SettingService);
@@ -259,10 +261,6 @@ export default class TableComponent {
       volumetric_factor: ['', [Validators.required]],
     });
     this.getSetting();
-
-    this.dataSource = new MatTableDataSource<any>();
-    this.getDistritcs(this.dataSource);
-    this.table = this.table;
   }
 
   async getSetting() {
@@ -319,6 +317,8 @@ export default class TableComponent {
   }
   async onSubmitStandardMeasurement(form: FormGroup) {
     if (form.valid) {
+      this.isLoading = true;
+
       this.settingService
         .updateSubmitStandardMeasurement({
           id: form.value.id,
@@ -331,15 +331,17 @@ export default class TableComponent {
           next: (data) => {
             console.log(data);
             const myObservable = of('Data received');
-            const subscriptionDelay = timer(1000);
+            const subscriptionDelay = timer(2000);
             myObservable
               .pipe(delayWhen(() => subscriptionDelay))
               .subscribe((data) => {
                 console.log(data);
+                this.isLoading = false;
                 window.location.reload();
               });
           },
           error: (e) => {
+            this.isLoading = false;
             console.log(e);
           },
         });
@@ -348,6 +350,8 @@ export default class TableComponent {
 
   async onSubmitMaximumMeasurement(form: FormGroup) {
     if (form.valid) {
+      this.isLoading2 = true;
+
       this.settingService
         .updateSubmitMaximumMeasurement({
           id: form.value.id,
@@ -361,76 +365,20 @@ export default class TableComponent {
           next: (data) => {
             console.log(data);
             const myObservable = of('Data received');
-            const subscriptionDelay = timer(1000);
+            const subscriptionDelay = timer(1500);
             myObservable
               .pipe(delayWhen(() => subscriptionDelay))
               .subscribe((data) => {
                 console.log(data);
+                this.isLoading2 = false;
                 window.location.reload();
               });
           },
           error: (e) => {
             console.log(e);
+            this.isLoading2 = false;
           },
         });
     }
   }
-  async getDistritcs(dataSource: any) {
-    this.districtService.getRows().subscribe({
-      next: (data) => {
-        console.log('data', data);
-        dataSource.data = data;
-      },
-      error: (e) => {
-        console.log(e);
-      },
-    });
-  }
-  openDialog(action: any, obj: any) {
-    obj.action = action;
-    this.dialog.open(DialogComponent, {
-      data: {
-        dialog: this.dialog,
-        obj: obj,
-        getDistritcs: this.getDistritcs,
-        dataSource: this.dataSource,
-      },
-    });
-  }
-  remove(id: string) {
-    if (window.confirm('¿Está seguro que desea eliminar este registro?')) {
-      this.districtService.remove(id).subscribe({
-        next: (data) => {
-          console.log('data', data);
-          const myObservable = of('Data received');
-          const subscriptionDelay = timer(1000); // Delay subscription by 3 seconds
-          myObservable
-            .pipe(delayWhen(() => subscriptionDelay))
-            .subscribe((data) => {
-              console.log(data); // Executes after the 3-second delay
-              this.getDistritcs(this.dataSource);
-            });
-        },
-        error: (e) => {
-          console.log(e);
-        },
-      });
-    }
-  }
-
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
-  }
-
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
-  }
-
-  async onSubmit(form: FormGroup) {}
 }

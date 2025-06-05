@@ -100,6 +100,7 @@ import {
 } from '@angular/animations'; // state añadido
 import { CommonModule } from '@angular/common';
 import { MenuItem } from '../menu-items';
+import { MatSidenav } from '@angular/material/sidenav';
 
 @Component({
   selector: 'app-menu-item',
@@ -160,6 +161,8 @@ import { MenuItem } from '../menu-items';
         [item]="subItem"
         [collapsed]="collapsed()"
         [level]="level() + 1"
+        [sidenavInstance]="sidenavInstance()"
+        [isMobile]="isMobile()"
       />
       }
     </div>
@@ -249,6 +252,9 @@ import { MenuItem } from '../menu-items';
   ],
 })
 export class MenuItemComponent {
+  isMobile = input.required<boolean>(); // <--- NUEVO INPUT
+  sidenavInstance = input<MatSidenav | null>(null);
+
   item = input.required<MenuItem>();
   routeHistory = input<string>('');
   collapsed = input.required<boolean>();
@@ -268,11 +274,21 @@ export class MenuItemComponent {
   }
 
   handleClick(): void {
+    const currentItem = this.item();
     if (this.hasSubitems()) {
       this.isSubmenuOpen.set(!this.isSubmenuOpen());
     }
-  }
 
+    // || this.isExternalLink()
+    if (currentItem.route) {
+      this.closeSidenavOnMobile();
+    }
+  }
+  private closeSidenavOnMobile(): void {
+    if (this.isMobile() && this.sidenavInstance()) {
+      this.sidenavInstance()?.close();
+    }
+  }
   buildRouterLink(): string[] | null {
     const currentItem = this.item();
 

@@ -11,14 +11,9 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root',
 })
 export class SettingService {
-  // readonly API_URL = 'http://161.132.41.184:8000/api/settings';
-  // readonly API_URL = 'http://localhost:8000/api/settings';
   readonly API_URL = environment.apiUrl + '/settings';
-
   private authService = inject(AuthService);
-
   unsubscribe: any | null = null;
-
   constructor(private http: HttpClient) {}
 
   async getAuthState(): Promise<any | null> {}
@@ -27,8 +22,7 @@ export class SettingService {
     if (token) {
       return new HttpHeaders({
         'Content-Type': 'application/json',
-        // 'Authorization': `Bearer ${token}` // ESTÁNDAR
-        codrr_token: token, // Como lo tenías
+        codrr_token: token,
       });
     }
     return new HttpHeaders({ 'Content-Type': 'application/json' });

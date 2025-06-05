@@ -32,7 +32,6 @@ import {
 import { OrderService } from '../../services/order.service';
 import { AutoSelectDirective } from '../../../../shared/directives/auto-select.directive';
 
-
 @Component({
   selector: 'app-package-calculator',
   standalone: true,
@@ -304,7 +303,11 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
       console.log('precio', precio);
 
       if (precio === 0) {
-        alert('No existe tarifa de envío asociada a ese distrito con ese peso');
+        alert(
+          'No hay ninguna tarifa asociada con el peso (' +
+            peso_cobrado +
+            ') del distrito seleccionado.'
+        );
       }
       this.shippingCostCalculated.emit(precio);
       this.isCalculating.set(false);

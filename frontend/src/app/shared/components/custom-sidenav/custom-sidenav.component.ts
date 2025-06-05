@@ -9,7 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -39,12 +39,19 @@ import SidenavHeaderComponent from './sidenav-header/sidenav-header.component';
         rel="noopener noreferrer"
         matRipple
         class="menu-link-item static-link"
+        (click)="onMenuItemClicked()"
       >
         <mat-icon matListItemIcon class="menu-item-icon">map</mat-icon>
         <span matListItemTitle>Mapa de cobertura</span>
       </a>
       } }@else{
-      <app-menu-item [item]="item" [collapsed]="collapsed()" [level]="0" />
+      <app-menu-item
+        [item]="item"
+        [collapsed]="collapsed()"
+        [level]="0"
+        [sidenavInstance]="actualSidenavInstanceForChildren"
+        [isMobile]="isMobile()"
+      />
       } } @empty { @if (!coverageMapLinkSignal()) {
       <mat-list-item disabled>
         <div matListItemTitle>No hay opciones de menú.</div>
@@ -64,6 +71,9 @@ import SidenavHeaderComponent from './sidenav-header/sidenav-header.component';
   ],
 })
 export class CustomSidenavComponent implements OnInit, OnDestroy {
+  isMobile = input.required<boolean>(); // <--- NUEVO INPUT
+  sidenavParentRef = input<MatSidenav | null>(null); // Este es InputSignal<MatSidenav | null>
+
   collapsed = input<boolean>(false);
 
   appStore = inject(AppStore);
@@ -142,5 +152,14 @@ export class CustomSidenavComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+  get actualSidenavInstanceForChildren(): MatSidenav | null {
+    return this.sidenavParentRef(); // Llama a la señal para obtener el valor
+  }
+
+  onMenuItemClicked(): void {
+    if (this.isMobile() && this.sidenavParentRef()) {
+      this.sidenavParentRef()?.close();
+    }
   }
 }
