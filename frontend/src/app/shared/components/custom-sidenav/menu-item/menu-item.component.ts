@@ -277,12 +277,13 @@ export class MenuItemComponent {
     const currentItem = this.item();
     if (this.hasSubitems()) {
       this.isSubmenuOpen.set(!this.isSubmenuOpen());
+    } else {
+      if (currentItem.route) {
+        this.closeSidenavOnMobile();
+      }
     }
 
     // || this.isExternalLink()
-    if (currentItem.route) {
-      this.closeSidenavOnMobile();
-    }
   }
   private closeSidenavOnMobile(): void {
     if (this.isMobile() && this.sidenavInstance()) {
