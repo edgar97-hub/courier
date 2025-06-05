@@ -89,7 +89,7 @@ export class SettingService {
         maximum_measurements_width: user.maximum_measurements_width,
         maximum_measurements_length: user.maximum_measurements_length,
         maximum_measurements_height: user.maximum_measurements_height,
-        maximum_measurements_weight: user.volumetric_factor,
+        maximum_measurements_weight: user.maximum_measurements_weight,
         volumetric_factor: user.volumetric_factor,
       },
       {

@@ -354,7 +354,7 @@ export default class TableComponent {
           maximum_measurements_width: form.value.maximum_measurements_width,
           maximum_measurements_length: form.value.maximum_measurements_length,
           maximum_measurements_height: form.value.maximum_measurements_height,
-          maximum_measurements_weight: form.value.volumetric_factor,
+          maximum_measurements_weight: form.value.maximum_measurements_weight,
           volumetric_factor: form.value.volumetric_factor,
         })
         .subscribe({
