@@ -1,7 +1,7 @@
 // No es necesario @use '@angular/material' as mat; si no usamos sus funciones de theming aquí.
 
 .kpi-card {
-  text-align: left;
+  // text-align: left;
   border-radius: 8px;
   // box-shadow: 0 2px 5px rgba(0,0,0,0.1); // Sombra sutil, puedes activarla si deseas
   // transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
@@ -17,7 +17,15 @@
 }
 .card-header-kpi {
   // min-width: 350px !important;
-  // border: 1px solid black;
+  // border: 1px solid rgb(21, 21, 21) !important;
+  border: 1px solid rgb(211, 207, 207) !important;
+  border-radius: 8px;
+  width: 220px;
+  height: 130px;
+  display: flex;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
 }
 
 .kpi-icon-container {
@@ -27,7 +35,8 @@
   border-radius: 50%;
   width: 48px;
   height: 48px;
-  margin-right: 16px;
+  // margin-right: 16px;
+  // border: 1px solid black;
 }
 
 .kpi-icon {
@@ -50,6 +59,8 @@
   font-size: 2em;
   font-weight: 700;
   line-height: 1.1;
+  // border: 1px solid black;
+  text-align: center;
   // El color del valor se definirá por las clases de color específicas
 }
 
@@ -58,6 +69,7 @@
   font-weight: 400;
   margin-left: 4px;
   text-transform: lowercase;
+  // border: 1px solid black;
   // El color del unit heredará de .kpi-value o puedes definirlo
 }
 
