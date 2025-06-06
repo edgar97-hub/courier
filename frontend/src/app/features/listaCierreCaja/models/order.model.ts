@@ -169,6 +169,7 @@ export interface Order_ {
   efectivo_courier_costo_servicio?: number;
   pago_directo_courier_costo_servicio?: number;
   pago_directo_empresa_costo_servicio?: number;
+  diferencia?: number;
   // pago_directo_costo_servicio?: number;
   // pos_costo_servicio?: number;
 }

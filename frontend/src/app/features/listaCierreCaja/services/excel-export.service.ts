@@ -26,8 +26,8 @@ export class ExcelExportService {
 
     // Opcional: Ajustar anchos de columnas (esto es un poco más avanzado y a veces no perfecto)
     // Podrías necesitar una función para calcular anchos basados en el contenido
-    // const columnWidths = this.calculateColumnWidths(jsonData);
-    // worksheet['!cols'] = columnWidths;
+    const columnWidths = this.calculateColumnWidths(jsonData);
+    worksheet['!cols'] = columnWidths;
 
     // Crear el workbook
     const workbook: XLSX.WorkBook = {
@@ -54,17 +54,18 @@ export class ExcelExportService {
   }
 
   // Función de ejemplo para calcular anchos (simplificada)
-  // private calculateColumnWidths(jsonData: any[]): any[] {
-  //   if (!jsonData || jsonData.length === 0) return [];
-  //   const widths: any[] = [];
-  //   const header = Object.keys(jsonData[0]);
-  //   header.forEach(key => {
-  //     const maxLength = Math.max(
-  //       key.length,
-  //       ...jsonData.map(item => (item[key] ? String(item[key]).length : 0))
-  //     );
-  //     widths.push({ wch: maxLength + 2 }); // +2 para un poco de padding
-  //   });
-  //   return widths;
-  // }
+  private calculateColumnWidths(jsonData: any[]): any[] {
+    if (!jsonData || jsonData.length === 0) return [];
+    const widths: any[] = [];
+    const header = Object.keys(jsonData[0]);
+    header.forEach((key) => {
+      const maxLength = Math.max(
+        key.length,
+        ...jsonData.map((item) => (item[key] ? String(item[key]).length : 0))
+      );
+      // widths.push({ wch: maxLength + 2 }); // +2 para un poco de padding
+      widths.push({ wch: maxLength + 1 });
+    });
+    return widths;
+  }
 }

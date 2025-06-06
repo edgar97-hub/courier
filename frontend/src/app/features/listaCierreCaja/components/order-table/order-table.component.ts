@@ -94,12 +94,12 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
 
     'efectivo_monto_cobrar',
     'pago_directo_monto_cobrar',
-    // 'pos_monto_cobrar',
+    'shipping_cost',
 
     'efectivo_courier_costo_servicio',
     'pago_directo_courier_costo_servicio',
     'pago_directo_empresa_costo_servicio',
-    // 'pos_costo_servicio',
+    'diferencia',
     'usuario_creacion',
     // 'recipient_phone',
     // 'delivery_address',

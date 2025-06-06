@@ -99,13 +99,13 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   appStore = inject(AppStore);
 
   // Para mostrar el nombre del distrito seleccionado, no solo el ID
-  selectedDistrictName = computed(() => {
+  selectedDistrictName = () => {
     const districtId = this.orderForm?.get('delivery_district_id')?.value;
     console.log('districtId', districtId);
     console.log('this._districtsCache', this._districtsCache);
     if (!districtId || !this._districtsCache) return '';
     return this._districtsCache.find((d) => d.id === districtId)?.name || '';
-  });
+  };
 
   private orderService = inject(OrderService);
   private fb = inject(FormBuilder);

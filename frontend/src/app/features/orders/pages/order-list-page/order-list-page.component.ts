@@ -121,7 +121,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
   async exportDataToExcel(): Promise<void> {
     this.isLoading = true;
     this.snackBar.open(
-      'Preparing Excel export, this may take a moment...',
+      'Preparando la exportación a Excel, esto puede tardar un momento...',
       '',
       { duration: 0 }
     );
@@ -152,14 +152,14 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
           'Pedidos'
         );
         this.snackBar.dismiss();
-        this.snackBar.open('Excel file exported successfully!', 'OK', {
+        this.snackBar.open('¡Archivo Excel exportado exitosamente!', 'OK', {
           duration: 3500,
           panelClass: ['success-snackbar'],
         });
       } else {
         this.snackBar.dismiss();
         this.snackBar.open(
-          'No data available to export with current filters.',
+          'No hay datos disponibles para exportar con los filtros actuales.',
           'OK',
           { duration: 3000 }
         );
