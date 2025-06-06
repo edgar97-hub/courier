@@ -160,7 +160,7 @@
           <button
             mat-menu-item
             (click)="openAssignDriverModal(order)"
-            *ngIf="isAdminUser()"
+            *ngIf="isAdminOrReceptionist()"
           >
             <mat-icon>person_pin_circle</mat-icon>
             <span
