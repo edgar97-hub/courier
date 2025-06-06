@@ -40,6 +40,12 @@ let DistrictsController = class DistrictsController {
         };
         return await this.usersService.findDistricts(queryParams);
     }
+    async findUsersByRol(search_term) {
+        const queryParams = {
+            search_term,
+        };
+        return await this.usersService.findDistricts2(queryParams);
+    }
     async findUserById(id) {
         return await this.usersService.findUserById(id);
     }
@@ -75,6 +81,13 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object, Object, Object, Object]),
     __metadata("design:returntype", Promise)
 ], DistrictsController.prototype, "findAllOrders", null);
+__decorate([
+    (0, common_1.Get)('filtered'),
+    __param(0, (0, common_1.Query)('search_term')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], DistrictsController.prototype, "findUsersByRol", null);
 __decorate([
     (0, swagger_1.ApiParam)({
         name: 'id',

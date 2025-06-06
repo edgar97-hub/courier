@@ -101,7 +101,7 @@
       >
     </mat-form-field>
 
-    <mat-form-field appearance="outline">
+    <!-- <mat-form-field appearance="outline">
       <mat-label>Distrito de entrega</mat-label>
       <mat-select formControlName="delivery_district_id">
         <mat-option
@@ -125,14 +125,60 @@
           </div>
         </mat-option>
       </mat-select>
-      <!-- CORRECCIÓN AQUÍ -->
-      <!-- <mat-hint
-        *ngIf="
-          orderForm.get('delivery_district_id')?.value as selectedDistrictId
-        "
+
+      <mat-error
+        *ngIf="orderForm.get('delivery_district_id')?.hasError('required')"
+        >Requerido</mat-error
       >
-        {{ getDistrictCoverageInfo(selectedDistrictId) }}
-      </mat-hint> -->
+    </mat-form-field> -->
+    <mat-form-field appearance="outline" class="driver-search-field">
+      <mat-label>Buscar y Seleccionar distrito</mat-label>
+      <input
+        type="text"
+        placeholder="Escriba el nombre del distrito..."
+        aria-label="distrito"
+        matInput
+        [formControl]="districSearchCtrl"
+        [matAutocomplete]="autoDistric"
+      />
+      <button
+        *ngIf="districSearchCtrl.value && !isLoadingDistricts"
+        matSuffix
+        mat-icon-button
+        aria-label="Limpiar"
+        (click)="clearDistrictSelection()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-icon
+        matSuffix
+        *ngIf="!districSearchCtrl.value && !isLoadingDistricts"
+        >person_search</mat-icon
+      >
+      <mat-progress-spinner
+        *ngIf="isLoadingDistricts"
+        matSuffix
+        mode="indeterminate"
+        diameter="20"
+      ></mat-progress-spinner>
+
+      <mat-autocomplete
+        #autoDistric="matAutocomplete"
+        [displayWith]="displayDistricName"
+        (optionSelected)="onDistrictSelected($event)"
+      >
+        @for (driver of filteredDistricts$ | async; track driver.id) {
+        <mat-option [value]="driver">
+          <div class="driver-option">
+            <span>{{ driver.name_and_price }}</span>
+          </div>
+        </mat-option>
+        } @if ((filteredDistricts$ | async)?.length === 0 && !isLoadingDistricts
+        && districSearchCtrl.value) {
+        <mat-option disabled>No se encontraron motorizados.</mat-option>
+        }
+      </mat-autocomplete>
+
       <mat-error
         *ngIf="orderForm.get('delivery_district_id')?.hasError('required')"
         >Requerido</mat-error

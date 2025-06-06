@@ -28,12 +28,15 @@
     *ngIf="!isLoading && dataSource.data.length > 0"
   >
     <ng-container matColumnDef="code">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>N°</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="code">N°</th>
+
       <td mat-cell *matCellDef="let user">{{ user.code }}</td>
     </ng-container>
 
     <ng-container matColumnDef="username">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="username">
+        Nombre
+      </th>
       <td mat-cell *matCellDef="let user">{{ user.username }}</td>
     </ng-container>
 
@@ -50,14 +53,6 @@
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef>Acciones</th>
       <td mat-cell *matCellDef="let user">
-        <!-- <button
-          mat-icon-button
-          color="primary"
-          (click)="onView(user)"
-          matTooltip="View Details"
-        >
-          <mat-icon>visibility</mat-icon>
-        </button> -->
         <button
           mat-icon-button
           color="accent"

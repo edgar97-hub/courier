@@ -25,7 +25,7 @@ import { ImportResult } from '../components/order-import-modal/order-import-moda
 })
 export class OrderService {
   readonly apiUrlOrders = environment.apiUrl + '/orders';
-  readonly apiUrl = environment.apiUrl + '/districts';
+  readonly apiUrlDistricts = environment.apiUrl + '/districts';
   readonly apiUrlUsers = environment.apiUrl + '/users';
   readonly apiUrlSettings = environment.apiUrl + '/settings';
 
@@ -163,7 +163,7 @@ export class OrderService {
       return throwError(() => new Error('Not authenticated to fetch users.'));
     }
     return this.http
-      .get<DistrictOption[]>(`${this.apiUrl}/all`, { headers })
+      .get<DistrictOption[]>(`${this.apiUrlDistricts}/all`, { headers })
       .pipe(catchError(this.handleError));
   }
 
@@ -234,8 +234,6 @@ export class OrderService {
               'cm ' +
               apiResponse[0].standard_measurements_weight +
               'kg';
-
-              
 
             let info_text =
               'MEDIDAS MAXIMAS (Largo ' +
@@ -390,6 +388,18 @@ export class OrderService {
 
     return this.http
       .get<any>(`${this.apiUrlUsers}/filtered`, { params, headers })
+      .pipe(catchError(this.handleError));
+  }
+
+  getDistricts(searchTerm: string): Observable<any> {
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(() => new Error('Not authenticated to fetch users.'));
+    }
+    let params = new HttpParams().set('search_term', searchTerm);
+
+    return this.http
+      .get<any>(`${this.apiUrlDistricts}/filtered`, { params, headers })
       .pipe(catchError(this.handleError));
   }
 

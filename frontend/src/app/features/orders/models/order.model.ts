@@ -67,6 +67,7 @@ export interface DistrictOption {
   name: string;
   isStandard: boolean;
   price: string;
+  name_and_price?: string;
   // coverage_info?: string; // "En caso de registrar el pedido, no verificar..."
 }
 

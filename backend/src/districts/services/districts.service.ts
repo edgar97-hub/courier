@@ -63,6 +63,33 @@ export class DistrictsService {
     }
   }
 
+  public async findDistricts2({
+    search_term = '',
+  }: {
+    search_term?: string;
+  }): Promise<DistrictsEntity[]> {
+    try {
+      const queryBuilder = this.userRepository.createQueryBuilder('district');
+
+      if (search_term) {
+        queryBuilder.andWhere('LOWER(district.name) LIKE LOWER(:search)', {
+          search: `%${search_term}%`,
+        });
+      }
+
+      let users: DistrictsEntity[] = await queryBuilder.getMany();
+      users = users.filter((item) => item.isStandard);
+      users = users.map((item) => {
+        return {
+          ...item,
+          name_and_price: item.name + ' - S/ ' + item.price.toFixed(2),
+        };
+      });
+      return users;
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
   public async createUser(body: DistrictDTO): Promise<DistrictsEntity> {
     try {
       return await this.userRepository.save(body);

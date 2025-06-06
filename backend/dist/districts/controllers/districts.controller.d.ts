@@ -11,6 +11,7 @@ export declare class DistrictsController {
         page_number: number;
         page_size: number;
     }>;
+    findUsersByRol(search_term: string): Promise<import("../entities/districts.entity").DistrictsEntity[]>;
     findUserById(id: string): Promise<import("../entities/districts.entity").DistrictsEntity>;
     updateUser(id: string, body: DistrictUpdateDTO): Promise<import("typeorm").UpdateResult | undefined>;
     deleteUser(id: string): Promise<import("typeorm").DeleteResult | undefined>;

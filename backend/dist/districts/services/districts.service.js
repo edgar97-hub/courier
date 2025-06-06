@@ -46,6 +46,28 @@ let DistrictsService = class DistrictsService {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
+    async findDistricts2({ search_term = '', }) {
+        try {
+            const queryBuilder = this.userRepository.createQueryBuilder('district');
+            if (search_term) {
+                queryBuilder.andWhere('LOWER(district.name) LIKE LOWER(:search)', {
+                    search: `%${search_term}%`,
+                });
+            }
+            let users = await queryBuilder.getMany();
+            users = users.filter((item) => item.isStandard);
+            users = users.map((item) => {
+                return {
+                    ...item,
+                    name_and_price: item.name + ' - S/ ' + item.price.toFixed(2),
+                };
+            });
+            return users;
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
     async createUser(body) {
         try {
             return await this.userRepository.save(body);

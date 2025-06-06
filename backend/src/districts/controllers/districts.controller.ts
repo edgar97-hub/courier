@@ -60,6 +60,14 @@ export class DistrictsController {
     return await this.usersService.findDistricts(queryParams);
   }
 
+  @Get('filtered')
+  public async findUsersByRol(@Query('search_term') search_term: string) {
+    const queryParams = {
+      search_term,
+    };
+    return await this.usersService.findDistricts2(queryParams);
+  }
+
   @ApiParam({
     name: 'id',
   })

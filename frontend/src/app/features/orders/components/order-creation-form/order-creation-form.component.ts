@@ -77,7 +77,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   @Output() formValidityChanged = new EventEmitter<boolean>(); // Para notificar al padre
 
   orderForm!: FormGroup;
-  deliveryDistricts$: Observable<DistrictOption[]>;
+  // deliveryDistricts$: Observable<DistrictOption[]>;
   minDeliveryDate: Date;
 
   shipmentTypes: string[] = [
@@ -101,6 +101,8 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   // Para mostrar el nombre del distrito seleccionado, no solo el ID
   selectedDistrictName = computed(() => {
     const districtId = this.orderForm?.get('delivery_district_id')?.value;
+    console.log('districtId', districtId);
+    console.log('this._districtsCache', this._districtsCache);
     if (!districtId || !this._districtsCache) return '';
     return this._districtsCache.find((d) => d.id === districtId)?.name || '';
   });
@@ -114,19 +116,37 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   drivers$: Observable<User[]> = of([]); // Observable para la lista de motorizados
   isLoadingDrivers = false;
   selectedDriver: User | null = null;
-
   driverSearchCtrl = new FormControl('');
   filteredDrivers$: Observable<User[]>;
 
+  ditricts$: Observable<User[]> = of([]); // Observable para la lista de motorizados
+  isLoadingDistricts = false;
+  selectedDistrict: User | null = null;
+  districSearchCtrl = new FormControl('');
+  filteredDistricts$: Observable<DistrictOption[]>;
+
   constructor() {
     this.minDeliveryDate = new Date(); // No se puede entregar en el pasado
-    this.deliveryDistricts$ = this.orderService.getDeliveryDistricts().pipe(
-      map((allDistricts: DistrictOption[]) => {
-        this._districtsCache = allDistricts;
-        return allDistricts.filter((district) => district.isStandard);
-      })
-      // tap((districts) => (this._districtsCache = districts)) // Cachear para buscar nombre
-    );
+    this.orderService
+      .getDeliveryDistricts()
+      .pipe(
+        map((allDistricts: DistrictOption[]) => {
+          // this._districtsCache = allDistricts;
+          console.log('this._districtsCache', this._districtsCache);
+          return allDistricts.filter((district) => district.isStandard);
+        })
+      )
+      .subscribe((standardDistricts) => {
+        this._districtsCache = standardDistricts; // o lo que necesites hacer
+      });
+    // this.deliveryDistricts$ = this.orderService.getDeliveryDistricts().pipe(
+    //   map((allDistricts: DistrictOption[]) => {
+    //     this._districtsCache = allDistricts;
+    //     console.log('this._districtsCache', this._districtsCache);
+    //     return allDistricts.filter((district) => district.isStandard);
+    //   })
+    //   // tap((districts) => (this._districtsCache = districts)) // Cachear para buscar nombre
+    // );
     this.buildForm();
 
     this.filteredDrivers$ = this.driverSearchCtrl.valueChanges.pipe(
@@ -140,6 +160,24 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
           tap(() => (this.isLoadingDrivers = false)),
           catchError(() => {
             this.isLoadingDrivers = false;
+            return of([]); // Devuelve array vacío en caso de error
+          })
+        );
+      }),
+      takeUntil(this.destroy$)
+    );
+
+    this.filteredDistricts$ = this.districSearchCtrl.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((searchTerm) => {
+        this.isLoadingDistricts = true;
+        console.log('searchTerm', searchTerm);
+        return this.orderService.getDistricts(searchTerm || '').pipe(
+          tap(() => (this.isLoadingDistricts = false)),
+          catchError(() => {
+            this.isLoadingDistricts = false;
             return of([]); // Devuelve array vacío en caso de error
           })
         );
@@ -172,6 +210,31 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     this.orderForm.get('company_id')?.setValue(null);
     console.log('Order form is invalid:', this.getFormErrors(this.orderForm));
   }
+
+  displayDistricName(driver: DistrictOption | null): string {
+    return driver && driver.name_and_price ? driver.name_and_price : '';
+  }
+  onDistrictSelected(event: MatAutocompleteSelectedEvent): void {
+    this.selectedDistrict = event.option.value as User;
+    console.log('district selected:', this.selectedDistrict);
+
+    this.orderForm
+      .get('delivery_district_id')
+      ?.setValue(this.selectedDistrict.id);
+    this.orderForm.markAllAsTouched();
+    console.log('Order form is invalid:', this.getFormErrors(this.orderForm));
+    const formValue = this.orderForm.getRawValue(); // getRawValue para incluir campos deshabilitados (como los de paquete estándar)
+    console.log('formValue', formValue);
+  }
+
+  clearDistrictSelection(): void {
+    this.selectedDistrict = null;
+    this.districSearchCtrl.setValue('');
+    this.orderForm.markAllAsTouched();
+    this.orderForm.get('delivery_district_id')?.setValue(null);
+    console.log('Order form is invalid:', this.getFormErrors(this.orderForm));
+  }
+
   ngOnInit(): void {
     // Emitir validez del formulario cuando cambie
     this.orderForm.statusChanges
@@ -370,7 +433,8 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     }
 
     const formValue = this.orderForm.getRawValue(); // getRawValue para incluir campos deshabilitados (como los de paquete estándar)
-
+    console.log('this.selectedDistrictName()', this.selectedDistrictName());
+    // return;
     const newOrderData: NewOrderData = {
       ...formValue, // Todos los campos del formulario principal
       ...formValue.package_details, // Desestructurar los detalles del paquete
@@ -391,6 +455,10 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   resetFormForNextOrder(): void {
     this.selectedDriver = null;
     this.driverSearchCtrl.setValue('');
+
+    this.selectedDistrict = null;
+    this.districSearchCtrl.setValue('');
+
     let company_id = null;
     if (this.isCompany()) {
       company_id = this.orderForm.get('company_id')?.value;

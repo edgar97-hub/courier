@@ -16,6 +16,9 @@ export declare class DistrictsService {
         page_number: number;
         page_size: number;
     }>;
+    findDistricts2({ search_term, }: {
+        search_term?: string;
+    }): Promise<DistrictsEntity[]>;
     createUser(body: DistrictDTO): Promise<DistrictsEntity>;
     findUsers(): Promise<DistrictsEntity[]>;
     findUserById(id: string): Promise<DistrictsEntity>;
