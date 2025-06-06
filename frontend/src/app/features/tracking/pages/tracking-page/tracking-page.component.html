@@ -65,13 +65,14 @@
         <mat-card-title
           >Pedido: {{ order.code || order.tracking_code }}</mat-card-title
         >
-        <mat-card-subtitle
+        <mat-card-subtitle style="font-weight: 700"
           >Destinatario:
           {{ order.recipient_name | default : "N/A" }}</mat-card-subtitle
         >
       </div>
       <span
         class="status-badge-tracking"
+        style="font-weight: 700 !important"
         [ngClass]="getStatusBadgeClass(order.status)"
       >
         {{ order.status | titlecase }}
@@ -82,24 +83,28 @@
       <div class="order-summary">
         <div class="summary-item">
           <mat-icon>description</mat-icon>
-          <span
-            ><strong>Contenido:</strong>
+          <span style="font-weight: 700 !important"
+            ><span>Contenido:</span>
             {{ order.item_description | default : "No especificado" }}</span
           >
         </div>
         <div class="summary-item">
           <mat-icon>home</mat-icon>
-          <span
-            ><strong>Destino:</strong>
+          <span style="font-weight: 700 !important"
+            ><span>Destino:</span>
             {{
               order.delivery_district_name | titlecase | default : "N/A"
             }}</span
           >
         </div>
-        <div class="summary-item" *ngIf="order.delivery_date">
+        <div
+          class="summary-item"
+          *ngIf="order.delivery_date"
+          style="font-weight: 700 !important"
+        >
           <mat-icon>event</mat-icon>
           <span
-            ><strong>Entrega Estimada:</strong>
+            ><span>Entrega Estimada:</span>
             {{
               order.delivery_date | date : "fullDate" | default : "N/A"
             }}</span
@@ -131,26 +136,45 @@
             class="timeline-icon"
             >{{ getTimelineIcon(log) }}</mat-icon
           >
-          <div matListItemTitle class="timeline-action">
+          <div
+            matListItemTitle
+            class="timeline-action"
+            style="font-weight: 700 !important"
+          >
             {{ log.action | titlecase }}
           </div>
-          <div matListItemLine class="timeline-date">
+          <div
+            matListItemLine
+            class="timeline-date"
+            style="font-weight: 700 !important"
+          >
             {{ log.createdAt | date : "dd/MM/yyyy HH:mm" }}
           </div>
           @if (log.notes) {
-          <div matListItemLine class="timeline-notes">
+          <div
+            matListItemLine
+            class="timeline-notes"
+            style="font-weight: 700 !important"
+          >
             <mat-icon class="notes-icon">short_text</mat-icon> {{ log.notes }}
           </div>
           } @if (log.previousValue && log.newValue &&
           log.action.toUpperCase().includes('ESTADO')) {
-          <div matListItemLine class="timeline-change">
+          <div
+            matListItemLine
+            class="timeline-change"
+            style="font-weight: 700 !important"
+          >
             De: {{ log.previousValue | titlecase }} → A:
             {{ log.newValue | titlecase }}
           </div>
           }
         </mat-list-item>
         @if (i < (order.logs | slice:0:10).length - 1) {
-        <div class="timeline-connector"></div>
+        <div
+          class="timeline-connector"
+          style="font-weight: 700 !important"
+        ></div>
         } }
       </mat-list>
       } @else {

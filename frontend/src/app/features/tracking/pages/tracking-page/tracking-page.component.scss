@@ -38,6 +38,7 @@
 
 .track-button {
   padding: 10px 0;
+  font-weight: 700 !important;
   font-size: 1.1em;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -259,32 +260,73 @@ h3 {
   text-align: center;
 }
 
-.status-registrado {
-  background-color: #06b6d4;
-  color: #fff;
-} // cyan-500
-.status-recogido {
-  background-color: #3b82f6;
-  color: #fff;
-} // blue-500
-.status-en-transito {
-  background-color: #3b82f6;
-  color: #fff;
-} // blue-500
-.status-entregado {
-  background-color: #22c55e;
-  color: #fff;
-} // emerald-500
-.status-cancelado {
-  background-color: #6b7280;
-  color: #fff;
-} // gray-500
-.status-rechazado-en-punto {
-  background-color: #ef4444;
-  color: #fff;
-} // red-500
+// .status-registrado {
+//   background-color: #06b6d4;
+//   color: #fff;
+// } // cyan-500
+// .status-recogido {
+//   background-color: #3b82f6;
+//   color: #fff;
+// } // blue-500
+// .status-en-transito {
+//   background-color: #3b82f6;
+//   color: #fff;
+// } // blue-500
+// .status-entregado {
+//   background-color: #22c55e;
+//   color: #fff;
+// } // emerald-500
+// .status-cancelado {
+//   background-color: #6b7280;
+//   color: #fff;
+// } // gray-500
+// .status-rechazado-en-punto {
+//   background-color: #ef4444;
+//   color: #fff;
+// } // red-500
 
-.status-reprogramado {
-  background-color: #a855f7;
+// .status-reprogramado {
+//   background-color: #a855f7;
+//   color: #fff;
+// } // purple-500
+
+.status-registrado {
+  background-color: #6610f2;
   color: #fff;
-} // purple-500
+} // Índigo con texto blanco
+.status-recogido {
+  background-color: #fd7e14;
+  color: #fff;
+} // Naranja con texto blanco
+.status-en-almacen {
+  background-color: #0d6efd;
+  color: #fff;
+  white-space: nowrap;
+} // Azul primario con texto blanco
+.status-en-transito {
+  background-color: #0c1a77;
+  color: #d0c8c8;
+  white-space: nowrap;
+}
+.status-entregado {
+  background-color: #198754;
+  color: #fff;
+} // Verde éxito con texto blanco
+.status-no-entregado {
+  background-color: #dc3545;
+  color: #fff;
+  white-space: nowrap;
+} // Rojo peligro con texto blanco
+.status-cancelado {
+  background-color: #6c757d;
+  color: #fff;
+} // Gris secundario con texto blanco
+.status-rechazado-en-punto {
+  background-color: #ff6b6b;
+  color: #fff;
+  white-space: nowrap;
+}
+.status-reprogramado {
+  background-color: #adb5bd;
+  color: #212529;
+}

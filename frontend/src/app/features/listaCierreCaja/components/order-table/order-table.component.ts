@@ -100,7 +100,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     'pago_directo_courier_costo_servicio',
     'pago_directo_empresa_costo_servicio',
     'diferencia',
-    'usuario_creacion',
+    // 'usuario_creacion',
     // 'recipient_phone',
     // 'delivery_address',
     // 'delivery_date',
