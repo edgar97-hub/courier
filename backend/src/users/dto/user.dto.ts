@@ -179,6 +179,10 @@ export class UserCompany {
 
   @ApiProperty()
   @IsString()
+  owner_phone_number: string;
+
+  @ApiProperty()
+  @IsString()
   password?: string;
 
   @ApiProperty()

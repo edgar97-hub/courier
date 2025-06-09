@@ -40,7 +40,6 @@ export class UsersService {
       body.role = ROLES.COMPANY;
 
       const savedUser = await this.userRepository.save(body);
-      // const { password, ...userWithoutPassword } = savedUser;
       return savedUser;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);

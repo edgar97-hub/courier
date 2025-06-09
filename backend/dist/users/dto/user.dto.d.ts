@@ -54,6 +54,7 @@ export declare class UserProfile {
 export declare class UserCompany {
     email: string;
     username: string;
+    owner_phone_number: string;
     password?: string;
     role?: ROLES;
 }

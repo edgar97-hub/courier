@@ -17,7 +17,6 @@ export const routes: Routes = [
         (m) => m.LoginPageComponent
       ),
     canMatch: [redirectDashboardIfAuthenticated],
-    title: 'Log In',
   },
   {
     path: 'register',
@@ -26,7 +25,6 @@ export const routes: Routes = [
         './features/auth/pages/register-page/register-page.component'
       ).then((m) => m.RegisterPageComponent),
     canMatch: [redirectDashboardIfAuthenticated],
-    title: 'Register',
   },
   {
     path: 'forgot-password',
@@ -35,7 +33,6 @@ export const routes: Routes = [
         './features/auth/pages/forgot-password-page/forgot-password-page.component'
       ).then((m) => m.ForgotPasswordPageComponent),
     canMatch: [redirectDashboardIfAuthenticated],
-    title: 'Forgot Password',
   },
   {
     path: '',
@@ -49,15 +46,12 @@ export const routes: Routes = [
           import('./features/dashboard/dashboard.routes').then(
             (m) => m.DASHBOARD_ROUTES
           ),
-        // canMatch: [redirectLoginIfNotAuthenticated], // Si el layout padre no lo protege ya
-        title: 'Dashboard',
       },
       {
         path: 'users',
         loadChildren: () =>
           import('./features/users/users.routes').then((m) => m.USERS_ROUTES),
 
-        title: 'Users Management',
         canActivate: [redirectLoginIfNotAuthenticated()],
       },
       {
@@ -77,7 +71,6 @@ export const routes: Routes = [
           import(
             './features/shared/image-display/image-display.component'
           ).then((m) => m.ImageDisplayComponent),
-        title: 'Tarifas de Envío',
       },
       {
         path: 'terms-and-conditions',
@@ -85,7 +78,6 @@ export const routes: Routes = [
           import(
             './features/shared/terms-and-conditions-display/terms-and-conditions-display.component'
           ).then((m) => m.TermsConditionsDisplayComponent),
-        title: '',
       },
       {
         path: 'package-calculator',
@@ -93,7 +85,6 @@ export const routes: Routes = [
           import(
             './features/shared/package-calculator/package-calculator.component'
           ).then((m) => m.PackageCalculatorComponent),
-        title: '',
       },
       {
         path: 'districts',
@@ -101,7 +92,6 @@ export const routes: Routes = [
           import('./features/districts/districts.routes').then(
             (m) => m.DISTRICTS_ROUTES
           ),
-        title: 'Gestión de Distritos',
       },
       {
         path: 'orders',

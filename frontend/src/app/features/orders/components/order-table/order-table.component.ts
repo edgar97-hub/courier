@@ -271,13 +271,17 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   }
 
   getAvailableStatuses(order: Order_): OrderStatus[] {
+    const userRole = this.appStore.currentUser()?.role;
+
+    let almacen = [OrderStatus.EN_ALMACEN];
+    if (userRole === 'MOTORIZADO' && OrderStatus.REGISTRADO) {
+      almacen = [];
+    }
+
+    order.status === OrderStatus.REGISTRADO;
     switch (order.status) {
       case OrderStatus.REGISTRADO:
-        return [
-          OrderStatus.RECOGIDO,
-          OrderStatus.EN_ALMACEN,
-          OrderStatus.CANCELADO,
-        ];
+        return [OrderStatus.RECOGIDO, ...almacen, OrderStatus.CANCELADO];
       case OrderStatus.RECOGIDO:
         return [OrderStatus.EN_ALMACEN, OrderStatus.CANCELADO];
       case OrderStatus.EN_ALMACEN:
@@ -401,20 +405,21 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   }
 
   isAdminOrDriver(order: Order_): boolean {
-    let hasPermission = false;
     const userRole = this.appStore.currentUser()?.role;
 
-    if (
-      userRole === 'MOTORIZADO' &&
-      order.assigned_driver?.id === this.appStore.currentUser()?.id
-    ) {
-      hasPermission = true;
+    if (userRole === 'MOTORIZADO') {
+      if (order.status === OrderStatus.REGISTRADO) {
+        return true;
+      }
+
+      if (order.assigned_driver?.id === this.appStore.currentUser()?.id) {
+        return true;
+      }
     }
     if (userRole === 'ADMINISTRADOR' || userRole === 'RECEPCIONISTA') {
-      hasPermission = true;
+      return true;
     }
-
-    return hasPermission;
+    return false;
   }
 
   isAdminOrReceptionist(): boolean {

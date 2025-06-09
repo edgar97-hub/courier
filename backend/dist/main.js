@@ -12,9 +12,10 @@ const bodyParser = require("body-parser");
 const fs = require("fs");
 const path = require("path");
 async function bootstrap() {
+    const certPath = '/etc/letsencrypt/live/app.jncourier.com/';
     const httpsOptions = {
-        key: fs.readFileSync(path.resolve('/etc/letsencrypt/live/jncourier.com/privkey.pem')),
-        cert: fs.readFileSync(path.resolve('/etc/letsencrypt/live/jncourier.com/fullchain.pem')),
+        key: fs.readFileSync(path.resolve(certPath, 'privkey.pem')),
+        cert: fs.readFileSync(path.resolve(certPath, 'fullchain.pem')),
     };
     const app = await core_1.NestFactory.create(app_module_1.AppModule, {
         httpsOptions,

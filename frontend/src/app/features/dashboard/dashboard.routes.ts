@@ -5,6 +5,5 @@ export const DASHBOARD_ROUTES: Routes = [
   {
     path: '',
     component: DashboardPageComponent,
-    title: 'Dashboard Principal',
   },
 ];

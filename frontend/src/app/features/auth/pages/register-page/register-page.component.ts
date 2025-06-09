@@ -60,6 +60,14 @@ import { environment } from '../../../../../environments/environment';
                 >El nombre es obligatorio</mat-error
               >
             </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Telefono</mat-label>
+              <input matInput formControlName="owner_phone_number" required />
+              <mat-error *ngIf="owner_phone_number?.hasError('required')"
+                >El telefono es obligatorio</mat-error
+              >
+            </mat-form-field>
             <mat-form-field appearance="outline" class="full-width">
               <mat-label>Correo</mat-label>
               <input
@@ -129,6 +137,7 @@ export class RegisterPageComponent {
   constructor() {
     this.registerForm = this.fb.group({
       username: ['', Validators.required],
+      owner_phone_number: ['', Validators.required],
       userEmail: ['', [Validators.required, Validators.email]],
       userPass: ['', [Validators.required, Validators.minLength(6)]],
     });
@@ -136,6 +145,9 @@ export class RegisterPageComponent {
 
   get name() {
     return this.registerForm.get('username');
+  }
+  get owner_phone_number() {
+    return this.registerForm.get('owner_phone_number');
   }
   get email() {
     return this.registerForm.get('userEmail');
@@ -150,7 +162,8 @@ export class RegisterPageComponent {
       return;
     }
     this.isLoading = true;
-    const { username, userEmail, userPass } = this.registerForm.value;
+    const { username, owner_phone_number, userEmail, userPass } =
+      this.registerForm.value;
 
     fetch(environment.apiUrl + '/users/register-company', {
       method: 'POST',
@@ -159,6 +172,7 @@ export class RegisterPageComponent {
       },
       body: JSON.stringify({
         username: username,
+        owner_phone_number: owner_phone_number,
         email: userEmail,
         password: userPass,
       }),
@@ -166,6 +180,7 @@ export class RegisterPageComponent {
       .then(async (response) => {
         let res = await response.json();
         this.isLoading = false;
+
         if (res.message) {
           this.snackBar.open('Ya existe un usuario con ese correo', 'OK', {
             duration: 3000,

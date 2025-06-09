@@ -5,6 +5,5 @@ export const ORDERS_ROUTES: Routes = [
   {
     path: '',
     component: OrderListPageComponent,
-    title: 'Listado de Pedidos',
   },
 ];

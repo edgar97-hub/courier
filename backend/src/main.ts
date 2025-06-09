@@ -13,9 +13,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 async function bootstrap() {
-  // console.log('TZ set programmatically to:', process.env.TZ);
-  // console.log('Current Date after programmatic TZ set:', new Date().toString());
-  // const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const certPath = '/etc/letsencrypt/live/app.jncourier.com/';
   // -----------------------------------------------------------
 
@@ -26,6 +23,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     httpsOptions,
   });
+  // const app = await NestFactory.create<NestExpressApplication>(AppModule)
 
   app.use(morgan('dev'));
   app.useGlobalPipes(

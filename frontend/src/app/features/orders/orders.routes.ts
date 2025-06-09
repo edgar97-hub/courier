@@ -4,15 +4,11 @@ import { OrderCreatePageComponent } from './pages/order-create-page/order-create
 
 export const ORDERS_ROUTES: Routes = [
   {
-    path: '', // Ruta para el listado (ej. /features/orders)
+    path: '',
     component: OrderListPageComponent,
-    title: 'Listado de Pedidos',
   },
   {
-    path: 'create', // Ruta para la creación (ej. /features/orders/create)
+    path: 'create',
     component: OrderCreatePageComponent,
-    title: 'Registrar Nuevo Pedido',
   },
-  // Podrías tener más rutas aquí, como para ver detalles de un pedido:
-  // { path: ':id', component: OrderDetailPageComponent, title: 'Detalle del Pedido' }
 ];
