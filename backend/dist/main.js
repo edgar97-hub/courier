@@ -9,8 +9,16 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const path_1 = require("path");
 const bodyParser = require("body-parser");
+const fs_1 = require("fs");
+const path_2 = require("path");
 async function bootstrap() {
-    const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    const httpsOptions = {
+        key: fs_1.default.readFileSync(path_2.default.resolve('/etc/letsencrypt/live/jncourier.com/privkey.pem')),
+        cert: fs_1.default.readFileSync(path_2.default.resolve('/etc/letsencrypt/live/jncourier.com/fullchain.pem')),
+    };
+    const app = await core_1.NestFactory.create(app_module_1.AppModule, {
+        httpsOptions,
+    });
     app.use(morgan('dev'));
     app.useGlobalPipes(new common_1.ValidationPipe({
         transformOptions: {

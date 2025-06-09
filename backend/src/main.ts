@@ -9,11 +9,26 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { Request, Response, NextFunction } from 'express';
 import * as bodyParser from 'body-parser';
+import fs from 'fs';
+import path from 'path';
 
 async function bootstrap() {
   // console.log('TZ set programmatically to:', process.env.TZ);
   // console.log('Current Date after programmatic TZ set:', new Date().toString());
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const httpsOptions = {
+    key: fs.readFileSync(
+      path.resolve('/etc/letsencrypt/live/jncourier.com/privkey.pem'),
+    ),
+    cert: fs.readFileSync(
+      path.resolve('/etc/letsencrypt/live/jncourier.com/fullchain.pem'),
+    ),
+  };
+
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    httpsOptions,
+  });
+
   app.use(morgan('dev'));
   app.useGlobalPipes(
     new ValidationPipe({
