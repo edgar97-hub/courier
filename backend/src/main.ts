@@ -9,8 +9,8 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { Request, Response, NextFunction } from 'express';
 import * as bodyParser from 'body-parser';
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 
 async function bootstrap() {
   // console.log('TZ set programmatically to:', process.env.TZ);
