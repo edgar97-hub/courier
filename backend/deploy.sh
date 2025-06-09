@@ -140,7 +140,8 @@ exit 0
 
 jncourier.com
 nikelijhonatan@gmail.com
-
+CNAME www www.jncourier.com.cdn.hstgr.net
+alias @ jncourier.com.cdn.hstgr.net
 
 git fetch origin main
 git reset --hard FETCH_HEAD

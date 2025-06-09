@@ -16,15 +16,13 @@ async function bootstrap() {
   // console.log('TZ set programmatically to:', process.env.TZ);
   // console.log('Current Date after programmatic TZ set:', new Date().toString());
   // const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  const httpsOptions = {
-    key: fs.readFileSync(
-      path.resolve('/etc/letsencrypt/live/jncourier.com/privkey.pem'),
-    ),
-    cert: fs.readFileSync(
-      path.resolve('/etc/letsencrypt/live/jncourier.com/fullchain.pem'),
-    ),
-  };
+  const certPath = '/etc/letsencrypt/live/app.jncourier.com/';
+  // -----------------------------------------------------------
 
+  const httpsOptions = {
+    key: fs.readFileSync(path.resolve(certPath, 'privkey.pem')),
+    cert: fs.readFileSync(path.resolve(certPath, 'fullchain.pem')),
+  };
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     httpsOptions,
   });
