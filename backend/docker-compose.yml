@@ -1,18 +1,20 @@
 services:
-  codrr_pg:
+  db:
     image: postgres:15.1
-    container_name: codrr_pg
+    container_name: courier_db
     restart: always
     environment:
-      POSTGRES_DB: codrrdb
-      POSTGRES_USER: ucodrr
-      POSTGRES_PASSWORD: secret1234
+      POSTGRES_DB: courier_db
+      POSTGRES_USER: courier_user
+      POSTGRES_PASSWORD: courier1234
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres-data:/var/lib/postgresql/data
     ports:
       - 5433:5432
   pgadmin:
     image: dpage/pgadmin4
+    container_name: courier_pgadmin
     restart: always
     ports:
       - '8080:80'
@@ -20,4 +22,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: edgar@gmail.com
       PGADMIN_DEFAULT_PASSWORD: Yi48}dv6C;qz
     depends_on:
-      - codrr_pg
+      - db
+volumes:
+  postgres-data:
+    driver: local

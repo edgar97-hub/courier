@@ -148,7 +148,7 @@
             class="timeline-date"
             style="font-weight: 700 !important"
           >
-            {{ log.createdAt | date : "dd/MM/yyyy HH:mm" }}
+            {{ log.createdAt | peruDate : "Pp" }}
           </div>
           @if (log.notes) {
           <div

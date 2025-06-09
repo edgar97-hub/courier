@@ -23,6 +23,8 @@ const roles_1 = require("../../constants/roles");
 const typeorm_3 = require("typeorm");
 const orderLog_entity_1 = require("../entities/orderLog.entity");
 const date_fns_1 = require("date-fns");
+const date_fns_tz_1 = require("date-fns-tz");
+const date_fns_2 = require("date-fns");
 const EXCEL_HEADER_TO_ENTITY_KEY_MAP = {
     'TIPO DE ENVIO': 'shipment_type',
     'NOMBRE DEL DESTINATARIO': 'recipient_name',
@@ -422,22 +424,36 @@ let OrdersService = class OrdersService {
                 .leftJoinAndSelect('order.assigned_driver', 'assigned_driver')
                 .leftJoinAndSelect('order.company', 'company');
             if (delivery_date) {
-                const start = new Date(delivery_date + 'T00:00:00');
-                const end = new Date(delivery_date + 'T23:59:59');
-                query.andWhere('order.delivery_date BETWEEN :start AND :end', {
-                    start,
-                    end,
+                const timeZone = 'America/Lima';
+                const startLocalString = `${delivery_date} 00:00:00.000`;
+                const endLocalString = `${delivery_date} 23:59:59.999`;
+                const refDate = new Date();
+                const startOfPeriodInLima = (0, date_fns_2.parse)(startLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
+                const endOfPeriodInLima = (0, date_fns_2.parse)(endLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
+                const startUTC = (0, date_fns_tz_1.fromZonedTime)(startOfPeriodInLima, timeZone);
+                const endUTC = (0, date_fns_tz_1.fromZonedTime)(endOfPeriodInLima, timeZone);
+                console.log('UTC Range Start:', startUTC.toISOString());
+                console.log('UTC Range End:  ', endUTC.toISOString());
+                query.andWhere({
+                    delivery_date: (0, typeorm_2.Between)(startUTC, endUTC),
                 });
             }
             else {
                 if (startDate && endDate) {
-                    query.andWhere(`order.createdAt AT TIME ZONE 'UTC' AT TIME ZONE 'America/Lima' BETWEEN :start AND :end`, {
-                        start: `${startDate} 00:00:00`,
-                        end: `${endDate} 23:59:59`,
+                    const timeZone = 'America/Lima';
+                    const startLocalString = `${startDate} 00:00:00.000`;
+                    const endLocalString = `${endDate} 23:59:59.999`;
+                    const refDate = new Date();
+                    const startOfPeriodInLima = (0, date_fns_2.parse)(startLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
+                    const endOfPeriodInLima = (0, date_fns_2.parse)(endLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
+                    const startUTC = (0, date_fns_tz_1.fromZonedTime)(startOfPeriodInLima, timeZone);
+                    const endUTC = (0, date_fns_tz_1.fromZonedTime)(endOfPeriodInLima, timeZone);
+                    console.log('UTC Range Start:', startUTC.toISOString());
+                    console.log('UTC Range End:  ', endUTC.toISOString());
+                    query.andWhere({
+                        createdAt: (0, typeorm_2.Between)(startUTC, endUTC),
                     });
                 }
-            }
-            if (role === roles_1.ROLES.MOTORIZED) {
             }
             if (role === roles_1.ROLES.COMPANY) {
                 query.andWhere('company.id = :idUser', { idUser });
@@ -491,18 +507,34 @@ let OrdersService = class OrdersService {
                 .leftJoinAndSelect('order.assigned_driver', 'assigned_driver')
                 .leftJoinAndSelect('order.company', 'company');
             if (delivery_date) {
-                const start = new Date(delivery_date + 'T00:00:00');
-                const end = new Date(delivery_date + 'T23:59:59');
-                query.andWhere('order.delivery_date BETWEEN :start AND :end', {
-                    start,
-                    end,
+                const timeZone = 'America/Lima';
+                const startLocalString = `${delivery_date} 00:00:00.000`;
+                const endLocalString = `${delivery_date} 23:59:59.999`;
+                const refDate = new Date();
+                const startOfPeriodInLima = (0, date_fns_2.parse)(startLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
+                const endOfPeriodInLima = (0, date_fns_2.parse)(endLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
+                const startUTC = (0, date_fns_tz_1.fromZonedTime)(startOfPeriodInLima, timeZone);
+                const endUTC = (0, date_fns_tz_1.fromZonedTime)(endOfPeriodInLima, timeZone);
+                console.log('UTC Range Start:', startUTC.toISOString());
+                console.log('UTC Range End:  ', endUTC.toISOString());
+                query.andWhere({
+                    delivery_date: (0, typeorm_2.Between)(startUTC, endUTC),
                 });
             }
             else {
                 if (startDate && endDate) {
-                    query.andWhere(`order.createdAt AT TIME ZONE 'UTC' AT TIME ZONE 'America/Lima' BETWEEN :start AND :end`, {
-                        start: `${startDate} 00:00:00`,
-                        end: `${endDate} 23:59:59`,
+                    const timeZone = 'America/Lima';
+                    const startLocalString = `${startDate} 00:00:00.000`;
+                    const endLocalString = `${endDate} 23:59:59.999`;
+                    const refDate = new Date();
+                    const startOfPeriodInLima = (0, date_fns_2.parse)(startLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
+                    const endOfPeriodInLima = (0, date_fns_2.parse)(endLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
+                    const startUTC = (0, date_fns_tz_1.fromZonedTime)(startOfPeriodInLima, timeZone);
+                    const endUTC = (0, date_fns_tz_1.fromZonedTime)(endOfPeriodInLima, timeZone);
+                    console.log('UTC Range Start:', startUTC.toISOString());
+                    console.log('UTC Range End:  ', endUTC.toISOString());
+                    query.andWhere({
+                        createdAt: (0, typeorm_2.Between)(startUTC, endUTC),
                     });
                 }
             }

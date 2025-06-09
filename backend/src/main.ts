@@ -9,7 +9,6 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { Request, Response, NextFunction } from 'express';
 import * as bodyParser from 'body-parser';
-import { TimezoneInterceptor } from './interceptors/lima-timezone.interceptor';
 
 async function bootstrap() {
   // console.log('TZ set programmatically to:', process.env.TZ);
@@ -24,7 +23,6 @@ async function bootstrap() {
     }),
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-  app.useGlobalInterceptors(new TimezoneInterceptor());
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   const configservice = app.get(ConfigService);

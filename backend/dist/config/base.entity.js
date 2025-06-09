@@ -20,15 +20,17 @@ __decorate([
 ], BaseEntity.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)({
-        type: 'timestamp',
+        type: 'timestamptz',
         name: 'created_at',
+        precision: 6,
     }),
     __metadata("design:type", Date)
 ], BaseEntity.prototype, "createdAt", void 0);
 __decorate([
     (0, typeorm_1.UpdateDateColumn)({
-        type: 'timestamp',
+        type: 'timestamptz',
         name: 'updated_at',
+        precision: 6,
     }),
     __metadata("design:type", Date)
 ], BaseEntity.prototype, "updatedAt", void 0);

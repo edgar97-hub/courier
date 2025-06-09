@@ -9,14 +9,16 @@ export abstract class BaseEntity {
   id: string;
 
   @CreateDateColumn({
-    type: 'timestamp',
+    type: 'timestamptz',
     name: 'created_at',
+    precision: 6,
   })
   createdAt: Date;
 
   @UpdateDateColumn({
-    type: 'timestamp',
+    type: 'timestamptz',
     name: 'updated_at',
+    precision: 6,
   })
   updatedAt: Date;
 }

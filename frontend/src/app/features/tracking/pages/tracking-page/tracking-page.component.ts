@@ -31,9 +31,11 @@ import {
   TrackingOrder,
   TrackingOrderLog,
 } from '../../models/tracking-order.model';
+
 // Opcional: Un componente específico para la línea de tiempo
 // import { TrackingTimelineComponent } from '../../components/tracking-timeline/tracking-timeline.component';
 import { DefaultPipe } from '../../../../shared/pipes/default.pipe'; // <--- IMPORTA TU PIPE (ajusta la ruta)
+import { PeruDatePipe } from '../../../../shared/pipes/peru-date.pipe';
 @Component({
   selector: 'app-tracking-page',
   standalone: true,
@@ -52,6 +54,7 @@ import { DefaultPipe } from '../../../../shared/pipes/default.pipe'; // <--- IMP
     DatePipe,
     TitleCasePipe,
     DefaultPipe,
+    PeruDatePipe,
     // TrackingTimelineComponent, // Si lo creas
   ],
   templateUrl: './tracking-page.component.html',
@@ -149,7 +152,7 @@ export class TrackingPageComponent implements OnInit, OnDestroy {
 
   // Función para determinar el icono de la línea de tiempo
   getTimelineIcon(log: TrackingOrderLog): string {
-    const action = log.newValue?.toUpperCase() || "";
+    const action = log.newValue?.toUpperCase() || '';
     if (action.includes('ENTREGADO')) return 'check_circle';
     if (action.includes('TRANSITO') || action.includes('RECOGIDO'))
       return 'local_shipping';
