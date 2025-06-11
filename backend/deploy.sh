@@ -148,3 +148,44 @@ git reset --hard FETCH_HEAD
 npm run start:dev
 
 
+cd /home/ubuntu/projectos/courier/backend
+git fetch origin main
+git reset --hard FETCH_HEAD
+pm2 restart all
+
+Cómo Verificar que la Renovación Automática está Configurada:
+sudo certbot renew --dry-run
+
+sudo systemctl list-timers | grep 'certbot'
+Deberías ver una salida similar a esta:
+NEXT                        LEFT          LAST                        PASSED        UNIT                         ACTIVATES
+Wed 2024-06-12 14:00:00 UTC 12h left      Tue 2024-06-11 14:00:00 UTC 12h ago       snap.certbot.renew.timer     snap.certbot.renew.service
+
+Verifica que la configuración existe:
+sudo ls -l /etc/letsencrypt/renewal/
+Deberías ver el archivo app.jncourier.com.conf.
+
+
+Verificar el Volumen del Contenedor:
+Inspecciona el contenedor de la base de datos para ver sus "montajes" (volúmenes).
+
+# El nombre del contenedor es 'courier_db' según tu archivo
+docker inspect courier_db | grep -A 5 "Mounts"
+Salida Correcta (Ejemplo):
+
+"Mounts": [
+    {
+        "Type": "volume",
+        "Name": "backend_postgres-data", // El nombre puede tener un prefijo
+        "Source": "/var/lib/docker/volumes/backend_postgres-data/_data",
+        "Destination": "/var/lib/postgresql/data",
+        "Driver": "local",
+        "Mode": "z",
+        "RW": true,
+        "Propagation": ""
+    },
+    // ... puede haber otros montajes como el de init.sql
+],
+Listar todos los Volúmenes de Docker:
+Verifica que el volumen nombrado postgres-data existe en el sistema.
+docker volume ls

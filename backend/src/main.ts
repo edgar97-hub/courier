@@ -14,7 +14,6 @@ import * as path from 'path';
 
 async function bootstrap() {
   const certPath = '/etc/letsencrypt/live/app.jncourier.com/';
-  // -----------------------------------------------------------
 
   const httpsOptions = {
     key: fs.readFileSync(path.resolve(certPath, 'privkey.pem')),
@@ -23,7 +22,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     httpsOptions,
   });
-  // const app = await NestFactory.create<NestExpressApplication>(AppModule)
+  // const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.use(morgan('dev'));
   app.useGlobalPipes(

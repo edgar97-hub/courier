@@ -218,6 +218,12 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
               if (costo_servicio_pagado_cliente_al_courier === 0) {
                 diferencia = monto_a_cobrar - order.shipping_cost;
               }
+              order.diferencia = diferencia;
+            } else {
+              diferencia =
+                order.amount_to_collect_at_delivery -
+                (order.shipping_cost || 0);
+              order.diferencia = diferencia;
             }
 
             totals.amount_to_collect_at_delivery +=
@@ -415,8 +421,12 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
             if (costo_servicio_pagado_cliente_al_courier === 0) {
               diferencia = monto_a_cobrar - (order.shipping_cost || 0);
             }
+
+            order.diferencia = diferencia;
+          } else {
+            order.diferencia =
+              order.amount_to_collect_at_delivery - (order.shipping_cost || 0);
           }
-          order.diferencia = diferencia;
         });
         this.orders = response.items;
         this.totalOrderCount = response.total_count || 0;

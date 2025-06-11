@@ -65,16 +65,6 @@ td.mat-cell {
   ); // El mismo que th.mat-header-cell
 }
 
-.data-row {
-  transition: background-color 0.2s ease-in-out;
-  &:hover {
-    background-color: var(
-      --sys-surface-container-highest
-    ); // Un hover gris claro
-    cursor: pointer; // Si la fila es clickeable
-  }
-}
-
 .highlight-row {
   // Si quieres resaltar una fila seleccionada
   background-color: var(--sys-primary-container) !important; // Un azul claro
@@ -214,7 +204,7 @@ td.mat-cell {
   background-color: #198754;
   color: #fff;
 } // Verde éxito con texto blanco
-.status-no-entregado {
+.status-anulado {
   background-color: #dc3545;
   color: #fff;
   white-space: nowrap;
@@ -244,5 +234,62 @@ td.mat-cell {
   td.mat-cell {
     padding: 8px 12px;
     font-size: 0.75rem;
+  }
+}
+
+// .data-row {
+//   // transition: background-color 0.2s ease-in-out;
+// }
+
+td.mat-cell {
+  // Estilos para todas las celdas de datos
+  padding: 10px 16px !important; // Mantén tu padding
+  color: black !important; // Color de texto
+  font-family: "Montserrat", sans-serif !important;
+  border-bottom: 1px solid #c11616 !important; // Borde inferior explícito para cada celda (color gris claro)
+  border-right: 1px solid #f0f0f0 !important; // Borde derecho muy sutil (opcional, para separar columnas)
+  &:last-child {
+    border-right: none; // Sin borde derecho en la última celda
+  }
+}
+
+.data-row {
+  position: relative; // Necesario para el ::after
+  transition: background-color 0.15s ease-in-out; // Transición más rápida para hover
+
+  &:hover:not(.row-cancelled-strikethrough) {
+    background-color: #eef2f7; // Color de hover (ej. un azul muy claro)
+    // Las celdas td mantendrán sus propios bordes definidos arriba.
+  }
+
+  &.row-cancelled-strikethrough {
+    color: #9e9e9e;
+    opacity: 0.75; // Ligeramente más opaco que antes
+
+    // El texto dentro de las celdas ya no se tacha individualmente
+    // si la línea ::after funciona bien visualmente.
+    // Si la línea ::after tapa el texto, vuelve a text-decoration en el td.
+    // td {
+    //   text-decoration: line-through;
+    //   text-decoration-color: #d32f2f;
+    //   text-decoration-thickness: 1.5px;
+    // }
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: 8px; // Pequeño padding desde la izquierda de la fila
+      right: 8px; // Pequeño padding desde la derecha de la fila
+      top: 50%;
+      height: 1.5px;
+      background-color: #d32f2f; // Rojo para la línea de tachado
+      transform: translateY(-50%);
+      z-index: 1; // Puede necesitar ser > 0 si el contenido de la celda tiene su propio fondo
+      pointer-events: none;
+    }
+
+    // &:hover {
+    //   background-color: transparent; // O un color de "cancelado hover" si lo deseas
+    // }
   }
 }

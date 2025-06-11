@@ -103,13 +103,14 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     'company',
     'shipment_type',
     'recipient_name',
+    'recipient_phone', // Puedes decidir cuáles mostrar por defecto
     'status', // Moví estado más a la izquierda para visibilidad
     'delivery_district_name',
+    'delivery_address',
     'delivery_date',
     'motorizado',
     'amount_to_collect_at_delivery',
     'tracking_code',
-    // 'recipient_phone', // Puedes decidir cuáles mostrar por defecto
     // 'createdAt',
     // 'shipping_cost',
     'actions',
@@ -278,24 +279,34 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
       almacen = [];
     }
 
+    let anulado: any = [];
+    if (userRole === 'ADMINISTRADOR') {
+      anulado = [OrderStatus.ANULADO];
+    }
+
     order.status === OrderStatus.REGISTRADO;
     switch (order.status) {
       case OrderStatus.REGISTRADO:
-        return [OrderStatus.RECOGIDO, ...almacen, OrderStatus.CANCELADO];
+        return [
+          OrderStatus.RECOGIDO,
+          ...almacen,
+          OrderStatus.CANCELADO,
+          ...anulado,
+        ];
       case OrderStatus.RECOGIDO:
-        return [OrderStatus.EN_ALMACEN, OrderStatus.CANCELADO];
+        return [OrderStatus.EN_ALMACEN, OrderStatus.CANCELADO, ...anulado];
       case OrderStatus.EN_ALMACEN:
-        return [OrderStatus.EN_TRANSITO, OrderStatus.CANCELADO];
-      case OrderStatus.EN_TRANSITO:
+        return [OrderStatus.EN_TRANSITO, OrderStatus.CANCELADO, ...anulado];
       case OrderStatus.EN_TRANSITO:
         return [
           OrderStatus.ENTREGADO,
           OrderStatus.CANCELADO,
           OrderStatus.RECHAZADO,
           OrderStatus.REPROGRAMADO,
+          ...anulado,
         ];
       case OrderStatus.REPROGRAMADO:
-        return [OrderStatus.EN_TRANSITO, OrderStatus.CANCELADO];
+        return [OrderStatus.EN_TRANSITO, OrderStatus.CANCELADO, ...anulado];
       default:
         return [];
     }

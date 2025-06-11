@@ -6,7 +6,7 @@ import {
   OnInit,
   ViewChild,
   inject,
-} from '@angular/core'; // Añadir inject
+} from '@angular/core';
 import {
   MatDialogRef,
   MAT_DIALOG_DATA,
@@ -22,15 +22,15 @@ import {
   FormBuilder,
   FormGroup,
   Validators,
-} from '@angular/forms'; // Añadir ReactiveFormsModule, FormBuilder, FormGroup, Validators
+} from '@angular/forms';
 import { CommonModule, TitleCasePipe } from '@angular/common';
 import { TextFieldModule } from '@angular/cdk/text-field';
-import { MatIconModule } from '@angular/material/icon'; // Para iconos
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'; // Para feedback de carga
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatSnackBar } from '@angular/material/snack-bar'; // Asegúrate de inyectarlo si lo usas para errores de cámara
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Order, Order_, OrderStatus } from '../../models/order.model';
-import { ImageUploadService } from '../../../shared/file-upload/image-upload.service'; // Asume que tienes este servicio
+import { ImageUploadService } from '../../../shared/file-upload/image-upload.service';
 import { Observable, of, Subject } from 'rxjs';
 import { catchError, finalize, takeUntil, tap } from 'rxjs/operators';
 
@@ -317,6 +317,7 @@ export class ChangeStatusDialogComponent implements OnInit {
       OrderStatus.CANCELADO,
       OrderStatus.REPROGRAMADO,
       OrderStatus.RECHAZADO,
+      OrderStatus.ANULADO,
     ];
     return statusesRequiringReason.includes(currentStatus);
   }

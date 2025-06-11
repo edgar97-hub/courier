@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:15.1
     container_name: courier_db
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_DB: courier_db
       POSTGRES_USER: courier_user
