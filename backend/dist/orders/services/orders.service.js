@@ -128,7 +128,11 @@ let OrdersService = class OrdersService {
                         orderDto.delivery_district_name;
                     orderToCreate.delivery_address = orderDto.delivery_address;
                     orderToCreate.delivery_coordinates = orderDto.delivery_coordinates;
-                    orderToCreate.delivery_date = orderDto.delivery_date;
+                    if (orderDto.delivery_date) {
+                        const inputDateUTC = orderDto.delivery_date;
+                        const timeZone = 'America/Lima';
+                        orderToCreate.delivery_date = (0, date_fns_tz_1.formatInTimeZone)(inputDateUTC, timeZone, 'yyyy-MM-dd');
+                    }
                     orderToCreate.package_size_type = orderDto.package_size_type;
                     orderToCreate.package_width_cm = orderDto.package_width_cm || 0;
                     orderToCreate.package_length_cm = orderDto.package_length_cm || 0;
@@ -281,7 +285,9 @@ let OrdersService = class OrdersService {
                         rowHasErrors = true;
                     }
                     else {
-                        orderEntity.delivery_date = new Date(day + '-' + month + '-' + year);
+                        const inputFormat = 'dd/MM/yyyy';
+                        const parsedDate = (0, date_fns_2.parse)(orderEntity.delivery_date, inputFormat, new Date());
+                        orderEntity.delivery_date = (0, date_fns_2.format)(parsedDate, 'yyyy-MM-dd');
                     }
                 }
                 else {
@@ -424,30 +430,14 @@ let OrdersService = class OrdersService {
                 .leftJoinAndSelect('order.assigned_driver', 'assigned_driver')
                 .leftJoinAndSelect('order.company', 'company');
             if (delivery_date) {
-                const timeZone = 'America/Lima';
-                const startLocalString = `${delivery_date} 00:00:00.000`;
-                const endLocalString = `${delivery_date} 23:59:59.999`;
-                const refDate = new Date();
-                const startOfPeriodInLima = (0, date_fns_2.parse)(startLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
-                const endOfPeriodInLima = (0, date_fns_2.parse)(endLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
-                const startUTC = (0, date_fns_tz_1.fromZonedTime)(startOfPeriodInLima, timeZone);
-                const endUTC = (0, date_fns_tz_1.fromZonedTime)(endOfPeriodInLima, timeZone);
                 query.andWhere({
-                    delivery_date: (0, typeorm_2.Between)(startUTC, endUTC),
+                    delivery_date: delivery_date,
                 });
             }
             else {
                 if (startDate && endDate) {
-                    const timeZone = 'America/Lima';
-                    const startLocalString = `${startDate} 00:00:00.000`;
-                    const endLocalString = `${endDate} 23:59:59.999`;
-                    const refDate = new Date();
-                    const startOfPeriodInLima = (0, date_fns_2.parse)(startLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
-                    const endOfPeriodInLima = (0, date_fns_2.parse)(endLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
-                    const startUTC = (0, date_fns_tz_1.fromZonedTime)(startOfPeriodInLima, timeZone);
-                    const endUTC = (0, date_fns_tz_1.fromZonedTime)(endOfPeriodInLima, timeZone);
                     query.andWhere({
-                        delivery_date: (0, typeorm_2.Between)(startUTC, endUTC),
+                        delivery_date: (0, typeorm_2.Between)(startDate, endDate),
                     });
                 }
             }
@@ -503,30 +493,14 @@ let OrdersService = class OrdersService {
                 .leftJoinAndSelect('order.assigned_driver', 'assigned_driver')
                 .leftJoinAndSelect('order.company', 'company');
             if (delivery_date) {
-                const timeZone = 'America/Lima';
-                const startLocalString = `${delivery_date} 00:00:00.000`;
-                const endLocalString = `${delivery_date} 23:59:59.999`;
-                const refDate = new Date();
-                const startOfPeriodInLima = (0, date_fns_2.parse)(startLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
-                const endOfPeriodInLima = (0, date_fns_2.parse)(endLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
-                const startUTC = (0, date_fns_tz_1.fromZonedTime)(startOfPeriodInLima, timeZone);
-                const endUTC = (0, date_fns_tz_1.fromZonedTime)(endOfPeriodInLima, timeZone);
                 query.andWhere({
-                    delivery_date: (0, typeorm_2.Between)(startUTC, endUTC),
+                    delivery_date: delivery_date,
                 });
             }
             else {
                 if (startDate && endDate) {
-                    const timeZone = 'America/Lima';
-                    const startLocalString = `${startDate} 00:00:00.000`;
-                    const endLocalString = `${endDate} 23:59:59.999`;
-                    const refDate = new Date();
-                    const startOfPeriodInLima = (0, date_fns_2.parse)(startLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
-                    const endOfPeriodInLima = (0, date_fns_2.parse)(endLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
-                    const startUTC = (0, date_fns_tz_1.fromZonedTime)(startOfPeriodInLima, timeZone);
-                    const endUTC = (0, date_fns_tz_1.fromZonedTime)(endOfPeriodInLima, timeZone);
                     query.andWhere({
-                        delivery_date: (0, typeorm_2.Between)(startUTC, endUTC),
+                        delivery_date: (0, typeorm_2.Between)(startDate, endDate),
                     });
                 }
             }
@@ -714,7 +688,7 @@ let OrdersService = class OrdersService {
             const ordersDeliveredToday = await this.orderRepository.count({
                 where: {
                     status: roles_1.STATES.DELIVERED,
-                    delivery_date: (0, typeorm_2.Between)(todayStart, todayEnd),
+                    delivery_date: (0, typeorm_2.Between)(todayStart.toString(), todayEnd.toString()),
                     updatedAt: (0, typeorm_2.Between)(todayStart, todayEnd),
                 },
             });

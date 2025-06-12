@@ -19,8 +19,8 @@ import { EntityManager, Connection, DataSource } from 'typeorm'; // Importa Conn
 import { UsersEntity } from 'src/users/entities/users.entity';
 import { OrderLogEntity } from '../entities/orderLog.entity';
 import { startOfDay, endOfDay, parseISO } from 'date-fns';
-import { fromZonedTime } from 'date-fns-tz';
-import { parse } from 'date-fns';
+import { fromZonedTime, formatInTimeZone } from 'date-fns-tz';
+import { parse, format } from 'date-fns';
 
 // import { customAlphabet } from 'nanoid';
 // const _nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 10);
@@ -156,7 +156,21 @@ export class OrdersService {
             orderDto.delivery_district_name;
           orderToCreate.delivery_address = orderDto.delivery_address;
           orderToCreate.delivery_coordinates = orderDto.delivery_coordinates;
-          orderToCreate.delivery_date = orderDto.delivery_date;
+          if (orderDto.delivery_date) {
+            const inputDateUTC = orderDto.delivery_date; // El string ISO 8601
+            const timeZone = 'America/Lima';
+
+            // 1. Usa `formatInTimeZone` para hacer todo en un solo paso.
+            // Esta función toma el timestamp UTC, lo convierte a la zona horaria de Perú,
+            // y lo formatea al formato 'yyyy-MM-dd' en esa misma zona horaria.
+            // Es la función perfecta para este caso de uso.
+            orderToCreate.delivery_date = formatInTimeZone(
+              inputDateUTC,
+              timeZone,
+              'yyyy-MM-dd',
+            );
+          }
+          // orderToCreate.delivery_date = orderDto.delivery_date;
           orderToCreate.package_size_type = orderDto.package_size_type;
           orderToCreate.package_width_cm = orderDto.package_width_cm || 0;
           orderToCreate.package_length_cm = orderDto.package_length_cm || 0;
@@ -366,9 +380,26 @@ export class OrdersService {
             rowHasErrors = true;
           } else {
             // orderEntity.delivery_date = parsedDate; // Guardar como objeto Date o string YYYY-MM-DD
-            orderEntity.delivery_date = new Date(
-              day + '-' + month + '-' + year,
-            ); // Guardar como objeto Date o string YYYY-MM-DD
+            // orderEntity.delivery_date = new Date(
+            //   day + '-' + month + '-' + year,
+            // ); // Guardar como objeto Date o string YYYY-MM-DD
+            // const dateObject = new Date(orderData.deliveryDate);
+            // orderEntity.delivery_date = format(dateObject, 'yyyy-MM-dd');
+            // orderEntity.delivery_date = year + '-' + month + '-' + day;
+
+            const inputFormat = 'dd/MM/yyyy';
+
+            // 1. Parsear el string de entrada con un formato explícito.
+            // Esto crea un objeto Date correcto sin ambigüedades de zona horaria.
+            const parsedDate = parse(
+              orderEntity.delivery_date,
+              inputFormat,
+              new Date(),
+            );
+
+            // 2. Formatear el objeto Date al formato de salida deseado (YYYY-MM-DD).
+            orderEntity.delivery_date = format(parsedDate, 'yyyy-MM-dd');
+            // Guardar como objeto Date o string YYYY-MM-DD
           }
         } else {
           errors.push({
@@ -588,53 +619,56 @@ export class OrdersService {
         .leftJoinAndSelect('order.company', 'company');
 
       if (delivery_date) {
-        const timeZone = 'America/Lima';
+        // const timeZone = 'America/Lima';
 
-        const startLocalString = `${delivery_date} 00:00:00.000`;
-        const endLocalString = `${delivery_date} 23:59:59.999`;
+        // const startLocalString = `${delivery_date} 00:00:00.000`;
+        // const endLocalString = `${delivery_date} 23:59:59.999`;
 
-        const refDate = new Date();
-        const startOfPeriodInLima = parse(
-          startLocalString,
-          'yyyy-MM-dd HH:mm:ss.SSS',
-          refDate,
-        );
-        const endOfPeriodInLima = parse(
-          endLocalString,
-          'yyyy-MM-dd HH:mm:ss.SSS',
-          refDate,
-        );
+        // const refDate = new Date();
+        // const startOfPeriodInLima = parse(
+        //   startLocalString,
+        //   'yyyy-MM-dd HH:mm:ss.SSS',
+        //   refDate,
+        // );
+        // const endOfPeriodInLima = parse(
+        //   endLocalString,
+        //   'yyyy-MM-dd HH:mm:ss.SSS',
+        //   refDate,
+        // );
 
-        const startUTC = fromZonedTime(startOfPeriodInLima, timeZone);
-        const endUTC = fromZonedTime(endOfPeriodInLima, timeZone);
+        // const startUTC = fromZonedTime(startOfPeriodInLima, timeZone);
+        // const endUTC = fromZonedTime(endOfPeriodInLima, timeZone);
 
+        // query.andWhere({
+        //   delivery_date: Between(startUTC, endUTC),
+        // });
         query.andWhere({
-          delivery_date: Between(startUTC, endUTC),
+          delivery_date: delivery_date,
         });
       } else {
         if (startDate && endDate) {
-          const timeZone = 'America/Lima';
+          // const timeZone = 'America/Lima';
 
-          const startLocalString = `${startDate} 00:00:00.000`;
-          const endLocalString = `${endDate} 23:59:59.999`;
+          // const startLocalString = `${startDate} 00:00:00.000`;
+          // const endLocalString = `${endDate} 23:59:59.999`;
 
-          const refDate = new Date();
-          const startOfPeriodInLima = parse(
-            startLocalString,
-            'yyyy-MM-dd HH:mm:ss.SSS',
-            refDate,
-          );
-          const endOfPeriodInLima = parse(
-            endLocalString,
-            'yyyy-MM-dd HH:mm:ss.SSS',
-            refDate,
-          );
+          // const refDate = new Date();
+          // const startOfPeriodInLima = parse(
+          //   startLocalString,
+          //   'yyyy-MM-dd HH:mm:ss.SSS',
+          //   refDate,
+          // );
+          // const endOfPeriodInLima = parse(
+          //   endLocalString,
+          //   'yyyy-MM-dd HH:mm:ss.SSS',
+          //   refDate,
+          // );
 
-          const startUTC = fromZonedTime(startOfPeriodInLima, timeZone);
-          const endUTC = fromZonedTime(endOfPeriodInLima, timeZone);
+          // const startUTC = fromZonedTime(startOfPeriodInLima, timeZone);
+          // const endUTC = fromZonedTime(endOfPeriodInLima, timeZone);
 
           query.andWhere({
-            delivery_date: Between(startUTC, endUTC),
+            delivery_date: Between(startDate, endDate),
           });
         }
       }
@@ -729,53 +763,56 @@ export class OrdersService {
         .leftJoinAndSelect('order.company', 'company');
 
       if (delivery_date) {
-        const timeZone = 'America/Lima';
+        // const timeZone = 'America/Lima';
 
-        const startLocalString = `${delivery_date} 00:00:00.000`;
-        const endLocalString = `${delivery_date} 23:59:59.999`;
+        // const startLocalString = `${delivery_date} 00:00:00.000`;
+        // const endLocalString = `${delivery_date} 23:59:59.999`;
 
-        const refDate = new Date();
-        const startOfPeriodInLima = parse(
-          startLocalString,
-          'yyyy-MM-dd HH:mm:ss.SSS',
-          refDate,
-        );
-        const endOfPeriodInLima = parse(
-          endLocalString,
-          'yyyy-MM-dd HH:mm:ss.SSS',
-          refDate,
-        );
+        // const refDate = new Date();
+        // const startOfPeriodInLima = parse(
+        //   startLocalString,
+        //   'yyyy-MM-dd HH:mm:ss.SSS',
+        //   refDate,
+        // );
+        // const endOfPeriodInLima = parse(
+        //   endLocalString,
+        //   'yyyy-MM-dd HH:mm:ss.SSS',
+        //   refDate,
+        // );
 
-        const startUTC = fromZonedTime(startOfPeriodInLima, timeZone);
-        const endUTC = fromZonedTime(endOfPeriodInLima, timeZone);
+        // const startUTC = fromZonedTime(startOfPeriodInLima, timeZone);
+        // const endUTC = fromZonedTime(endOfPeriodInLima, timeZone);
 
+        // query.andWhere({
+        //   delivery_date: Between(startUTC, endUTC),
+        // });
         query.andWhere({
-          delivery_date: Between(startUTC, endUTC),
+          delivery_date: delivery_date,
         });
       } else {
         if (startDate && endDate) {
-          const timeZone = 'America/Lima';
+          // const timeZone = 'America/Lima';
 
-          const startLocalString = `${startDate} 00:00:00.000`;
-          const endLocalString = `${endDate} 23:59:59.999`;
+          // const startLocalString = `${startDate} 00:00:00.000`;
+          // const endLocalString = `${endDate} 23:59:59.999`;
 
-          const refDate = new Date();
-          const startOfPeriodInLima = parse(
-            startLocalString,
-            'yyyy-MM-dd HH:mm:ss.SSS',
-            refDate,
-          );
-          const endOfPeriodInLima = parse(
-            endLocalString,
-            'yyyy-MM-dd HH:mm:ss.SSS',
-            refDate,
-          );
+          // const refDate = new Date();
+          // const startOfPeriodInLima = parse(
+          //   startLocalString,
+          //   'yyyy-MM-dd HH:mm:ss.SSS',
+          //   refDate,
+          // );
+          // const endOfPeriodInLima = parse(
+          //   endLocalString,
+          //   'yyyy-MM-dd HH:mm:ss.SSS',
+          //   refDate,
+          // );
 
-          const startUTC = fromZonedTime(startOfPeriodInLima, timeZone);
-          const endUTC = fromZonedTime(endOfPeriodInLima, timeZone);
+          // const startUTC = fromZonedTime(startOfPeriodInLima, timeZone);
+          // const endUTC = fromZonedTime(endOfPeriodInLima, timeZone);
 
           query.andWhere({
-            delivery_date: Between(startUTC, endUTC),
+            delivery_date: Between(startDate, endDate),
           });
         }
       }
@@ -1020,7 +1057,7 @@ export class OrdersService {
       const ordersDeliveredToday = await this.orderRepository.count({
         where: {
           status: STATES.DELIVERED,
-          delivery_date: Between(todayStart, todayEnd),
+          delivery_date: Between(todayStart.toString(), todayEnd.toString()),
           updatedAt: Between(todayStart, todayEnd),
         },
       });
