@@ -189,42 +189,41 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
 
             let diferencia = 0;
             let monto_a_cobrar = order.amount_to_collect_at_delivery;
-            if (order.amount_to_collect_at_delivery !== 0) {
-              let costo_servicio_pagado_cliente_al_courier =
-                order.efectivo_courier_costo_servicio ||
-                order.pago_directo_courier_costo_servicio;
-
-              /**
-               * si el pago del monto a cobrar se hizo por pago directo,
-               * ya no es considerado para el calculo en columna diferencia
-               */
-              if (
-                order.pago_directo_monto_cobrar ===
-                order.amount_to_collect_at_delivery
-              ) {
-                monto_a_cobrar = 0;
-              } else {
-                /**
-                 * quiere dicer que el pago se hizo al courier,
-                 * y se le tiene que devolver a la empresa
-                 */
-                diferencia = monto_a_cobrar;
-              }
-
-              /**
-               * si el cliente no pago el costo del servicio,
-               * quiere decir que se le tiene que cobrar a la empresa
-               */
-              if (costo_servicio_pagado_cliente_al_courier === 0) {
-                diferencia = monto_a_cobrar - order.shipping_cost;
-              }
-              order.diferencia = diferencia;
+            let costo_servicio_pagado_cliente_al_courier =
+              order.efectivo_courier_costo_servicio ||
+              order.pago_directo_courier_costo_servicio;
+            // if (order.amount_to_collect_at_delivery !== 0) {
+            /**
+             * si el pago del monto a cobrar se hizo por pago directo,
+             * ya no es considerado para el calculo en columna diferencia
+             */
+            if (
+              order.pago_directo_monto_cobrar ===
+              order.amount_to_collect_at_delivery
+            ) {
+              monto_a_cobrar = 0;
             } else {
-              diferencia =
-                order.amount_to_collect_at_delivery -
-                (order.shipping_cost || 0);
-              order.diferencia = diferencia;
+              /**
+               * quiere decir que el pago se hizo al courier,
+               * y se le tiene que devolver a la empresa
+               */
+              diferencia = monto_a_cobrar;
             }
+
+            /**
+             * si el cliente no pago el costo del servicio,
+             * quiere decir que se le tiene que cobrar a la empresa
+             */
+            if (costo_servicio_pagado_cliente_al_courier === 0) {
+              diferencia = monto_a_cobrar - order.shipping_cost;
+            }
+            order.diferencia = diferencia;
+            // } else {
+            //   diferencia =
+            //     order.amount_to_collect_at_delivery -
+            //     (order.shipping_cost || 0);
+            //   order.diferencia = diferencia;
+            // }
 
             totals.amount_to_collect_at_delivery +=
               Number(order.amount_to_collect_at_delivery) || 0;
@@ -342,7 +341,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
     this.orderService
       .getOrders(
         currentFilters,
-        this.currentPageIndex + 1, // API suele esperar page index 1-based
+        this.currentPageIndex + 1,
         this.currentPageSize,
         this.currentSortField,
         this.currentSortDirection
@@ -356,7 +355,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
             { duration: 5000, panelClass: ['error-snackbar'] }
           );
           this.isLoading = false;
-          return []; // Devuelve un array vacío o un observable vacío para que la cadena no se rompa
+          return [];
         })
       )
       .subscribe((response: PaginatedOrdersResponse) => {
@@ -392,46 +391,49 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
 
           let diferencia = 0;
           let monto_a_cobrar = order.amount_to_collect_at_delivery || 0;
-          if (order.amount_to_collect_at_delivery !== 0) {
-            let costo_servicio_pagado_cliente_al_courier =
-              order.efectivo_courier_costo_servicio ||
-              order.pago_directo_courier_costo_servicio;
+          let costo_servicio_pagado_cliente_al_courier =
+            order.efectivo_courier_costo_servicio ||
+            order.pago_directo_courier_costo_servicio;
 
-            /**
-             * si el pago del monto a cobrar se hizo por pago directo,
-             * ya no es considerado para el calculo en columna diferencia
-             */
-            if (
-              order.pago_directo_monto_cobrar ===
-              order.amount_to_collect_at_delivery
-            ) {
-              monto_a_cobrar = 0;
-            } else {
-              /**
-               * quiere dicer que el pago se hizo al courier,
-               * y se le tiene que devolver a la empresa
-               */
-              diferencia = monto_a_cobrar;
-            }
-
-            /**
-             * si el cliente no pago el costo del servicio,
-             * quiere decir que se le tiene que cobrar a la empresa
-             */
-            if (costo_servicio_pagado_cliente_al_courier === 0) {
-              diferencia = monto_a_cobrar - (order.shipping_cost || 0);
-            }
-
-            order.diferencia = diferencia;
+          // if (order.amount_to_collect_at_delivery !== 0) {
+          /**
+           * si el pago del monto a cobrar se hizo por pago directo,
+           * ya no es considerado para el calculo en columna diferencia
+           */
+          if (
+            order.pago_directo_monto_cobrar ===
+            order.amount_to_collect_at_delivery
+          ) {
+            monto_a_cobrar = 0;
           } else {
-            order.diferencia =
-              order.amount_to_collect_at_delivery - (order.shipping_cost || 0);
+            /**
+             * quiere dicer que el pago se hizo al courier,
+             * y se le tiene que devolver a la empresa
+             */
+            diferencia = monto_a_cobrar;
           }
+
+          /**
+           * si el cliente no pago el costo del servicio,
+           * quiere decir que se le tiene que cobrar a la empresa
+           */
+          if (costo_servicio_pagado_cliente_al_courier === 0) {
+            diferencia = monto_a_cobrar - (order.shipping_cost || 0);
+          }
+
+          order.diferencia = diferencia;
+          // } else {
+          //   if (costo_servicio_pagado_cliente_al_courier === 0) {
+          //     diferencia =
+          //       order.amount_to_collect_at_delivery -
+          //       (order.shipping_cost || 0);
+          //   }
+          //   order.diferencia = diferencia;
+          // }
         });
         this.orders = response.items;
         this.totalOrderCount = response.total_count || 0;
         this.isLoading = false;
-        console.log('Orders fetched:', this.orders);
       });
   }
 
@@ -443,7 +445,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
     shippingCostPaymentMethod?: string | null;
     collectionPaymentMethod?: string | null;
   }): void {
-    this.isLoading = true; // O una bandera de carga específica para la actualización
+    this.isLoading = true;
     console.log('OrderListPage: Status change requested', event);
 
     this.orderService
@@ -482,8 +484,6 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
     orderId: number | string;
     motorizedId: string;
   }): void {
-    console.log('orderId', event.orderId);
-    console.log('motorizedId', event.motorizedId);
     this.orderService
       .assignDriverToOrder(event.orderId, event.motorizedId)
       .subscribe({
@@ -564,8 +564,8 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
   onSortChanged(sort: Sort): void {
     console.log('OrderListPage: Sort changed', sort);
     this.currentSortField = sort.active;
-    this.currentSortDirection = sort.direction as 'asc' | 'desc'; // El tipo SortDirection puede ser '', pero nuestro servicio espera 'asc' o 'desc'
-    this.currentPageIndex = 0; // Resetear a la primera página al cambiar el orden
+    this.currentSortDirection = sort.direction as 'asc' | 'desc';
+    this.currentPageIndex = 0;
     this.fetchOrders();
   }
 

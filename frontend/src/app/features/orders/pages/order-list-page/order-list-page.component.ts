@@ -39,9 +39,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 import { OrderImportModalComponent } from '../../components/order-import-modal/order-import-modal.component';
-import { Order_importacion, STATES } from '../../models/order.model'; // Importa tu modelo Order y STATES
+import { Order_importacion, STATES } from '../../models/order.model';
 import { ExcelExportService } from '../../services/excel-export.service';
-import { CommonModule, DatePipe } from '@angular/common'; // DatePipe aquí es solo para el tipado, no para proveerlo
+import { CommonModule, DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-order-list-page',
@@ -52,8 +52,8 @@ import { CommonModule, DatePipe } from '@angular/common'; // DatePipe aquí es s
     OrderFiltersComponent,
     OrderTableComponent,
     MatSnackBarModule,
-    MatButtonModule, // Para el botón de Acciones Masivas
-    MatIconModule, // Para iconos en botones
+    MatButtonModule,
+    MatIconModule,
     MatMenuModule,
   ],
   templateUrl: './order-list-page.component.html',
@@ -61,27 +61,25 @@ import { CommonModule, DatePipe } from '@angular/common'; // DatePipe aquí es s
 })
 export class OrderListPageComponent implements OnInit, OnDestroy {
   private orderService = inject(OrderService);
-  private router = inject(Router); // Si necesitas navegar
+  private router = inject(Router);
   private snackBar = inject(MatSnackBar);
-  private dialog = inject(MatDialog); // Inyectar MatDialog
-  private excelExportService = inject(ExcelExportService); // <--- INYECTA EL SERVICIO
+  private dialog = inject(MatDialog);
+  private excelExportService = inject(ExcelExportService);
   private datePipe = inject(DatePipe);
   orders: Order_[] = [];
   isLoading = false;
   totalOrderCount = 0;
-  currentPageIndex = 0; // Paginator es base 0
-  currentPageSize = 10; // Valor inicial para el paginador
-  currentSortField = 'registration_date'; // Campo de ordenamiento inicial
-  currentSortDirection: 'asc' | 'desc' = 'desc'; // Dirección inicial
+  currentPageIndex = 0;
+  currentPageSize = 10;
+  currentSortField = 'registration_date';
+  currentSortDirection: 'asc' | 'desc' = 'desc';
 
-  // Subject para manejar los filtros actuales
   private filterCriteriaSubject = new BehaviorSubject<OrderFilterCriteria>({});
   private destroy$ = new Subject<void>();
 
   constructor() {}
 
   ngOnInit(): void {
-    // Escuchar cambios en los filtros y recargar datos
     this.filterCriteriaSubject
       .pipe(
         takeUntil(this.destroy$),
@@ -107,14 +105,14 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
           .pipe(takeUntil(this.destroy$))
       );
 
-      return allOrders || []; // Devuelve un array vacío si la respuesta es null/undefined
+      return allOrders || [];
     } catch (error) {
       console.error('Error fetching all filtered orders for export:', error);
       this.snackBar.open('Failed to fetch data for export.', 'Close', {
         duration: 3000,
         panelClass: ['error-snackbar'],
       });
-      return []; // Devuelve un array vacío en caso de error para no romper la exportación
+      return [];
     }
   }
 
@@ -183,7 +181,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
     this.orderService
       .getOrders(
         currentFilters,
-        this.currentPageIndex + 1, // API suele esperar page index 1-based
+        this.currentPageIndex + 1,
         this.currentPageSize,
         this.currentSortField,
         this.currentSortDirection
@@ -197,7 +195,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
             { duration: 5000, panelClass: ['error-snackbar'] }
           );
           this.isLoading = false;
-          return []; // Devuelve un array vacío o un observable vacío para que la cadena no se rompa
+          return [];
         })
       )
       .subscribe((response: PaginatedOrdersResponse) => {

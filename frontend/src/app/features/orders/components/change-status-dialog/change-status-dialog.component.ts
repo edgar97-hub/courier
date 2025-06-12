@@ -126,17 +126,7 @@ export class ChangeStatusDialogComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    // Pre-seleccionar el estado actual si está en la lista de disponibles
-    if (
-      this.data.availableStatuses.includes(
-        this.data.order.status as OrderStatus
-      )
-    ) {
-      // this.selectedStatus = this.data.order.status; // Podría no ser lo ideal si siempre quieres que elija
-      // this.onStatusChange({ value: this.selectedStatus } as MatSelectChange);
-    }
-  }
+  ngOnInit(): void {}
 
   async startCamera(): Promise<void> {
     this.cameraError = null;
@@ -496,7 +486,6 @@ export class ChangeStatusDialogComponent implements OnInit {
       return 'status-desconocido';
     }
     const formattedStatus = status.toLowerCase().replace(/[\s_]+/g, '-');
-    console.log('`status-${formattedStatus}`', `status-${formattedStatus}`);
     return `status-${formattedStatus}`;
   }
 }

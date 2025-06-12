@@ -62,10 +62,6 @@ export class OrdersService {
   }
 
   public async updateOrderStatus(body: any, idUser: string): Promise<any> {
-    // let ORDER_LOG_ACTIONS = {
-    //   STATUS_CHANGE: 'CAMBIO DE ESTADO',
-    //   DRIVER_ASSIGNED: 'MOTORIZADO ASIGNADO',
-    // };
     let log: OrderLogEntity;
     try {
       const oldOrder = await this.orderRepository.findOne({
@@ -594,13 +590,9 @@ export class OrdersService {
       if (delivery_date) {
         const timeZone = 'America/Lima';
 
-        // 1. Construir strings explícitos para el inicio y el fin del rango en hora local de Perú.
-        const startLocalString = `${delivery_date} 00:00:00.000`; // <-- Añadido .000
+        const startLocalString = `${delivery_date} 00:00:00.000`;
         const endLocalString = `${delivery_date} 23:59:59.999`;
 
-        // 2. Parsear estos strings como si estuvieran en la zona horaria de Perú.
-        // Esto crea objetos Date que representan el inicio y el fin del período en Lima.
-        // Usamos una fecha de referencia para que `parse` funcione correctamente.
         const refDate = new Date();
         const startOfPeriodInLima = parse(
           startLocalString,
@@ -613,35 +605,19 @@ export class OrdersService {
           refDate,
         );
 
-        // 3. Convertir estos momentos de "hora de Perú" a su equivalente UTC.
         const startUTC = fromZonedTime(startOfPeriodInLima, timeZone);
         const endUTC = fromZonedTime(endOfPeriodInLima, timeZone);
-
-        // Imprime los valores finales para depurar.
-        console.log('UTC Range Start:', startUTC.toISOString());
-        console.log('UTC Range End:  ', endUTC.toISOString());
 
         query.andWhere({
           delivery_date: Between(startUTC, endUTC),
         });
-
-        // const start = new Date(delivery_date + 'T00:00:00');
-        // const end = new Date(delivery_date + 'T23:59:59');
-        // query.andWhere('order.delivery_date BETWEEN :start AND :end', {
-        //   start,
-        //   end,
-        // });
       } else {
         if (startDate && endDate) {
           const timeZone = 'America/Lima';
 
-          // 1. Construir strings explícitos para el inicio y el fin del rango en hora local de Perú.
-          const startLocalString = `${startDate} 00:00:00.000`; // <-- Añadido .000
+          const startLocalString = `${startDate} 00:00:00.000`;
           const endLocalString = `${endDate} 23:59:59.999`;
 
-          // 2. Parsear estos strings como si estuvieran en la zona horaria de Perú.
-          // Esto crea objetos Date que representan el inicio y el fin del período en Lima.
-          // Usamos una fecha de referencia para que `parse` funcione correctamente.
           const refDate = new Date();
           const startOfPeriodInLima = parse(
             startLocalString,
@@ -654,16 +630,11 @@ export class OrdersService {
             refDate,
           );
 
-          // 3. Convertir estos momentos de "hora de Perú" a su equivalente UTC.
           const startUTC = fromZonedTime(startOfPeriodInLima, timeZone);
           const endUTC = fromZonedTime(endOfPeriodInLima, timeZone);
 
-          // Imprime los valores finales para depurar.
-          console.log('UTC Range Start:', startUTC.toISOString());
-          console.log('UTC Range End:  ', endUTC.toISOString());
-
           query.andWhere({
-            createdAt: Between(startUTC, endUTC),
+            delivery_date: Between(startUTC, endUTC),
           });
         }
       }
@@ -760,13 +731,9 @@ export class OrdersService {
       if (delivery_date) {
         const timeZone = 'America/Lima';
 
-        // 1. Construir strings explícitos para el inicio y el fin del rango en hora local de Perú.
-        const startLocalString = `${delivery_date} 00:00:00.000`; // <-- Añadido .000
+        const startLocalString = `${delivery_date} 00:00:00.000`;
         const endLocalString = `${delivery_date} 23:59:59.999`;
 
-        // 2. Parsear estos strings como si estuvieran en la zona horaria de Perú.
-        // Esto crea objetos Date que representan el inicio y el fin del período en Lima.
-        // Usamos una fecha de referencia para que `parse` funcione correctamente.
         const refDate = new Date();
         const startOfPeriodInLima = parse(
           startLocalString,
@@ -779,35 +746,19 @@ export class OrdersService {
           refDate,
         );
 
-        // 3. Convertir estos momentos de "hora de Perú" a su equivalente UTC.
         const startUTC = fromZonedTime(startOfPeriodInLima, timeZone);
         const endUTC = fromZonedTime(endOfPeriodInLima, timeZone);
-
-        // Imprime los valores finales para depurar.
-        console.log('UTC Range Start:', startUTC.toISOString());
-        console.log('UTC Range End:  ', endUTC.toISOString());
 
         query.andWhere({
           delivery_date: Between(startUTC, endUTC),
         });
-
-        // const start = new Date(delivery_date + 'T00:00:00');
-        // const end = new Date(delivery_date + 'T23:59:59');
-        // query.andWhere('order.delivery_date BETWEEN :start AND :end', {
-        //   start,
-        //   end,
-        // });
       } else {
         if (startDate && endDate) {
           const timeZone = 'America/Lima';
 
-          // 1. Construir strings explícitos para el inicio y el fin del rango en hora local de Perú.
-          const startLocalString = `${startDate} 00:00:00.000`; // <-- Añadido .000
+          const startLocalString = `${startDate} 00:00:00.000`;
           const endLocalString = `${endDate} 23:59:59.999`;
 
-          // 2. Parsear estos strings como si estuvieran en la zona horaria de Perú.
-          // Esto crea objetos Date que representan el inicio y el fin del período en Lima.
-          // Usamos una fecha de referencia para que `parse` funcione correctamente.
           const refDate = new Date();
           const startOfPeriodInLima = parse(
             startLocalString,
@@ -820,23 +771,15 @@ export class OrdersService {
             refDate,
           );
 
-          // 3. Convertir estos momentos de "hora de Perú" a su equivalente UTC.
           const startUTC = fromZonedTime(startOfPeriodInLima, timeZone);
           const endUTC = fromZonedTime(endOfPeriodInLima, timeZone);
 
-          // Imprime los valores finales para depurar.
-          console.log('UTC Range Start:', startUTC.toISOString());
-          console.log('UTC Range End:  ', endUTC.toISOString());
-
           query.andWhere({
-            createdAt: Between(startUTC, endUTC),
+            delivery_date: Between(startUTC, endUTC),
           });
         }
       }
 
-      if (role === ROLES.MOTORIZED) {
-        query.andWhere('assigned_driver.id = :idUser', { idUser });
-      }
       if (role === ROLES.COMPANY) {
         query.andWhere('company.id = :idUser', { idUser });
       }
