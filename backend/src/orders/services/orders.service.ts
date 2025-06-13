@@ -1042,12 +1042,43 @@ export class OrdersService {
     // }
 
     try {
-      const todayStart = startOfDay(new Date());
-      const todayEnd = endOfDay(new Date());
+      const todayStart = new Date();
+
+      const timeZone = 'America/Lima';
+
+      let _todayStart = formatInTimeZone(todayStart, timeZone, 'yyyy-MM-dd');
+      const startLocalString = `${_todayStart} 00:00:00.000`;
+      const endLocalString = `${_todayStart} 23:59:59.999`;
+      const refDate = new Date();
+      const startOfPeriodInLima = parse(
+        startLocalString,
+        'yyyy-MM-dd HH:mm:ss.SSS',
+        refDate,
+      );
+      const endOfPeriodInLima = parse(
+        endLocalString,
+        'yyyy-MM-dd HH:mm:ss.SSS',
+        refDate,
+      );
+
+      const startUTC = fromZonedTime(startOfPeriodInLima, timeZone);
+      const endUTC = fromZonedTime(endOfPeriodInLima, timeZone);
+      console.log('startUTC', startUTC);
+      console.log('endUTC', endUTC);
+      // 1. Usa `formatInTimeZone` para hacer todo en un solo paso.
+      // Esta función toma el timestamp UTC, lo convierte a la zona horaria de Perú,
+      // y lo formatea al formato 'yyyy-MM-dd' en esa misma zona horaria.
+      // Es la función perfecta para este caso de uso.
+
+      let delivery_date = formatInTimeZone(
+        new Date().toISOString(),
+        timeZone,
+        'yyyy-MM-dd',
+      );
 
       // KPIs
       const totalOrdersToday = await this.orderRepository.count({
-        where: { createdAt: Between(todayStart, todayEnd) },
+        where: { createdAt: Between(startUTC, endUTC) },
       });
 
       const ordersInTransit = await this.orderRepository.count({
@@ -1057,15 +1088,15 @@ export class OrdersService {
       const ordersDeliveredToday = await this.orderRepository.count({
         where: {
           status: STATES.DELIVERED,
-          delivery_date: Between(todayStart.toString(), todayEnd.toString()),
-          updatedAt: Between(todayStart, todayEnd),
+          delivery_date: delivery_date,
+          updatedAt: Between(startUTC, endUTC),
         },
       });
 
       const rejectedToday = await this.orderRepository.count({
         where: {
           status: STATES.REJECTED,
-          updatedAt: Between(todayStart, todayEnd),
+          updatedAt: Between(startUTC, endUTC),
         },
       });
       // const cancelledToday = await this.orderRepository.count({

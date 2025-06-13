@@ -22,9 +22,8 @@ const districts_entity_1 = require("../../districts/entities/districts.entity");
 const roles_1 = require("../../constants/roles");
 const typeorm_3 = require("typeorm");
 const orderLog_entity_1 = require("../entities/orderLog.entity");
-const date_fns_1 = require("date-fns");
 const date_fns_tz_1 = require("date-fns-tz");
-const date_fns_2 = require("date-fns");
+const date_fns_1 = require("date-fns");
 const EXCEL_HEADER_TO_ENTITY_KEY_MAP = {
     'TIPO DE ENVIO': 'shipment_type',
     'NOMBRE DEL DESTINATARIO': 'recipient_name',
@@ -286,8 +285,8 @@ let OrdersService = class OrdersService {
                     }
                     else {
                         const inputFormat = 'dd/MM/yyyy';
-                        const parsedDate = (0, date_fns_2.parse)(orderEntity.delivery_date, inputFormat, new Date());
-                        orderEntity.delivery_date = (0, date_fns_2.format)(parsedDate, 'yyyy-MM-dd');
+                        const parsedDate = (0, date_fns_1.parse)(orderEntity.delivery_date, inputFormat, new Date());
+                        orderEntity.delivery_date = (0, date_fns_1.format)(parsedDate, 'yyyy-MM-dd');
                     }
                 }
                 else {
@@ -677,10 +676,21 @@ let OrdersService = class OrdersService {
     }
     async dashboardOrders() {
         try {
-            const todayStart = (0, date_fns_1.startOfDay)(new Date());
-            const todayEnd = (0, date_fns_1.endOfDay)(new Date());
+            const todayStart = new Date();
+            const timeZone = 'America/Lima';
+            let _todayStart = (0, date_fns_tz_1.formatInTimeZone)(todayStart, timeZone, 'yyyy-MM-dd');
+            const startLocalString = `${_todayStart} 00:00:00.000`;
+            const endLocalString = `${_todayStart} 23:59:59.999`;
+            const refDate = new Date();
+            const startOfPeriodInLima = (0, date_fns_1.parse)(startLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
+            const endOfPeriodInLima = (0, date_fns_1.parse)(endLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
+            const startUTC = (0, date_fns_tz_1.fromZonedTime)(startOfPeriodInLima, timeZone);
+            const endUTC = (0, date_fns_tz_1.fromZonedTime)(endOfPeriodInLima, timeZone);
+            console.log('startUTC', startUTC);
+            console.log('endUTC', endUTC);
+            let delivery_date = (0, date_fns_tz_1.formatInTimeZone)(new Date().toISOString(), timeZone, 'yyyy-MM-dd');
             const totalOrdersToday = await this.orderRepository.count({
-                where: { createdAt: (0, typeorm_2.Between)(todayStart, todayEnd) },
+                where: { createdAt: (0, typeorm_2.Between)(startUTC, endUTC) },
             });
             const ordersInTransit = await this.orderRepository.count({
                 where: { status: roles_1.STATES.IN_TRANSIT },
@@ -688,14 +698,14 @@ let OrdersService = class OrdersService {
             const ordersDeliveredToday = await this.orderRepository.count({
                 where: {
                     status: roles_1.STATES.DELIVERED,
-                    delivery_date: (0, typeorm_2.Between)(todayStart.toString(), todayEnd.toString()),
-                    updatedAt: (0, typeorm_2.Between)(todayStart, todayEnd),
+                    delivery_date: delivery_date,
+                    updatedAt: (0, typeorm_2.Between)(startUTC, endUTC),
                 },
             });
             const rejectedToday = await this.orderRepository.count({
                 where: {
                     status: roles_1.STATES.REJECTED,
-                    updatedAt: (0, typeorm_2.Between)(todayStart, todayEnd),
+                    updatedAt: (0, typeorm_2.Between)(startUTC, endUTC),
                 },
             });
             const ordersWithIssuesToday = rejectedToday;
