@@ -131,13 +131,13 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       .getDeliveryDistricts()
       .pipe(
         map((allDistricts: DistrictOption[]) => {
-          // this._districtsCache = allDistricts;
+          this._districtsCache = allDistricts;
           console.log('this._districtsCache', this._districtsCache);
           return allDistricts.filter((district) => district.isStandard);
         })
       )
       .subscribe((standardDistricts) => {
-        this._districtsCache = standardDistricts; // o lo que necesites hacer
+        // this._districtsCache = standardDistricts; // o lo que necesites hacer
       });
     // this.deliveryDistricts$ = this.orderService.getDeliveryDistricts().pipe(
     //   map((allDistricts: DistrictOption[]) => {

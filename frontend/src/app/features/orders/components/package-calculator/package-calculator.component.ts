@@ -251,11 +251,13 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
         let districtFound = this.listaDeDistritos?.find(
           (item) => item.id === customData.delivery_district_id
         );
+        console.log('this.listaDeDistritos', this.listaDeDistritos);
+        console.log('districtFound', districtFound);
         if (districtFound) {
           let filtrados = this.listaDeDistritos?.filter(
-            (item) => item.name === districtFound?.name
+            (item) => item.name == districtFound?.name
           );
-          console.log('districtFound', districtFound);
+          console.log('filtrados', filtrados);
           // interface Tarifa {
           //   id: number | string; // Identificador único de la tarifa
           //   weight_from: number; // Límite inferior del rango de peso (inclusivo)
@@ -291,7 +293,7 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
           }
 
           if (filtrados) {
-            console.log('filtrados', filtrados);
+            // console.log('filtrados', filtrados);
             let tarifa = getTarifa(peso_cobrado, filtrados);
             precio = tarifa?.price || 0;
           }

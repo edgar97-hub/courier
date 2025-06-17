@@ -105,12 +105,6 @@ export class DistrictsService {
           code: 'ASC',
         },
       });
-      // if (users.length === 0) {
-      //   throw new ErrorManager({
-      //     type: 'BAD_REQUEST',
-      //     message: 'No se encontro resultado',
-      //   });
-      // }
       return users;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);

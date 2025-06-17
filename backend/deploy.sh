@@ -153,6 +153,8 @@ git fetch origin main
 git reset --hard FETCH_HEAD
 pm2 restart all
 
+
+anyshared 1 640 700 253
 Cómo Verificar que la Renovación Automática está Configurada:
 sudo certbot renew --dry-run
 
