@@ -69,12 +69,10 @@ export interface ChangeStatusDialogResult {
   styleUrls: ['./change-status-dialog.component.scss'],
 })
 export class ChangeStatusDialogComponent implements OnInit {
-  // Para el estado principal y motivo (usando ngModel por simplicidad aquí, podrías migrar a Reactive Forms todo)
   selectedStatus!: OrderStatus;
   reason: string = '';
   showReasonField: boolean = false;
 
-  // Formulario reactivo para los campos adicionales
   deliveryDetailsForm: FormGroup;
 
   @ViewChild('videoPlayer') videoPlayer!: ElementRef<HTMLVideoElement>;
@@ -91,10 +89,6 @@ export class ChangeStatusDialogComponent implements OnInit {
   cameraError: string | null = null;
 
   formSubmitted: boolean = false;
-  // imagePreviewUrl: string | ArrayBuffer | null = null;
-  // selectedImageFile: File | null = null;
-  // isUploadingImage: boolean = false;
-  // uploadedImageUrl: string | null = null; // URL de la imagen después de subirla
 
   readonly paymentMethods: string[] = ['Efectivo', 'Pago directo'];
   readonly paymentMethodsCostoEnvio: string[] = [
@@ -146,10 +140,13 @@ export class ChangeStatusDialogComponent implements OnInit {
           this.showCamera = true;
           this.photoTaken = false;
         }
+        this.showCamera = true;
+        this.photoTaken = false;
       } else {
         this.cameraError = 'Tu navegador no soporta el acceso a la cámara.';
         this.snackBar.open(this.cameraError, 'Cerrar', { duration: 5000 });
       }
+      // alert('this.showCamera' + this.showCamera);
     } catch (err: any) {
       console.error('Error al acceder a la cámara:', err);
       if (
@@ -201,49 +198,8 @@ export class ChangeStatusDialogComponent implements OnInit {
       this.stream = null;
     }
     this.showCamera = false;
+    this.cdr.detectChanges();
   }
-
-  // takePhoto(): void {
-  //   if (
-  //     !this.stream ||
-  //     !this.videoPlayer?.nativeElement ||
-  //     !this.canvasElement?.nativeElement
-  //   ) {
-  //     console.error('takePhoto: Stream o elementos no listos.');
-  //     return;
-  //   }
-  //   const video = this.videoPlayer.nativeElement;
-  //   const canvas = this.canvasElement.nativeElement;
-  //   const context = canvas.getContext('2d');
-
-  //   if (context) {
-  //     canvas.width = video.videoWidth;
-  //     canvas.height = video.videoHeight;
-  //     context.drawImage(video, 0, 0, canvas.width, canvas.height);
-  //     this.imagePreviewUrl.set(canvas.toDataURL('image/jpeg'));
-  //     this.photoTaken.set(true);
-  //     this.showCamera.set(false); // Ocultar video, mostrar preview
-  //     this.selectedImageFile.set(null);
-  //     this.uploadedImageUrl.set(null);
-  //     this.stopCameraStream();
-  //     this.cdr.detectChanges();
-  //   }
-  // }
-
-  // stopCameraStream(): void {
-  //   if (this.stream) {
-  //     this.stream.getTracks().forEach((track) => track.stop());
-  //     this.stream = null;
-  //     console.log('Camera stream stopped.');
-  //   }
-  // }
-
-  // closeCameraView(): void {
-  //   this.stopCameraStream();
-  //   this.showCamera.set(false);
-  //   // No resetear photoTaken aquí necesariamente
-  //   this.cdr.detectChanges();
-  // }
 
   onFileSelected(event: Event): void {
     this.stopCamera(); // Detener cámara si estaba activa
@@ -316,27 +272,31 @@ export class ChangeStatusDialogComponent implements OnInit {
     if (status === OrderStatus.ENTREGADO) {
       this.showDeliveryDetails = true;
       // Habilitar y poner validadores si es necesario (ej. si el monto a cobrar es > 0)
-      if (this.data.order.shipping_cost && this.data.order.shipping_cost > 0) {
-        this.deliveryDetailsForm
-          .get('shippingCostPaymentMethod')
-          ?.setValidators([Validators.required]);
-      } else {
-        this.deliveryDetailsForm
-          .get('shippingCostPaymentMethod')
-          ?.clearValidators();
-      }
-      if (
-        this.data.order.amount_to_collect_at_delivery &&
-        this.data.order.amount_to_collect_at_delivery > 0
-      ) {
-        this.deliveryDetailsForm
-          .get('collectionPaymentMethod')
-          ?.setValidators([Validators.required]);
-      } else {
-        this.deliveryDetailsForm
-          .get('collectionPaymentMethod')
-          ?.clearValidators();
-      }
+      // if (this.data.order.shipping_cost && this.data.order.shipping_cost > 0) {
+      //   this.deliveryDetailsForm
+      //     .get('shippingCostPaymentMethod')
+      //     ?.setValidators([Validators.required]);
+      // } else {
+      //   this.deliveryDetailsForm
+      //     .get('shippingCostPaymentMethod')
+      //     ?.clearValidators();
+      // }
+
+      this.deliveryDetailsForm
+        .get('shippingCostPaymentMethod')
+        ?.setValidators([Validators.required]);
+      // if (
+      //   this.data.order.amount_to_collect_at_delivery &&
+      //   this.data.order.amount_to_collect_at_delivery > 0
+      // ) {
+      //   this.deliveryDetailsForm
+      //     .get('collectionPaymentMethod')
+      //     ?.setValidators([Validators.required]);
+      // } else {
+      //   this.deliveryDetailsForm
+      //     .get('collectionPaymentMethod')
+      //     ?.clearValidators();
+      // }
       this.deliveryDetailsForm
         .get('shippingCostPaymentMethod')
         ?.updateValueAndValidity();
@@ -357,7 +317,6 @@ export class ChangeStatusDialogComponent implements OnInit {
       this.deliveryDetailsForm
         .get('collectionPaymentMethod')
         ?.updateValueAndValidity();
-      // Resetear valores e imagen si se cambia de ENTREGADO a otro estado
       this.deliveryDetailsForm.reset();
       this.imagePreviewUrl = null;
       this.selectedImageFile = null;
@@ -377,8 +336,8 @@ export class ChangeStatusDialogComponent implements OnInit {
       // Si es ENTREGADO, el formulario de detalles de entrega debe ser válido
       // y se requiere una imagen si la política del negocio lo exige.
       // Para este ejemplo, haremos que la imagen sea opcional, pero los selects de pago sí deben ser válidos si los montos son > 0
-      // if (!this.deliveryDetailsForm.valid) return true;
-      if (!this.selectedImageFile) return true; // Si la imagen es obligatoria
+      if (!this.deliveryDetailsForm.valid) return true;
+      if (!this.imagePreviewUrl) return true; // Si la imagen es obligatoria
     }
     return false; // Si pasa todas las validaciones, no está deshabilitado
   }

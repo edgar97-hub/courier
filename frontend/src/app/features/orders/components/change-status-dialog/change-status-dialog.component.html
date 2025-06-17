@@ -96,7 +96,8 @@
               flex-wrap: wrap;
               gap: 15px;
               width: 100% !important;
-              /* border: 1px solid black; */
+              border: 0px solid black;
+              margin-bottom: 10px;
             "
           >
             <button
@@ -129,28 +130,39 @@
 
           <div class="camera-view">
             <video
+              [style.display]="showCamera ? 'block' : 'none'"
               #videoPlayer
               autoplay
               playsinline
               class="video-preview"
             ></video>
-            <button
-              mat-fab
-              extended
-              class="take-photo-button btn-corp-primary"
-              (click)="takePhoto()"
-              [disabled]="!stream"
+
+            <div
+              style="
+                display: flex;
+                gap: 3;
+                justify-content: center;
+                align-items: center;
+              "
             >
-              <mat-icon>camera</mat-icon> Tomar Foto
-            </button>
-            <button
-              mat-icon-button
-              (click)="stopCamera()"
-              class="stop-camera-button"
-              matTooltip="Cerrar cámara"
-            >
-              <mat-icon>videocam_off</mat-icon>
-            </button>
+              <button
+                mat-fab
+                extended
+                class="take-photo-button btn-corp-primary"
+                (click)="takePhoto()"
+                [disabled]="!stream"
+              >
+                <mat-icon>camera</mat-icon> Tomar Foto
+              </button>
+              <button
+                mat-icon-button
+                (click)="stopCamera()"
+                class="stop-camera-button"
+                matTooltip="Cerrar cámara"
+              >
+                <mat-icon>videocam_off</mat-icon>
+              </button>
+            </div>
           </div>
           <!-- Canvas oculto para procesar la foto -->
           <canvas #canvasElement style="display: none"></canvas>

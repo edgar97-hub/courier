@@ -160,7 +160,6 @@
 }
 
 .image-upload-container {
-  
   // border: 1px solid black;
   margin-bottom: 10px;
 
@@ -236,4 +235,17 @@
   padding: 0;
   line-height: normal;
   color: #757575;
+}
+
+.camera-view {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  // border: 1px solid black !important;
+}
+.video-preview {
+  width: 100%;
+  height: 300px;
 }
