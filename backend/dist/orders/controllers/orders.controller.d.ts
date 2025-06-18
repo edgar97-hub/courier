@@ -35,5 +35,5 @@ export declare class OrdersController {
     getOrderPdfA4(orderId: string, req: Request, res: Response): Promise<void>;
     getOrderPdfA4Landscape(orderId: string, req: Request, res: Response): Promise<void>;
     getOrderPdfTicket80mm(orderId: string, req: Request, res: Response): Promise<void>;
-    getDashboardSummary(): Promise<any>;
+    getDashboardSummary(req: any): Promise<any>;
 }

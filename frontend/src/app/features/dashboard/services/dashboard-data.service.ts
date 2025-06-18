@@ -47,27 +47,14 @@ export class DashboardDataService {
   }
 
   getDashboardSummary(): Observable<DashboardSummary> {
-    // console.log('DashboardDataService: Fetching dashboard summary (simulated)');
-    // // const mockSummary: DashboardSummary = {
-    // //   kpis: {
-    // //     totalOrdersToday: 120,
-    // //     ordersInTransit: 25,
-    // //     ordersDeliveredToday: 85,
-    // //     ordersWithIssuesToday: 3,
-    // //   },
-    // //   statusDistribution: [
-    // //     { name: 'Registrado', value: 15 },
-    // //     { name: 'En Preparación', value: 20 },
-    // //     { name: 'En Tránsito', value: 25 },
-    // //     { name: 'Entregado', value: 85 },
-    // //     { name: 'Incidencia', value: 3 },
-    // //     { name: 'Cancelado', value: 5 },
-    // //   ],
-    // // };
-    // // return of(mockSummary).pipe(delay(800));
-
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(() => new Error('Not authenticated to fetch users.'));
+    }
     return this.http
-      .get<DashboardSummary>(this.apiUrl + '/orders/dashboard/data')
+      .get<DashboardSummary>(this.apiUrl + '/orders/dashboard/data', {
+        headers,
+      })
       .pipe(
         tap((data) => console.log('Dashboard summary fetched:', data)),
         catchError(this.handleError)

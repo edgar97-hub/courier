@@ -136,8 +136,8 @@ let OrdersController = class OrdersController {
             }
         }
     }
-    async getDashboardSummary() {
-        return this.ordersService.dashboardOrders();
+    async getDashboardSummary(req) {
+        return this.ordersService.dashboardOrders(req);
     }
 };
 exports.OrdersController = OrdersController;
@@ -300,10 +300,10 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "getOrderPdfTicket80mm", null);
 __decorate([
-    (0, public_decorator_1.PublicAccess)(),
     (0, common_1.Get)('dashboard/data'),
+    __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "getDashboardSummary", null);
 exports.OrdersController = OrdersController = __decorate([

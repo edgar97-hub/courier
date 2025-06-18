@@ -264,9 +264,9 @@ export class OrdersController {
     }
   }
 
-  @PublicAccess()
+  // @PublicAccess()
   @Get('dashboard/data')
-  async getDashboardSummary(): Promise<any> {
-    return this.ordersService.dashboardOrders();
+  async getDashboardSummary(@Request() req): Promise<any> {
+    return this.ordersService.dashboardOrders(req);
   }
 }

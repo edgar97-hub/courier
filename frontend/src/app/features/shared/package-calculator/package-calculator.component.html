@@ -9,11 +9,9 @@
 
   <mat-card-content class="calculator-card-content">
     <form [formGroup]="packageFormGroup">
-      <!-- Mensaje sobre medida estándar -->
       <p class="standard-package-info">{{ standardPackageLabel() }}</p>
 
-      <!-- Selección de Distrito -->
-      <mat-form-field appearance="outline" class="full-width-field">
+      <!-- <mat-form-field appearance="outline" class="full-width-field">
         <mat-label>Distrito de entrega</mat-label>
         <mat-select formControlName="delivery_district_id" required>
           <mat-option
@@ -37,10 +35,57 @@
         >
           Seleccione un distrito.
         </mat-error>
+      </mat-form-field> -->
+
+      <mat-form-field appearance="outline" class="driver-search-field">
+        <mat-label>Buscar y Seleccionar distrito</mat-label>
+        <input
+          type="text"
+          placeholder="Escriba el nombre del distrito..."
+          aria-label="distrito"
+          matInput
+          [formControl]="districSearchCtrl"
+          [matAutocomplete]="autoDistric"
+        />
+        <button
+          *ngIf="districSearchCtrl.value && !isLoadingDistricts"
+          matSuffix
+          mat-icon-button
+          aria-label="Limpiar"
+          (click)="clearDistrictSelection()"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-icon
+          matSuffix
+          *ngIf="!districSearchCtrl.value && !isLoadingDistricts"
+          >person_search</mat-icon
+        >
+        <mat-progress-spinner
+          *ngIf="isLoadingDistricts"
+          matSuffix
+          mode="indeterminate"
+          diameter="20"
+        ></mat-progress-spinner>
+
+        <mat-autocomplete
+          #autoDistric="matAutocomplete"
+          [displayWith]="displayDistricName"
+          (optionSelected)="onDistrictSelected($event)"
+        >
+          @for (driver of filteredDistricts$ | async; track driver.id) {
+          <mat-option [value]="driver">
+            <div class="driver-option">
+              <span>{{ driver.name_and_price }}</span>
+            </div>
+          </mat-option>
+          } @if ((filteredDistricts$ | async)?.length === 0 &&
+          !isLoadingDistricts && districSearchCtrl.value) {
+          <mat-option disabled>No se encontraron resultados.</mat-option>
+          }
+        </mat-autocomplete>
       </mat-form-field>
 
-      <!-- Campos de Dimensiones Personalizadas -->
-      <!-- Este div ya estaba bien con `custom-dimensions-grid` -->
       <div class="custom-dimensions-grid">
         <mat-form-field appearance="outline">
           <mat-label>Largo (cm)</mat-label>
@@ -132,7 +177,6 @@
         </mat-form-field>
       </div>
 
-      <!-- Botón Calcular (movido fuera del grid de dimensiones si es una acción principal) -->
       <div class="calculate-action-container">
         <button
           mat-flat-button
@@ -165,24 +209,12 @@
         </div>
       </div>
 
-      <!-- Información de Medidas Máximas -->
       <div
         *ngIf="maxDimensions$ | async as maxDims"
         class="info-banner max-dimensions-info"
       >
-        <!-- <mat-icon>info_outline</mat-icon> -->
         <span>{{ maxDims.info_text }}</span>
       </div>
-
-      <!-- Advertencia Paquete Estándar (la eliminé porque tu screenshot no la muestra prominentemente y la info de medida estándar ya está arriba) -->
-      <!-- Si la necesitas, puedes re-estilizarla de forma similar al info-banner -->
-
-      <!-- Muestra del Costo de Envío -->
-
-      <!-- <div class="shipping-cost-result" *ngIf="calculationError()">
-        <span class="cost-label error-label">Error:</span>
-        <span class="cost-value error-value">{{ calculationError() }}</span>
-      </div> -->
     </form>
   </mat-card-content>
 </mat-card>

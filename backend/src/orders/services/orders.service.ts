@@ -1027,20 +1027,7 @@ export class OrdersService {
     }
   }
 
-  public async dashboardOrders(): Promise<any> {
-    // interface DashboardOrderStatusSummary {
-    //   status: STATES;
-    //   count: number;
-    //   label: string; // Un label legible para el frontend
-    // }
-    // interface DashboardData {
-    //   statusSummary: DashboardOrderStatusSummary[];
-    //   totalOrders: number;
-    //   // Puedes añadir más agregaciones aquí, ej:
-    //   // totalRevenue: number;
-    //   // averageDeliveryTime: number;
-    // }
-
+  public async dashboardOrders(req): Promise<any> {
     try {
       const todayStart = new Date();
 
@@ -1063,12 +1050,6 @@ export class OrdersService {
 
       const startUTC = fromZonedTime(startOfPeriodInLima, timeZone);
       const endUTC = fromZonedTime(endOfPeriodInLima, timeZone);
-      console.log('startUTC', startUTC);
-      console.log('endUTC', endUTC);
-      // 1. Usa `formatInTimeZone` para hacer todo en un solo paso.
-      // Esta función toma el timestamp UTC, lo convierte a la zona horaria de Perú,
-      // y lo formatea al formato 'yyyy-MM-dd' en esa misma zona horaria.
-      // Es la función perfecta para este caso de uso.
 
       let delivery_date = formatInTimeZone(
         new Date().toISOString(),
@@ -1076,20 +1057,25 @@ export class OrdersService {
         'yyyy-MM-dd',
       );
 
-      // KPIs
+      let user = {};
+      if (req.roleUser === ROLES.COMPANY) {
+        user = { company: { id: req.idUser } };
+      }
+
       const totalOrdersToday = await this.orderRepository.count({
-        where: { createdAt: Between(startUTC, endUTC) },
+        where: { createdAt: Between(startUTC, endUTC), ...user },
       });
 
       const ordersInTransit = await this.orderRepository.count({
-        where: { status: STATES.IN_TRANSIT },
+        where: { status: STATES.IN_TRANSIT, ...user },
       });
 
       const ordersDeliveredToday = await this.orderRepository.count({
         where: {
           status: STATES.DELIVERED,
-          delivery_date: delivery_date,
+          // delivery_date: delivery_date,
           updatedAt: Between(startUTC, endUTC),
+          ...user,
         },
       });
 
@@ -1097,67 +1083,61 @@ export class OrdersService {
         where: {
           status: STATES.REJECTED,
           updatedAt: Between(startUTC, endUTC),
+          ...user,
         },
       });
-      // const cancelledToday = await this.orderRepository.count({
-      //   where: {
-      //     status: STATES.CANCELED,
-      //     updatedAt: Between(todayStart, todayEnd),
-      //   },
+
+      // const relevantStatusesForDistribution: STATES[] = [
+      //   STATES.REGISTERED,
+      //   STATES.IN_WHAREHOUSE,
+      //   STATES.IN_TRANSIT,
+      //   STATES.DELIVERED,
+      //   STATES.REJECTED,
+      //   STATES.CANCELED,
+      // ];
+
+      // const statusCountsResult = await this.orderRepository
+      //   .createQueryBuilder('order')
+      //   .select('order.status', 'status_val')
+      //   .addSelect('COUNT(order.id)', 'count')
+      //   .where('order.status IN (:...statuses)', {
+      //     statuses: relevantStatusesForDistribution,
+      //   })
+      //   .groupBy('order.status')
+      //   .getRawMany<{ status_val: STATES; count: string }>();
+
+      // const statusMap = new Map<STATES, number>();
+      // statusCountsResult.forEach((item) => {
+      //   statusMap.set(item.status_val, parseInt(item.count, 10));
       // });
-      const ordersWithIssuesToday = rejectedToday;
 
-      const relevantStatusesForDistribution: STATES[] = [
-        STATES.REGISTERED,
-        STATES.IN_WHAREHOUSE,
-        STATES.IN_TRANSIT,
-        STATES.DELIVERED,
-        STATES.REJECTED,
-        STATES.CANCELED,
-      ];
-
-      const statusCountsResult = await this.orderRepository
-        .createQueryBuilder('order')
-        .select('order.status', 'status_val')
-        .addSelect('COUNT(order.id)', 'count')
-        .where('order.status IN (:...statuses)', {
-          statuses: relevantStatusesForDistribution,
-        })
-        .groupBy('order.status')
-        .getRawMany<{ status_val: STATES; count: string }>();
-
-      const statusMap = new Map<STATES, number>();
-      statusCountsResult.forEach((item) => {
-        statusMap.set(item.status_val, parseInt(item.count, 10));
-      });
-
-      const statusDistribution: Array<{
-        name: STATES;
-        label: string;
-        value: number;
-      }> = [];
-      relevantStatusesForDistribution.forEach((status) => {
-        let label = status.toString().replace(/_/g, ' ');
-        label = label
-          .toLowerCase()
-          .split(' ')
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ');
-        statusDistribution.push({
-          name: status, // El valor del enum
-          label: label, // El label legible
-          value: statusMap.get(status) || 0,
-        });
-      });
+      // const statusDistribution: Array<{
+      //   name: STATES;
+      //   label: string;
+      //   value: number;
+      // }> = [];
+      // relevantStatusesForDistribution.forEach((status) => {
+      //   let label = status.toString().replace(/_/g, ' ');
+      //   label = label
+      //     .toLowerCase()
+      //     .split(' ')
+      //     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      //     .join(' ');
+      //   statusDistribution.push({
+      //     name: status,
+      //     label: label,
+      //     value: statusMap.get(status) || 0,
+      //   });
+      // });
 
       return {
         kpis: {
           totalOrdersToday,
           ordersInTransit,
           ordersDeliveredToday,
-          ordersWithIssuesToday,
+          rejectedToday,
         },
-        statusDistribution,
+        statusDistribution: [],
       };
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);

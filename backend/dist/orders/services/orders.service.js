@@ -674,7 +674,7 @@ let OrdersService = class OrdersService {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
-    async dashboardOrders() {
+    async dashboardOrders(req) {
         try {
             const todayStart = new Date();
             const timeZone = 'America/Lima';
@@ -686,72 +686,39 @@ let OrdersService = class OrdersService {
             const endOfPeriodInLima = (0, date_fns_1.parse)(endLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
             const startUTC = (0, date_fns_tz_1.fromZonedTime)(startOfPeriodInLima, timeZone);
             const endUTC = (0, date_fns_tz_1.fromZonedTime)(endOfPeriodInLima, timeZone);
-            console.log('startUTC', startUTC);
-            console.log('endUTC', endUTC);
             let delivery_date = (0, date_fns_tz_1.formatInTimeZone)(new Date().toISOString(), timeZone, 'yyyy-MM-dd');
+            let user = {};
+            if (req.roleUser === roles_1.ROLES.COMPANY) {
+                user = { company: { id: req.idUser } };
+            }
             const totalOrdersToday = await this.orderRepository.count({
-                where: { createdAt: (0, typeorm_2.Between)(startUTC, endUTC) },
+                where: { createdAt: (0, typeorm_2.Between)(startUTC, endUTC), ...user },
             });
             const ordersInTransit = await this.orderRepository.count({
-                where: { status: roles_1.STATES.IN_TRANSIT },
+                where: { status: roles_1.STATES.IN_TRANSIT, ...user },
             });
             const ordersDeliveredToday = await this.orderRepository.count({
                 where: {
                     status: roles_1.STATES.DELIVERED,
-                    delivery_date: delivery_date,
                     updatedAt: (0, typeorm_2.Between)(startUTC, endUTC),
+                    ...user,
                 },
             });
             const rejectedToday = await this.orderRepository.count({
                 where: {
                     status: roles_1.STATES.REJECTED,
                     updatedAt: (0, typeorm_2.Between)(startUTC, endUTC),
+                    ...user,
                 },
-            });
-            const ordersWithIssuesToday = rejectedToday;
-            const relevantStatusesForDistribution = [
-                roles_1.STATES.REGISTERED,
-                roles_1.STATES.IN_WHAREHOUSE,
-                roles_1.STATES.IN_TRANSIT,
-                roles_1.STATES.DELIVERED,
-                roles_1.STATES.REJECTED,
-                roles_1.STATES.CANCELED,
-            ];
-            const statusCountsResult = await this.orderRepository
-                .createQueryBuilder('order')
-                .select('order.status', 'status_val')
-                .addSelect('COUNT(order.id)', 'count')
-                .where('order.status IN (:...statuses)', {
-                statuses: relevantStatusesForDistribution,
-            })
-                .groupBy('order.status')
-                .getRawMany();
-            const statusMap = new Map();
-            statusCountsResult.forEach((item) => {
-                statusMap.set(item.status_val, parseInt(item.count, 10));
-            });
-            const statusDistribution = [];
-            relevantStatusesForDistribution.forEach((status) => {
-                let label = status.toString().replace(/_/g, ' ');
-                label = label
-                    .toLowerCase()
-                    .split(' ')
-                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                    .join(' ');
-                statusDistribution.push({
-                    name: status,
-                    label: label,
-                    value: statusMap.get(status) || 0,
-                });
             });
             return {
                 kpis: {
                     totalOrdersToday,
                     ordersInTransit,
                     ordersDeliveredToday,
-                    ordersWithIssuesToday,
+                    rejectedToday,
                 },
-                statusDistribution,
+                statusDistribution: [],
             };
         }
         catch (error) {

@@ -11,23 +11,39 @@ import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
-// MatDialogModule y MatDialog no se usan en este componente, considera quitarlos si no son necesarios
-// import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { SettingsService } from '../../settings/services/settings.service'; // Ajusta la ruta
-import { Observable, Subject } from 'rxjs';
-import { takeUntil, finalize, tap, startWith, map } from 'rxjs/operators';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser'; // <--- IMPORTAR DomSanitizer
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Observable, of, Subject } from 'rxjs';
+import {
+  takeUntil,
+  finalize,
+  tap,
+  startWith,
+  map,
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+  catchError,
+} from 'rxjs/operators';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 import {
   DistrictOption,
   MaxPackageDimensions,
 } from '../../orders/models/order.model';
 import { OrderService } from '../../orders/services/order.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatRadioModule } from '@angular/material/radio'; // O MatCheckboxModule si prefieres checkboxes
+import { MatRadioModule } from '@angular/material/radio';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import {
+  MatAutocompleteModule,
+  MatAutocompleteSelectedEvent,
+} from '@angular/material/autocomplete';
 
 @Component({
   selector: 'app-terms-conditions-display',
@@ -43,15 +59,15 @@ import { MatSelectModule } from '@angular/material/select';
     FormsModule,
     MatInputModule,
     MatSelectModule,
-    // MatDialogModule, // Quitar si no se usa
+    MatAutocompleteModule,
   ],
-  templateUrl: './package-calculator.component.html', // Usaremos un template externo por claridad
-  styleUrls: ['./package-calculator.component.scss'], // Usaremos SCSS externo
+  templateUrl: './package-calculator.component.html',
+  styleUrls: ['./package-calculator.component.scss'],
 })
 export class PackageCalculatorComponent implements OnInit, OnDestroy {
-  packageFormGroup!: FormGroup; // Recibe el FormGroup para 'package_details'
-  deliveryDistrictId: string | number | null = null; // Necesario para el cálculo de costo
-  listaDeDistritos: DistrictOption[] | null = []; // Recibe la lista del padre
+  packageFormGroup!: FormGroup;
+  deliveryDistrictId: string | number | null = null;
+  // listaDeDistritos: DistrictOption[] | null = [];
 
   maxDimensions$: Observable<MaxPackageDimensions>;
   standardPackageLabel: WritableSignal<string> = signal('');
@@ -62,14 +78,49 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
   private orderService = inject(OrderService);
   private destroy$ = new Subject<void>();
   private fb = inject(FormBuilder);
-  deliveryDistricts$: Observable<DistrictOption[]>;
+  // deliveryDistricts$: Observable<DistrictOption[]>;
+
+  districtsCache: DistrictOption[] = [];
+  ditricts$: Observable<DistrictOption[]> = of([]);
+  isLoadingDistricts = false;
+  selectedDistrict: DistrictOption | null = null;
+  districSearchCtrl = new FormControl('');
+  filteredDistricts$: Observable<DistrictOption[]>;
+
   constructor() {
-    this.deliveryDistricts$ = this.orderService.getDeliveryDistricts().pipe(
-      map((allDistricts: DistrictOption[]) => {
-        this.listaDeDistritos = allDistricts;
-        return allDistricts.filter((district) => district.isStandard);
-      })
+    // this.deliveryDistricts$ = this.orderService.getDeliveryDistricts().pipe(
+    //   map((allDistricts: DistrictOption[]) => {
+    //     this.listaDeDistritos = allDistricts;
+    //     return allDistricts.filter((district) => district.isStandard);
+    //   })
+    // );
+
+    this.orderService
+      .getDeliveryDistricts()
+      .pipe(
+        map((allDistricts: DistrictOption[]) => {
+          this.districtsCache = allDistricts;
+        })
+      )
+      .subscribe();
+
+    this.filteredDistricts$ = this.districSearchCtrl.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((searchTerm) => {
+        this.isLoadingDistricts = true;
+        return this.orderService.getDistricts(searchTerm || '').pipe(
+          tap(() => (this.isLoadingDistricts = false)),
+          catchError(() => {
+            this.isLoadingDistricts = false;
+            return of([]);
+          })
+        );
+      }),
+      takeUntil(this.destroy$)
     );
+
     this.packageFormGroup = this.fb.group({
       package_size_type: ['custom', Validators.required],
       package_width_cm: [0, Validators.required],
@@ -171,11 +222,11 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
         peso_cobrado = peso_volumetrico;
       }
 
-      let tarifa = this.listaDeDistritos?.find(
+      let tarifa = this.districtsCache?.find(
         (item) => item.id === customData.delivery_district_id
       );
       if (tarifa) {
-        let tarifasDistrito = this.listaDeDistritos?.filter(
+        let tarifasDistrito = this.districtsCache?.filter(
           (item) => item.name === tarifa?.name
         );
 
@@ -204,8 +255,57 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
     return;
   }
 
+  displayDistricName(driver: DistrictOption | null): string {
+    return driver && driver.name_and_price ? driver.name_and_price : '';
+  }
+  onDistrictSelected(event: MatAutocompleteSelectedEvent): void {
+    this.selectedDistrict = event.option.value as DistrictOption;
+    console.log('district selected:', this.selectedDistrict);
+
+    this.packageFormGroup
+      .get('delivery_district_id')
+      ?.setValue(this.selectedDistrict.id);
+    this.packageFormGroup.markAllAsTouched();
+    console.log(
+      'Order form is invalid:',
+      this.getFormErrors(this.packageFormGroup)
+    );
+    const formValue = this.packageFormGroup.getRawValue();
+    console.log('formValue', formValue);
+  }
+
+  clearDistrictSelection(): void {
+    this.selectedDistrict = null;
+    this.districSearchCtrl.setValue('');
+    this.packageFormGroup.markAllAsTouched();
+    this.packageFormGroup.get('delivery_district_id')?.setValue(null);
+    console.log(
+      'Order form is invalid:',
+      this.getFormErrors(this.packageFormGroup)
+    );
+  }
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private getFormErrors(formGroup: FormGroup): any {
+    const errors: any = {};
+    Object.keys(formGroup.controls).forEach((key) => {
+      const controlErrors = formGroup.get(key)?.errors;
+      if (controlErrors) {
+        errors[key] = controlErrors;
+      }
+      // Si es un FormGroup anidado, recurrir
+      if (formGroup.get(key) instanceof FormGroup) {
+        const nestedErrors = this.getFormErrors(
+          formGroup.get(key) as FormGroup
+        );
+        if (Object.keys(nestedErrors).length > 0) {
+          errors[key] = nestedErrors;
+        }
+      }
+    });
+    return errors;
   }
 }

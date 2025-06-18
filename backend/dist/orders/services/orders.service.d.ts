@@ -62,5 +62,5 @@ export declare class OrdersService {
     assignDriverToOrder(body: any, id: string, idUser: string): Promise<any>;
     rescheduleOrder(body: any, id: string, idUser: string): Promise<any>;
     deleteOrder(id: string): Promise<DeleteResult | undefined>;
-    dashboardOrders(): Promise<any>;
+    dashboardOrders(req: any): Promise<any>;
 }
