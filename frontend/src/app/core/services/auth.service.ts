@@ -99,7 +99,8 @@ export class AuthService {
   getAccessToken(): string | null {
     return localStorage.getItem(ACCESS_TOKEN_KEY);
   }
-refreshToken(): Observable<AuthResponse> {
+
+  refreshToken(): Observable<AuthResponse> {
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
     if (!refreshToken) {
       this.logout();

@@ -125,7 +125,6 @@ export class UserFormComponent implements OnInit {
         console.log('formData', formData);
         this.formSubmit.emit(formData);
       } else {
-        // Es creación
         const { id, ...formDataWithoutId } = this.userForm.value; // Excluir el ID (que sería null)
         this.formSubmit.emit(formDataWithoutId as Omit<User, 'id'>);
       }

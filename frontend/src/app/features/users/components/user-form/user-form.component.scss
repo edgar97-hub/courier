@@ -129,12 +129,8 @@ mat-card-subtitle {
   // pero los checkboxes de Material son un poco más rígidos para el re-styling profundo.
 }
 
-.mat-card-actions.form-actions-sticky {
-  padding: 16px 24px;
-  border-top: 1px solid #e0e0e0;
-  background-color: #fff; // Para que no sea transparente si la tarjeta tiene scroll
-  // Si quieres que los botones estén siempre visibles al hacer scroll dentro de la tarjeta:
-  // position: sticky;
-  // bottom: 0;
-  // z-index: 2;
+.form-actions-sticky {
+  background-color: #fff;
+  display: flex;
+  gap: 10px !important;
 }

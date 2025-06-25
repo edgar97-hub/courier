@@ -312,6 +312,9 @@ let OrdersService = class OrdersService {
                     .where('LOWER(d.name) = LOWER(:name)', {
                     name: orderEntity.delivery_district_name,
                 })
+                    .andWhere('d.isStandard = :standard', {
+                    standard: true,
+                })
                     .getOne();
                 if (!district) {
                     errors.push({
@@ -321,6 +324,7 @@ let OrdersService = class OrdersService {
                     });
                     rowHasErrors = true;
                 }
+                orderEntity.shipping_cost = district?.price;
             }
             else {
                 errors.push({
@@ -335,6 +339,7 @@ let OrdersService = class OrdersService {
             if (!rowHasErrors) {
                 orderEntity.status = roles_1.STATES.REGISTERED;
                 orderEntity.user = { id: idUser };
+                orderEntity.company = { id: idUser };
                 async function generateTrackingCode() {
                     const { customAlphabet } = await Promise.resolve().then(() => require('nanoid'));
                     const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 10);

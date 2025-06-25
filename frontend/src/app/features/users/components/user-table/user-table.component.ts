@@ -43,7 +43,6 @@ export class UserTableComponent implements AfterViewInit, OnChanges {
   @Input() users: User[] | null = [];
   @Input() isLoading: boolean | null = false;
 
-  // Ajusta displayedColumns según tu modelo User
   displayedColumns: string[] = ['code', 'username', 'email', 'rol', 'actions'];
   dataSource: MatTableDataSource<User> = new MatTableDataSource<User>();
 

@@ -36,6 +36,7 @@ import {
   EditShippingCostDialogData,
 } from '../edit-shipping-cost-dialog/edit-shipping-cost-dialog.component'; // <--- IMPORTA EL NUEVO DIÁLOGO
 import { AppStore } from '../../../../app.store';
+import heic2any from 'heic2any'; // Importa la librería
 
 @Component({
   selector: 'app-order-table',
@@ -121,7 +122,9 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
 
-  readonly OrderStatus = OrderStatus; // Para usar la enum en la plantilla
+  readonly OrderStatus = OrderStatus;
+  displayImageUrl: string | null = null;
+  isLoadingImage: boolean = false;
 
   constructor(private http: HttpClient) {}
   ngOnChanges(changes: SimpleChanges): void {
@@ -130,59 +133,58 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     }
   }
 
-  ngAfterViewInit(): void {
-    // El sort y paginator ya están configurados para emitir eventos al padre
-    // No es necesario configurar dataSource.sort y dataSource.paginator aquí
-    // si el padre maneja la paginación y el ordenamiento del lado del servidor.
-    // Si es del lado del cliente, SÍ debes configurarlos:
-    // this.dataSource.sort = this.sort;
-    // this.dataSource.paginator = this.paginator;
-  }
+  ngAfterViewInit(): void {}
 
-  // --- Funciones de ayuda para la lógica de acciones ---
-  canMarkAs(order: Order, targetStatus: OrderStatus): boolean {
-    // Lógica simplificada, necesitarás adaptarla a tu flujo exacto de estados
-    // y roles de usuario (que obtendrías de tu AppStore o AuthService)
-    const currentStatus = order.status;
-    // const userRole = this.appStore.currentUser()?.role;
+  async onDownload(order: Order_): Promise<void> {
+    if (order && order.product_delivery_photo_url) {
+      const imageUrl = order.product_delivery_photo_url;
 
-    // if (userRole === 'MOTORIZADO' || userRole === 'ADMINISTRADOR') {
-    // switch (targetStatus) {
-    //   case OrderStatus.EN_TRANSITO:
-    //     return (
-    //       currentStatus === OrderStatus.LISTO_PARA_RECOGER ||
-    //       currentStatus === OrderStatus.EN_PREPARACION
-    //     );
-    //   case OrderStatus.ENTREGADO:
-    //     return currentStatus === OrderStatus.EN_TRANSITO;
-    //   case OrderStatus.NO_ENTREGADO: // O INCIDENCIA
-    //     return currentStatus === OrderStatus.EN_TRANSITO;
-    //   // Añade más casos según tu lógica
-    //   default:
-    //     return false;
-    // }
-    // }
-    return false;
-  }
-
-  onViewPdf(order: Order_): void {
-    this.http
-      .get(order.product_delivery_photo_url || '', { responseType: 'blob' })
-      .subscribe((blob) => {
+      if (
+        imageUrl.toLowerCase().endsWith('.heic') ||
+        imageUrl.toLowerCase().endsWith('.heif')
+      ) {
+        await this.convertHeicToJpeg(imageUrl);
         const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
+
         link.download = 'filename';
+        link.href = this.displayImageUrl || '';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-      });
+      } else {
+        order.product_delivery_photo_url = imageUrl;
+        this.http
+          .get(order.product_delivery_photo_url || '', { responseType: 'blob' })
+          .subscribe((blob) => {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'filename';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          });
+      }
+    }
   }
 
   onSeguimiento(order: Order): void {
     window.open('/tracking?code=' + order.tracking_code, '_blank');
   }
 
-  onViewOrderDetails(order: Order_): void {
+  async onViewImage(order: Order_): Promise<void> {
+    if (order && order.product_delivery_photo_url) {
+      const imageUrl = order.product_delivery_photo_url;
+
+      if (
+        imageUrl.toLowerCase().endsWith('.heic') ||
+        imageUrl.toLowerCase().endsWith('.heif')
+      ) {
+        await this.convertHeicToJpeg(imageUrl);
+      } else {
+        this.displayImageUrl = imageUrl;
+      }
+    }
+    order.product_delivery_photo_url = this.displayImageUrl || '';
     this.viewDetailsClicked.emit(order);
     this.dialog.open(OrderDetailDialogComponent, {
       width: '750px', // Puedes ajustar esto
@@ -194,6 +196,27 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
       panelClass: 'order-detail-dialog-responsive', // Clase para estilos globales si necesitas
       autoFocus: 'dialog', // Para enfocar el diálogo
     });
+  }
+
+  private async convertHeicToJpeg(heicUrl: string): Promise<void> {
+    this.isLoadingImage = true;
+    try {
+      const response = await fetch(heicUrl);
+      const heicBlob = await response.blob();
+
+      const jpegBlob = (await heic2any({
+        blob: heicBlob,
+        toType: 'image/jpeg',
+        quality: 0.8,
+      })) as Blob;
+
+      this.displayImageUrl = URL.createObjectURL(jpegBlob);
+      console.log('Imagen HEIC convertida y lista para mostrar.');
+    } catch (error) {
+      console.error('Error al convertir la imagen HEIC en el frontend:', error);
+    } finally {
+      this.isLoadingImage = false;
+    }
   }
 
   onReschedule(order: Order): void {
@@ -252,5 +275,12 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   hashavePermissionEdit(): boolean {
     const userRole = this.appStore.currentUser()?.role;
     return userRole === 'ADMINISTRADOR' || userRole === 'RECEPCIONISTA';
+  }
+
+  ngOnDestroy(): void {
+    if (this.displayImageUrl && this.displayImageUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(this.displayImageUrl);
+      console.log('Object URL liberado.');
+    }
   }
 }

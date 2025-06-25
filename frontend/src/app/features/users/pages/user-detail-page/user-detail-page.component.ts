@@ -44,11 +44,11 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
   appStore = inject(AppStore);
 
   userSubject = new BehaviorSubject<User | null>(null);
-  user$ = this.userSubject.asObservable(); // Para pasar al UserCardComponent si no se edita
-  userDataToDisplay: UserFormData | null = null; // Propiedad para almacenar los datos del usuario
+  user$ = this.userSubject.asObservable();
+  userDataToDisplay: UserFormData | null = null;
 
   isLoading = true;
-  isEditMode = false; // Determinará si estamos en modo vista o edición
+  isEditMode = false;
   userId: string | null = null;
   private destroy$ = new Subject<void>();
 
@@ -58,7 +58,7 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
         tap(() => {
           this.isLoading = true;
-          this.userSubject.next(null); // Limpiar usuario anterior
+          this.userSubject.next(null);
         }),
         switchMap((params) => {
           if (this.appStore.currentUser()?.id) {
@@ -80,7 +80,7 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
           this.router.navigate(['/users']);
           return of(null);
         }),
-        filter((user) => user !== null) // Solo continuar si el usuario no es null
+        filter((user) => user !== null)
       )
       .subscribe((user) => {
         this.isLoading = false;

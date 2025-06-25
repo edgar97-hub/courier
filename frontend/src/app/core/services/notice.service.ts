@@ -92,7 +92,7 @@ export class NoticeService {
 
     return of(null); // No hay aviso para esta ruta
   }
-  // NUEVO: Método para obtener el aviso global (post-login o general)
+
   getGlobalLoginNotice(): Observable<RouteNoticeDialogData | null> {
     let noticeData: RouteNoticeDialogData | null = null;
     let global_notice_url =

@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserCompany = exports.UserProfile = exports.UserUpdateDTO = exports.UserDTO = void 0;
+exports.RegistrationUserCompanyDTO = exports.UserProfile = exports.UserCompanyUpdateDTO = exports.UserUpdateDTO = exports.UserDTO = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 const roles_1 = require("../../constants/roles");
@@ -202,6 +202,41 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], UserUpdateDTO.prototype, "name_account_number_owner", void 0);
+class UserCompanyUpdateDTO {
+}
+exports.UserCompanyUpdateDTO = UserCompanyUpdateDTO;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], UserCompanyUpdateDTO.prototype, "business_type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], UserCompanyUpdateDTO.prototype, "business_name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], UserCompanyUpdateDTO.prototype, "business_district", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], UserCompanyUpdateDTO.prototype, "business_address", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], UserCompanyUpdateDTO.prototype, "business_phone_number", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], UserCompanyUpdateDTO.prototype, "business_sector", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], UserCompanyUpdateDTO.prototype, "business_document_type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], UserCompanyUpdateDTO.prototype, "business_email", void 0);
 class UserProfile {
 }
 exports.UserProfile = UserProfile;
@@ -221,33 +256,33 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], UserProfile.prototype, "photo_url", void 0);
-class UserCompany {
+class RegistrationUserCompanyDTO {
 }
-exports.UserCompany = UserCompany;
+exports.RegistrationUserCompanyDTO = RegistrationUserCompanyDTO;
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], UserCompany.prototype, "email", void 0);
+], RegistrationUserCompanyDTO.prototype, "email", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], UserCompany.prototype, "username", void 0);
+], RegistrationUserCompanyDTO.prototype, "username", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], UserCompany.prototype, "owner_phone_number", void 0);
+], RegistrationUserCompanyDTO.prototype, "owner_phone_number", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], UserCompany.prototype, "password", void 0);
+], RegistrationUserCompanyDTO.prototype, "password", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(roles_1.ROLES),
     __metadata("design:type", String)
-], UserCompany.prototype, "role", void 0);
+], RegistrationUserCompanyDTO.prototype, "role", void 0);
 //# sourceMappingURL=user.dto.js.map

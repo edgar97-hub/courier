@@ -19,7 +19,7 @@ import {
   setCSSProperty,
   setInnerHTML
 } from "./chunk-RRSIUYYD.js";
-import "./chunk-WDMUDEB6.js";
+import "./chunk-3OV72XIM.js";
 
 // node_modules/swiper/modules/virtual.mjs
 function Virtual(_ref) {

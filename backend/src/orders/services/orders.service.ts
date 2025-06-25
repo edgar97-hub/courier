@@ -420,14 +420,13 @@ export class OrdersService {
 
       // VALIDAR DISTRITO CONTRA BASE DE DATOS
       if (orderEntity.delivery_district_name) {
-        // const district = await this.districtsRepository.findOne({
-        //   where: { name: orderEntity.delivery_district_name },
-        // }); // Búsqueda case-sensitive
-        // Para búsqueda case-insensitive, depende de tu DB y ORM: ILIKE en PostgreSQL, o transformar a minúsculas en ambos lados
         const district = await this.districtsRepository
           .createQueryBuilder('d')
           .where('LOWER(d.name) = LOWER(:name)', {
             name: orderEntity.delivery_district_name,
+          })
+          .andWhere('d.isStandard = :standard', {
+            standard: true,
           })
           .getOne();
         if (!district) {
@@ -438,6 +437,7 @@ export class OrdersService {
           });
           rowHasErrors = true;
         }
+        orderEntity.shipping_cost = district?.price;
       } else {
         errors.push({
           rowExcel: excelRowNumber,
@@ -459,6 +459,7 @@ export class OrdersService {
       if (!rowHasErrors) {
         orderEntity.status = STATES.REGISTERED;
         orderEntity.user = { id: idUser } as UsersEntity;
+        orderEntity.company = { id: idUser } as UsersEntity;
         async function generateTrackingCode() {
           const { customAlphabet } = await import('nanoid');
           const nanoid = customAlphabet(

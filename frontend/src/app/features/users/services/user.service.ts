@@ -81,6 +81,16 @@ export class UserService {
       .pipe(catchError(this.handleError));
   }
 
+  updateUserCompany(user: User): Observable<User> {
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(() => new Error('Not authenticated to update user.'));
+    }
+    return this.http
+      .put<User>(`${this.apiUrl}/edit-user-company/${user.id}`, user, { headers })
+      .pipe(catchError(this.handleError));
+  }
+
   updateProfile(user: User): Observable<User> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {

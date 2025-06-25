@@ -1,0 +1,23 @@
+<div class="page-container detail-page-container">
+  <div *ngIf="isLoading" class="spinner-container">
+    <mat-progress-spinner
+      mode="indeterminate"
+      diameter="60"
+    ></mat-progress-spinner>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+    <div class="form-wrapper">
+      <app-user-form
+        [userToEdit]="user$ | async"
+        (formSubmit)="handleFormSubmit($event)"
+        (formCancel)="handleFormCancel()"
+        [isLoading]="isLoading"
+      ></app-user-form>
+    </div>
+  </ng-container>
+
+  <p *ngIf="!isLoading && !(user$ | async) && userId" class="not-found-message">
+    User with ID {{ userId }} not found or could not be loaded.
+  </p>
+</div>

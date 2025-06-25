@@ -4,7 +4,8 @@ import * as bcrypt from 'bcrypt';
 import { ErrorManager } from 'src/utils/error.manager';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import {
-  UserCompany,
+  RegistrationUserCompanyDTO,
+  UserCompanyUpdateDTO,
   UserDTO,
   UserProfile,
   UserUpdateDTO,
@@ -31,7 +32,9 @@ export class UsersService {
     }
   }
 
-  public async registerCompany(body: UserCompany): Promise<UsersEntity> {
+  public async registerCompany(
+    body: RegistrationUserCompanyDTO,
+  ): Promise<UsersEntity> {
     try {
       body.password = await bcrypt.hash(
         body.password,
@@ -159,6 +162,24 @@ export class UsersService {
         delete body.password;
       }
 
+      const user: UpdateResult = await this.userRepository.update(id, body);
+      if (user.affected === 0) {
+        throw new ErrorManager({
+          type: 'BAD_REQUEST',
+          message: 'No se pudo actualizar',
+        });
+      }
+      return user;
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  public async updateUserCompany(
+    body: UserCompanyUpdateDTO,
+    id: string,
+  ): Promise<UpdateResult | undefined> {
+    try {
       const user: UpdateResult = await this.userRepository.update(id, body);
       if (user.affected === 0) {
         throw new ErrorManager({

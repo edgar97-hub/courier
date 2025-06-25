@@ -145,6 +145,21 @@ let UsersService = class UsersService {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
+    async updateUserCompany(body, id) {
+        try {
+            const user = await this.userRepository.update(id, body);
+            if (user.affected === 0) {
+                throw new error_manager_1.ErrorManager({
+                    type: 'BAD_REQUEST',
+                    message: 'No se pudo actualizar',
+                });
+            }
+            return user;
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
     async updateProfile(body, id) {
         try {
             if (body.password) {

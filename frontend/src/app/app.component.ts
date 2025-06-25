@@ -5,14 +5,14 @@ import { NgIf } from '@angular/common';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { AuthService } from './core/services/auth.service';
 import { Subject } from 'rxjs';
-import { NoticeService } from './core/services/notice.service'; // Ajusta ruta
+import { NoticeService } from './core/services/notice.service';
 import {
   RouteSpecificNoticeDialogComponent,
   RouteNoticeDialogData,
-} from './features/shared/components/route-specific-notice-dialog/route-specific-notice-dialog.component'; // Ajusta ruta
+} from './features/shared/components/route-specific-notice-dialog/route-specific-notice-dialog.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { filter, takeUntil, switchMap, tap } from 'rxjs/operators';
-import { NavigationEnd, Event as RouterEvent } from '@angular/router'; // Event para tipar
+import { NavigationEnd, Event as RouterEvent } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -75,7 +75,7 @@ export class AppComponent implements OnInit {
         setTimeout(() => (this.justShowedRouteNotice = false), 500);
       });
 
-    let previousIsAuthenticated = this.appStore.isAuthenticated(); // Valor inicial
+    let previousIsAuthenticated = this.appStore.isAuthenticated();
 
     effect(
       () => {

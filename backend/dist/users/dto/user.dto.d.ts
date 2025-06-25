@@ -45,13 +45,23 @@ export declare class UserUpdateDTO {
     owner_bank_account: string;
     name_account_number_owner: string;
 }
+export declare class UserCompanyUpdateDTO {
+    business_type: string;
+    business_name: string;
+    business_district: string;
+    business_address: string;
+    business_phone_number: string;
+    business_sector: string;
+    business_document_type: string;
+    business_email: string;
+}
 export declare class UserProfile {
     email: string;
     username: string;
     password?: string;
     photo_url: string;
 }
-export declare class UserCompany {
+export declare class RegistrationUserCompanyDTO {
     email: string;
     username: string;
     owner_phone_number: string;

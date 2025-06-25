@@ -62,10 +62,6 @@ export class UserEditPageComponent implements OnInit, OnDestroy {
           }
           this.isLoading = false;
 
-          // this.snackBar.open('User ID not provided in URL.', 'Close', {
-          //   duration: 3000,
-          // });
-          // this.router.navigate(['/users/create']);
           return of(null);
         }),
         catchError((err) => {
@@ -122,23 +118,13 @@ export class UserEditPageComponent implements OnInit, OnDestroy {
         .subscribe({
           next: (savedUser) => {
             this.isLoading = false;
-            this.userSubject.next(savedUser); // Actualiza el usuario mostrado si es necesario
-            // this.snackBar.open(
-            //   `User "${savedUser.username}" updated successfully!`,
-            //   'OK',
-            //   {
-            //     duration: 3000,
-            //     verticalPosition: 'top',
-            //     panelClass: ['success-snackbar'],
-            //   }
-            // );
+            this.userSubject.next(savedUser);
             this.snackBar.open(`guardado exitosamente!`, 'OK', {
               duration: 3000,
               verticalPosition: 'top',
               panelClass: ['success-snackbar'],
             });
             this.isEditMode = false;
-            // this.router.navigate(['/users']);
             window.location.href = '/users';
           },
           error: (err) => {
@@ -169,15 +155,6 @@ export class UserEditPageComponent implements OnInit, OnDestroy {
           next: (savedUser) => {
             this.isLoading = false;
             this.userSubject.next(savedUser); // Actualiza el usuario mostrado si es necesario
-            // this.snackBar.open(
-            //   `User "${savedUser.username}" updated successfully!`,
-            //   'OK',
-            //   {
-            //     duration: 3000,
-            //     verticalPosition: 'top',
-            //     panelClass: ['success-snackbar'],
-            //   }
-            // );
             this.snackBar.open(`¡Actualizado exitosamente!`, 'OK', {
               duration: 3000,
               verticalPosition: 'top',
@@ -185,7 +162,6 @@ export class UserEditPageComponent implements OnInit, OnDestroy {
             });
             this.isEditMode = false;
             window.location.href = '/users';
-            // this.router.navigate(['/users']);
           },
           error: (err) => {
             this.isLoading = false;

@@ -52,6 +52,9 @@ let UsersController = class UsersController {
     async updateUser(id, body) {
         return await this.usersService.updateUser(body, id);
     }
+    async updateUserCompany(id, body) {
+        return await this.usersService.updateUserCompany(body, id);
+    }
     async updateProfile(id, body) {
         return await this.usersService.updateProfile(body, id);
     }
@@ -73,7 +76,7 @@ __decorate([
     (0, common_1.Post)('register-company'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [user_dto_1.UserCompany]),
+    __metadata("design:paramtypes", [user_dto_1.RegistrationUserCompanyDTO]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "registerCompany", null);
 __decorate([
@@ -125,6 +128,17 @@ __decorate([
     __metadata("design:paramtypes", [String, user_dto_1.UserUpdateDTO]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateUser", null);
+__decorate([
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+    }),
+    (0, common_1.Put)('edit-user-company/:id'),
+    __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, user_dto_1.UserCompanyUpdateDTO]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "updateUserCompany", null);
 __decorate([
     (0, swagger_1.ApiParam)({
         name: 'id',

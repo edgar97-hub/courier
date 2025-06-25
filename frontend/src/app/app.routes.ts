@@ -116,7 +116,6 @@ export const routes: Routes = [
       },
     ],
   },
-
   {
     path: 'tracking',
     loadChildren: () =>

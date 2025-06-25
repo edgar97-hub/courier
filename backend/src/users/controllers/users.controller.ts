@@ -18,7 +18,8 @@ import { AccessLevelGuard } from 'src/auth/guards/access-level.guard';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import {
-  UserCompany,
+  RegistrationUserCompanyDTO,
+  UserCompanyUpdateDTO,
   UserDTO,
   UserProfile,
   UserUpdateDTO,
@@ -41,7 +42,7 @@ export class UsersController {
 
   @PublicAccess()
   @Post('register-company')
-  public async registerCompany(@Body() body: UserCompany) {
+  public async registerCompany(@Body() body: RegistrationUserCompanyDTO) {
     return await this.usersService.registerCompany(body);
   }
 
@@ -94,6 +95,17 @@ export class UsersController {
     @Body() body: UserUpdateDTO,
   ) {
     return await this.usersService.updateUser(body, id);
+  }
+
+  @ApiParam({
+    name: 'id',
+  })
+  @Put('edit-user-company/:id')
+  public async updateUserCompany(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() body: UserCompanyUpdateDTO,
+  ) {
+    return await this.usersService.updateUserCompany(body, id);
   }
 
   @ApiParam({

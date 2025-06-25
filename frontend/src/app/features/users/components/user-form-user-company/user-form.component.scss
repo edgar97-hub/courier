@@ -1,0 +1,137 @@
+// Importa el tema de Material si no está globalmente o para acceder a las variables de tema
+@use "@angular/material" as mat;
+// @use "path/to/your/global/theme-definition" as theme;
+
+.multi-section-form-card {
+  max-width: 900px; // Ancho máximo para el formulario
+  margin: 24px auto; // Centrado y con margen
+  padding: 16px 24px; // Padding interno
+  border-radius: 8px; // Bordes redondeados
+}
+
+mat-card-title {
+  font-size: 1.5em; // Título de la tarjeta
+  margin-bottom: 4px;
+}
+mat-card-subtitle {
+  margin-bottom: 24px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.form-section {
+  margin-bottom: 32px;
+  gap: 10px !important;
+  // border: 1px solid black;
+
+  .section-title {
+    font-size: 1.2em;
+    font-weight: 500;
+    // color: #3f51b5; // Color primario de Material (o tu color de tema)
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px; // Espacio entre icono y texto
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 8px;
+  }
+}
+
+.section-divider {
+  margin-top: 16px;
+  margin-bottom: 32px;
+}
+
+// Grid para organizar campos (responsive)
+.form-grid {
+  display: grid;
+  gap: 20px; // Espacio entre campos
+  // Por defecto, 1 columna en móviles, se ajustará con media queries
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+
+  &.two-columns {
+    // Clase específica para forzar 2 columnas si hay espacio
+    @media (min-width: 600px) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+}
+
+.form-field.small-field {
+  // Reducir el tamaño de la fuente del input y la etiqueta como base
+  ::ng-deep .mat-mdc-form-field-input-control,
+  ::ng-deep .mat-mdc-floating-label,
+  ::ng-deep .mat-mdc-select-value {
+    // Incluye select si también los quieres pequeños
+    font-size: 0.875em; // Un poco más pequeño (ej. 14px si la base es 16px)
+  }
+
+  // Contenedor del input y la etiqueta (infix)
+  ::ng-deep .mat-mdc-form-field-infix {
+    padding-top: 0.8em !important; // Aumenta un poco este padding para dar espacio a la etiqueta
+    padding-bottom: 0.6em !important;
+    min-height: auto !important; // Permite que la altura se ajuste más al contenido
+  }
+
+  // Wrapper general del campo de texto (outline)
+  ::ng-deep .mat-mdc-text-field-wrapper.mdc-text-field--outlined {
+    // Intenta no forzar una altura fija aquí a menos que sea necesario,
+    // deja que el padding del infix y la fuente la determinen.
+    // Si necesitas una altura fija, asegúrate de que sea coherente con los paddings y la etiqueta.
+    // height: 40px !important; // Ejemplo de altura fija, ajusta si es necesario
+  }
+
+  // Etiqueta flotante
+  ::ng-deep .mat-mdc-floating-label.mdc-floating-label--float-above {
+    // Ajusta cuánto sube la etiqueta. Un valor más negativo la sube más.
+    // La escala también afecta su tamaño percibido y posición.
+    transform: translateY(-1.85em) scale(0.75) !important; // Prueba ajustar estos valores
+    // Podrías necesitar también ajustar `top` si translateY no es suficiente
+    // top: -0.5em !important; // Ejemplo, puede no ser necesario
+  }
+
+  // Específicamente para el input dentro del outline
+  ::ng-deep .mat-mdc-input-element {
+    padding-top: 0; // Asegura que no haya padding extra en el propio input que lo empuje hacia abajo
+    margin-top: 0; // Lo mismo para el margen
+  }
+
+  // Para el asterisco de 'required' en la etiqueta, si se desalinea
+  ::ng-deep .mat-mdc-form-field-required-marker {
+    // Podría necesitar un ajuste vertical si la etiqueta se movió mucho
+    // transform: translateY(-algun valor si es necesario);
+  }
+}
+.full-width-mobile {
+  // En pantallas pequeñas, ocupa todo el ancho disponible dentro del grid si es necesario
+  // (el grid ya hace esto por defecto si es el único item en una "fila" implícita)
+}
+
+.form-field-group {
+  display: flex;
+  flex-direction: column; // O 'row' si quieres los checkboxes en línea
+  gap: 8px;
+  margin-top: 8px; // Espacio antes del grupo de checkboxes
+
+  .checkbox-group-label {
+    font-size: 0.9em;
+    color: rgba(0, 0, 0, 0.6);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+}
+
+.small-checkbox {
+  // Reducir el tamaño visual del checkbox y su etiqueta
+  ::ng-deep .mdc-form-field {
+    font-size: 0.9em;
+  }
+}
+
+.form-actions-sticky {
+  // padding: 16px 24px;
+  // border-top: 1px solid #e0e0e0;
+  background-color: #fff;
+  display: flex;
+  gap: 10px !important;
+  // border: 1px solid black;
+}

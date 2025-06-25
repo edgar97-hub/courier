@@ -20,7 +20,7 @@
           matTooltip="Descargar la plantilla en formato .xlsx (.xls también soportado)"
         >
           <mat-icon>cloud_download</mat-icon> Descargar Plantilla
-      </a>
+        </a>
       </li>
       <li>
         Completa la plantilla con la información de tus pedidos. Asegúrate de
@@ -32,8 +32,8 @@
           <li>
             <strong>TIPO DE ENVIO:</strong> Indica la modalidad del envío.
             Valores comunes: <code>CONTRAENTREGA</code>,
-            <code>SOLO-ENTREGA-NO-COBRAR</code>. *(Esta columna podría tener una
-            lista desplegable en la plantilla).*
+            <code>SOLO ENTREGAR</code>,<code>CAMBIO</code>,<code>RECOJO</code>.
+            *(Esta columna podría tener una lista desplegable en la plantilla).*
           </li>
           <li>
             <strong>NOMBRE DEL DESTINATARIO:</strong> Nombre completo de la
@@ -68,8 +68,7 @@
             <strong>MONTO A COBRAR:</strong> Si el envío es
             <code>CONTRAENTREGA</code>, indica aquí el monto exacto que el
             courier debe cobrar al destinatario. Si es
-            <code>SOLO-ENTREGA-NO-COBRAR</code>, este campo puede dejarse vacío
-            o con 0.
+            <code>SOLO ENTREGAR</code>, este campo puede dejarse vacío o con 0.
           </li>
           <li>
             <strong>FORMA DE PAGO:</strong> Indica cómo se realizará el pago del
@@ -97,6 +96,7 @@
         class="btn-corp-primary"
         (click)="fileInput.click()"
         [disabled]="isUploading"
+        style="height: 60px"
       >
         <mat-icon>attach_file</mat-icon> Seleccionar Archivo Excel
       </button>
@@ -154,8 +154,13 @@
             </div> -->
 
   <mat-dialog-actions align="end">
-    <button mat-stroked-button class="btn-corp-secondary" (click)="closeDialog()" [disabled]="isUploading">
-      Cancelar
+    <button
+      mat-stroked-button
+      class="btn-corp-secondary"
+      (click)="closeDialog()"
+      [disabled]="isUploading"
+    >
+      Cerrar
     </button>
     <button
       mat-flat-button
