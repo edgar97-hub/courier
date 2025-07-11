@@ -41,6 +41,11 @@ import {
 import { User } from '../../../../shared/models/user';
 import { RescheduleOrderDialogComponent } from '../reschedule-order-dialog/reschedule-order-dialog.component';
 import { AppStore } from '../../../../app.store';
+import {
+  EditAmountCollectDialogComponent,
+  EditAmountCollectDialogResult,
+  EditAmountCollectDialogData,
+} from '../edit-amount-collect-dialog/edit-amount-collect-dialog-component'; // <--- IMPORTA EL NUEVO DIÁLOGO
 
 @Component({
   selector: 'app-order-table',
@@ -96,7 +101,11 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
 
   @Output() viewPdfClicked = new EventEmitter<Order_>();
   @Output() viewDetailsClicked = new EventEmitter<Order_>();
-  // ... otros outputs para acciones específicas si las manejas en el componente padre
+  @Output() amountToCollectChanged = new EventEmitter<{
+    orderId: string | number;
+    newAmount: number;
+    observation: string;
+  }>();
 
   displayedColumns: string[] = [
     'code',
@@ -145,30 +154,30 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   }
 
   // --- Funciones de ayuda para la lógica de acciones ---
-  canMarkAs(order: Order, targetStatus: OrderStatus): boolean {
-    // Lógica simplificada, necesitarás adaptarla a tu flujo exacto de estados
-    // y roles de usuario (que obtendrías de tu AppStore o AuthService)
-    const currentStatus = order.status;
-    // const userRole = this.appStore.currentUser()?.role;
+  // canMarkAs(order: Order, targetStatus: OrderStatus): boolean {
+  //   // Lógica simplificada, necesitarás adaptarla a tu flujo exacto de estados
+  //   // y roles de usuario (que obtendrías de tu AppStore o AuthService)
+  //   const currentStatus = order.status;
+  //   // const userRole = this.appStore.currentUser()?.role;
 
-    // if (userRole === 'MOTORIZADO' || userRole === 'ADMINISTRADOR') {
-    // switch (targetStatus) {
-    //   case OrderStatus.EN_TRANSITO:
-    //     return (
-    //       currentStatus === OrderStatus.LISTO_PARA_RECOGER ||
-    //       currentStatus === OrderStatus.EN_PREPARACION
-    //     );
-    //   case OrderStatus.ENTREGADO:
-    //     return currentStatus === OrderStatus.EN_TRANSITO;
-    //   case OrderStatus.NO_ENTREGADO: // O INCIDENCIA
-    //     return currentStatus === OrderStatus.EN_TRANSITO;
-    //   // Añade más casos según tu lógica
-    //   default:
-    //     return false;
-    // }
-    // }
-    return false;
-  }
+  //   // if (userRole === 'MOTORIZADO' || userRole === 'ADMINISTRADOR') {
+  //   // switch (targetStatus) {
+  //   //   case OrderStatus.EN_TRANSITO:
+  //   //     return (
+  //   //       currentStatus === OrderStatus.LISTO_PARA_RECOGER ||
+  //   //       currentStatus === OrderStatus.EN_PREPARACION
+  //   //     );
+  //   //   case OrderStatus.ENTREGADO:
+  //   //     return currentStatus === OrderStatus.EN_TRANSITO;
+  //   //   case OrderStatus.NO_ENTREGADO: // O INCIDENCIA
+  //   //     return currentStatus === OrderStatus.EN_TRANSITO;
+  //   //   // Añade más casos según tu lógica
+  //   //   default:
+  //   //     return false;
+  //   // }
+  //   // }
+  //   return false;
+  // }
 
   onViewPdfA4(order: Order_): void {
     const pdfUrl = environment.apiUrl + '/orders/' + order.id + '/pdf-a4';
@@ -192,18 +201,10 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   }
 
   changeOrderStatus(order: Order, newStatus: OrderStatus): void {
-    // Podrías mostrar un diálogo de confirmación aquí
-    // const dialogRef = this.dialog.open(ConfirmDialogComponent, { data: { title: 'Confirmar Cambio', message: `¿Marcar pedido ${order.code} como ${newStatus}?`}});
-    // dialogRef.afterClosed().subscribe(result => {
-    //   if (result) {
     console.log(`Changing status of order ${order.code} to ${newStatus}`);
     this.statusChanged.emit({ orderId: order.id, newStatus });
-    // Lógica para llamar al servicio y manejar la respuesta estaría en el componente padre
-    // Ejemplo: this.orderService.updateStatus(order.id, newStatus).subscribe(...);
-    // this.snackBar.open(`Pedido ${order.code} marcado como ${newStatus}`, 'OK', { duration: 2500 });
-    //   }
-    // });
   }
+
   getStatusClass(status: string | undefined | null): string {
     if (!status) {
       return 'status-desconocido'; // O una clase por defecto
@@ -259,11 +260,8 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
         }
         console.log('updatePayload', updatePayload);
         this.statusChanged.emit({
-          orderId: order.id, // o order.code si usas el código como identificador
-          // newStatus: result.newStatus,
-          // details: result.reason ? { reason: result.reason } : undefined,
-          // reason: result.reason
-          ...updatePayload, // Esparce el payload aquí
+          orderId: order.id,
+          ...updatePayload,
         });
       } else {
         console.log('Cambio de estado cancelado o sin selección.');
@@ -312,20 +310,20 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     }
   }
 
-  // Abrir modal para reportar incidencia
-  openReportIssueModal(order: Order): void {
-    console.log(`Open modal to report issue for order: ${order.code}`);
-    // const dialogRef = this.dialog.open(ReportIssueDialogComponent, {
-    //   width: '450px',
-    //   data: { order: order }
-    // });
+  // // Abrir modal para reportar incidencia
+  // openReportIssueModal(order: Order): void {
+  //   console.log(`Open modal to report issue for order: ${order.code}`);
+  //   // const dialogRef = this.dialog.open(ReportIssueDialogComponent, {
+  //   //   width: '450px',
+  //   //   data: { order: order }
+  //   // });
 
-    // dialogRef.afterClosed().subscribe(result => {
-    //   if (result && result.issueDescription) {
-    //     this.statusChanged.emit({ orderId: order.id, newStatus: OrderStatus.INCIDENCIA, details: result });
-    //   }
-    // });
-  }
+  //   // dialogRef.afterClosed().subscribe(result => {
+  //   //   if (result && result.issueDescription) {
+  //   //     this.statusChanged.emit({ orderId: order.id, newStatus: OrderStatus.INCIDENCIA, details: result });
+  //   //   }
+  //   // });
+  // }
 
   onViewOrderDetails(order: Order_): void {
     this.viewDetailsClicked.emit(order);
@@ -436,5 +434,46 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   isAdminOrReceptionist(): boolean {
     const userRole = this.appStore.currentUser()?.role;
     return userRole === 'ADMINISTRADOR' || userRole === 'RECEPCIONISTA';
+  }
+
+  openEditAmountToCollectModal(order: Order_): void {
+    if (!order.id) {
+      console.error(
+        'Order ID or current monto a cabrar is missing for editing.',
+        order
+      );
+      this.snackBar.open(
+        'No se puede modificar el monto a cabrar: faltan datos del pedido.',
+        'Cerrar',
+        { duration: 3000 }
+      );
+      return;
+    }
+
+    const dialogRef = this.dialog.open<
+      EditAmountCollectDialogComponent,
+      EditAmountCollectDialogData,
+      EditAmountCollectDialogResult
+    >(EditAmountCollectDialogComponent, {
+      width: '500px',
+      data: {
+        orderCode: order.code,
+        currentAmount: order.amount_to_collect_at_delivery,
+      },
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        console.log('Edit Shipping Cost Dialog result:', result);
+        this.amountToCollectChanged.emit({
+          orderId: order.id,
+          newAmount: result.newAmount,
+          observation: result.observation,
+        });
+      } else {
+        console.log('Edición de costo de envío cancelada.');
+      }
+    });
   }
 }

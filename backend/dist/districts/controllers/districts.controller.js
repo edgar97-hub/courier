@@ -15,11 +15,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DistrictsController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
-const access_level_guard_1 = require("../../auth/guards/access-level.guard");
+const admin_decorator_1 = require("../../auth/decorators/admin.decorator");
 const auth_guard_1 = require("../../auth/guards/auth.guard");
 const roles_guard_1 = require("../../auth/guards/roles.guard");
 const district_dto_1 = require("../dto/district.dto");
 const districts_service_1 = require("../services/districts.service");
+const roles_decorator_1 = require("../../auth/decorators/roles.decorator");
 let DistrictsController = class DistrictsController {
     constructor(usersService) {
         this.usersService = usersService;
@@ -58,6 +59,8 @@ let DistrictsController = class DistrictsController {
 };
 exports.DistrictsController = DistrictsController;
 __decorate([
+    (0, admin_decorator_1.AdminAccess)(),
+    (0, roles_decorator_1.Roles)('RECEPTIONIST'),
     (0, common_1.Post)('register'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -65,6 +68,8 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DistrictsController.prototype, "registerUser", null);
 __decorate([
+    (0, admin_decorator_1.AdminAccess)(),
+    (0, roles_decorator_1.Roles)('RECEPTIONIST'),
     (0, common_1.Get)('all'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
@@ -109,6 +114,8 @@ __decorate([
     (0, swagger_1.ApiParam)({
         name: 'id',
     }),
+    (0, admin_decorator_1.AdminAccess)(),
+    (0, roles_decorator_1.Roles)('RECEPTIONIST'),
     (0, common_1.Put)('edit/:id'),
     __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
     __param(1, (0, common_1.Body)()),
@@ -120,6 +127,8 @@ __decorate([
     (0, swagger_1.ApiParam)({
         name: 'id',
     }),
+    (0, admin_decorator_1.AdminAccess)(),
+    (0, roles_decorator_1.Roles)('RECEPTIONIST'),
     (0, common_1.Delete)('delete/:id'),
     __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
     __metadata("design:type", Function),
@@ -129,7 +138,7 @@ __decorate([
 exports.DistrictsController = DistrictsController = __decorate([
     (0, swagger_1.ApiTags)('Districts'),
     (0, common_1.Controller)('districts'),
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard, roles_guard_1.RolesGuard, access_level_guard_1.AccessLevelGuard),
+    (0, common_1.UseGuards)(auth_guard_1.AuthGuard, roles_guard_1.RolesGuard),
     __metadata("design:paramtypes", [districts_service_1.DistrictsService])
 ], DistrictsController);
 //# sourceMappingURL=districts.controller.js.map

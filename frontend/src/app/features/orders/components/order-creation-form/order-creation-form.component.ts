@@ -375,42 +375,6 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       ],
       observations: [''],
     });
-
-    // this.orderForm = this.fb.group({
-    //   shipment_type: [this.shipmentTypes[0], Validators.required],
-    //   recipient_name: ['wwwwwwwww', Validators.required],
-    //   recipient_phone: [
-    //     951954633,
-    //     [Validators.required, Validators.pattern('^[0-9]{9}$')],
-    //   ],
-    //   company_id: ['wwwwwwwww', Validators.required],
-    //   delivery_district_id: ['wwwwwwwww', Validators.required],
-    //   delivery_address: [
-    //     'wwwwwwwww',
-    //     [Validators.required, Validators.minLength(6)],
-    //   ],
-    //   delivery_coordinates: ['wwwwwwwww'],
-    //   delivery_date: ['2025-06-03', Validators.required], // String en formato YYYY-MM-DD
-    //   package_details: this.fb.group({
-    //     // Sub-FormGroup para PackageCalculatorComponent
-    //     package_size_type: ['standard', Validators.required],
-    //     package_width_cm: [{ value: 0, disabled: true }],
-    //     package_length_cm: [{ value: 0, disabled: true }],
-    //     package_height_cm: [{ value: 0, disabled: true }],
-    //     package_weight_kg: [{ value: 0, disabled: true }],
-    //   }),
-    //   // shipping_cost se maneja con la señal `calculatedShippingCost`
-    //   item_description: ['wwwwwwwww', Validators.required],
-    //   amount_to_collect_at_delivery: [
-    //     0,
-    //     [Validators.required, Validators.min(0)],
-    //   ],
-    //   payment_method_for_collection: [
-    //     this.paymentMethodsForCollection[0],
-    //     Validators.required,
-    //   ],
-    //   observations: [''],
-    // });
   }
 
   // Método llamado por el evento del PackageCalculatorComponent
@@ -466,9 +430,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
 
     const defaultShipmentType =
       this.orderForm.get('shipment_type')?.value || this.shipmentTypes[0];
-    const defaultPaymentMethod =
-      this.orderForm.get('payment_method_for_collection')?.value ||
-      this.paymentMethodsForCollection[0];
+    const defaultPaymentMethod = this.paymentMethodsForCollection[0];
     // const todayString = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
 
     this.orderForm.reset({

@@ -155,7 +155,7 @@ export class AuthService {
   logout(): void {
     console.log('AuthService: logout - Clearing session and signals...');
     this.clearUserSessionAndSignals();
-    this.router.navigate(['/login']); // AuthService puede manejar la redirección base del logout
+    this.router.navigate(['/login']);
   }
 
   private handleError(error: HttpErrorResponse) {

@@ -154,7 +154,6 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
       };
 
       const allFilteredOrders = await this.getAllFilteredOrdersForExport();
-      console.log('allFilteredOrders', allFilteredOrders);
       if (allFilteredOrders && allFilteredOrders.length > 0) {
         const dataForSheet: ExcelOrderRow[] = allFilteredOrders.map(
           (order: any) => {
@@ -192,7 +191,6 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
             let costo_servicio_pagado_cliente_al_courier =
               order.efectivo_courier_costo_servicio ||
               order.pago_directo_courier_costo_servicio;
-            // if (order.amount_to_collect_at_delivery !== 0) {
             /**
              * si el pago del monto a cobrar se hizo por pago directo,
              * ya no es considerado para el calculo en columna diferencia
@@ -218,12 +216,6 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
               diferencia = monto_a_cobrar - order.shipping_cost;
             }
             order.diferencia = diferencia;
-            // } else {
-            //   diferencia =
-            //     order.amount_to_collect_at_delivery -
-            //     (order.shipping_cost || 0);
-            //   order.diferencia = diferencia;
-            // }
 
             totals.amount_to_collect_at_delivery +=
               Number(order.amount_to_collect_at_delivery) || 0;
@@ -395,7 +387,6 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
             order.efectivo_courier_costo_servicio ||
             order.pago_directo_courier_costo_servicio;
 
-          // if (order.amount_to_collect_at_delivery !== 0) {
           /**
            * si el pago del monto a cobrar se hizo por pago directo,
            * ya no es considerado para el calculo en columna diferencia
@@ -422,14 +413,6 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
           }
 
           order.diferencia = diferencia;
-          // } else {
-          //   if (costo_servicio_pagado_cliente_al_courier === 0) {
-          //     diferencia =
-          //       order.amount_to_collect_at_delivery -
-          //       (order.shipping_cost || 0);
-          //   }
-          //   order.diferencia = diferencia;
-          // }
         });
         this.orders = response.items;
         this.totalOrderCount = response.total_count || 0;
@@ -437,11 +420,11 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  handleStatusChanged(event: {
+  handlePaymentTypeChanged(event: {
     orderId: number | string;
-    newStatus: OrderStatus;
-    reason?: string | null;
-    proofOfDeliveryImageUrl?: string | null;
+    // newStatus: OrderStatus;
+    // reason?: string | null;
+    // proofOfDeliveryImageUrl?: string | null;
     shippingCostPaymentMethod?: string | null;
     collectionPaymentMethod?: string | null;
   }): void {
@@ -449,18 +432,18 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
     console.log('OrderListPage: Status change requested', event);
 
     this.orderService
-      .updateOrderStatus(
+      .updateOrderPaymentType(
         event.orderId,
-        event.newStatus,
-        event.reason || '',
-        event.proofOfDeliveryImageUrl,
+        // event.newStatus,
+        // event.reason || '',
+        // event.proofOfDeliveryImageUrl,
         event.shippingCostPaymentMethod,
         event.collectionPaymentMethod
       )
       .subscribe({
         next: (updatedOrder) => {
           this.snackBar.open(
-            `Estado del pedido ${updatedOrder.code} actualizado a ${event.newStatus}.`,
+            `Pedido actualizado.`,
             'OK',
             { duration: 3000, panelClass: ['success-snackbar'] }
           );
@@ -480,74 +463,74 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  handleMotorizedChanged(event: {
-    orderId: number | string;
-    motorizedId: string;
-  }): void {
-    this.orderService
-      .assignDriverToOrder(event.orderId, event.motorizedId)
-      .subscribe({
-        next: (updatedOrder) => {
-          this.snackBar.open(
-            `Motorizado ${updatedOrder.assigned_driver?.username} asignado al pedido ${updatedOrder.code}.`,
-            'OK',
-            {
-              duration: 3000,
-              panelClass: ['success-snackbar'],
-            }
-          );
-          this.fetchOrders();
-        },
-        error: (err) => {
-          this.snackBar.open(
-            `Error al asignar motorizado: ${err.message || 'Intente de nuevo'}`,
-            'Cerrar',
-            {
-              duration: 5000,
-              panelClass: ['error-snackbar'],
-            }
-          );
-        },
-      });
-  }
+  // handleMotorizedChanged(event: {
+  //   orderId: number | string;
+  //   motorizedId: string;
+  // }): void {
+  //   this.orderService
+  //     .assignDriverToOrder(event.orderId, event.motorizedId)
+  //     .subscribe({
+  //       next: (updatedOrder) => {
+  //         this.snackBar.open(
+  //           `Motorizado ${updatedOrder.assigned_driver?.username} asignado al pedido ${updatedOrder.code}.`,
+  //           'OK',
+  //           {
+  //             duration: 3000,
+  //             panelClass: ['success-snackbar'],
+  //           }
+  //         );
+  //         this.fetchOrders();
+  //       },
+  //       error: (err) => {
+  //         this.snackBar.open(
+  //           `Error al asignar motorizado: ${err.message || 'Intente de nuevo'}`,
+  //           'Cerrar',
+  //           {
+  //             duration: 5000,
+  //             panelClass: ['error-snackbar'],
+  //           }
+  //         );
+  //       },
+  //     });
+  // }
 
-  handleRescheduleChanged(event: {
-    orderId: number | string;
-    newDate: Date;
-    reason?: string;
-  }): void {
-    const isoString = new Date(event.newDate).toISOString();
-    this.orderService
-      .rescheduleOrder(event.orderId, isoString || '', event.reason)
-      .subscribe({
-        next: (updatedOrder) => {
-          this.snackBar.open(
-            `Pedido ${
-              updatedOrder.code
-            } reprogramado para ${this.datePipe.transform(
-              updatedOrder.delivery_date,
-              'dd/MM/yyyy'
-            )}.`,
-            'OK',
-            {
-              duration: 3500,
-              panelClass: ['success-snackbar'],
-            }
-          );
-          this.fetchOrders();
-        },
-        error: (err) => {
-          this.snackBar.open(
-            `Error al reprogramar pedido: ${err.message || 'Intente de nuevo'}`,
-            'Cerrar',
-            {
-              duration: 5000,
-              panelClass: ['error-snackbar'],
-            }
-          );
-        },
-      });
-  }
+  // handleRescheduleChanged(event: {
+  //   orderId: number | string;
+  //   newDate: Date;
+  //   reason?: string;
+  // }): void {
+  //   const isoString = new Date(event.newDate).toISOString();
+  //   this.orderService
+  //     .rescheduleOrder(event.orderId, isoString || '', event.reason)
+  //     .subscribe({
+  //       next: (updatedOrder) => {
+  //         this.snackBar.open(
+  //           `Pedido ${
+  //             updatedOrder.code
+  //           } reprogramado para ${this.datePipe.transform(
+  //             updatedOrder.delivery_date,
+  //             'dd/MM/yyyy'
+  //           )}.`,
+  //           'OK',
+  //           {
+  //             duration: 3500,
+  //             panelClass: ['success-snackbar'],
+  //           }
+  //         );
+  //         this.fetchOrders();
+  //       },
+  //       error: (err) => {
+  //         this.snackBar.open(
+  //           `Error al reprogramar pedido: ${err.message || 'Intente de nuevo'}`,
+  //           'Cerrar',
+  //           {
+  //             duration: 5000,
+  //             panelClass: ['error-snackbar'],
+  //           }
+  //         );
+  //       },
+  //     });
+  // }
 
   onFiltersChanged(filters: OrderFilterCriteria): void {
     console.log('OrderListPage: Filters changed', filters);

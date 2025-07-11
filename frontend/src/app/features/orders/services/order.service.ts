@@ -492,6 +492,34 @@ export class OrderService {
       .pipe(catchError(this.handleError));
   }
 
+  updateOrderAmountToCollect(
+    orderId: number | string,
+    newValue: number,
+    notes?: string
+  ): Observable<any> {
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(() => new Error('Not authenticated to fetch users.'));
+    }
+
+    let payload: any = {
+      orderId,
+      newValue,
+      notes,
+      action: 'MODIFICACIÓN DEL MONTO A COBRAR',
+    };
+
+    return this.http
+      .post<{ success: boolean; message: string; batchId?: string }>(
+        `${this.apiUrlOrders}/update-order-status`,
+        {
+          payload,
+        },
+        { headers }
+      )
+      .pipe(catchError(this.handleError));
+  }
+
   private handleImportError(error: HttpErrorResponse): Observable<never> {
     console.error('API Import Error:', error);
     let result: ImportResult = {

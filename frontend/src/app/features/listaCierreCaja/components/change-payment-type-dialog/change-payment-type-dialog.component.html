@@ -1,0 +1,84 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>Modificar los tipos de pago</h2>
+    <span class="order-code-chip"
+      >Pedido N°: {{ data.order.code || data.order.id }}</span
+    >
+  </div>
+
+  <form [formGroup]="deliveryDetailsForm" (ngSubmit)="onConfirm()">
+    <mat-dialog-content class="dialog-content">
+      <div class="delivery-details-section">
+        <mat-divider></mat-divider>
+
+        <mat-form-field
+          appearance="outline"
+          class="full-width payment-method-field"
+        >
+          <mat-label
+            >Método Pago Cobro (S/
+            {{
+              data.order.amount_to_collect_at_delivery | number : "1.2-2"
+            }})</mat-label
+          >
+          <mat-select
+            formControlName="collectionPaymentMethod"
+            name="collectionPaymentMethod"
+          >
+            <mat-option
+              *ngFor="let method of paymentMethods"
+              [value]="method"
+              >{{ method }}</mat-option
+            >
+          </mat-select>
+          @if (formSubmitted && cpmCtrl?.hasError('required')) {
+          <mat-error
+            >Seleccione método de pago para el monto a cobrar.</mat-error
+          >
+          }
+        </mat-form-field>
+
+        <mat-form-field
+          appearance="outline"
+          class="full-width payment-method-field"
+        >
+          <mat-label
+            >Método Pago Costo Envío (S/
+            {{ data.order.shipping_cost | number : "1.2-2" }})</mat-label
+          >
+          <mat-select
+            formControlName="shippingCostPaymentMethod"
+            name="shippingCostPaymentMethod"
+          >
+            <mat-option
+              *ngFor="let method of paymentMethodsCostoEnvio"
+              [value]="method"
+              >{{ method }}</mat-option
+            >
+          </mat-select>
+          @if (formSubmitted && scpmCtrl?.hasError('required')) {
+          <mat-error>Seleccione método de pago para costo de envío.</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end" class="dialog-actions">
+      <button
+        mat-stroked-button
+        type="button"
+        class="cancel-button btn-corp-secondary"
+        (click)="onCancel()"
+      >
+        Cancelar
+      </button>
+      <button
+        mat-flat-button
+        type="submit"
+        class="confirm-button btn-corp-primary"
+      >
+        {{ "Confirmar Cambio" }}
+      </button>
+    </mat-dialog-actions>
+  </form>
+</div>

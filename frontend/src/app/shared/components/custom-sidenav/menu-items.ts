@@ -28,7 +28,7 @@ export const menuItems: MenuItem[] = [
   {
     icon: 'list_alt',
     label: 'Detalles del negocio',
-    route: 'users/detail/',
+    route: 'users/detail',
     roles: ['EMPRESA'],
   },
   {
@@ -66,12 +66,11 @@ export const menuItems: MenuItem[] = [
     label: 'Pedidos',
     route: 'orders',
     roles: ['ADMINISTRADOR', 'EMPRESA', 'RECEPCIONISTA'],
-
     subItems: [
       {
         icon: 'add',
         label: 'Nuevo Pedido',
-        route: '/orders/create',
+        route: 'orders/create',
       },
       {
         icon: 'shopping_basket',

@@ -157,6 +157,14 @@
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #orderActionMenu="matMenu" xPosition="before">
+          <button
+            mat-menu-item
+            (click)="openEditAmountToCollectModal(order)"
+            *ngIf="isAdminOrReceptionist()"
+          >
+            <mat-icon>attach_money</mat-icon>
+            <span>Modificar el monto a cobrar</span>
+          </button>
           <button mat-menu-item (click)="onViewOrderDetails(order)">
             <mat-icon>visibility</mat-icon>
             <span>Ver Detalles Completos</span>
@@ -212,17 +220,6 @@
       *matHeaderRowDef="displayedColumns; sticky: true"
       class="header-row-sticky"
     ></tr>
-    <!-- <tr
-      mat-row
-      *matRowDef="let row; columns: displayedColumns"
-      class="data-row"
-      (click)="onViewOrderDetails(row)"
-      [ngClass]="{ 'highlight-row': false }"
-    ></tr> 
-    
-      [ngClass]="{ 'highlight-row': false }"
-    
-    -->
     <tr
       mat-row
       *matRowDef="let row; columns: displayedColumns"
@@ -232,7 +229,6 @@
         'row-cancelled-strikethrough': row.status === OrderStatus.ANULADO
       }"
     ></tr>
-    <!-- (click) para seleccionar fila opcional -->
 
     <tr class="mat-row" *matNoDataRow>
       <td [attr.colspan]="displayedColumns.length" class="no-data-cell">

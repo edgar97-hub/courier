@@ -104,6 +104,40 @@ export class OrdersService {
         await this.orderLogRepository.save(log);
       }
 
+      if (body.payload.action === 'MODIFICACIÓN DEL MONTO A COBRAR') {
+        await this.orderRepository.update(body.payload.orderId, {
+          amount_to_collect_at_delivery: body.payload.newValue,
+          // observation_shipping_cost_modification: body.payload.notes,
+        });
+        log = await this.orderLogRepository.create({
+          order: { id: body.payload.orderId },
+          performedBy: { id: idUser },
+          action: body.payload.action,
+          previousValue: oldOrder.amount_to_collect_at_delivery?.toString(),
+          newValue: body.payload.newValue,
+          notes: body.payload.notes,
+        });
+        await this.orderLogRepository.save(log);
+      }
+
+      if (body.payload.action === 'MODIFICACION DE TIPOS DE PAGO') {
+        await this.orderRepository.update(body.payload.orderId, {
+          payment_method_for_collection:
+            body.payload.payment_method_for_collection,
+          payment_method_for_shipping_cost:
+            body.payload.payment_method_for_shipping_cost,
+        });
+        // log = await this.orderLogRepository.create({
+        //   order: { id: body.payload.orderId },
+        //   performedBy: { id: idUser },
+        //   action: body.payload.action,
+        //   previousValue: oldOrder.amount_to_collect_at_delivery?.toString(),
+        //   newValue: body.payload.newValue,
+        //   notes: body.payload.notes,
+        // });
+        // await this.orderLogRepository.save(log);
+      }
+
       const updatedOrder = await this.orderRepository.findOne({
         where: { id: body.payload.orderId },
         relations: ['assigned_driver'],

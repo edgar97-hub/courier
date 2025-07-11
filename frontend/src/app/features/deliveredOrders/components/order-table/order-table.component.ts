@@ -272,7 +272,8 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
       }
     });
   }
-  hashavePermissionEdit(): boolean {
+  
+  hasPermissionEdit(): boolean {
     const userRole = this.appStore.currentUser()?.role;
     return userRole === 'ADMINISTRADOR' || userRole === 'RECEPCIONISTA';
   }

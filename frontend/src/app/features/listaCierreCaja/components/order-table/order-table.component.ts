@@ -30,6 +30,11 @@ import { Order, Order_, OrderStatus } from '../../models/order.model'; // Asegú
 import { OrderDetailDialogComponent } from '../order-detail-dialog/order-detail-dialog.component'; //
 import { environment } from '../../../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
+import {
+  ChangePayementTypeDialogResult,
+  ChangePaymentTypeDialogComponent,
+} from '../change-payment-type-dialog/change-payment-type-dialog.component';
+import { AppStore } from '../../../../app.store';
 
 @Component({
   selector: 'app-order-table',
@@ -53,6 +58,8 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./order-table.component.scss'],
 })
 export class OrderTableComponent implements AfterViewInit, OnChanges {
+  appStore = inject(AppStore);
+
   @Input() orders: Order_[] | null = [];
   @Input() isLoading: boolean = false;
   @Input() totalCount: number = 0;
@@ -83,6 +90,15 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   @Output() viewPdfClicked = new EventEmitter<Order_>();
   @Output() viewDetailsClicked = new EventEmitter<Order_>();
 
+  @Output() paymentTypeChanged = new EventEmitter<{
+    orderId: number | string;
+    // newStatus: OrderStatus;
+    // reason?: string | null;
+    // proofOfDeliveryImageUrl?: string | null;
+    shippingCostPaymentMethod?: string | null;
+    collectionPaymentMethod?: string | null;
+  }>();
+
   displayedColumns: string[] = [
     'code',
     'company',
@@ -108,7 +124,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     // 'recipient_phone', // Puedes decidir cuáles mostrar por defecto
     // 'createdAt',
     // 'shipping_cost',
-    // 'actions',
+    'actions',
   ];
   dataSource: MatTableDataSource<Order_> = new MatTableDataSource<Order_>();
 
@@ -263,5 +279,62 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     // const userRole = this.appStore.currentUser()?.role;
     // return userRole === 'ADMINISTRADOR';
     return true; // Placeholder
+  }
+
+  hasPermissionEdit(): boolean {
+    const userRole = this.appStore.currentUser()?.role;
+    return userRole === 'ADMINISTRADOR' || userRole === 'RECEPCIONISTA';
+  }
+
+  openChangePaymentTypeModal(order: Order_): void {
+    if (!order.id) {
+      this.snackBar.open('No es posible modificar', 'OK', { duration: 3000 });
+      return;
+    }
+
+    const dialogRef = this.dialog.open<
+      ChangePaymentTypeDialogComponent,
+      { order: Order_; availableStatuses: OrderStatus[] },
+      ChangePayementTypeDialogResult
+    >(ChangePaymentTypeDialogComponent, {
+      width: '450px',
+      data: { order: order, availableStatuses: [] },
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      console.log('result', result);
+      if (!result) return;
+      // if (result && result.newStatus) {
+      console.log('Dialog result:', result);
+      const updatePayload: any = {
+        // newStatus: result.newStatus,
+        // reason: result.reason || '',
+        // proofOfDeliveryImageUrl: '',
+        shippingCostPaymentMethod: '',
+        collectionPaymentMethod: '',
+      };
+      // if (result.newStatus === OrderStatus.ENTREGADO) {
+      // if (result.proofOfDeliveryImageUrl) {
+      //   updatePayload.proofOfDeliveryImageUrl =
+      //     result.proofOfDeliveryImageUrl;
+      // }
+      // if (result?.shippingCostPaymentMethod) {
+      updatePayload.shippingCostPaymentMethod =
+        result.shippingCostPaymentMethod;
+      // }
+      // if (result?.collectionPaymentMethod) {
+      updatePayload.collectionPaymentMethod = result.collectionPaymentMethod;
+      // }
+      // }
+      console.log('updatePayload', updatePayload);
+      this.paymentTypeChanged.emit({
+        orderId: order.id,
+        ...updatePayload,
+      });
+      // } else {
+      //   console.log('Cambio de estado cancelado o sin selección.');
+      // }
+    });
   }
 }

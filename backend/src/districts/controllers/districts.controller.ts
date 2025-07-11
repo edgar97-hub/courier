@@ -24,24 +24,29 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { DistrictDTO, DistrictUpdateDTO } from '../dto/district.dto';
 import { DistrictsService } from '../services/districts.service';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { ROLES } from 'src/constants/roles';
 
 @ApiTags('Districts')
 @Controller('districts')
-@UseGuards(AuthGuard, RolesGuard, AccessLevelGuard)
+@UseGuards(AuthGuard, RolesGuard)
 export class DistrictsController {
   constructor(private readonly usersService: DistrictsService) {}
 
-  // @AdminAccess()
+  @AdminAccess()
+  @Roles('RECEPTIONIST')
   @Post('register')
   public async registerUser(@Body() body: DistrictDTO) {
     return await this.usersService.createUser(body);
   }
 
-  // @AdminAccess()
+  @AdminAccess()
+  @Roles('RECEPTIONIST')
   @Get('all')
   public async findAllUsers() {
     return await this.usersService.findUsers();
   }
+
   @Get('')
   public async findAllOrders(
     @Query('page_number') pageNumber = 0,
@@ -78,7 +83,6 @@ export class DistrictsController {
     status: 400,
     description: 'No se encontro resultado',
   })
-  // @AdminAccess()
   @Get(':id')
   public async findUserById(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.usersService.findUserById(id);
@@ -87,7 +91,8 @@ export class DistrictsController {
   @ApiParam({
     name: 'id',
   })
-  // @AdminAccess()
+  @AdminAccess()
+  @Roles('RECEPTIONIST')
   @Put('edit/:id')
   public async updateUser(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -99,7 +104,8 @@ export class DistrictsController {
   @ApiParam({
     name: 'id',
   })
-  // @AdminAccess()
+  @AdminAccess()
+  @Roles('RECEPTIONIST')
   @Delete('delete/:id')
   public async deleteUser(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.usersService.deleteUser(id);

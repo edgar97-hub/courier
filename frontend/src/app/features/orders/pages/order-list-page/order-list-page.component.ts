@@ -343,6 +343,43 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
       });
   }
 
+  handleAmountToCollectChanged(event: {
+    orderId: string | number;
+    newAmount: number;
+    observation: string;
+  }): void {
+    this.isLoading = true;
+    console.log('OrderListPage: Shipping cost change requested', event);
+
+    this.orderService
+      .updateOrderAmountToCollect(
+        event.orderId,
+        event.newAmount,
+        event.observation
+      )
+      .subscribe({
+        next: (updatedOrder) => {
+          this.snackBar.open(
+            `Monto a cobrar del pedido ${updatedOrder.code} actualizado.`,
+            'OK',
+            { duration: 3000, panelClass: ['success-snackbar'] }
+          );
+          this.fetchOrders();
+        },
+        error: (err) => {
+          this.snackBar.open(
+            `Error al actualizar costo: ${err.message || 'Intente de nuevo'}`,
+            'Cerrar',
+            { duration: 5000, panelClass: ['error-snackbar'] }
+          );
+          this.isLoading = false;
+        },
+        complete: () => {
+          this.isLoading = false;
+        },
+      });
+  }
+
   onFiltersChanged(filters: OrderFilterCriteria): void {
     console.log('OrderListPage: Filters changed', filters);
     this.filterCriteriaSubject.next(filters);

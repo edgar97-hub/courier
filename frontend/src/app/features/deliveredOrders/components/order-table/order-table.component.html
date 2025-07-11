@@ -163,7 +163,7 @@
           <button
             mat-menu-item
             (click)="openEditShippingCostModal(order)"
-            *ngIf="hashavePermissionEdit()"
+            *ngIf="hasPermissionEdit()"
           >
             <mat-icon>price_change</mat-icon>
             <span>Modificar Costo Envío</span>

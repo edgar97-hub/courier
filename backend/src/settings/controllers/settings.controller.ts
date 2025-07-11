@@ -30,6 +30,7 @@ import { SettingsService } from '../services/settings.service';
 import { PublicAccess } from 'src/auth/decorators/public.decorator';
 import { Response } from 'express';
 import { PromotionalSetItem } from '../entities/settings.entity';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @ApiTags('Settings')
 @Controller('settings')
@@ -37,13 +38,13 @@ import { PromotionalSetItem } from '../entities/settings.entity';
 export class SettingsController {
   constructor(private readonly usersService: SettingsService) {}
 
-  // @AdminAccess()
+  @AdminAccess()
+  @Roles('RECEPTIONIST')
   @Post('register')
   public async registerUser(@Body() body: SettingDTO) {
     return await this.usersService.createUser(body);
   }
 
-  // @AdminAccess()
   @Get('all')
   public async findAllUsers() {
     return await this.usersService.findUsers();
@@ -64,7 +65,6 @@ export class SettingsController {
     status: 400,
     description: 'No se encontro resultado',
   })
-  // @AdminAccess()
   @Get(':id')
   public async findUserById(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.usersService.findUserById(id);
@@ -73,7 +73,8 @@ export class SettingsController {
   @ApiParam({
     name: 'id',
   })
-  // @AdminAccess()
+  @AdminAccess()
+  @Roles('RECEPTIONIST')
   @Put('edit/:id')
   public async updateUser(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -85,7 +86,8 @@ export class SettingsController {
   @ApiParam({
     name: 'id',
   })
-  // @AdminAccess()
+  @AdminAccess()
+  @Roles('RECEPTIONIST')
   @Delete('delete/:id')
   public async deleteUser(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.usersService.deleteUser(id);

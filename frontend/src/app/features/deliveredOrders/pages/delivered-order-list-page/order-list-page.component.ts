@@ -204,7 +204,6 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
         console.log('Orders fetched:', response);
       });
   }
-  
 
   handleShippingCostChanged(event: {
     orderId: string | number;
@@ -241,35 +240,6 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
           this.isLoading = false;
         },
       });
-
-    // --- SIMULACIÓN --- (Reemplaza con la llamada real a tu API)
-    // setTimeout(() => {
-    //   this.snackBar.open(
-    //     `Costo de envío para pedido ${
-    //       event.orderId
-    //     } actualizado a S/${event.newShippingCost.toFixed(2)}. Motivo: ${
-    //       event.observation
-    //     } (Simulado)`,
-    //     'OK',
-    //     { duration: 4000, panelClass: ['success-snackbar'] }
-    //   );
-    //   // Simular la recarga de datos o la actualización local
-    //   const orderIndex = this.orders.findIndex((o) => o.id === event.orderId);
-    //   if (orderIndex > -1) {
-    //     const updatedOrders = [...this.orders];
-    //     updatedOrders[orderIndex] = {
-    //       ...updatedOrders[orderIndex],
-    //       shipping_cost: event.newShippingCost,
-    //       // Aquí deberías tener un lugar donde guardar/mostrar la 'observation_shipping_cost_modification'
-    //       // si tu modelo Order lo soporta directamente, o si se guarda en un log.
-    //       // Por ejemplo, si 'observations' es un campo general:
-    //       // observations: `${updatedOrders[orderIndex].observations || ''}\nMOD_COST_ENVIO: ${event.observation}`.trim()
-    //     };
-    //     this.orders = updatedOrders;
-    //   }
-    //   this.isLoading = false;
-    // }, 1000);
-    // --- FIN SIMULACIÓN ---
   }
 
   onFiltersChanged(filters: OrderFilterCriteria): void {

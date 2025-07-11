@@ -26,6 +26,7 @@ import {
 } from '../dto/user.dto';
 import { UsersService } from '../services/users.service';
 import { PublicAccess } from 'src/auth/decorators/public.decorator';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @ApiTags('Users')
 @Controller('users')
@@ -33,7 +34,8 @@ import { PublicAccess } from 'src/auth/decorators/public.decorator';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // @PublicAccess()
+  @AdminAccess()
+  @Roles('RECEPTIONIST')
   @AdminAccess()
   @Post('register')
   public async registerUser(@Body() body: UserDTO) {
@@ -46,7 +48,6 @@ export class UsersController {
     return await this.usersService.registerCompany(body);
   }
 
-  // @AdminAccess()
   @Get('all')
   public async findAllUsers() {
     return await this.usersService.findUsers();
@@ -89,6 +90,8 @@ export class UsersController {
   @ApiParam({
     name: 'id',
   })
+  @AdminAccess()
+  @Roles('RECEPTIONIST')
   @Put('edit/:id')
   public async updateUser(
     @Param('id', new ParseUUIDPipe()) id: string,
