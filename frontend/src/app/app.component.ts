@@ -62,7 +62,13 @@ export class AppComponent implements OnInit {
         switchMap((event: NavigationEnd) => {
           const currentRoute = event.urlAfterRedirects.split('?')[0];
           const currentUser = this.appStore.currentUser();
-          if (!this.hasAccess(currentUser?.role || '', currentRoute)) {
+          const cleanedTargetRoute = this.cleanRoute(currentRoute);
+
+          if (
+            cleanedTargetRoute !== 'register' &&
+            cleanedTargetRoute !== 'tracking' &&
+            !this.hasAccess(currentUser?.role || '', currentRoute)
+          ) {
             this.router.navigate(['login']);
           }
           return this.noticeService.getNoticeForRoute(currentRoute);
@@ -155,7 +161,16 @@ export class AppComponent implements OnInit {
       this.currentNoticeDialogRef = null;
     });
   }
-
+  cleanRoute(route: string): string {
+    let cleaned = route;
+    if (cleaned.startsWith('/')) {
+      cleaned = cleaned.substring(1);
+    }
+    if (cleaned.endsWith('/')) {
+      cleaned = cleaned.substring(0, cleaned.length - 1);
+    }
+    return cleaned;
+  }
   /**
    * Valida si un usuario tiene acceso a una ruta específica basándose en su rol.
    *
@@ -164,23 +179,12 @@ export class AppComponent implements OnInit {
    * @returns {boolean} - Retorna true si el usuario tiene acceso, false en caso contrario.
    */
   hasAccess(userRole: string, targetRoute: string) {
-    function cleanRoute(route: string): string {
-      let cleaned = route;
-      if (cleaned.startsWith('/')) {
-        cleaned = cleaned.substring(1);
-      }
-      if (cleaned.endsWith('/')) {
-        cleaned = cleaned.substring(0, cleaned.length - 1);
-      }
-      return cleaned;
-    }
-
-    const cleanedTargetRoute = cleanRoute(targetRoute);
+    const cleanedTargetRoute = this.cleanRoute(targetRoute);
 
     for (const item of baseMenuItems) {
       // Validar ítems principales
       if (item.roles && item.roles.includes(userRole)) {
-        const cleanedItemRoute = item.route ? cleanRoute(item.route) : '';
+        const cleanedItemRoute = item.route ? this.cleanRoute(item.route) : '';
 
         // Coincidencia exacta de la ruta
         if (cleanedItemRoute === cleanedTargetRoute) {
@@ -209,7 +213,7 @@ export class AppComponent implements OnInit {
           // Un sub-item es accesible si el padre tiene el rol.
           if (item.roles && item.roles.includes(userRole)) {
             const cleanedSubItemRoute = subItem.route
-              ? cleanRoute(subItem.route)
+              ? this.cleanRoute(subItem.route)
               : '';
 
             // Coincidencia exacta de la ruta

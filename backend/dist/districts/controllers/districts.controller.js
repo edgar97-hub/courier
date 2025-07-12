@@ -68,8 +68,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DistrictsController.prototype, "registerUser", null);
 __decorate([
-    (0, admin_decorator_1.AdminAccess)(),
-    (0, roles_decorator_1.Roles)('RECEPTIONIST'),
     (0, common_1.Get)('all'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),

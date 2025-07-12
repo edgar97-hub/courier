@@ -40,8 +40,6 @@ export class DistrictsController {
     return await this.usersService.createUser(body);
   }
 
-  @AdminAccess()
-  @Roles('RECEPTIONIST')
   @Get('all')
   public async findAllUsers() {
     return await this.usersService.findUsers();
