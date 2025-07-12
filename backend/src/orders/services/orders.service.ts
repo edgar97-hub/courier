@@ -613,6 +613,7 @@ export class OrdersService {
       errors: errors,
     };
   }
+
   public async findOrders(
     {
       pageNumber = 0,
@@ -713,7 +714,13 @@ export class OrdersService {
       }
 
       if (status) {
-        query.andWhere('order.status = :status', { status });
+        let states = [status];
+        if (status === STATES.DELIVERED) {
+          states.push(STATES.REJECTED);
+        }
+        query.andWhere('order.status IN (:...states)', {
+          states: states,
+        });
       }
 
       if (search_term) {
@@ -857,7 +864,13 @@ export class OrdersService {
       }
 
       if (status) {
-        query.andWhere('order.status = :status', { status });
+        let states = [status];
+        if (status === STATES.DELIVERED) {
+          states.push(STATES.REJECTED);
+        }
+        query.andWhere('order.status IN (:...states)', {
+          states: states,
+        });
       }
 
       if (search_term) {

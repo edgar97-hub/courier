@@ -152,6 +152,7 @@ export class OrderService {
         'CANCELADO',
         'RECHAZADO EN PUNTO',
         'REPROGRAMADO',
+        'ANULADO',
       ]);
       observer.complete();
     });

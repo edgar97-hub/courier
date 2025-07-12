@@ -9,17 +9,9 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const path_1 = require("path");
 const bodyParser = require("body-parser");
-const fs = require("fs");
-const path = require("path");
 async function bootstrap() {
     const certPath = '/etc/letsencrypt/live/app.jncourier.com/';
-    const httpsOptions = {
-        key: fs.readFileSync(path.resolve(certPath, 'privkey.pem')),
-        cert: fs.readFileSync(path.resolve(certPath, 'fullchain.pem')),
-    };
-    const app = await core_1.NestFactory.create(app_module_1.AppModule, {
-        httpsOptions,
-    });
+    const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.use(morgan('dev'));
     app.useGlobalPipes(new common_1.ValidationPipe({
         transformOptions: {

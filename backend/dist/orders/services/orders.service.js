@@ -469,7 +469,13 @@ let OrdersService = class OrdersService {
                 query.andWhere('company.id = :idUser', { idUser });
             }
             if (status) {
-                query.andWhere('order.status = :status', { status });
+                let states = [status];
+                if (status === roles_1.STATES.DELIVERED) {
+                    states.push(roles_1.STATES.REJECTED);
+                }
+                query.andWhere('order.status IN (:...states)', {
+                    states: states,
+                });
             }
             if (search_term) {
                 const term = `%${search_term}%`;
@@ -532,7 +538,13 @@ let OrdersService = class OrdersService {
                 query.andWhere('company.id = :idUser', { idUser });
             }
             if (status) {
-                query.andWhere('order.status = :status', { status });
+                let states = [status];
+                if (status === roles_1.STATES.DELIVERED) {
+                    states.push(roles_1.STATES.REJECTED);
+                }
+                query.andWhere('order.status IN (:...states)', {
+                    states: states,
+                });
             }
             if (search_term) {
                 const term = `%${search_term}%`;
