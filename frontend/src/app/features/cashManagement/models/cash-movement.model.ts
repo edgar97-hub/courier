@@ -33,10 +33,20 @@ export interface CashMovementQuery {
   [key: string]: any; // Add index signature
 }
 
-export interface CashMovementSummary {
-  totalIncome: number;
-  totalExpense: number;
+export interface PaymentMethodSummary {
+  income: number;
+  expense: number;
   balance: number;
+}
+
+export interface DetailedCashMovementSummary {
+  Efectivo: PaymentMethodSummary;
+  'Yape/Transferencia BCP': PaymentMethodSummary;
+  'Plin/Transferencia INTERBANK': PaymentMethodSummary;
+  POS: PaymentMethodSummary;
+  totalCashIncome: number;
+  totalCashExpense: number;
+  totalCashBalance: number;
 }
 
 export interface CashMovementPaginatedResponse {

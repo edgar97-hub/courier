@@ -50,7 +50,12 @@ export class CashMovementFormComponent implements OnInit {
   movementForm: FormGroup;
   isLoading: boolean = false;
   minDate: Date | null = null;
-
+  paymentMethods: string[] = [
+    'Efectivo',
+    'Yape/Transferencia BCP',
+    'Plin/Transferencia INTERBANK',
+    'POS',
+  ];
   constructor(
     private fb: FormBuilder,
     public dialogRef: MatDialogRef<CashMovementFormComponent>,

@@ -52,8 +52,9 @@
     <mat-form-field appearance="outline" class="cash-movement-form-field">
       <mat-label>Forma de Pago</mat-label>
       <mat-select formControlName="paymentsMethod">
-        <mat-option value="Efectivo">Efectivo</mat-option>
-        <mat-option value="Otros">Otros</mat-option>
+        <mat-option *ngFor="let type of paymentMethods" [value]="type">{{
+          type
+        }}</mat-option>
       </mat-select>
       <mat-error
         *ngIf="movementForm.get('paymentsMethod')?.hasError('required')"

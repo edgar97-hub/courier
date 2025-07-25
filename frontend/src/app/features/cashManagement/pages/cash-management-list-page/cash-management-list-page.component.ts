@@ -20,7 +20,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { CashManagementService } from '../../services/cash-management.service';
 import {
   CashMovement,
-  CashMovementSummary,
+  DetailedCashMovementSummary,
   CashMovementQuery,
 } from '../../models/cash-movement.model';
 import { Observable, of } from 'rxjs';
@@ -71,12 +71,20 @@ export class CashManagementListPageComponent implements OnInit {
     'user',
     'actions',
   ];
+
+  summaryDisplayedColumns: string[] = ['type', 'Efectivo', 'Yape/Transferencia BCP', 'Plin/Transferencia INTERBANK', 'POS'];
   cashMovements$: Observable<CashMovement[]> = of([]);
-  summary$: Observable<CashMovementSummary> = of({
-    totalIncome: 0,
-    totalExpense: 0,
-    balance: 0,
+  summary$: Observable<DetailedCashMovementSummary> = of({
+    Efectivo: { income: 0, expense: 0, balance: 0 },
+    'Yape/Transferencia BCP': { income: 0, expense: 0, balance: 0 },
+    'Plin/Transferencia INTERBANK': { income: 0, expense: 0, balance: 0 },
+    POS: { income: 0, expense: 0, balance: 0 },
+    totalCashIncome: 0,
+    totalCashExpense: 0,
+    totalCashBalance: 0,
   });
+
+  summaryTableDataSource: any[] = [];
 
   totalItems: number = 0;
   pageSize: number = 10;
@@ -134,7 +142,52 @@ export class CashManagementListPageComponent implements OnInit {
     this.summary$ = this.cashManagementService
       .getCashMovementSummary(filters)
       .pipe(finalize(() => (this.isLoadingSummary = false)));
+
+    this.summary$.subscribe((summary) => {
+      this.summaryTableDataSource = this.getSummaryTableDataSource(summary);
+    });
   }
+
+  private getSummaryTableDataSource(summary: DetailedCashMovementSummary): any[] {
+    return [
+      {
+        type: 'Ingreso',
+        Efectivo: summary.Efectivo.income,
+        'Yape/Transferencia BCP': summary['Yape/Transferencia BCP'].income,
+        'Plin/Transferencia INTERBANK': summary['Plin/Transferencia INTERBANK'].income,
+        POS: summary.POS.income,
+      },
+      {
+        type: 'Egreso',
+        Efectivo: summary.Efectivo.expense,
+        'Yape/Transferencia BCP': summary['Yape/Transferencia BCP'].expense,
+        'Plin/Transferencia INTERBANK': summary['Plin/Transferencia INTERBANK'].expense,
+        POS: summary.POS.expense,
+      },
+      {
+        type: 'Saldo',
+        Efectivo: summary.Efectivo.balance,
+        'Yape/Transferencia BCP': summary['Yape/Transferencia BCP'].balance,
+        'Plin/Transferencia INTERBANK': summary['Plin/Transferencia INTERBANK'].balance,
+        POS: summary.POS.balance,
+      },
+      {
+        type: 'IngresoCaja',
+        POS: summary.totalCashIncome,
+      },
+      {
+        type: 'EgresoCaja',
+        POS: summary.totalCashExpense,
+      },
+      {
+        type: 'TotalCaja',
+        POS: summary.totalCashBalance,
+      },
+    ];
+  }
+
+  isPaymentMethodRow = (row: any) => row.type === 'Ingreso' || row.type === 'Egreso' || row.type === 'Saldo';
+  isTotalRow = (row: any) => row.type === 'IngresoCaja' || row.type === 'EgresoCaja' || row.type === 'TotalCaja';
 
   onPageChange(event: any): void {
     this.pageNumber = event.pageIndex + 1;

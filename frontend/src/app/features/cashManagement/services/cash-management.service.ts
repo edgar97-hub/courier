@@ -4,7 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import {
   CashMovement,
   CashMovementQuery,
-  CashMovementSummary,
+  DetailedCashMovementSummary,
   CreateCashMovement,
   CashMovementPaginatedResponse
 } from '../models/cash-movement.model';
@@ -55,7 +55,7 @@ export class CashManagementService {
 
   getCashMovementSummary(
     query?: CashMovementQuery
-  ): Observable<CashMovementSummary> {
+  ): Observable<DetailedCashMovementSummary> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
       return throwError(() => new Error('Not authenticated to fetch cash movement summary.'));
@@ -68,7 +68,7 @@ export class CashManagementService {
         }
       }
     }
-    return this.http.get<CashMovementSummary>(`${this.apiUrl}/summary`, {
+    return this.http.get<DetailedCashMovementSummary>(`${this.apiUrl}/detailed-summary`, {
       params,
       headers,
     });

@@ -212,3 +212,17 @@ tr.mat-row:hover {
 .mat-card {
   // border: 1px solid black;
 }
+
+.total-row-content {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.total-row-label {
+  font-weight: bold;
+}
+
+.total-row-value {
+  font-weight: bold;
+}
