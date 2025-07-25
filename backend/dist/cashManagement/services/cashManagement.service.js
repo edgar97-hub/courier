@@ -133,6 +133,48 @@ let CashManagementService = class CashManagementService {
         const balance = totalIncome - totalExpense;
         return { totalIncome, totalExpense, balance };
     }
+    async getDetailedBalanceSummary(query) {
+        const movements = await this.cashMovementRepository.find({
+            where: this.buildWhereClauseForSummary(query),
+            relations: ['user'],
+        });
+        const paymentMethods = [
+            'Efectivo',
+            'Yape/Transferencia BCP',
+            'Plin/Transferencia INTERBANK',
+            'POS',
+        ];
+        const summary = {
+            Efectivo: { income: 0, expense: 0, balance: 0 },
+            'Yape/Transferencia BCP': { income: 0, expense: 0, balance: 0 },
+            'Plin/Transferencia INTERBANK': { income: 0, expense: 0, balance: 0 },
+            POS: { income: 0, expense: 0, balance: 0 },
+            totalCashIncome: 0,
+            totalCashExpense: 0,
+            totalCashBalance: 0,
+        };
+        for (const movement of movements) {
+            const method = movement.paymentsMethod;
+            if (paymentMethods.includes(method)) {
+                if (movement.typeMovement === cashManagement_entity_1.TYPES_MOVEMENTS.INCOME) {
+                    summary[method].income += movement.amount;
+                    summary.totalCashIncome += movement.amount;
+                }
+                else if (movement.typeMovement === cashManagement_entity_1.TYPES_MOVEMENTS.OUTCOME) {
+                    summary[method].expense += movement.amount;
+                    summary.totalCashExpense += movement.amount;
+                }
+            }
+        }
+        for (const method of paymentMethods) {
+            const methodKey = method;
+            summary[methodKey].balance =
+                summary[methodKey].income -
+                    summary[methodKey].expense;
+        }
+        summary.totalCashBalance = summary.totalCashIncome - summary.totalCashExpense;
+        return summary;
+    }
     buildWhereClauseForSummary(query) {
         const where = {};
         if (query.startDate && query.endDate) {

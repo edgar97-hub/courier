@@ -8,6 +8,8 @@ import {
 import {
   CreateCashMovementDto,
   QueryCashMovementDto,
+  DetailedCashMovementSummaryDto,
+  PaymentMethodSummary,
 } from '../dto/cashManagement.dto';
 import { UsersService } from '../../users/services/users.service';
 import { UsersEntity } from '../../users/entities/users.entity';
@@ -166,6 +168,56 @@ export class CashManagementService {
 
     const balance = totalIncome - totalExpense;
     return { totalIncome, totalExpense, balance };
+  }
+
+  async getDetailedBalanceSummary(
+    query: QueryCashMovementDto,
+  ): Promise<DetailedCashMovementSummaryDto> {
+    const movements = await this.cashMovementRepository.find({
+      where: this.buildWhereClauseForSummary(query),
+      relations: ['user'],
+    });
+
+    const paymentMethods = [
+      'Efectivo',
+      'Yape/Transferencia BCP',
+      'Plin/Transferencia INTERBANK',
+      'POS',
+    ];
+
+    const summary: DetailedCashMovementSummaryDto = {
+      Efectivo: { income: 0, expense: 0, balance: 0 },
+      'Yape/Transferencia BCP': { income: 0, expense: 0, balance: 0 },
+      'Plin/Transferencia INTERBANK': { income: 0, expense: 0, balance: 0 },
+      POS: { income: 0, expense: 0, balance: 0 },
+      totalCashIncome: 0,
+      totalCashExpense: 0,
+      totalCashBalance: 0,
+    };
+
+    for (const movement of movements) {
+      const method = movement.paymentsMethod as keyof DetailedCashMovementSummaryDto;
+      if (paymentMethods.includes(method)) {
+        if (movement.typeMovement === TYPES_MOVEMENTS.INCOME) {
+          (summary[method] as PaymentMethodSummary).income += movement.amount;
+          summary.totalCashIncome += movement.amount;
+        } else if (movement.typeMovement === TYPES_MOVEMENTS.OUTCOME) {
+          (summary[method] as PaymentMethodSummary).expense += movement.amount;
+          summary.totalCashExpense += movement.amount;
+        }
+      }
+    }
+
+    for (const method of paymentMethods) {
+      const methodKey = method as keyof DetailedCashMovementSummaryDto;
+      (summary[methodKey] as PaymentMethodSummary).balance =
+        (summary[methodKey] as PaymentMethodSummary).income -
+        (summary[methodKey] as PaymentMethodSummary).expense;
+    }
+
+    summary.totalCashBalance = summary.totalCashIncome - summary.totalCashExpense;
+
+    return summary;
   }
 
   private buildWhereClauseForSummary(query: QueryCashMovementDto): any {

@@ -20,6 +20,7 @@ import { CashManagementService } from '../services/cashManagement.service';
 import {
   CreateCashMovementDto,
   QueryCashMovementDto,
+  DetailedCashMovementSummaryDto,
 } from '../dto/cashManagement.dto';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
@@ -135,6 +136,20 @@ export class CashManagementController {
   @ApiResponse({ status: 403, description: 'Acceso denegado.' })
   async getBalanceSummary(@Query() query: QueryCashMovementDto) {
     return this.cashManagementService.getBalanceSummary(query);
+  }
+
+  @Get('detailed-summary')
+  @AdminAccess()
+  @Roles('RECEPTIONIST')
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
+    description: 'Resumen detallado de saldos de caja.',
+    type: DetailedCashMovementSummaryDto,
+  })
+  @ApiResponse({ status: 403, description: 'Acceso denegado.' })
+  async getDetailedBalanceSummary(@Query() query: QueryCashMovementDto) {
+    return this.cashManagementService.getDetailedBalanceSummary(query);
   }
 
   @Get(':id/pdf')

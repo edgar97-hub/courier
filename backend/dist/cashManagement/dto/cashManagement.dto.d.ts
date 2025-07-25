@@ -14,3 +14,17 @@ export declare class QueryCashMovementDto {
     paymentsMethod?: string;
     userId?: string;
 }
+export declare class PaymentMethodSummary {
+    income: number;
+    expense: number;
+    balance: number;
+}
+export declare class DetailedCashMovementSummaryDto {
+    Efectivo: PaymentMethodSummary;
+    'Yape/Transferencia BCP': PaymentMethodSummary;
+    'Plin/Transferencia INTERBANK': PaymentMethodSummary;
+    POS: PaymentMethodSummary;
+    totalCashIncome: number;
+    totalCashExpense: number;
+    totalCashBalance: number;
+}

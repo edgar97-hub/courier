@@ -59,3 +59,37 @@ export class QueryCashMovementDto {
   @IsUUID()
   userId?: string;
 }
+
+export class PaymentMethodSummary {
+  @ApiProperty({ example: 100.50, description: 'Total de ingresos para esta forma de pago' })
+  income: number;
+
+  @ApiProperty({ example: 50.25, description: 'Total de egresos para esta forma de pago' })
+  expense: number;
+
+  @ApiProperty({ example: 50.25, description: 'Saldo para esta forma de pago' })
+  balance: number;
+}
+
+export class DetailedCashMovementSummaryDto {
+  @ApiProperty({ type: PaymentMethodSummary, description: 'Resumen para Efectivo' })
+  Efectivo: PaymentMethodSummary;
+
+  @ApiProperty({ type: PaymentMethodSummary, description: 'Resumen para Yape/Transferencia BCP' })
+  'Yape/Transferencia BCP': PaymentMethodSummary;
+
+  @ApiProperty({ type: PaymentMethodSummary, description: 'Resumen para Plin/Transferencia INTERBANK' })
+  'Plin/Transferencia INTERBANK': PaymentMethodSummary;
+
+  @ApiProperty({ type: PaymentMethodSummary, description: 'Resumen para POS' })
+  POS: PaymentMethodSummary;
+
+  @ApiProperty({ example: 500.00, description: 'Total de ingresos en caja (suma de todos los ingresos)' })
+  totalCashIncome: number;
+
+  @ApiProperty({ example: 200.00, description: 'Total de egresos en caja (suma de todos los egresos)' })
+  totalCashExpense: number;
+
+  @ApiProperty({ example: 300.00, description: 'Saldo total en caja (ingresos - egresos)' })
+  totalCashBalance: number;
+}

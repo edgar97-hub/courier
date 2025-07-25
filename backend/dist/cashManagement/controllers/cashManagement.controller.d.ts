@@ -1,5 +1,5 @@
 import { CashManagementService } from '../services/cashManagement.service';
-import { CreateCashMovementDto, QueryCashMovementDto } from '../dto/cashManagement.dto';
+import { CreateCashMovementDto, QueryCashMovementDto, DetailedCashMovementSummaryDto } from '../dto/cashManagement.dto';
 import { Response } from 'express';
 import { CashMovementPdfGeneratorService } from '../services/cash-movement-pdf-generator.service';
 export declare class CashManagementController {
@@ -18,5 +18,6 @@ export declare class CashManagementController {
         totalExpense: number;
         balance: number;
     }>;
+    getDetailedBalanceSummary(query: QueryCashMovementDto): Promise<DetailedCashMovementSummaryDto>;
     getCashMovementPdf(id: string, req: Request, res: Response): Promise<void>;
 }

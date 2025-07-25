@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.QueryCashMovementDto = exports.CreateCashMovementDto = void 0;
+exports.DetailedCashMovementSummaryDto = exports.PaymentMethodSummary = exports.QueryCashMovementDto = exports.CreateCashMovementDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 const cashManagement_entity_1 = require("../entities/cashManagement.entity");
@@ -84,4 +84,50 @@ __decorate([
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], QueryCashMovementDto.prototype, "userId", void 0);
+class PaymentMethodSummary {
+}
+exports.PaymentMethodSummary = PaymentMethodSummary;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 100.50, description: 'Total de ingresos para esta forma de pago' }),
+    __metadata("design:type", Number)
+], PaymentMethodSummary.prototype, "income", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 50.25, description: 'Total de egresos para esta forma de pago' }),
+    __metadata("design:type", Number)
+], PaymentMethodSummary.prototype, "expense", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 50.25, description: 'Saldo para esta forma de pago' }),
+    __metadata("design:type", Number)
+], PaymentMethodSummary.prototype, "balance", void 0);
+class DetailedCashMovementSummaryDto {
+}
+exports.DetailedCashMovementSummaryDto = DetailedCashMovementSummaryDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: PaymentMethodSummary, description: 'Resumen para Efectivo' }),
+    __metadata("design:type", PaymentMethodSummary)
+], DetailedCashMovementSummaryDto.prototype, "Efectivo", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: PaymentMethodSummary, description: 'Resumen para Yape/Transferencia BCP' }),
+    __metadata("design:type", PaymentMethodSummary)
+], DetailedCashMovementSummaryDto.prototype, "Yape/Transferencia BCP", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: PaymentMethodSummary, description: 'Resumen para Plin/Transferencia INTERBANK' }),
+    __metadata("design:type", PaymentMethodSummary)
+], DetailedCashMovementSummaryDto.prototype, "Plin/Transferencia INTERBANK", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: PaymentMethodSummary, description: 'Resumen para POS' }),
+    __metadata("design:type", PaymentMethodSummary)
+], DetailedCashMovementSummaryDto.prototype, "POS", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 500.00, description: 'Total de ingresos en caja (suma de todos los ingresos)' }),
+    __metadata("design:type", Number)
+], DetailedCashMovementSummaryDto.prototype, "totalCashIncome", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 200.00, description: 'Total de egresos en caja (suma de todos los egresos)' }),
+    __metadata("design:type", Number)
+], DetailedCashMovementSummaryDto.prototype, "totalCashExpense", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 300.00, description: 'Saldo total en caja (ingresos - egresos)' }),
+    __metadata("design:type", Number)
+], DetailedCashMovementSummaryDto.prototype, "totalCashBalance", void 0);
 //# sourceMappingURL=cashManagement.dto.js.map

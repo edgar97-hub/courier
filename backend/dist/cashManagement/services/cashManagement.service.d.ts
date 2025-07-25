@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { CashManagementEntity } from '../entities/cashManagement.entity';
-import { CreateCashMovementDto, QueryCashMovementDto } from '../dto/cashManagement.dto';
+import { CreateCashMovementDto, QueryCashMovementDto, DetailedCashMovementSummaryDto } from '../dto/cashManagement.dto';
 import { UsersService } from '../../users/services/users.service';
 export declare class CashManagementService {
     private readonly cashMovementRepository;
@@ -20,5 +20,6 @@ export declare class CashManagementService {
         totalExpense: number;
         balance: number;
     }>;
+    getDetailedBalanceSummary(query: QueryCashMovementDto): Promise<DetailedCashMovementSummaryDto>;
     private buildWhereClauseForSummary;
 }

@@ -50,6 +50,9 @@ let CashManagementController = class CashManagementController {
     async getBalanceSummary(query) {
         return this.cashManagementService.getBalanceSummary(query);
     }
+    async getDetailedBalanceSummary(query) {
+        return this.cashManagementService.getDetailedBalanceSummary(query);
+    }
     async getCashMovementPdf(id, req, res) {
         await this.cashMovementPdfGeneratorService.streamCashMovementPdfToResponse(id, req, res);
     }
@@ -139,6 +142,22 @@ __decorate([
     __metadata("design:paramtypes", [cashManagement_dto_1.QueryCashMovementDto]),
     __metadata("design:returntype", Promise)
 ], CashManagementController.prototype, "getBalanceSummary", null);
+__decorate([
+    (0, common_1.Get)('detailed-summary'),
+    (0, admin_decorator_1.AdminAccess)(),
+    (0, roles_decorator_1.Roles)('RECEPTIONIST'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Resumen detallado de saldos de caja.',
+        type: cashManagement_dto_1.DetailedCashMovementSummaryDto,
+    }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Acceso denegado.' }),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [cashManagement_dto_1.QueryCashMovementDto]),
+    __metadata("design:returntype", Promise)
+], CashManagementController.prototype, "getDetailedBalanceSummary", null);
 __decorate([
     (0, common_1.Get)(':id/pdf'),
     (0, admin_decorator_1.AdminAccess)(),
