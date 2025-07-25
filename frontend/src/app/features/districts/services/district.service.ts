@@ -44,7 +44,6 @@ export class DistrictService {
     return new HttpHeaders({ 'Content-Type': 'application/json' });
   }
 
-  // --- CRUD ---
   getDistricts(
     page: number = 1,
     limit: number = 10,

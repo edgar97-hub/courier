@@ -24,6 +24,7 @@ const typeorm_3 = require("typeorm");
 const orderLog_entity_1 = require("../entities/orderLog.entity");
 const date_fns_tz_1 = require("date-fns-tz");
 const date_fns_1 = require("date-fns");
+const cashManagement_service_1 = require("../../cashManagement/services/cashManagement.service");
 const EXCEL_HEADER_TO_ENTITY_KEY_MAP = {
     'TIPO DE ENVIO': 'shipment_type',
     'NOMBRE DEL DESTINATARIO': 'recipient_name',
@@ -37,10 +38,11 @@ const EXCEL_HEADER_TO_ENTITY_KEY_MAP = {
     OBSERVACION: 'observations',
 };
 let OrdersService = class OrdersService {
-    constructor(orderRepository, orderLogRepository, districtsRepository, entityManager) {
+    constructor(orderRepository, orderLogRepository, districtsRepository, cashManagementService, entityManager) {
         this.orderRepository = orderRepository;
         this.orderLogRepository = orderLogRepository;
         this.districtsRepository = districtsRepository;
+        this.cashManagementService = cashManagementService;
         this.entityManager = entityManager;
     }
     async createOrder(body) {
@@ -113,8 +115,18 @@ let OrdersService = class OrdersService {
             }
             const updatedOrder = await this.orderRepository.findOne({
                 where: { id: body.payload.orderId },
-                relations: ['assigned_driver'],
+                relations: ['assigned_driver', 'user'],
             });
+            if (body.payload.newStatus === roles_1.STATES.DELIVERED) {
+                if (updatedOrder) {
+                    const amount = updatedOrder.shipping_cost || 0;
+                    const paymentMethod = updatedOrder.payment_method_for_shipping_cost || 'Efectivo';
+                    await this.cashManagementService.createAutomaticIncome(amount, paymentMethod, updatedOrder.user.id, updatedOrder.id, updatedOrder.code);
+                }
+            }
+            else if (body.payload.newStatus === roles_1.STATES.ANNULLED) {
+                await this.cashManagementService.reverseAutomaticIncome(body.payload.orderId);
+            }
             return updatedOrder;
         }
         catch (error) {
@@ -291,7 +303,6 @@ let OrdersService = class OrdersService {
                     const month = parseInt(dateParts[1], 10) - 1;
                     const year = parseInt(dateParts[2], 10);
                     const parsedDate = new Date(year, month, day);
-                    console.log(parsedDate.getTime(), parsedDate.getDate(), day, parsedDate.getMonth(), month, parsedDate.getFullYear(), year);
                     if (isNaN(parsedDate.getTime()) ||
                         parsedDate.getDate() !== day ||
                         parsedDate.getMonth() !== month ||
@@ -354,8 +365,6 @@ let OrdersService = class OrdersService {
                 });
                 rowHasErrors = true;
             }
-            console.log('test1');
-            console.log('ordersToSave.length > 0 && errors.length', ordersToSave, errors);
             if (!rowHasErrors) {
                 orderEntity.status = roles_1.STATES.REGISTERED;
                 orderEntity.user = { id: idUser };
@@ -769,10 +778,11 @@ exports.OrdersService = OrdersService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(orders_entity_1.OrdersEntity)),
     __param(1, (0, typeorm_1.InjectRepository)(orderLog_entity_1.OrderLogEntity)),
     __param(2, (0, typeorm_1.InjectRepository)(districts_entity_1.DistrictsEntity)),
-    __param(3, (0, typeorm_1.InjectEntityManager)()),
+    __param(4, (0, typeorm_1.InjectEntityManager)()),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
+        cashManagement_service_1.CashManagementService,
         typeorm_3.EntityManager])
 ], OrdersService);
 //# sourceMappingURL=orders.service.js.map

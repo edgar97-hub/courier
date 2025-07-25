@@ -1,0 +1,95 @@
+<h1 mat-dialog-title style="font-weight: 700 !important" class="page-header">
+  Formulario de Movimiento de Caja
+</h1>
+
+<mat-dialog-content
+  [formGroup]="movementForm"
+  class="cash-movement-dialog-content"
+>
+  <div class="wrapper-form-field">
+    <mat-form-field appearance="outline" class="cash-movement-form-field">
+      <mat-label>Fecha</mat-label>
+      <input
+        matInput
+        [matDatepicker]="picker"
+        formControlName="date"
+        [min]="minDate"
+      />
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+      <mat-error *ngIf="movementForm.get('date')?.hasError('required')"
+        >La fecha es requerida</mat-error
+      >
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="cash-movement-form-field">
+      <mat-label>Monto</mat-label>
+      <input
+        matInput
+        type="number"
+        formControlName="amount"
+        placeholder="Ej: 100.50"
+      />
+      <mat-error *ngIf="movementForm.get('amount')?.hasError('required')"
+        >El monto es requerido</mat-error
+      >
+      <mat-error *ngIf="movementForm.get('amount')?.hasError('min')"
+        >El monto debe ser mayor o igual a 0</mat-error
+      >
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="cash-movement-form-field">
+      <mat-label>Tipo de Movimiento</mat-label>
+      <mat-select formControlName="typeMovement">
+        <mat-option value="INGRESO">Ingreso</mat-option>
+        <mat-option value="EGRESO">Egreso</mat-option>
+      </mat-select>
+      <mat-error *ngIf="movementForm.get('typeMovement')?.hasError('required')"
+        >El tipo de movimiento es requerido</mat-error
+      >
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="cash-movement-form-field">
+      <mat-label>Forma de Pago</mat-label>
+      <mat-select formControlName="paymentsMethod">
+        <mat-option value="Efectivo">Efectivo</mat-option>
+        <mat-option value="Otros">Otros</mat-option>
+      </mat-select>
+      <mat-error
+        *ngIf="movementForm.get('paymentsMethod')?.hasError('required')"
+        >La forma de pago es requerida</mat-error
+      >
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="cash-movement-form-field">
+      <mat-label>Descripción / Motivo</mat-label>
+      <textarea
+        matInput
+        formControlName="description"
+        placeholder="Ej: Compra de insumos"
+        rows="3"
+      ></textarea>
+    </mat-form-field>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="cash-movement-dialog-actions">
+  <button
+    mat-button
+    (click)="onCancel()"
+    class="btn-corp-secondary"
+    [disabled]="isLoading"
+  >
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSave()"
+    class="btn-corp-primary"
+    [disabled]="movementForm.invalid || isLoading"
+  >
+    <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+    <span *ngIf="!isLoading">Guardar</span>
+  </button>
+</mat-dialog-actions>

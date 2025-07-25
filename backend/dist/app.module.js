@@ -17,6 +17,7 @@ const auth_module_1 = require("./auth/auth.module");
 const providers_module_1 = require("./providers/providers.module");
 const settings_module_1 = require("./settings/settings.module");
 const orders_module_1 = require("./orders/orders.module");
+const cashManagement_module_1 = require("./cashManagement/cashManagement.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -34,6 +35,7 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             providers_module_1.ProvidersModule,
             orders_module_1.OrdersModule,
+            cashManagement_module_1.CashManagementModule,
         ],
     })
 ], AppModule);

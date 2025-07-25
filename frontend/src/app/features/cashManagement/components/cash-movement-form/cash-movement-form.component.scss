@@ -1,0 +1,62 @@
+/* Component-specific styles for CashMovementFormComponent */
+
+.cash-movement-dialog-content {
+  padding: 0.75rem; /* Reduced padding */
+  overflow-y: auto;
+  max-height: 50vh; /* Further reduced max height */
+}
+.wrapper-form-field {
+  padding: 20px;
+}
+/* Styling for form fields */
+.cash-movement-form-field {
+  margin-bottom: 0.5rem; /* Reduced space between form fields */
+  // font-size: 0.8rem; /* Further smaller font size for form fields */
+}
+
+/* Adjusting button styles for a more modern look */
+.cash-movement-dialog-actions {
+  padding: 0.75rem 1rem; /* Reduced padding */
+  border-top: 1px solid #eee;
+  background-color: #f9f9f9;
+}
+
+.cash-movement-action-button {
+  padding: 0.5rem 1rem; /* Reduced button padding */
+  font-size: 0.8rem; /* Reduced button font size */
+  border-radius: 0.25rem; /* More compact rounded corners */
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Specific styles for primary and accent buttons */
+.cash-movement-action-button[color="primary"] {
+  background-color: #007bff;
+  color: white;
+}
+
+.cash-movement-action-button[color="accent"] {
+  background-color: #6c757d;
+  color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .cash-movement-dialog-content {
+    padding: 0.5rem;
+  }
+
+  .cash-movement-dialog-actions {
+    padding: 0.5rem;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .cash-movement-action-button {
+    width: 100%;
+  }
+}

@@ -15,6 +15,7 @@ const base_entity_1 = require("../../config/base.entity");
 const users_entity_1 = require("../../users/entities/users.entity");
 const roles_1 = require("../../constants/roles");
 const orderLog_entity_1 = require("./orderLog.entity");
+const cashManagement_entity_1 = require("../../cashManagement/entities/cashManagement.entity");
 let OrdersEntity = class OrdersEntity extends base_entity_1.BaseEntity {
 };
 exports.OrdersEntity = OrdersEntity;
@@ -139,6 +140,10 @@ __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], OrdersEntity.prototype, "observation_shipping_cost_modification", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => cashManagement_entity_1.CashManagementEntity, (cashManagement) => cashManagement.order),
+    __metadata("design:type", Array)
+], OrdersEntity.prototype, "cashManagementIncludes", void 0);
 exports.OrdersEntity = OrdersEntity = __decorate([
     (0, typeorm_1.Entity)({ name: 'orders' })
 ], OrdersEntity);

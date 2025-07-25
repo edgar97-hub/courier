@@ -53,6 +53,7 @@ export class UsersController {
     return await this.usersService.findUsers();
   }
 
+  @PublicAccess()
   @Get('filtered')
   public async findUsersByRol(
     @Query('search_term') search_term: string,

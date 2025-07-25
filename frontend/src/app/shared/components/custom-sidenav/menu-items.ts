@@ -98,6 +98,12 @@ export const menuItems: MenuItem[] = [
     roles: ['ADMINISTRADOR', 'EMPRESA', 'RECEPCIONISTA'],
   },
   {
+    icon: 'analytics',
+    label: 'Gestión de Caja Chica',
+    route: 'cash-management',
+    roles: ['ADMINISTRADOR', 'RECEPCIONISTA'],
+  },
+  {
     icon: 'calculate',
     label: 'Calculadora',
     route: 'package-calculator',

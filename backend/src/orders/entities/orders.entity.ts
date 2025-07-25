@@ -11,6 +11,7 @@ import { BaseEntity } from '../../config/base.entity';
 import { UsersEntity } from '../../users/entities/users.entity';
 import { STATES } from '../../constants/roles';
 import { OrderLogEntity } from './orderLog.entity';
+import { CashManagementEntity } from 'src/cashManagement/entities/cashManagement.entity';
 
 @Entity({ name: 'orders' })
 export class OrdersEntity extends BaseEntity {
@@ -106,4 +107,10 @@ export class OrdersEntity extends BaseEntity {
 
   @Column({ nullable: true })
   observation_shipping_cost_modification?: string;
+
+  @OneToMany(
+    () => CashManagementEntity,
+    (cashManagement) => cashManagement.order,
+  )
+  cashManagementIncludes: CashManagementEntity[];
 }

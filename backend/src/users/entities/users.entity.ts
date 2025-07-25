@@ -4,6 +4,7 @@ import { ROLES } from '../../constants/roles';
 import { IUser } from '../../interfaces/user.interface';
 import { BaseEntity } from '../../config/base.entity';
 import { OrdersEntity } from '../../orders/entities/orders.entity';
+import { CashManagementEntity } from 'src/cashManagement/entities/cashManagement.entity';
 
 @Entity({ name: 'users' })
 export class UsersEntity extends BaseEntity implements IUser {
@@ -86,4 +87,7 @@ export class UsersEntity extends BaseEntity implements IUser {
 
   @OneToMany(() => OrdersEntity, (order) => order.company)
   companyOrdersIncludes: OrdersEntity[];
+
+  @OneToMany(() => CashManagementEntity, (cashManagement) => cashManagement.user)
+  cashManagementIncludes: CashManagementEntity[];
 }

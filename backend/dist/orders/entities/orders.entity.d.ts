@@ -2,6 +2,7 @@ import { BaseEntity } from '../../config/base.entity';
 import { UsersEntity } from '../../users/entities/users.entity';
 import { STATES } from '../../constants/roles';
 import { OrderLogEntity } from './orderLog.entity';
+import { CashManagementEntity } from 'src/cashManagement/entities/cashManagement.entity';
 export declare class OrdersEntity extends BaseEntity {
     code?: number;
     shipment_type?: string;
@@ -31,4 +32,5 @@ export declare class OrdersEntity extends BaseEntity {
     tracking_code: string;
     product_delivery_photo_url?: string;
     observation_shipping_cost_modification?: string;
+    cashManagementIncludes: CashManagementEntity[];
 }

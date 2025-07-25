@@ -40,16 +40,16 @@ import {
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule, // Para el breadcrumb o links de volver
-    ReactiveFormsModule, // Para los controles de pickup y terms
+    RouterModule,
+    ReactiveFormsModule,
     OrderCreationFormComponent,
     TemporaryOrdersTableComponent,
     MatSnackBarModule,
     MatButtonModule,
     MatIconModule,
     MatCheckboxModule,
-    MatSelectModule, // Para el select de pickup_option
-    MatFormFieldModule, // Para el select de pickup_option
+    MatSelectModule,
+    MatFormFieldModule,
     MatProgressSpinnerModule,
   ],
   templateUrl: './order-create-page.component.html',
@@ -70,7 +70,7 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
   ); // Valor por defecto como en la imagen
   termsAcceptedControl = new FormControl(false, Validators.requiredTrue);
 
-  pickupOptions: string[] = ['RECOGER EN DOMICILIO', 'ENTREGAR EN ALMACEN']; 
+  pickupOptions: string[] = ['RECOGER EN DOMICILIO', 'ENTREGAR EN ALMACEN'];
 
   private orderService = inject(OrderService);
   private router = inject(Router);
@@ -107,7 +107,6 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Método llamado por el evento del OrderCreationFormComponent
   onOrderFormValidityChanged(isValid: boolean): void {
     this.isOrderFormValid.set(isValid);
   }
@@ -135,7 +134,7 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
         duration: 3000,
         verticalPosition: 'top',
       });
-      this.termsAcceptedControl.markAsTouched(); // Para mostrar el error si lo tienes
+      this.termsAcceptedControl.markAsTouched();
       return;
     }
 
@@ -152,10 +151,9 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
         type_order_transfer_to_warehouse: this.pickupOptionControl.value,
       })),
       pickup_option: this.pickupOptionControl.value || 'RECOGER EN DOMICILIO',
-      terms_accepted: true, // Ya validado arriba
+      terms_accepted: true,
     };
-    console.log('payload', payload);
-    // return;
+
     this.orderService
       .createBatchOrders(payload)
       .pipe(

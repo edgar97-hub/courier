@@ -113,6 +113,13 @@ export const routes: Routes = [
             (m) => m.ORDERS_ROUTES
           ),
       },
+      {
+        path: 'cash-management',
+        loadChildren: () =>
+          import('./features/cashManagement/cash-management.routes').then(
+            (m) => m.CASH_MANAGEMENT_ROUTES
+          ),
+      },
     ],
   },
   {

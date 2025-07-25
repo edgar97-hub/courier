@@ -1,0 +1,214 @@
+/* Styles for CashManagementListPageComponent */
+
+.page-container {
+  // padding: 0.25rem; /* Even further reduced padding */
+  background-color: #f9fafb;
+  min-height: 100vh;
+}
+
+@media (min-width: 640px) {
+  .page-container {
+    // padding: 0.5rem; /* Reduced padding */
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-container {
+    // padding: 0.75rem; /* Reduced padding */
+  }
+}
+
+.mat-card {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* Even lighter shadow */
+  border-radius: 0.2rem; /* More compact rounded corners */
+  // margin-bottom: 0.5rem; /* Reduced spacing between cards */
+}
+
+.mat-card-header {
+  padding: 0.4rem 0.6rem; /* Reduced padding */
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 0.4rem; /* Reduced margin */
+}
+
+.mat-card-title {
+  color: #1f2937;
+  font-weight: 900;
+  font-size: 1.4rem; /* Further reduced font size */
+  padding: 7px !important;
+}
+
+.filter-form {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(140px, 1fr)
+  ); /* Even smaller min width */
+  gap: 0.4rem; /* Reduced gap */
+}
+
+.mat-form-field {
+  width: 100%;
+  margin-bottom: 0;
+  font-size: 0.75rem; /* Further smaller font size for form fields */
+}
+
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  // margin-top: 0.4rem; /* Reduced margin-top */
+  gap: 0.3rem; /* Reduced gap */
+  // border: 1px solid black;
+  margin-top: 0px !important;
+  font-weight: 700 !important;
+}
+
+@media (min-width: 640px) {
+  .form-actions {
+    flex-direction: row;
+  }
+}
+
+.action-button {
+  width: 100%;
+  padding: 0.3rem 0.6rem; /* Even smaller buttons */
+  font-size: 0.7rem; /* Even smaller font size */
+  font-weight: 600;
+  border-radius: 0.15rem; /* More compact rounded corners */
+  transition: all 0.2s ease-in-out;
+}
+
+@media (min-width: 640px) {
+  .action-button {
+    width: auto;
+  }
+}
+
+.action-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); /* Lighter shadow on hover */
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(100px, 1fr)
+  ); /* Even more compact summary cards */
+  gap: 0.4rem; /* Reduced gap for summary cards */
+  text-align: center;
+}
+
+.summary-card {
+  padding: 0.1rem !important; /* Reduced padding */
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.2rem; /* More compact rounded corners */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02); /* Lighter shadow */
+}
+
+.summary-card .mat-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.summary-label {
+  color: #4b5563;
+  font-weight: 700;
+}
+
+.summary-value {
+  font-size: 1.1rem; /* Further reduced font size for values */
+  font-weight: 700;
+  margin-top: 0.05rem; /* Reduced margin-top */
+}
+
+/* Specific colors for summary cards */
+.income-card {
+  background-color: #e6ffe6;
+  border-color: #66cc66;
+}
+
+.income-card .summary-value {
+  color: #28a745;
+}
+
+.expense-card {
+  background-color: #ffe6e6;
+  border-color: #ff6666;
+}
+
+.expense-card .summary-value {
+  color: #dc3545;
+}
+
+.balance-card {
+  background-color: #e6f7ff;
+  border-color: #66b3ff;
+}
+
+.balance-card .summary-value.text-green-700 {
+  color: #28a745;
+}
+
+.balance-card .summary-value.text-red-700 {
+  color: #dc3545;
+}
+
+.mat-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem; /* Even smaller font size for table content */
+}
+
+.mat-header-cell {
+  text-align: left;
+  color: #374151;
+  font-weight: 700;
+  // text-transform: uppercase;
+  letter-spacing: 0.005em; /* Even tighter letter spacing */
+  padding: 0.25rem 0.4rem; /* Even further reduced padding */
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.mat-cell {
+  color: #1f2937;
+  padding: 0.25rem 0.4rem; /* Even further reduced padding */
+  border-bottom: 1px solid #e5e7eb;
+}
+
+tr.mat-header-row {
+  border-bottom: 2px solid #d1d5db;
+}
+
+tr.mat-row:hover {
+  background-color: #f9fafb;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.mat-no-data-row .mat-cell {
+  text-align: center;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Responsive adjustments for table */
+@media (max-width: 768px) {
+  .mat-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.mat-card.summary-section {
+  // border: 1px solid black;
+}
+
+.mat-card {
+  // border: 1px solid black;
+}

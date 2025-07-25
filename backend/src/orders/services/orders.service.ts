@@ -21,6 +21,8 @@ import { OrderLogEntity } from '../entities/orderLog.entity';
 import { startOfDay, endOfDay, parseISO } from 'date-fns';
 import { fromZonedTime, formatInTimeZone } from 'date-fns-tz';
 import { parse, format } from 'date-fns';
+import { CashManagementEntity } from 'src/cashManagement/entities/cashManagement.entity';
+import { CashManagementService } from 'src/cashManagement/services/cashManagement.service';
 
 // import { customAlphabet } from 'nanoid';
 // const _nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 10);
@@ -50,6 +52,7 @@ export class OrdersService {
     private readonly orderLogRepository: Repository<OrderLogEntity>,
     @InjectRepository(DistrictsEntity)
     private districtsRepository: Repository<DistrictsEntity>,
+    private readonly cashManagementService: CashManagementService,
     @InjectEntityManager()
     private entityManager: EntityManager,
   ) {}
@@ -140,8 +143,27 @@ export class OrdersService {
 
       const updatedOrder = await this.orderRepository.findOne({
         where: { id: body.payload.orderId },
-        relations: ['assigned_driver'],
+        relations: ['assigned_driver', 'user'],
       });
+
+      if (body.payload.newStatus === STATES.DELIVERED) {
+        if (updatedOrder) {
+          const amount = updatedOrder.shipping_cost || 0;
+          const paymentMethod =
+            updatedOrder.payment_method_for_shipping_cost || 'Efectivo';
+          await this.cashManagementService.createAutomaticIncome(
+            amount,
+            paymentMethod,
+            updatedOrder.user.id,
+            updatedOrder.id,
+            updatedOrder.code,
+          );
+        }
+      } else if (body.payload.newStatus === STATES.ANNULLED) {
+        await this.cashManagementService.reverseAutomaticIncome(
+          body.payload.orderId,
+        );
+      }
 
       return updatedOrder;
     } catch (error) {
@@ -391,15 +413,6 @@ export class OrdersService {
           const month = parseInt(dateParts[1], 10) - 1; // Meses en JS Date son 0-indexed
           const year = parseInt(dateParts[2], 10);
           const parsedDate = new Date(year, month, day);
-          console.log(
-            parsedDate.getTime(),
-            parsedDate.getDate(),
-            day,
-            parsedDate.getMonth(),
-            month,
-            parsedDate.getFullYear(),
-            year,
-          );
           if (
             isNaN(parsedDate.getTime()) ||
             parsedDate.getDate() !== day ||
@@ -481,15 +494,6 @@ export class OrdersService {
         rowHasErrors = true;
       }
 
-      // orderEntity.delivery_coordinates = '...'; // Si lo puedes calcular o es opcional
-
-      // let importedCount = 0; // Mantener esta variable para el conteo final
-      console.log('test1');
-      console.log(
-        'ordersToSave.length > 0 && errors.length',
-        ordersToSave,
-        errors,
-      );
       if (!rowHasErrors) {
         orderEntity.status = STATES.REGISTERED;
         orderEntity.user = { id: idUser } as UsersEntity;
@@ -521,18 +525,6 @@ export class OrdersService {
               `Iniciando transacción para guardar ${ordersToSave.length} pedidos.`,
             );
 
-            // Opción 1: Guardar uno por uno (más control si necesitas IDs de retorno individuales para algo)
-            // const savedOrders: OrderEntity[] = [];
-            // for (const orderData of ordersToSave) {
-            //   const newOrder = transactionalEntityManager.create(OrderEntity, orderData);
-            //   const saved = await transactionalEntityManager.save(OrderEntity, newOrder);
-            //   savedOrders.push(saved);
-            // }
-            // importedCount = savedOrders.length;
-
-            // Opción 2: Guardar en batch (más eficiente para múltiples inserciones si tu ORM lo soporta bien)
-            // TypeORM puede tomar un array de entidades o objetos parciales en save()
-            // Asegúrate de que orderData en ordersToSave sea compatible con lo que espera OrderEntity
             const entitiesToSave = ordersToSave.map((orderData) =>
               transactionalEntityManager.create(
                 OrdersEntity,
@@ -551,8 +543,8 @@ export class OrdersService {
               'Error DENTRO de la transacción de base de datos, iniciando rollback:',
               dbError,
             );
-            importedCount = 0; // Asegurar que el conteo sea 0 si la transacción falla
-            throw dbError; // ESTO ES CRUCIAL para que la transacción haga rollback
+            importedCount = 0;
+            throw dbError;
           }
         })
         .catch((transactionError) => {
@@ -597,7 +589,7 @@ export class OrdersService {
       finalMessage = `La importación falló. Se encontraron ${errors.length} errores. Ningún pedido fue guardado.`;
       if (importedCount > 0) {
         finalMessage += ` (Nota: se detectó un conteo de importados de ${importedCount}, pero debido a errores críticos, la operación debería haberse revertido).`;
-        importedCount = 0; // Forzar a 0
+        importedCount = 0;
       }
     } else if (totalProcessed > 0 && importedCount === 0) {
       finalMessage =

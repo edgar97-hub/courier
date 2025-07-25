@@ -5,10 +5,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrdersEntity } from './entities/orders.entity';
 import { OrderPdfGeneratorService } from './services/order-pdf-generator.service';
 import { OrderLogEntity } from './entities/orderLog.entity';
+import { CashManagementModule } from '../cashManagement/cashManagement.module'; // Import CashManagementModule
 
 @Global()
 @Module({
-  imports: [TypeOrmModule.forFeature([OrdersEntity, OrderLogEntity])],
+  imports: [
+    TypeOrmModule.forFeature([OrdersEntity, OrderLogEntity]),
+    CashManagementModule, // Add CashManagementModule here
+  ],
   providers: [OrdersService, OrderPdfGeneratorService],
   controllers: [OrdersController],
   exports: [OrdersService, TypeOrmModule],

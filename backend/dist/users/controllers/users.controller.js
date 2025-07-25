@@ -89,6 +89,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findAllUsers", null);
 __decorate([
+    (0, public_decorator_1.PublicAccess)(),
     (0, common_1.Get)('filtered'),
     __param(0, (0, common_1.Query)('search_term')),
     __param(1, (0, common_1.Query)('role')),

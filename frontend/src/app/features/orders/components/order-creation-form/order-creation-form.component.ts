@@ -408,8 +408,6 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
         .toString(36)
         .substring(2, 7)}`, // ID temporal único
     };
-    // console.log('newOrderData', newOrderData);
-    // delete newOrderData.package_details; // Eliminar el subgrupo anidado
 
     console.log('Submitting New Order Data:', newOrderData);
     this.orderSubmit.emit(newOrderData);
