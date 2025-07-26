@@ -11,6 +11,7 @@ export declare class CashManagementService {
     deleteCashMovement(id: string): Promise<void>;
     createAutomaticIncome(amount: number, paymentMethod: string, userId: string, orderId: string, code?: number): Promise<CashManagementEntity>;
     reverseAutomaticIncome(orderId: string): Promise<void>;
+    updateDueToOrderModification(orderId: string, amount: number, paymentMethod: string): Promise<CashManagementEntity>;
     findAllMovements(query: QueryCashMovementDto, pageNumber?: number, pageSize?: number): Promise<{
         movements: CashManagementEntity[];
         total: number;

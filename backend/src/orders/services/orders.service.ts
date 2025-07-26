@@ -105,6 +105,42 @@ export class OrdersService {
           notes: body.payload.notes,
         });
         await this.orderLogRepository.save(log);
+
+        const updatedOrder = await this.orderRepository.findOne({
+          where: { id: body.payload.orderId },
+          relations: ['assigned_driver', 'user'],
+        });
+        if (updatedOrder) {
+          const amount = updatedOrder.shipping_cost || 0;
+
+          let pagoDirectoCourier = 'Pago directo (Pago a COURIER)';
+          let pagoEfectivoCourier = 'Efectivo (Pago a COURIER)';
+          let pagoDirectoEmpresa = 'Pago directo (Pago a EMPRESA)';
+          let paymentMethod = '';
+
+          if (
+            updatedOrder.payment_method_for_shipping_cost ===
+            pagoEfectivoCourier
+          ) {
+            paymentMethod = 'Efectivo';
+          }
+          if (
+            updatedOrder.payment_method_for_shipping_cost === pagoDirectoCourier
+          ) {
+            paymentMethod = 'Yape/Transferencia BCP';
+          }
+
+          if (
+            updatedOrder.payment_method_for_shipping_cost === pagoDirectoEmpresa
+          ) {
+            paymentMethod = 'Yape/Transferencia BCP';
+          }
+          await this.cashManagementService.updateDueToOrderModification(
+            updatedOrder.id,
+            amount,
+            paymentMethod,
+          );
+        }
       }
 
       if (body.payload.action === 'MODIFICACIÓN DEL MONTO A COBRAR') {
@@ -139,6 +175,42 @@ export class OrdersService {
         //   notes: body.payload.notes,
         // });
         // await this.orderLogRepository.save(log);
+
+        const updatedOrder = await this.orderRepository.findOne({
+          where: { id: body.payload.orderId },
+          relations: ['assigned_driver', 'user'],
+        });
+        if (updatedOrder) {
+          const amount = updatedOrder.shipping_cost || 0;
+
+          let pagoDirectoCourier = 'Pago directo (Pago a COURIER)';
+          let pagoEfectivoCourier = 'Efectivo (Pago a COURIER)';
+          let pagoDirectoEmpresa = 'Pago directo (Pago a EMPRESA)';
+          let paymentMethod = '';
+
+          if (
+            updatedOrder.payment_method_for_shipping_cost ===
+            pagoEfectivoCourier
+          ) {
+            paymentMethod = 'Efectivo';
+          }
+          if (
+            updatedOrder.payment_method_for_shipping_cost === pagoDirectoCourier
+          ) {
+            paymentMethod = 'Yape/Transferencia BCP';
+          }
+
+          if (
+            updatedOrder.payment_method_for_shipping_cost === pagoDirectoEmpresa
+          ) {
+            paymentMethod = 'Yape/Transferencia BCP';
+          }
+          await this.cashManagementService.updateDueToOrderModification(
+            updatedOrder.id,
+            amount,
+            paymentMethod,
+          );
+        }
       }
 
       const updatedOrder = await this.orderRepository.findOne({

@@ -115,6 +115,30 @@ export class CashManagementService {
     }
   }
 
+  async updateDueToOrderModification(
+    orderId: string,
+    amount: number,
+    paymentMethod: string,
+  ): Promise<CashManagementEntity> {
+    const existingMovement = await this.cashMovementRepository.findOne({
+      where: {
+        order: { id: orderId },
+      },
+    });
+
+    if (!existingMovement) {
+      throw new NotFoundException(`Cash movement ID not found`);
+    }
+    const updatedMovement = this.cashMovementRepository.merge(
+      existingMovement,
+      {
+        amount: amount,
+        paymentsMethod: paymentMethod,
+      },
+    );
+    return await this.cashMovementRepository.save(updatedMovement);
+  }
+
   async findAllMovements(
     query: QueryCashMovementDto,
     pageNumber: number = 1,

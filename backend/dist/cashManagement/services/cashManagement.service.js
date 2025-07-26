@@ -92,6 +92,21 @@ let CashManagementService = class CashManagementService {
             await this.cashMovementRepository.remove(movement);
         }
     }
+    async updateDueToOrderModification(orderId, amount, paymentMethod) {
+        const existingMovement = await this.cashMovementRepository.findOne({
+            where: {
+                order: { id: orderId },
+            },
+        });
+        if (!existingMovement) {
+            throw new common_1.NotFoundException(`Cash movement ID not found`);
+        }
+        const updatedMovement = this.cashMovementRepository.merge(existingMovement, {
+            amount: amount,
+            paymentsMethod: paymentMethod,
+        });
+        return await this.cashMovementRepository.save(updatedMovement);
+    }
     async findAllMovements(query, pageNumber = 1, pageSize = 10) {
         const where = {};
         if (query.startDate && query.endDate) {
