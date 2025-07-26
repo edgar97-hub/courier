@@ -1,5 +1,6 @@
 export interface CashMovement {
   id: string;
+  code?: string; // Added code property
   date?: string; // Changed to optional string
   amount: number;
   typeMovement: 'INGRESO' | 'EGRESO';

@@ -6,7 +6,7 @@ import {
   CashMovementQuery,
   DetailedCashMovementSummary,
   CreateCashMovement,
-  CashMovementPaginatedResponse
+  CashMovementPaginatedResponse,
 } from '../models/cash-movement.model';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
@@ -31,10 +31,16 @@ export class CashManagementService {
     return new HttpHeaders({ 'Content-Type': 'application/json' });
   }
 
-  getAllCashMovements(query?: CashMovementQuery, pageNumber: number = 1, pageSize: number = 10): Observable<CashMovementPaginatedResponse> {
+  getAllCashMovements(
+    query?: CashMovementQuery,
+    pageNumber: number = 1,
+    pageSize: number = 10
+  ): Observable<CashMovementPaginatedResponse> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
-      return throwError(() => new Error('Not authenticated to fetch cash movements.'));
+      return throwError(
+        () => new Error('Not authenticated to fetch cash movements.')
+      );
     }
     let params = new HttpParams();
     if (query) {
@@ -47,10 +53,13 @@ export class CashManagementService {
     params = params.append('page_number', pageNumber.toString());
     params = params.append('page_size', pageSize.toString());
 
-    return this.http.get<CashMovementPaginatedResponse>(`${this.apiUrl}/movements`, {
-      params,
-      headers,
-    });
+    return this.http.get<CashMovementPaginatedResponse>(
+      `${this.apiUrl}/movements`,
+      {
+        params,
+        headers,
+      }
+    );
   }
 
   getCashMovementSummary(
@@ -58,7 +67,9 @@ export class CashManagementService {
   ): Observable<DetailedCashMovementSummary> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
-      return throwError(() => new Error('Not authenticated to fetch cash movement summary.'));
+      return throwError(
+        () => new Error('Not authenticated to fetch cash movement summary.')
+      );
     }
     let params = new HttpParams();
     if (query) {
@@ -68,16 +79,21 @@ export class CashManagementService {
         }
       }
     }
-    return this.http.get<DetailedCashMovementSummary>(`${this.apiUrl}/detailed-summary`, {
-      params,
-      headers,
-    });
+    return this.http.get<DetailedCashMovementSummary>(
+      `${this.apiUrl}/detailed-summary`,
+      {
+        params,
+        headers,
+      }
+    );
   }
 
   createManualMovement(movement: CreateCashMovement): Observable<CashMovement> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
-      return throwError(() => new Error('Not authenticated to create cash movement.'));
+      return throwError(
+        () => new Error('Not authenticated to create cash movement.')
+      );
     }
     return this.http.post<CashMovement>(
       `${this.apiUrl}/manual-movement`,
@@ -86,18 +102,27 @@ export class CashManagementService {
     );
   }
 
-  updateCashMovement(id: string, movement: CreateCashMovement): Observable<CashMovement> {
+  updateCashMovement(
+    id: string,
+    movement: CreateCashMovement
+  ): Observable<CashMovement> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
-      return throwError(() => new Error('Not authenticated to update cash movement.'));
+      return throwError(
+        () => new Error('Not authenticated to update cash movement.')
+      );
     }
-    return this.http.put<CashMovement>(`${this.apiUrl}/${id}`, movement, { headers });
+    return this.http.put<CashMovement>(`${this.apiUrl}/${id}`, movement, {
+      headers,
+    });
   }
 
   deleteCashMovement(id: string): Observable<void> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
-      return throwError(() => new Error('Not authenticated to delete cash movement.'));
+      return throwError(
+        () => new Error('Not authenticated to delete cash movement.')
+      );
     }
     return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers });
   }
@@ -107,9 +132,9 @@ export class CashManagementService {
     if (!this.authService.getAccessToken()) {
       return throwError(() => new Error('Not authenticated to generate PDF.'));
     }
-    return this.http.get(`${this.apiUrl}/${id}/pdf`, {
+    return this.http.get(`${this.apiUrl}/${id}/pdf/ticket`, {
       headers,
-      responseType: 'blob' // Important for handling binary data like PDF
+      responseType: 'blob', // Important for handling binary data like PDF
     });
   }
 }

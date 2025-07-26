@@ -22,12 +22,13 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* Even lighter shadow */
   border-radius: 0.2rem; /* More compact rounded corners */
   // margin-bottom: 0.5rem; /* Reduced spacing between cards */
+  // border: 1px solid black;
 }
 
 .mat-card-header {
-  padding: 0.4rem 0.6rem; /* Reduced padding */
+  padding: 0rem 0.6rem; /* Reduced padding */
   border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 0.4rem; /* Reduced margin */
+  // margin-bottom: 0.4rem; /* Reduced margin */
 }
 
 .mat-card-title {
@@ -35,6 +36,7 @@
   font-weight: 900;
   font-size: 1.4rem; /* Further reduced font size */
   padding: 7px !important;
+  padding-bottom: 11px !important;
 }
 
 .filter-form {
@@ -157,42 +159,91 @@
   color: #dc3545;
 }
 
-.mat-table {
+.summary-table-container {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 0.75rem; /* Even smaller font size for table content */
+  overflow-x: auto;
 }
 
-.mat-header-cell {
+.summary-table {
+  display: grid;
+  grid-template-columns: 1fr repeat(4, minmax(100px, 1fr));
+  border: 1px solid #817e7e; /* Lighter border for the overall table */
+  border-radius: 4px;
+  overflow: hidden;
+  font-size: 0.85rem;
+  min-width: 600px;
+}
+
+.summary-header,
+.summary-row {
+  display: contents;
+}
+
+.summary-cell {
+  // border: 0.07px solid rgb(83, 82, 82);
+}
+
+.summary-cell {
+  padding: 10px 15px;
+  border: 1px solid #848383; /* Lighter border for cells */
+  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  // border-top: 0px;
+  border-bottom: 0px;
+  border-left: 0px;
+  color: #18191a;
+  font-weight: 500;
+}
+
+.summary-cell:first-child {
+  border-bottom: 0px;
   text-align: left;
-  color: #374151;
-  font-weight: 700;
-  // text-transform: uppercase;
-  letter-spacing: 0.005em; /* Even tighter letter spacing */
-  padding: 0.25rem 0.4rem; /* Even further reduced padding */
-  border-bottom: 1px solid #e5e7eb;
+  justify-content: flex-start;
+  font-weight: bold;
+  background-color: #f9f9f9; /* Slightly different background for first column */
 }
 
-.mat-cell {
-  color: #1f2937;
-  padding: 0.25rem 0.4rem; /* Even further reduced padding */
-  border-bottom: 1px solid #e5e7eb;
+.header-cell {
+  background-color: #012147; /* Darker blue for headers */
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  justify-content: center;
+  // border: 1px solid #2c3e50; /* Solid border for header cells */
 }
 
-tr.mat-header-row {
-  border-bottom: 2px solid #d1d5db;
+.header-cell:first-child {
+  background-color: #012147;
+  color: white;
+  text-align: left;
+  justify-content: flex-start;
 }
 
-tr.mat-row:hover {
-  background-color: #f9fafb;
-  transition: background-color 0.15s ease-in-out;
+.total-row .summary-cell {
+  background-color: #f0f0f0; /* Light grey for total rows */
+  font-weight: bold;
+}
+
+.total-row .summary-cell.total-label {
+  text-align: right;
+  justify-content: flex-end;
+  grid-column: span 4;
+  // border-right: 1px solid #eee; /* Keep border for total label */
+}
+
+.total-row .summary-cell.total-value {
+  text-align: right;
+  justify-content: flex-end;
+  // border-left: 1px solid #eee; /* Keep border for total value */
 }
 
 .mat-no-data-row .mat-cell {
   text-align: center;
   padding-top: 0.4rem;
   padding-bottom: 0.4rem;
-  color: #6b7280;
+  color: #494b4e;
   font-style: italic;
 }
 
@@ -203,14 +254,6 @@ tr.mat-row:hover {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-}
-
-.mat-card.summary-section {
-  // border: 1px solid black;
-}
-
-.mat-card {
-  // border: 1px solid black;
 }
 
 .total-row-content {

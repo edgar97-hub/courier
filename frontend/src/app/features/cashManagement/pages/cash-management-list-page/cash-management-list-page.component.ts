@@ -23,17 +23,24 @@ import {
   DetailedCashMovementSummary,
   CashMovementQuery,
 } from '../../models/cash-movement.model';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { format } from 'date-fns';
 import { CashMovementFormComponent } from '../../components/cash-movement-form/cash-movement-form.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { finalize } from 'rxjs/operators';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  finalize,
+  takeUntil,
+} from 'rxjs/operators';
 import { MatMenuModule } from '@angular/material/menu';
 import {
   ConfirmDialogComponent,
   ConfirmDialogData,
 } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { environment } from '../../../../../environments/environment';
+import { ExcelExportService } from '../../../../features/listaCierreCaja/services/excel-export.service'; // Import ExcelExportService
 
 @Component({
   selector: 'app-cash-management-list-page',
@@ -72,7 +79,13 @@ export class CashManagementListPageComponent implements OnInit {
     'actions',
   ];
 
-  summaryDisplayedColumns: string[] = ['type', 'Efectivo', 'Yape/Transferencia BCP', 'Plin/Transferencia INTERBANK', 'POS'];
+  paymentMethods: string[] = [
+    'Efectivo',
+    'Yape/Transferencia BCP',
+    'Plin/Transferencia INTERBANK',
+    'POS',
+  ];
+
   cashMovements$: Observable<CashMovement[]> = of([]);
   summary$: Observable<DetailedCashMovementSummary> = of({
     Efectivo: { income: 0, expense: 0, balance: 0 },
@@ -83,8 +96,6 @@ export class CashManagementListPageComponent implements OnInit {
     totalCashExpense: 0,
     totalCashBalance: 0,
   });
-
-  summaryTableDataSource: any[] = [];
 
   totalItems: number = 0;
   pageSize: number = 10;
@@ -97,11 +108,14 @@ export class CashManagementListPageComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
+  private destroy$ = new Subject<void>();
+
   constructor(
     private fb: FormBuilder,
     private cashManagementService: CashManagementService,
     public dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private excelExportService: ExcelExportService // Inject ExcelExportService
   ) {
     const today = new Date();
     this.filterForm = this.fb.group({
@@ -115,8 +129,46 @@ export class CashManagementListPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.applyFilters();
+
+    this.filterForm.valueChanges
+      .pipe(
+        takeUntil(this.destroy$),
+        debounceTime(400),
+        distinctUntilChanged(
+          (prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)
+        )
+      )
+      .subscribe((formValues) => {
+        this.applyAllFilters(formValues);
+      });
   }
 
+  applyAllFilters(formValues: any): void {
+    const filters: CashMovementQuery = formValues;
+
+    if (filters.startDate) {
+      filters.startDate =
+        this.datePipe.transform(filters.startDate, 'yyyy-MM-dd') || '';
+    }
+    if (filters.endDate) {
+      filters.endDate =
+        this.datePipe.transform(filters.endDate, 'yyyy-MM-dd') || '';
+    }
+
+    this.isLoadingResults = true;
+    this.cashManagementService
+      .getAllCashMovements(filters, this.pageNumber, this.pageSize)
+      .pipe(finalize(() => (this.isLoadingResults = false)))
+      .subscribe((response) => {
+        this.cashMovements$ = of(response.movements);
+        this.totalItems = response.total;
+      });
+
+    this.isLoadingSummary = true;
+    this.summary$ = this.cashManagementService
+      .getCashMovementSummary(filters)
+      .pipe(finalize(() => (this.isLoadingSummary = false)));
+  }
   applyFilters(): void {
     const filters: CashMovementQuery = this.filterForm.value;
 
@@ -142,52 +194,7 @@ export class CashManagementListPageComponent implements OnInit {
     this.summary$ = this.cashManagementService
       .getCashMovementSummary(filters)
       .pipe(finalize(() => (this.isLoadingSummary = false)));
-
-    this.summary$.subscribe((summary) => {
-      this.summaryTableDataSource = this.getSummaryTableDataSource(summary);
-    });
   }
-
-  private getSummaryTableDataSource(summary: DetailedCashMovementSummary): any[] {
-    return [
-      {
-        type: 'Ingreso',
-        Efectivo: summary.Efectivo.income,
-        'Yape/Transferencia BCP': summary['Yape/Transferencia BCP'].income,
-        'Plin/Transferencia INTERBANK': summary['Plin/Transferencia INTERBANK'].income,
-        POS: summary.POS.income,
-      },
-      {
-        type: 'Egreso',
-        Efectivo: summary.Efectivo.expense,
-        'Yape/Transferencia BCP': summary['Yape/Transferencia BCP'].expense,
-        'Plin/Transferencia INTERBANK': summary['Plin/Transferencia INTERBANK'].expense,
-        POS: summary.POS.expense,
-      },
-      {
-        type: 'Saldo',
-        Efectivo: summary.Efectivo.balance,
-        'Yape/Transferencia BCP': summary['Yape/Transferencia BCP'].balance,
-        'Plin/Transferencia INTERBANK': summary['Plin/Transferencia INTERBANK'].balance,
-        POS: summary.POS.balance,
-      },
-      {
-        type: 'IngresoCaja',
-        POS: summary.totalCashIncome,
-      },
-      {
-        type: 'EgresoCaja',
-        POS: summary.totalCashExpense,
-      },
-      {
-        type: 'TotalCaja',
-        POS: summary.totalCashBalance,
-      },
-    ];
-  }
-
-  isPaymentMethodRow = (row: any) => row.type === 'Ingreso' || row.type === 'Egreso' || row.type === 'Saldo';
-  isTotalRow = (row: any) => row.type === 'IngresoCaja' || row.type === 'EgresoCaja' || row.type === 'TotalCaja';
 
   onPageChange(event: any): void {
     this.pageNumber = event.pageIndex + 1;
@@ -259,26 +266,103 @@ export class CashManagementListPageComponent implements OnInit {
   }
 
   generatePdf(id: string): void {
-    this.cashManagementService.generatePdf(id).subscribe({
-      next: (response) => {
-        const url = window.URL.createObjectURL(response);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `movimiento_${id}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        this.snackBar.open('PDF generado exitosamente', 'Cerrar', {
-          duration: 3000,
-        });
-      },
-      error: (error) => {
-        this.snackBar.open('Error al generar PDF: ' + error.message, 'Cerrar', {
-          duration: 3000,
-        });
-        console.error('Error generating PDF:', error);
-      },
+    const pdfUrl =
+      environment.apiUrl + '/cash-management/' + id + '/pdf/ticket';
+    window.open(pdfUrl, '_blank');
+  }
+  async exportCashMovementsToExcel(): Promise<void> {
+    const filters: CashMovementQuery = this.filterForm.value;
+
+    if (filters.startDate) {
+      filters.startDate =
+        this.datePipe.transform(filters.startDate, 'yyyy-MM-dd') || '';
+    }
+    if (filters.endDate) {
+      filters.endDate =
+        this.datePipe.transform(filters.endDate, 'yyyy-MM-dd') || '';
+    }
+
+    // Fetch all movements (assuming a large page size is sufficient for export)
+    const movementsResponse = await this.cashManagementService
+      .getAllCashMovements(filters, 1, 9999) // Fetch all movements
+      .toPromise();
+    const movements = movementsResponse?.movements || [];
+
+    // Fetch detailed summary
+    const summary = await this.cashManagementService
+      .getCashMovementSummary(filters) // Corrected method name
+      .toPromise();
+
+    const summaryForExcel: any[] = [];
+    const movementsForExcel: any[] = [];
+
+    // Prepare summary data
+    summaryForExcel.push({
+      label: 'Fecha Inicio',
+      value: this.datePipe.transform(filters.startDate, 'dd/MM/yyyy'),
     });
+    summaryForExcel.push({
+      label: 'Fecha Fin',
+      value: this.datePipe.transform(filters.endDate, 'dd/MM/yyyy'),
+    });
+
+    if (summary) {
+      const paymentMethods = [
+        'Efectivo',
+        'Yape/Transferencia BCP',
+        'Plin/Transferencia INTERBANK',
+        'POS',
+      ];
+
+      paymentMethods.forEach((key) => {
+        const paymentMethodSummary =
+          summary[key as keyof DetailedCashMovementSummary];
+        if (paymentMethodSummary && typeof paymentMethodSummary === 'object') {
+          summaryForExcel.push({
+            Tipo: key,
+            Ingreso: paymentMethodSummary.income.toFixed(2),
+            Egreso: paymentMethodSummary.expense.toFixed(2),
+            Saldo: paymentMethodSummary.balance.toFixed(2),
+          });
+        }
+      });
+
+      summaryForExcel.push({
+        label: 'Total Ingresos',
+        value: parseFloat(summary.totalCashIncome.toFixed(2)),
+      });
+      summaryForExcel.push({
+        label: 'Total Egresos',
+        value: parseFloat(summary.totalCashExpense.toFixed(2)),
+      });
+      summaryForExcel.push({
+        label: 'Saldo Total',
+        value: parseFloat(summary.totalCashBalance.toFixed(2)),
+      });
+    }
+
+    // Prepare movements data
+    movements.forEach((movement) => {
+      movementsForExcel.push({
+        'N°': movement.code,
+        Fecha: this.datePipe.transform(movement.date, 'dd/MM/yyyy'),
+        Tipo: movement.typeMovement,
+        Monto: parseFloat(movement.amount.toFixed(2)),
+        'Forma de Pago': movement.paymentsMethod,
+        Descripción: movement.description,
+        Usuario: movement.user?.username || movement.user?.email,
+      });
+    });
+
+    const fileName = `movimientos_caja_${this.datePipe.transform(
+      new Date(),
+      'yyyyMMdd_HHmmss'
+    )}`;
+    this.excelExportService.exportCashMovementSummaryAndDetailsToExcel(
+      summaryForExcel,
+      movementsForExcel,
+      fileName,
+      'Movimientos de Caja'
+    );
   }
 }

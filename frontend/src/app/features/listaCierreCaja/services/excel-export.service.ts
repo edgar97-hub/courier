@@ -26,7 +26,7 @@ export class ExcelExportService {
 
     // Opcional: Ajustar anchos de columnas (esto es un poco más avanzado y a veces no perfecto)
     // Podrías necesitar una función para calcular anchos basados en el contenido
-    const columnWidths = this.calculateColumnWidths(jsonData);
+    const columnWidths = this.calculateColumnWidths(worksheet);
     worksheet['!cols'] = columnWidths;
 
     // Crear el workbook
@@ -34,6 +34,123 @@ export class ExcelExportService {
       Sheets: { [sheetName]: worksheet },
       SheetNames: [sheetName],
     };
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
+    });
+    this.saveAsExcelFile(excelBuffer, excelFileName);
+  }
+
+  public exportCashMovementSummaryAndDetailsToExcel(
+    summaryData: any[],
+    movementData: any[],
+    excelFileName: string,
+    sheetName: string = 'Movimientos de Caja'
+  ): void {
+    const workbook: XLSX.WorkBook = XLSX.utils.book_new();
+    const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([]); // Create empty sheet
+
+    let rowIndex = 1;
+
+    // Initialize !merges if it doesn't exist
+    if (!worksheet['!merges']) {
+      worksheet['!merges'] = [];
+    }
+
+    // Add main title
+    worksheet['!merges'].push({
+      s: { r: rowIndex - 1, c: 0 },
+      e: { r: rowIndex - 1, c: 3 },
+    });
+    worksheet['A' + rowIndex] = {
+      v: 'Movimientos de Caja',
+      t: 's',
+      s: { font: { bold: true, sz: 14 } },
+    };
+    rowIndex++;
+    rowIndex++; // Empty row
+
+    // Add summary details (Fecha Inicio, Fecha Fin)
+    summaryData.slice(0, 2).forEach((row) => {
+      worksheet['A' + rowIndex] = { v: row.label, t: 's' };
+      worksheet['C' + rowIndex] = { v: row.value, t: 's' };
+      rowIndex++;
+    });
+    rowIndex++; // Empty row
+
+    // Add summary table headers
+    worksheet['A' + rowIndex] = { v: 'Tipo', t: 's', s: { font: { bold: true } } };
+    worksheet['B' + rowIndex] = { v: 'Ingreso', t: 's', s: { font: { bold: true } } };
+    worksheet['C' + rowIndex] = { v: 'Egreso', t: 's', s: { font: { bold: true } } };
+    worksheet['D' + rowIndex] = { v: 'Saldo', t: 's', s: { font: { bold: true } } };
+    rowIndex++;
+
+    // Add summary table data
+    summaryData.slice(2, -3).forEach((row) => {
+      // Exclude Fecha Inicio/Fin and totals
+      worksheet['A' + rowIndex] = { v: row.Tipo, t: 's' };
+      worksheet['B' + rowIndex] = { v: row.Ingreso, t: 's' };
+      worksheet['C' + rowIndex] = { v: parseFloat(row.Egreso), t: 's' };
+      worksheet['D' + rowIndex] = { v: parseFloat(row.Saldo), t: 's' };
+      rowIndex++;
+    });
+    rowIndex++; // Empty row
+
+    // Add total summary
+    summaryData.slice(-3).forEach((row) => {
+      // Only totals
+      if (!worksheet['!merges']) {
+        worksheet['!merges'] = [];
+      }
+      worksheet['!merges'].push({
+        s: { r: rowIndex - 1, c: 0 },
+        e: { r: rowIndex - 1, c: 2 },
+      });
+      worksheet['A' + rowIndex] = {
+        v: row.label,
+        t: 's',
+        s: { font: { bold: true } },
+      };
+      worksheet['C' + rowIndex] = {
+        v: 'S/',
+        t: 's',
+        s: { font: { bold: true } },
+      };
+      worksheet['D' + rowIndex] = {
+        v: row.value,
+        t: 'n',
+        s: { font: { bold: true } },
+      };
+      rowIndex++;
+    });
+    rowIndex++; // Empty row
+    rowIndex++; // Empty row
+
+    // Add movements table header
+    const movementHeaders = Object.keys(movementData[0] || {});
+    XLSX.utils.sheet_add_aoa(worksheet, [movementHeaders], {
+      origin: `A${rowIndex}`,
+    });
+    worksheet['A' + rowIndex].s = { font: { bold: true } }; // Apply bold to the first header cell
+    rowIndex++;
+
+    // Add movements data
+    XLSX.utils.sheet_add_json(worksheet, movementData, {
+      origin: `A${rowIndex}`,
+      skipHeader: true,
+    });
+    // Set column widths for the entire sheet
+    const columnWidths = this.calculateColumnWidths(worksheet);
+    // Set column A width to be very small
+    if (columnWidths[0]) {
+      columnWidths[0].wch = 5; // Set a small width, e.g., 5 characters
+    } else {
+      columnWidths.unshift({ wch: 5 }); // If column A doesn't exist yet, add it
+    }
+    console.log('columnWidths', columnWidths);
+    worksheet['!cols'] = columnWidths;
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
     const excelBuffer: any = XLSX.write(workbook, {
       bookType: 'xlsx',
       type: 'array',
@@ -53,19 +170,25 @@ export class ExcelExportService {
     window.URL.revokeObjectURL(url);
   }
 
-  // Función de ejemplo para calcular anchos (simplificada)
-  private calculateColumnWidths(jsonData: any[]): any[] {
-    if (!jsonData || jsonData.length === 0) return [];
-    const widths: any[] = [];
-    const header = Object.keys(jsonData[0]);
-    header.forEach((key) => {
-      const maxLength = Math.max(
-        key.length,
-        ...jsonData.map((item) => (item[key] ? String(item[key]).length : 0))
-      );
-      // widths.push({ wch: maxLength + 2 }); // +2 para un poco de padding
-      widths.push({ wch: maxLength + 1 });
+  // Updated function to calculate widths from a worksheet
+  private calculateColumnWidths(worksheet: XLSX.WorkSheet): any[] {
+    const columnWidths: any[] = [];
+    const data = XLSX.utils.sheet_to_json(worksheet, {
+      header: 1,
+      raw: false,
+    }) as any[][]; // Ensure data is treated as array of arrays
+
+    data.forEach((row: any[]) => {
+      row.forEach((cell: any, colIndex: number) => {
+        const cellValue = String(cell || '');
+        const currentWidth = columnWidths[colIndex]
+          ? columnWidths[colIndex].wch
+          : 0;
+        if (cellValue.length > currentWidth) {
+          columnWidths[colIndex] = { wch: cellValue.length + 2 }; // +2 for padding
+        }
+      });
     });
-    return widths;
+    return columnWidths;
   }
 }

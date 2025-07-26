@@ -39,7 +39,9 @@ export interface ConfirmDialogData {
       <mat-dialog-content>
         <p>{{ data.message }}</p>
       </mat-dialog-content>
-      <mat-dialog-actions style="display: flex; flex-direction: row;">
+      <mat-dialog-actions
+        style="display: flex; flex-direction: row;flex-wrap:nowrap; border:0px solid black"
+      >
         <button
           mat-stroked-button
           [mat-dialog-close]="false"

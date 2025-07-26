@@ -99,7 +99,7 @@ export const menuItems: MenuItem[] = [
   },
   {
     icon: 'analytics',
-    label: 'Gestión de Caja Chica',
+    label: 'Gestión de Caja',
     route: 'cash-management',
     roles: ['ADMINISTRADOR', 'RECEPCIONISTA'],
   },
