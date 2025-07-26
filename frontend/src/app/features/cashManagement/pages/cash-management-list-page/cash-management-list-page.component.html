@@ -196,7 +196,7 @@
       <div class="">
         <table
           mat-table
-          [dataSource]="(cashMovements$ | async) || []"
+          [dataSource]="cashMovements"
           matSort
           class="mat-table"
         >
@@ -327,7 +327,11 @@
                   <mat-icon>picture_as_pdf</mat-icon>
                   <span>Imprimir ticket</span>
                 </button>
-                <button mat-menu-item (click)="deleteMovement(element.id)">
+                <button
+                  mat-menu-item
+                  (click)="deleteMovement(element.id)"
+                  *ngIf="!isReceptionist()"
+                >
                   <mat-icon>delete</mat-icon>
                   <span>Eliminar</span>
                 </button>

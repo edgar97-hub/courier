@@ -34,7 +34,9 @@ export class CashManagementService {
   getAllCashMovements(
     query?: CashMovementQuery,
     pageNumber: number = 1,
-    pageSize: number = 10
+    pageSize: number = 10,
+    orderBy?: string,
+    orderDirection?: string
   ): Observable<CashMovementPaginatedResponse> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
@@ -52,6 +54,12 @@ export class CashManagementService {
     }
     params = params.append('page_number', pageNumber.toString());
     params = params.append('page_size', pageSize.toString());
+    if (orderBy) {
+      params = params.append('orderBy', orderBy);
+    }
+    if (orderDirection) {
+      params = params.append('orderDirection', orderDirection);
+    }
 
     return this.http.get<CashMovementPaginatedResponse>(
       `${this.apiUrl}/movements`,

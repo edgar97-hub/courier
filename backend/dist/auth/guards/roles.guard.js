@@ -24,6 +24,7 @@ let RolesGuard = class RolesGuard {
             return true;
         }
         const roles = this.reflector.get(key_decorators_1.ROLES_KEY, context.getHandler());
+        console.log('roles', roles);
         const admin = this.reflector.get(key_decorators_1.ADMIN_KEY, context.getHandler());
         const req = context.switchToHttp().getRequest();
         const { roleUser } = req;
@@ -41,7 +42,9 @@ let RolesGuard = class RolesGuard {
         if (roleUser === roles_1.ROLES.ADMIN) {
             return true;
         }
-        const isAuth = roles.some((role) => role === roleUser);
+        const isAuth = roles.some((role) => roles_1.ROLES[role] === roleUser);
+        console.log('roleUser', roleUser);
+        console.log('isAuth', isAuth);
         if (!isAuth) {
             throw new common_1.UnauthorizedException('No tienes permisos para esta operacion');
         }

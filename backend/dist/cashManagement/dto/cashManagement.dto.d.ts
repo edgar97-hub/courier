@@ -13,6 +13,8 @@ export declare class QueryCashMovementDto {
     typeMovement?: TYPES_MOVEMENTS;
     paymentsMethod?: string;
     userId?: string;
+    orderBy?: string;
+    orderDirection?: 'ASC' | 'DESC' | 'asc' | 'desc';
 }
 export declare class PaymentMethodSummary {
     income: number;

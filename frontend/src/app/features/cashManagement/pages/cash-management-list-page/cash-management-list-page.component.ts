@@ -1,4 +1,10 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -23,7 +29,7 @@ import {
   DetailedCashMovementSummary,
   CashMovementQuery,
 } from '../../models/cash-movement.model';
-import { Observable, of, Subject } from 'rxjs';
+import { firstValueFrom, Observable, of, Subject } from 'rxjs';
 import { format } from 'date-fns';
 import { CashMovementFormComponent } from '../../components/cash-movement-form/cash-movement-form.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -41,6 +47,7 @@ import {
 } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { environment } from '../../../../../environments/environment';
 import { ExcelExportService } from '../../../../features/listaCierreCaja/services/excel-export.service'; // Import ExcelExportService
+import { AppStore } from '../../../../app.store';
 
 @Component({
   selector: 'app-cash-management-list-page',
@@ -66,7 +73,9 @@ import { ExcelExportService } from '../../../../features/listaCierreCaja/service
   templateUrl: './cash-management-list-page.component.html',
   styleUrls: ['./cash-management-list-page.component.scss'],
 })
-export class CashManagementListPageComponent implements OnInit {
+export class CashManagementListPageComponent implements OnInit, AfterViewInit {
+  appStore = inject(AppStore);
+
   filterForm: FormGroup;
   displayedColumns: string[] = [
     'code',
@@ -86,7 +95,8 @@ export class CashManagementListPageComponent implements OnInit {
     'POS',
   ];
 
-  cashMovements$: Observable<CashMovement[]> = of([]);
+  cashMovements: MatTableDataSource<CashMovement> =
+    new MatTableDataSource<CashMovement>([]);
   summary$: Observable<DetailedCashMovementSummary> = of({
     Efectivo: { income: 0, expense: 0, balance: 0 },
     'Yape/Transferencia BCP': { income: 0, expense: 0, balance: 0 },
@@ -128,7 +138,7 @@ export class CashManagementListPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.applyFilters();
+    this.fetchCashMovementsAndSummary(this.filterForm.value);
 
     this.filterForm.valueChanges
       .pipe(
@@ -139,12 +149,24 @@ export class CashManagementListPageComponent implements OnInit {
         )
       )
       .subscribe((formValues) => {
-        this.applyAllFilters(formValues);
+        this.fetchCashMovementsAndSummary(formValues);
       });
   }
 
-  applyAllFilters(formValues: any): void {
-    const filters: CashMovementQuery = formValues;
+  ngAfterViewInit(): void {
+    this.cashMovements.sort = this.sort;
+    this.sort.sortChange.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.pageNumber = 1; // Reset page to 1 when sort changes
+      this.applyFilters();
+    });
+  }
+
+  fetchCashMovementsAndSummary(
+    formValues: any,
+    orderBy?: string,
+    orderDirection?: string
+  ): void {
+    const filters: CashMovementQuery = { ...formValues };
 
     if (filters.startDate) {
       filters.startDate =
@@ -157,11 +179,20 @@ export class CashManagementListPageComponent implements OnInit {
 
     this.isLoadingResults = true;
     this.cashManagementService
-      .getAllCashMovements(filters, this.pageNumber, this.pageSize)
+      .getAllCashMovements(
+        filters,
+        this.pageNumber,
+        this.pageSize,
+        orderBy,
+        orderDirection
+      )
       .pipe(finalize(() => (this.isLoadingResults = false)))
       .subscribe((response) => {
-        this.cashMovements$ = of(response.movements);
+        this.cashMovements = new MatTableDataSource<CashMovement>(
+          response.movements
+        );
         this.totalItems = response.total;
+        this.cashMovements.sort = this.sort;
       });
 
     this.isLoadingSummary = true;
@@ -169,31 +200,13 @@ export class CashManagementListPageComponent implements OnInit {
       .getCashMovementSummary(filters)
       .pipe(finalize(() => (this.isLoadingSummary = false)));
   }
+
   applyFilters(): void {
-    const filters: CashMovementQuery = this.filterForm.value;
-
-    if (filters.startDate) {
-      filters.startDate =
-        this.datePipe.transform(filters.startDate, 'yyyy-MM-dd') || '';
-    }
-    if (filters.endDate) {
-      filters.endDate =
-        this.datePipe.transform(filters.endDate, 'yyyy-MM-dd') || '';
-    }
-
-    this.isLoadingResults = true;
-    this.cashManagementService
-      .getAllCashMovements(filters, this.pageNumber, this.pageSize)
-      .pipe(finalize(() => (this.isLoadingResults = false)))
-      .subscribe((response) => {
-        this.cashMovements$ = of(response.movements);
-        this.totalItems = response.total;
-      });
-
-    this.isLoadingSummary = true;
-    this.summary$ = this.cashManagementService
-      .getCashMovementSummary(filters)
-      .pipe(finalize(() => (this.isLoadingSummary = false)));
+    this.fetchCashMovementsAndSummary(
+      this.filterForm.value,
+      this.sort?.active,
+      this.sort?.direction
+    );
   }
 
   onPageChange(event: any): void {
@@ -283,15 +296,15 @@ export class CashManagementListPageComponent implements OnInit {
     }
 
     // Fetch all movements (assuming a large page size is sufficient for export)
-    const movementsResponse = await this.cashManagementService
-      .getAllCashMovements(filters, 1, 9999) // Fetch all movements
-      .toPromise();
+    const movementsObservable = this.cashManagementService
+      .getAllCashMovements(filters, 1, 999999); // Fetch all movements
+    const movementsResponse = await firstValueFrom(movementsObservable);
     const movements = movementsResponse?.movements || [];
 
     // Fetch detailed summary
-    const summary = await this.cashManagementService
-      .getCashMovementSummary(filters) // Corrected method name
-      .toPromise();
+    const summaryObservable = this.cashManagementService
+      .getCashMovementSummary(filters); // Corrected method name
+    const summary = await firstValueFrom(summaryObservable);
 
     const summaryForExcel: any[] = [];
     const movementsForExcel: any[] = [];
@@ -364,5 +377,10 @@ export class CashManagementListPageComponent implements OnInit {
       fileName,
       'Movimientos de Caja'
     );
+  }
+
+  isReceptionist(): boolean {
+    const userRole = this.appStore.currentUser()?.role;
+    return userRole === 'RECEPCIONISTA';
   }
 }

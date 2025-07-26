@@ -136,9 +136,18 @@ export class CashManagementService {
       where.user = { id: query.userId };
     }
 
+    const order: { [key: string]: 'ASC' | 'DESC' } = {};
+    if (query.orderBy && query.orderDirection) {
+      order[query.orderBy] = query.orderDirection.toUpperCase() as
+        | 'ASC'
+        | 'DESC';
+    } else {
+      order.code = 'DESC'; // Default sort
+    }
+
     const [movements, total] = await this.cashMovementRepository.findAndCount({
       where,
-      order: { date: 'DESC' },
+      order,
       relations: ['user'],
       skip: (pageNumber - 1) * pageSize,
       take: pageSize,
@@ -196,7 +205,8 @@ export class CashManagementService {
     };
 
     for (const movement of movements) {
-      const method = movement.paymentsMethod as keyof DetailedCashMovementSummaryDto;
+      const method =
+        movement.paymentsMethod as keyof DetailedCashMovementSummaryDto;
       if (paymentMethods.includes(method)) {
         if (movement.typeMovement === TYPES_MOVEMENTS.INCOME) {
           (summary[method] as PaymentMethodSummary).income += movement.amount;
@@ -215,7 +225,8 @@ export class CashManagementService {
         (summary[methodKey] as PaymentMethodSummary).expense;
     }
 
-    summary.totalCashBalance = summary.totalCashIncome - summary.totalCashExpense;
+    summary.totalCashBalance =
+      summary.totalCashIncome - summary.totalCashExpense;
 
     return summary;
   }

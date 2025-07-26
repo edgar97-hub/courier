@@ -106,9 +106,16 @@ let CashManagementService = class CashManagementService {
         if (query.userId) {
             where.user = { id: query.userId };
         }
+        const order = {};
+        if (query.orderBy && query.orderDirection) {
+            order[query.orderBy] = query.orderDirection.toUpperCase();
+        }
+        else {
+            order.code = 'DESC';
+        }
         const [movements, total] = await this.cashMovementRepository.findAndCount({
             where,
-            order: { date: 'DESC' },
+            order,
             relations: ['user'],
             skip: (pageNumber - 1) * pageSize,
             take: pageSize,
@@ -172,7 +179,8 @@ let CashManagementService = class CashManagementService {
                 summary[methodKey].income -
                     summary[methodKey].expense;
         }
-        summary.totalCashBalance = summary.totalCashIncome - summary.totalCashExpense;
+        summary.totalCashBalance =
+            summary.totalCashIncome - summary.totalCashExpense;
         return summary;
     }
     buildWhereClauseForSummary(query) {

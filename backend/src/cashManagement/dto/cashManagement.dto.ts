@@ -58,6 +58,17 @@ export class QueryCashMovementDto {
   @IsOptional()
   @IsUUID()
   userId?: string;
+
+  @ApiProperty({ example: 'date', description: 'Campo por el cual ordenar (e.g., date, amount, code)', required: false })
+  @IsOptional()
+  @IsString()
+  orderBy?: string;
+
+  @ApiProperty({ example: 'DESC', description: 'Dirección del ordenamiento (ASC o DESC)', required: false })
+  @IsOptional()
+  @IsString()
+  @IsEnum(['ASC', 'DESC', 'asc', 'desc'])
+  orderDirection?: 'ASC' | 'DESC' | 'asc' | 'desc';
 }
 
 export class PaymentMethodSummary {
