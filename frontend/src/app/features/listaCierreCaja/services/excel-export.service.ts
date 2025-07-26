@@ -78,22 +78,66 @@ export class ExcelExportService {
     });
     rowIndex++; // Empty row
 
-    // Add summary table headers
-    worksheet['A' + rowIndex] = { v: 'Tipo', t: 's', s: { font: { bold: true } } };
-    worksheet['B' + rowIndex] = { v: 'Ingreso', t: 's', s: { font: { bold: true } } };
-    worksheet['C' + rowIndex] = { v: 'Egreso', t: 's', s: { font: { bold: true } } };
-    worksheet['D' + rowIndex] = { v: 'Saldo', t: 's', s: { font: { bold: true } } };
+    // Extract payment method summaries
+    const paymentMethodSummaries = summaryData.slice(2, -3);
+
+    // Get payment method names for headers
+    const paymentMethodNames = paymentMethodSummaries.map((s) => s.Tipo);
+
+    // Add payment method headers horizontally
+    let colIndex = 1; // Start from column B
+    worksheet['A' + rowIndex] = { v: '', t: 's' }; // Empty cell for the first column
+    paymentMethodNames.forEach((name) => {
+      const cellRef = XLSX.utils.encode_cell({ r: rowIndex - 1, c: colIndex });
+      worksheet[cellRef] = { v: name, t: 's', s: { font: { bold: true } } };
+      colIndex++;
+    });
     rowIndex++;
 
-    // Add summary table data
-    summaryData.slice(2, -3).forEach((row) => {
-      // Exclude Fecha Inicio/Fin and totals
-      worksheet['A' + rowIndex] = { v: row.Tipo, t: 's' };
-      worksheet['B' + rowIndex] = { v: row.Ingreso, t: 's' };
-      worksheet['C' + rowIndex] = { v: parseFloat(row.Egreso), t: 's' };
-      worksheet['D' + rowIndex] = { v: parseFloat(row.Saldo), t: 's' };
-      rowIndex++;
+    // Add "Ingreso" row
+    colIndex = 0;
+    worksheet['A' + rowIndex] = {
+      v: 'Ingreso',
+      t: 's',
+      s: { font: { bold: true } },
+    };
+    colIndex++;
+    paymentMethodSummaries.forEach((s) => {
+      const cellRef = XLSX.utils.encode_cell({ r: rowIndex - 1, c: colIndex });
+      worksheet[cellRef] = { v: parseFloat(s.Ingreso), t: 'n' };
+      colIndex++;
     });
+    rowIndex++;
+
+    // Add "Egreso" row
+    colIndex = 0;
+    worksheet['A' + rowIndex] = {
+      v: 'Egreso',
+      t: 's',
+      s: { font: { bold: true } },
+    };
+    colIndex++;
+    paymentMethodSummaries.forEach((s) => {
+      const cellRef = XLSX.utils.encode_cell({ r: rowIndex - 1, c: colIndex });
+      worksheet[cellRef] = { v: parseFloat(s.Egreso), t: 'n' };
+      colIndex++;
+    });
+    rowIndex++;
+
+    // Add "Saldo" row
+    colIndex = 0;
+    worksheet['A' + rowIndex] = {
+      v: 'Saldo',
+      t: 's',
+      s: { font: { bold: true } },
+    };
+    colIndex++;
+    paymentMethodSummaries.forEach((s) => {
+      const cellRef = XLSX.utils.encode_cell({ r: rowIndex - 1, c: colIndex });
+      worksheet[cellRef] = { v: parseFloat(s.Saldo), t: 'n' };
+      colIndex++;
+    });
+    rowIndex++;
     rowIndex++; // Empty row
 
     // Add total summary

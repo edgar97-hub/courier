@@ -22,6 +22,7 @@ const roles_guard_1 = require("../../auth/guards/roles.guard");
 const roles_decorator_1 = require("../../auth/decorators/roles.decorator");
 const cash_movement_pdf_generator_service_1 = require("../services/cash-movement-pdf-generator.service");
 const admin_decorator_1 = require("../../auth/decorators/admin.decorator");
+const public_decorator_1 = require("../../auth/decorators/public.decorator");
 let CashManagementController = class CashManagementController {
     constructor(cashManagementService, cashMovementPdfGeneratorService) {
         this.cashManagementService = cashManagementService;
@@ -54,7 +55,10 @@ let CashManagementController = class CashManagementController {
         return this.cashManagementService.getDetailedBalanceSummary(query);
     }
     async getCashMovementPdf(id, req, res) {
-        await this.cashMovementPdfGeneratorService.streamCashMovementPdfToResponse(id, req, res);
+        await this.cashMovementPdfGeneratorService.streamCashMovementPdfA4ToResponse(id, req, res);
+    }
+    async getCashMovementPdfTicket(id, req, res) {
+        await this.cashMovementPdfGeneratorService.streamCashMovementPdf80mmToResponse(id, req, res);
     }
 };
 exports.CashManagementController = CashManagementController;
@@ -180,6 +184,27 @@ __decorate([
     __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", Promise)
 ], CashManagementController.prototype, "getCashMovementPdf", null);
+__decorate([
+    (0, common_1.Get)(':id/pdf/ticket'),
+    (0, public_decorator_1.PublicAccess)(),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del movimiento de caja' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'PDF del movimiento de caja en formato ticket generado exitosamente.',
+        type: 'application/pdf',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 404,
+        description: 'Movimiento de caja no encontrado.',
+    }),
+    __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
+    __param(1, (0, common_1.Req)()),
+    __param(2, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:returntype", Promise)
+], CashManagementController.prototype, "getCashMovementPdfTicket", null);
 exports.CashManagementController = CashManagementController = __decorate([
     (0, swagger_1.ApiTags)('Cash Management'),
     (0, common_1.Controller)('cash-management'),

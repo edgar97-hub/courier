@@ -7,5 +7,6 @@ export declare class CashMovementPdfGeneratorService {
     private readonly settingRepository;
     private printer;
     constructor(cashMovementRepository: Repository<CashManagementEntity>, settingRepository: Repository<SettingsEntity>);
-    streamCashMovementPdfToResponse(movementId: string, req: Request, res: Response): Promise<void>;
+    streamCashMovementPdfA4ToResponse(movementId: string, req: Request, res: Response): Promise<void>;
+    streamCashMovementPdf80mmToResponse(movementId: string, req: Request, res: Response): Promise<void>;
 }

@@ -29,6 +29,7 @@ import { ROLES } from '../../constants/roles';
 import { Response } from 'express';
 import { CashMovementPdfGeneratorService } from '../services/cash-movement-pdf-generator.service';
 import { AdminAccess } from 'src/auth/decorators/admin.decorator';
+import { PublicAccess } from 'src/auth/decorators/public.decorator';
 
 @ApiTags('Cash Management')
 @Controller('cash-management')
@@ -171,10 +172,36 @@ export class CashManagementController {
     @Req() req: Request, // Changed to @Req() req: Request
     @Res() res: Response,
   ): Promise<void> {
-    await this.cashMovementPdfGeneratorService.streamCashMovementPdfToResponse(
+    await this.cashMovementPdfGeneratorService.streamCashMovementPdfA4ToResponse(
       id,
       req,
       res,
     ); // Pass req
+  }
+
+  @Get(':id/pdf/ticket')
+  @PublicAccess()
+  @ApiBearerAuth()
+  @ApiParam({ name: 'id', description: 'ID del movimiento de caja' })
+  @ApiResponse({
+    status: 200,
+    description:
+      'PDF del movimiento de caja en formato ticket generado exitosamente.',
+    type: 'application/pdf',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Movimiento de caja no encontrado.',
+  })
+  async getCashMovementPdfTicket(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<void> {
+    await this.cashMovementPdfGeneratorService.streamCashMovementPdf80mmToResponse(
+      id,
+      req,
+      res,
+    );
   }
 }

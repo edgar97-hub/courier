@@ -20,4 +20,5 @@ export declare class CashManagementController {
     }>;
     getDetailedBalanceSummary(query: QueryCashMovementDto): Promise<DetailedCashMovementSummaryDto>;
     getCashMovementPdf(id: string, req: Request, res: Response): Promise<void>;
+    getCashMovementPdfTicket(id: string, req: Request, res: Response): Promise<void>;
 }

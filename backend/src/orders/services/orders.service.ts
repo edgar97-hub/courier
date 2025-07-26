@@ -149,8 +149,29 @@ export class OrdersService {
       if (body.payload.newStatus === STATES.DELIVERED) {
         if (updatedOrder) {
           const amount = updatedOrder.shipping_cost || 0;
-          const paymentMethod =
-            updatedOrder.payment_method_for_shipping_cost || 'Efectivo';
+
+          let pagoDirectoCourier = 'Pago directo (Pago a COURIER)';
+          let pagoEfectivoCourier = 'Efectivo (Pago a COURIER)';
+          let pagoDirectoEmpresa = 'Pago directo (Pago a EMPRESA)';
+          let paymentMethod = '';
+
+          if (
+            updatedOrder.payment_method_for_shipping_cost ===
+            pagoEfectivoCourier
+          ) {
+            paymentMethod = 'Efectivo';
+          }
+          if (
+            updatedOrder.payment_method_for_shipping_cost === pagoDirectoCourier
+          ) {
+            paymentMethod = 'Yape/Transferencia BCP';
+          }
+
+          if (
+            updatedOrder.payment_method_for_shipping_cost === pagoDirectoEmpresa
+          ) {
+            paymentMethod = 'Yape/Transferencia BCP';
+          }
           await this.cashManagementService.createAutomaticIncome(
             amount,
             paymentMethod,
