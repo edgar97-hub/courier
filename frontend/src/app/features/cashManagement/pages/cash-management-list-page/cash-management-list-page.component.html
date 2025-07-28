@@ -194,12 +194,7 @@
         <mat-spinner diameter="30"></mat-spinner>
       </div>
       <div class="">
-        <table
-          mat-table
-          [dataSource]="cashMovements"
-          matSort
-          class="mat-table"
-        >
+        <table mat-table [dataSource]="cashMovements" matSort class="mat-table">
           <!-- Code Column -->
           <ng-container matColumnDef="code">
             <th
@@ -319,7 +314,11 @@
                 <mat-icon>more_vert</mat-icon>
               </button>
               <mat-menu #actionsMenu="matMenu">
-                <button mat-menu-item (click)="editMovement(element)">
+                <button
+                  mat-menu-item
+                  (click)="editMovement(element)"
+                  *ngIf="!isReceptionist()"
+                >
                   <mat-icon>edit</mat-icon>
                   <span>Editar</span>
                 </button>
