@@ -201,7 +201,7 @@ let CashManagementService = class CashManagementService {
     buildWhereClauseForSummary(query) {
         const where = {};
         if (query.startDate && query.endDate) {
-            where.date = (0, typeorm_2.Between)(query.startDate, query.startDate);
+            where.date = (0, typeorm_2.Between)(query.startDate, query.endDate);
         }
         if (query.typeMovement) {
             where.typeMovement = query.typeMovement;

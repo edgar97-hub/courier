@@ -259,7 +259,7 @@ export class CashManagementService {
     const where: any = {};
 
     if (query.startDate && query.endDate) {
-      where.date = Between(query.startDate, query.startDate);
+      where.date = Between(query.startDate, query.endDate);
     }
     if (query.typeMovement) {
       where.typeMovement = query.typeMovement;
