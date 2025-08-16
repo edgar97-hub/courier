@@ -70,7 +70,14 @@ export class OrdersService {
       const oldOrder = await this.orderRepository.findOne({
         where: { id: body.payload.orderId },
       });
+
       if (!oldOrder) throw new Error('Orden no encontrada');
+      if (
+        body.payload.action === 'CAMBIO DE ESTADO' &&
+        (oldOrder.status === STATES.DELIVERED ||
+          oldOrder.status === STATES.REJECTED)
+      )
+        throw new Error('Orden ya fue modificada');
 
       if (body.payload.action === 'CAMBIO DE ESTADO') {
         await this.orderRepository.update(body.payload.orderId, {
@@ -116,7 +123,18 @@ export class OrdersService {
           let pagoDirectoCourier = 'Pago directo (Pago a COURIER)';
           let pagoEfectivoCourier = 'Efectivo (Pago a COURIER)';
           let pagoDirectoEmpresa = 'Pago directo (Pago a EMPRESA)';
-          let paymentMethod = '';
+          let paymentMethod = 'Efectivo';
+
+          /**
+           * Cuando el monto a cobrar sea en efectivo,
+           * el registro del coste del servicio en la caja debe ser efectivo.
+           */
+          if (
+            updatedOrder.payment_method_for_collection?.toLowerCase() ===
+            'efectivo'
+          ) {
+            updatedOrder.payment_method_for_shipping_cost = pagoEfectivoCourier;
+          }
 
           if (
             updatedOrder.payment_method_for_shipping_cost ===
@@ -182,11 +200,21 @@ export class OrdersService {
         });
         if (updatedOrder) {
           const amount = updatedOrder.shipping_cost || 0;
-
           let pagoDirectoCourier = 'Pago directo (Pago a COURIER)';
           let pagoEfectivoCourier = 'Efectivo (Pago a COURIER)';
           let pagoDirectoEmpresa = 'Pago directo (Pago a EMPRESA)';
-          let paymentMethod = '';
+          let paymentMethod = 'Efectivo';
+
+          /**
+           * Cuando el monto a cobrar sea en efectivo,
+           * el registro del coste del servicio en la caja debe ser efectivo.
+           */
+          if (
+            updatedOrder.payment_method_for_collection?.toLowerCase() ===
+            'efectivo'
+          ) {
+            updatedOrder.payment_method_for_shipping_cost = pagoEfectivoCourier;
+          }
 
           if (
             updatedOrder.payment_method_for_shipping_cost ===
@@ -218,14 +246,27 @@ export class OrdersService {
         relations: ['assigned_driver', 'user'],
       });
 
-      if (body.payload.newStatus === STATES.DELIVERED) {
+      if (
+        body.payload.newStatus === STATES.DELIVERED ||
+        body.payload.newStatus === STATES.REJECTED
+      ) {
         if (updatedOrder) {
           const amount = updatedOrder.shipping_cost || 0;
 
           let pagoDirectoCourier = 'Pago directo (Pago a COURIER)';
           let pagoEfectivoCourier = 'Efectivo (Pago a COURIER)';
           let pagoDirectoEmpresa = 'Pago directo (Pago a EMPRESA)';
-          let paymentMethod = '';
+          let paymentMethod = 'Efectivo';
+          /**
+           * Cuando el monto a cobrar sea en efectivo,
+           * el registro del coste del servicio en la caja debe ser efectivo.
+           */
+          if (
+            updatedOrder.payment_method_for_collection?.toLowerCase() ===
+            'efectivo'
+          ) {
+            updatedOrder.payment_method_for_shipping_cost = pagoEfectivoCourier;
+          }
 
           if (
             updatedOrder.payment_method_for_shipping_cost ===
@@ -244,12 +285,16 @@ export class OrdersService {
           ) {
             paymentMethod = 'Yape/Transferencia BCP';
           }
+
+          if (!updatedOrder.code || !updatedOrder.delivery_date) return;
+
           await this.cashManagementService.createAutomaticIncome(
             amount,
             paymentMethod,
             updatedOrder.user.id,
             updatedOrder.id,
             updatedOrder.code,
+            updatedOrder.delivery_date,
           );
         }
       } else if (body.payload.newStatus === STATES.ANNULLED) {
@@ -257,7 +302,6 @@ export class OrdersService {
           body.payload.orderId,
         );
       }
-
       return updatedOrder;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
@@ -796,6 +840,8 @@ export class OrdersService {
 
       if (role === ROLES.COMPANY) {
         query.andWhere('company.id = :idUser', { idUser });
+      } else if (role === ROLES.MOTORIZED && req.query.my_orders === 'true') {
+        query.andWhere('assigned_driver.id = :idUser', { idUser });
       }
 
       if (status) {
@@ -1271,6 +1317,135 @@ export class OrdersService {
           rejectedToday,
         },
         statusDistribution: [],
+      };
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+  public async findOrdersByRegistrationDate(
+    {
+      pageNumber = 0,
+      pageSize = 0,
+      sortField = '',
+      sortDirection = '',
+      startDate,
+      endDate,
+      status = '',
+      search_term = '',
+    }: {
+      pageNumber?: number;
+      pageSize?: number;
+      sortField?: string;
+      sortDirection?: string;
+      startDate?: string;
+      endDate?: string;
+      status?: string;
+      search_term?: string;
+    },
+    req,
+  ): Promise<{
+    items: any;
+    total_count: number;
+    page_number: number;
+    page_size: number;
+  }> {
+    let idUser = req.idUser;
+    let role = req.roleUser;
+
+    try {
+      const skip = (pageNumber - 1) * pageSize;
+      const query = this.orderRepository
+        .createQueryBuilder('order')
+        .leftJoinAndSelect('order.user', 'user')
+        .leftJoinAndSelect('order.assigned_driver', 'assigned_driver')
+        .leftJoinAndSelect('order.company', 'company');
+
+      if (startDate && endDate) {
+        const todayStart = new Date();
+
+        const timeZone = 'America/Lima';
+
+        let _startDate = formatInTimeZone(startDate, timeZone, 'yyyy-MM-dd');
+        let _endDate = formatInTimeZone(endDate, timeZone, 'yyyy-MM-dd');
+        const startLocalString = `${_startDate} 00:00:00.000`;
+        const endLocalString = `${_endDate} 23:59:59.999`;
+        const refDate = new Date();
+        const startOfPeriodInLima = parse(
+          startLocalString,
+          'yyyy-MM-dd HH:mm:ss.SSS',
+          refDate,
+        );
+        const endOfPeriodInLima = parse(
+          endLocalString,
+          'yyyy-MM-dd HH:mm:ss.SSS',
+          refDate,
+        );
+
+        const startUTC = fromZonedTime(startOfPeriodInLima, timeZone);
+        const endUTC = fromZonedTime(endOfPeriodInLima, timeZone);
+
+        // console.log(startOfDay(parseISO(startDate)));
+        // const start = startOfDay(parseISO(startDate));
+        // const end = endOfDay(parseISO(endDate));
+        console.log(startUTC);
+        console.log(endUTC);
+        query.andWhere({
+          createdAt: Between(startUTC, endUTC),
+        });
+      }
+
+      if (role === ROLES.COMPANY) {
+        query.andWhere('company.id = :idUser', { idUser });
+      }
+
+      if (status) {
+        let states = [status];
+        if (status === STATES.DELIVERED) {
+          states.push(STATES.REJECTED);
+        }
+        query.andWhere('order.status IN (:...states)', {
+          states: states,
+        });
+      }
+
+      if (search_term) {
+        const term = `%${search_term}%`;
+        query.andWhere(
+          `(CAST(order.code AS TEXT) ILIKE :term OR
+          user.username ILIKE :term OR
+          assigned_driver.username ILIKE :term OR
+          company.username ILIKE :term OR
+          order.shipment_type ILIKE :term OR
+          order.recipient_name ILIKE :term OR
+          order.delivery_district_name ILIKE :term OR
+          CAST(order.amount_to_collect_at_delivery AS TEXT) ILIKE :term OR
+          order.tracking_code ILIKE :term
+          )`,
+          { term },
+        );
+      }
+
+      const sortFieldMap = {
+        registration_date: 'order.createdAt',
+        motorizado: 'assigned_driver.username',
+        usuario_creacion: 'user.username',
+      };
+
+      const sortBy = sortFieldMap[sortField] || `order.${sortField}`;
+      const direction =
+        sortDirection?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+
+      query
+        .orderBy(sortBy, direction as 'ASC' | 'DESC')
+        .skip(skip)
+        .take(pageSize);
+
+      const [items, total] = await query.getManyAndCount();
+      return {
+        items,
+        total_count: total,
+        page_number: pageNumber,
+        page_size: pageSize,
       };
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);

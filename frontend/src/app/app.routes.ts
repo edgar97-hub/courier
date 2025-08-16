@@ -100,6 +100,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'orders-registered',
+        loadChildren: () =>
+          import('./features/ordersRegistradas/orders.routes').then(
+            (m) => m.ORDERS_ROUTES
+          ),
+      },
+      {
         path: 'orders-delivered',
         loadChildren: () =>
           import('./features/deliveredOrders/orders.routes').then(

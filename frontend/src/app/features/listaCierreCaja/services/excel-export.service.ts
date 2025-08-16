@@ -45,7 +45,9 @@ export class ExcelExportService {
     summaryData: any[],
     movementData: any[],
     excelFileName: string,
-    sheetName: string = 'Movimientos de Caja'
+    sheetName: string = 'Movimientos de Caja',
+    movementStartDate: string, // New parameter for movement start date
+    movementEndDate: string // New parameter for movement end date
   ): void {
     const workbook: XLSX.WorkBook = XLSX.utils.book_new();
     const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([]); // Create empty sheet
@@ -70,6 +72,14 @@ export class ExcelExportService {
     rowIndex++;
     rowIndex++; // Empty row
 
+    worksheet['A' + rowIndex] = {
+      v: 'Resumen de saldos',
+      t: 's',
+      s: { font: { bold: true, sz: 14 } },
+    };
+    rowIndex++;
+    rowIndex++; // Empty row
+
     // Add summary details (Fecha Inicio, Fecha Fin)
     summaryData.slice(0, 2).forEach((row) => {
       worksheet['A' + rowIndex] = { v: row.label, t: 's' };
@@ -88,7 +98,10 @@ export class ExcelExportService {
     let colIndex = 1; // Start from column B
     worksheet['A' + rowIndex] = { v: '', t: 's' }; // Empty cell for the first column
     paymentMethodNames.forEach((name) => {
-      const cellRef = XLSX.utils.encode_cell({ r: rowIndex - 1, c: colIndex });
+      const cellRef = XLSX.utils.encode_cell({
+        r: rowIndex - 1,
+        c: colIndex,
+      });
       worksheet[cellRef] = { v: name, t: 's', s: { font: { bold: true } } };
       colIndex++;
     });
@@ -103,7 +116,10 @@ export class ExcelExportService {
     };
     colIndex++;
     paymentMethodSummaries.forEach((s) => {
-      const cellRef = XLSX.utils.encode_cell({ r: rowIndex - 1, c: colIndex });
+      const cellRef = XLSX.utils.encode_cell({
+        r: rowIndex - 1,
+        c: colIndex,
+      });
       worksheet[cellRef] = { v: parseFloat(s.Ingreso), t: 'n' };
       colIndex++;
     });
@@ -118,7 +134,10 @@ export class ExcelExportService {
     };
     colIndex++;
     paymentMethodSummaries.forEach((s) => {
-      const cellRef = XLSX.utils.encode_cell({ r: rowIndex - 1, c: colIndex });
+      const cellRef = XLSX.utils.encode_cell({
+        r: rowIndex - 1,
+        c: colIndex,
+      });
       worksheet[cellRef] = { v: parseFloat(s.Egreso), t: 'n' };
       colIndex++;
     });
@@ -133,13 +152,16 @@ export class ExcelExportService {
     };
     colIndex++;
     paymentMethodSummaries.forEach((s) => {
-      const cellRef = XLSX.utils.encode_cell({ r: rowIndex - 1, c: colIndex });
+      const cellRef = XLSX.utils.encode_cell({
+        r: rowIndex - 1,
+        c: colIndex,
+      });
       worksheet[cellRef] = { v: parseFloat(s.Saldo), t: 'n' };
       colIndex++;
     });
     rowIndex++;
     rowIndex++; // Empty row
-
+    // if (summaryData && summaryData.length > 0) {
     // Add total summary
     summaryData.slice(-3).forEach((row) => {
       // Only totals
@@ -169,20 +191,49 @@ export class ExcelExportService {
     });
     rowIndex++; // Empty row
     rowIndex++; // Empty row
+    // }
+
+    // Add movement filter dates
+    worksheet['A' + rowIndex] = {
+      v: 'Detalle de Movimientos',
+      t: 's',
+      s: { font: { bold: true, sz: 12 } },
+    };
+    worksheet['!merges'].push({
+      s: { r: rowIndex - 1, c: 0 },
+      e: { r: rowIndex - 1, c: 3 },
+    });
+    rowIndex++;
+    rowIndex++;
+    worksheet['A' + rowIndex] = { v: 'Fecha Inicio:', t: 's' };
+    worksheet['B' + rowIndex] = { v: movementStartDate, t: 's' };
+    rowIndex++;
+    worksheet['A' + rowIndex] = { v: 'Fecha Fin:', t: 's' };
+    worksheet['B' + rowIndex] = { v: movementEndDate, t: 's' };
+    rowIndex++;
+    rowIndex++; // Empty row
 
     // Add movements table header
+    // if (movementData && movementData.length > 0) {
     const movementHeaders = Object.keys(movementData[0] || {});
     XLSX.utils.sheet_add_aoa(worksheet, [movementHeaders], {
       origin: `A${rowIndex}`,
     });
-    worksheet['A' + rowIndex].s = { font: { bold: true } }; // Apply bold to the first header cell
-    rowIndex++;
+    if (worksheet['A' + rowIndex]) {
+      worksheet['A' + rowIndex].s = { font: { bold: true } }; // Apply bold to the first header cell
+      rowIndex++;
+    }
+    // }
 
     // Add movements data
-    XLSX.utils.sheet_add_json(worksheet, movementData, {
-      origin: `A${rowIndex}`,
-      skipHeader: true,
-    });
+    XLSX.utils.sheet_add_json(
+      worksheet,
+      movementData.length ? movementData : ['-----'],
+      {
+        origin: `A${rowIndex}`,
+        skipHeader: true,
+      }
+    );
     // Set column widths for the entire sheet
     const columnWidths = this.calculateColumnWidths(worksheet);
     // Set column A width to be very small

@@ -9,7 +9,7 @@ export declare class CashManagementService {
     createManualMovement(dto: CreateCashMovementDto, userId: string): Promise<CashManagementEntity>;
     updateCashMovement(id: string, dto: CreateCashMovementDto, userId: string): Promise<CashManagementEntity>;
     deleteCashMovement(id: string): Promise<void>;
-    createAutomaticIncome(amount: number, paymentMethod: string, userId: string, orderId: string, code?: number): Promise<CashManagementEntity>;
+    createAutomaticIncome(amount: number, paymentMethod: string, userId: string, orderId: string, code: number, delivery_date: string): Promise<CashManagementEntity>;
     reverseAutomaticIncome(orderId: string): Promise<void>;
     updateDueToOrderModification(orderId: string, amount: number, paymentMethod: string): Promise<CashManagementEntity>;
     findAllMovements(query: QueryCashMovementDto, pageNumber?: number, pageSize?: number): Promise<{

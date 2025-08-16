@@ -46,6 +46,11 @@ import {
   EditAmountCollectDialogResult,
   EditAmountCollectDialogData,
 } from '../edit-amount-collect-dialog/edit-amount-collect-dialog-component'; // <--- IMPORTA EL NUEVO DIÁLOGO
+import {
+  EditShippingCostDialogComponent,
+  EditShippingCostDialogResult,
+  EditShippingCostDialogData,
+} from '../edit-shipping-cost-dialog/edit-shipping-cost-dialog.component';
 
 @Component({
   selector: 'app-order-table',
@@ -104,6 +109,12 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   @Output() amountToCollectChanged = new EventEmitter<{
     orderId: string | number;
     newAmount: number;
+    observation: string;
+  }>();
+
+  @Output() shippingCostChanged = new EventEmitter<{
+    orderId: string | number;
+    newShippingCost: number;
     observation: string;
   }>();
 
@@ -469,6 +480,53 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
         this.amountToCollectChanged.emit({
           orderId: order.id,
           newAmount: result.newAmount,
+          observation: result.observation,
+        });
+      } else {
+        console.log('Edición de costo de envío cancelada.');
+      }
+    });
+  }
+
+  openEditShippingCostModal(order: Order_): void {
+    if (
+      !order.id ||
+      order.shipping_cost === undefined ||
+      order.shipping_cost === null
+    ) {
+      console.error(
+        'Order ID or current shipping cost is missing for editing.',
+        order
+      );
+      // Podrías mostrar un snackbar aquí
+      this.snackBar.open(
+        'No se puede modificar el costo: faltan datos del pedido.',
+        'Cerrar',
+        { duration: 3000 }
+      );
+      return;
+    }
+
+    const dialogRef = this.dialog.open<
+      EditShippingCostDialogComponent,
+      EditShippingCostDialogData,
+      EditShippingCostDialogResult
+    >(EditShippingCostDialogComponent, {
+      width: '500px', // Ajusta el ancho
+      data: {
+        orderCode: order.code || order.id.toString(), // Muestra el código o ID
+        currentShippingCost: order.shipping_cost,
+      },
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        // Si el usuario confirmó y no cerró con undefined
+        console.log('Edit Shipping Cost Dialog result:', result);
+        this.shippingCostChanged.emit({
+          orderId: order.id, // o order.code si tu API usa eso
+          newShippingCost: result.newShippingCost,
           observation: result.observation,
         });
       } else {

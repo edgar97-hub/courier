@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between } from 'typeorm';
+import { Repository, Brackets, Between, ILike, Raw } from 'typeorm';
 import {
   CashManagementEntity,
   TYPES_MOVEMENTS,
@@ -86,14 +86,16 @@ export class CashManagementService {
     paymentMethod: string,
     userId: string,
     orderId: string,
-    code?: number,
+    code: number,
+    delivery_date: string,
   ): Promise<CashManagementEntity> {
     const user = await this.usersService.findUserById(userId);
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
+    // formatInTimeZone(new Date(), 'America/Lima', 'yyyy-MM-dd')
     const newMovement = this.cashMovementRepository.create({
-      date: formatInTimeZone(new Date(), 'America/Lima', 'yyyy-MM-dd'),
+      date: delivery_date,
       amount,
       typeMovement: TYPES_MOVEMENTS.INCOME,
       paymentsMethod: paymentMethod,
@@ -139,43 +141,135 @@ export class CashManagementService {
     return await this.cashMovementRepository.save(updatedMovement);
   }
 
+  // async findAllMovements(
+  //   query: QueryCashMovementDto,
+  //   pageNumber: number = 1,
+  //   pageSize: number = 10,
+  // ): Promise<{ movements: CashManagementEntity[]; total: number }> {
+  //   const where: any = {};
+
+  //   if (query.startDate && query.endDate) {
+  //     where.date = Between(query.startDate, query.endDate);
+  //   }
+
+  //   if (query.typeMovement) {
+  //     where.typeMovement = query.typeMovement;
+  //   }
+  //   if (query.paymentsMethod) {
+  //     where.paymentsMethod = query.paymentsMethod;
+  //   }
+  //   if (query.userId) {
+  //     where.user = { id: query.userId };
+  //   }
+
+  //   if (query.search) {
+  //     const searchQuery = query.search.toLowerCase();
+  //     const searchNumber = parseFloat(query.search);
+
+  //     Object.assign(where, [
+  //       { description: ILike(`%${searchQuery}%`) },
+  //       { paymentsMethod: ILike(`%${searchQuery}%`) },
+  //       { user: { username: ILike(`%${searchQuery}%`) } },
+  //       ...(isNaN(searchNumber) ? [] : [{ code: searchNumber }]),
+  //       ...(isNaN(searchNumber) ? [] : [{ amount: searchNumber }]),
+  //     ]);
+  //   }
+
+  //   const order: { [key: string]: 'ASC' | 'DESC' } = {};
+  //   if (query.orderBy && query.orderDirection) {
+  //     order[query.orderBy] = query.orderDirection.toUpperCase() as
+  //       | 'ASC'
+  //       | 'DESC';
+  //   } else {
+  //     order.code = 'DESC'; // Default sort
+  //   }
+
+  //   const [movements, total] = await this.cashMovementRepository.findAndCount({
+  //     where,
+  //     order,
+  //     relations: ['user'],
+  //     skip: (pageNumber - 1) * pageSize,
+  //     take: pageSize,
+  //   });
+
+  //   return { movements, total };
+  // }
+
   async findAllMovements(
     query: QueryCashMovementDto,
     pageNumber: number = 1,
     pageSize: number = 10,
   ): Promise<{ movements: CashManagementEntity[]; total: number }> {
-    const where: any = {};
+    // Inicializa el QueryBuilder
+    const queryBuilder = this.cashMovementRepository
+      .createQueryBuilder('movement')
+      .leftJoinAndSelect('movement.user', 'user');
 
+    // Condiciones AND para filtrar
     if (query.startDate && query.endDate) {
-      where.date = Between(query.startDate, query.endDate);
+      queryBuilder.andWhere('movement.date BETWEEN :startDate AND :endDate', {
+        startDate: query.startDate,
+        endDate: query.endDate,
+      });
     }
 
     if (query.typeMovement) {
-      where.typeMovement = query.typeMovement;
+      queryBuilder.andWhere('movement.typeMovement = :typeMovement', {
+        typeMovement: query.typeMovement,
+      });
     }
+
     if (query.paymentsMethod) {
-      where.paymentsMethod = query.paymentsMethod;
+      queryBuilder.andWhere('movement.paymentsMethod = :paymentsMethod', {
+        paymentsMethod: query.paymentsMethod,
+      });
     }
+
     if (query.userId) {
-      where.user = { id: query.userId };
+      queryBuilder.andWhere('user.id = :userId', {
+        userId: query.userId,
+      });
     }
 
-    const order: { [key: string]: 'ASC' | 'DESC' } = {};
-    if (query.orderBy && query.orderDirection) {
-      order[query.orderBy] = query.orderDirection.toUpperCase() as
-        | 'ASC'
-        | 'DESC';
-    } else {
-      order.code = 'DESC'; // Default sort
+    // Lógica de búsqueda OR con Brackets
+    if (query.search) {
+      const searchQuery = query.search.toLowerCase();
+      const searchNumber = parseFloat(query.search);
+
+      queryBuilder.andWhere(
+        new Brackets((qb) => {
+          qb.where('LOWER(movement.description) LIKE :searchQuery', {
+            searchQuery: `%${searchQuery}%`,
+          })
+            .orWhere('LOWER(movement.paymentsMethod) LIKE :searchQuery', {
+              searchQuery: `%${searchQuery}%`,
+            })
+            .orWhere('LOWER(user.username) LIKE :searchQuery', {
+              searchQuery: `%${searchQuery}%`,
+            });
+
+          if (!isNaN(searchNumber)) {
+            qb.orWhere('movement.code = :searchNumber', {
+              searchNumber: searchNumber,
+            }).orWhere('movement.amount = :searchNumber', {
+              searchNumber: searchNumber,
+            });
+          }
+        }),
+      );
     }
 
-    const [movements, total] = await this.cashMovementRepository.findAndCount({
-      where,
-      order,
-      relations: ['user'],
-      skip: (pageNumber - 1) * pageSize,
-      take: pageSize,
-    });
+    // Ordenamiento
+    const orderBy = query.orderBy || 'code';
+    const orderDirection =
+      (query.orderDirection?.toUpperCase() as 'ASC' | 'DESC') || 'DESC';
+    queryBuilder.orderBy(`movement.${orderBy}`, orderDirection);
+
+    // Paginación y ejecución de la consulta
+    const [movements, total] = await queryBuilder
+      .skip((pageNumber - 1) * pageSize)
+      .take(pageSize)
+      .getManyAndCount();
 
     return { movements, total };
   }

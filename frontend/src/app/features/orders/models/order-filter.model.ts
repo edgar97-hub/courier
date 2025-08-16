@@ -3,4 +3,5 @@ export interface OrderFilterCriteria {
   end_date?: string | null; // Formato YYYY-MM-DD esperado por la API
   status?: string | null;
   search_term?: string | null;
+  myOrders?: boolean;
 }

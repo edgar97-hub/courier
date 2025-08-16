@@ -6,9 +6,9 @@
   min-height: 100vh;
 }
 
-@media (min-width: 640px) {
-  .page-container {
-    // padding: 0.5rem; /* Reduced padding */
+@media (max-width: 640px) {
+  .btn-excel {
+    padding: 25px !important;
   }
 }
 
@@ -57,7 +57,7 @@
 .form-actions {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: space-between;
   // margin-top: 0.4rem; /* Reduced margin-top */
   gap: 0.3rem; /* Reduced gap */
   // border: 1px solid black;
@@ -65,9 +65,18 @@
   font-weight: 700 !important;
 }
 
+.filter-form mat-form-field {
+  width: 100%;
+}
+.search-form {
+  width: 100%;
+}
 @media (min-width: 640px) {
   .form-actions {
     flex-direction: row;
+  }
+  .search-form {
+    width: 70%;
   }
 }
 

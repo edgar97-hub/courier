@@ -135,13 +135,24 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
           let standard_package_info =
             'La medida estándar es ' +
             data.sta_length_cm +
-            'cmx' +
+            'cm' +
             data.sta_width_cm +
-            'cmx' +
+            'cm' +
             data.sta_height_cm +
             'cm ' +
             data.sta_weight_kg +
             'kg';
+
+          // let info_text =
+          //   'Las entregas en motorizado permiten paquetes de hasta ' +
+          //   data.sta_length_cm +
+          //   ' cm x ' +
+          //   data.sta_width_cm +
+          //   ' cm x  ' +
+          //   data.sta_height_cm +
+          //   ' cm y ' +
+          //   data.sta_weight_kg +
+          //   ' kg. Si se exceden estas medidas o peso, se cobrará una tarifa distinta porque la entrega será en una van.';
 
           this.standardPackageLabel.set(standard_package_info);
           this.volumetric_factor.set(data.volumetric_factor);

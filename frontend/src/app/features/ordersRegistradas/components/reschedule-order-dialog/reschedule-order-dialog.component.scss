@@ -1,0 +1,101 @@
+:host {
+  display: block;
+}
+
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh;
+  width: 480px; // Ancho adecuado para este formulario
+  max-width: 90vw;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  //   border-bottom: 1px solid mat.get-color-from-palette(mat.$gray-palette, 300);
+  //   background-color: mat.get-color-from-palette(mat.$gray-palette, 100);
+}
+
+.dialog-header-draggable {
+  cursor: move;
+}
+
+h2.mat-mdc-dialog-title {
+  margin: 0;
+  font-size: 1.3em;
+  font-weight: 500;
+  //   color: mat.get-color-from-palette(mat.$blue-grey-palette, 700);
+}
+
+.order-code-chip {
+  font-size: 0.85em;
+  //   color: mat.get-color-from-palette(mat.$indigo-palette, 500);
+  font-weight: 500;
+  margin-left: 12px;
+  flex-grow: 1;
+}
+
+.close-button {
+  min-width: auto;
+  padding: 0;
+  line-height: normal;
+  //   color: mat.get-color-from-palette(mat.$gray-palette, 600);
+}
+
+.dialog-content {
+  padding: 20px 24px 10px 24px; // Menos padding inferior si las acciones tienen mucho
+  overflow-y: auto;
+  flex-grow: 1;
+
+  p {
+    margin-top: 0;
+    margin-bottom: 8px;
+    // color: mat.get-color-from-palette(mat.$gray-palette, 800);
+    font-size: 0.95em;
+  }
+  strong {
+    font-weight: 500;
+    // color: mat.get-color-from-palette(mat.$blue-grey-palette, 600);
+  }
+}
+
+.content-divider {
+  margin: 16px 0 20px 0;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.date-picker-field {
+  margin-bottom: 20px;
+}
+
+.reason-field {
+  margin-top: 10px;
+  textarea {
+    min-height: 50px;
+  }
+}
+
+.dialog-actions {
+  padding: 16px 24px;
+  gap: 10px;
+  //   border-top: 1px solid mat.get-color-from-palette(mat.$gray-palette, 300);
+  //   background-color: mat.get-color-from-palette(mat.$gray-palette, 50);
+  button {
+    margin-left: 0px;
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+}
+@media (max-width: 480px) {
+  .dialog-actions {
+    gap: 10px;
+    flex-direction: row-reverse;
+  }
+}

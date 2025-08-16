@@ -1,0 +1,75 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <!-- <mat-icon class="header-icon">price_change</mat-icon> -->
+    <h2 mat-dialog-title>Modificar Monto a Cobrar</h2>
+    <span class="order-code-chip">Pedido N°: {{ data.orderCode }}</span>
+  </div>
+
+  <mat-dialog-content class="dialog-content" [formGroup]="editCostForm">
+    <p class="current-cost-info">
+      Monto a Cobrar Actual:
+      <strong
+        >{{ data.currentAmount | currency : "PEN" : "S/ " : "1.2-2" }}</strong
+      >
+    </p>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nuevo monto a cobrar (S/)</mat-label>
+      <input
+        matInput
+        formControlName="shipping_cost"
+        type="number"
+        min="0"
+        step="0.01"
+        required
+        placeholder="0.00"
+      />
+      <span matTextPrefix>S/</span>
+      @if (shippingCostCtrl?.hasError('required') && shippingCostCtrl?.touched)
+      {
+      <mat-error>El nuevo costo es obligatorio.</mat-error>
+      } @if (shippingCostCtrl?.hasError('min') && shippingCostCtrl?.touched) {
+      <mat-error>El costo no puede ser negativo.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width reason-field">
+      <mat-label>Motivo del Ajuste</mat-label>
+      <textarea
+        matInput
+        formControlName="observation"
+        rows="2"
+        cdkTextareaAutosize
+        cdkAutosizeMinRows="2"
+        cdkAutosizeMaxRows="4"
+        required
+        placeholder="Explique brevemente por qué se está modificando..."
+      ></textarea>
+      @if (observationCtrl?.hasError('required') && observationCtrl?.touched) {
+      <mat-error>El motivo es obligatorio.</mat-error>
+      } @if (observationCtrl?.hasError('minlength') && observationCtrl?.touched)
+      {
+      <mat-error>El motivo debe tener al menos 5 caracteres.</mat-error>
+      }
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="dialog-actions">
+    <button
+      mat-stroked-button
+      (click)="onCancel()"
+      class="cancel-button btn-corp-secondary"
+    >
+      Cancelar
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="onConfirm()"
+      [disabled]="editCostForm.invalid || isLoading"
+      class="confirm-button btn-corp-primary"
+    >
+      {{ isLoading ? "Guardando..." : "Guardar Cambios" }}
+    </button>
+  </mat-dialog-actions>
+</div>

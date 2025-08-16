@@ -165,6 +165,14 @@
             <mat-icon>attach_money</mat-icon>
             <span>Modificar el monto a cobrar</span>
           </button>
+          <button
+            mat-menu-item
+            (click)="openEditShippingCostModal(order)"
+            *ngIf="isAdminOrReceptionist()"
+          >
+            <mat-icon>attach_money</mat-icon>
+            <span>Modificar el costo envío</span>
+          </button>
           <button mat-menu-item (click)="onViewOrderDetails(order)">
             <mat-icon>visibility</mat-icon>
             <span>Ver Detalles Completos</span>

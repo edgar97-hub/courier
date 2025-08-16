@@ -26,6 +26,12 @@ export declare class OrdersController {
         total_count: number;
     }>;
     getOrderByTrackingCode(tracking_code?: string): Promise<import("../entities/orders.entity").OrdersEntity | null>;
+    findRegisteredOrders(req: any, pageNumber?: number, pageSize?: number, sortField?: string, sortDirection?: string, startDate?: string, endDate?: string, status?: string, search_term?: string): Promise<{
+        items: any;
+        total_count: number;
+        page_number: number;
+        page_size: number;
+    }>;
     findOrderById(id: string): Promise<import("../entities/orders.entity").OrdersEntity>;
     updateOrder(id: string, body: OrderUpdateDTO): Promise<import("typeorm").UpdateResult | undefined>;
     updateOrderStatus(body: any, req: any): Promise<any>;

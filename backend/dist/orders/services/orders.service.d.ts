@@ -65,4 +65,19 @@ export declare class OrdersService {
     rescheduleOrder(body: any, id: string, idUser: string): Promise<any>;
     deleteOrder(id: string): Promise<DeleteResult | undefined>;
     dashboardOrders(req: any): Promise<any>;
+    findOrdersByRegistrationDate({ pageNumber, pageSize, sortField, sortDirection, startDate, endDate, status, search_term, }: {
+        pageNumber?: number;
+        pageSize?: number;
+        sortField?: string;
+        sortDirection?: string;
+        startDate?: string;
+        endDate?: string;
+        status?: string;
+        search_term?: string;
+    }, req: any): Promise<{
+        items: any;
+        total_count: number;
+        page_number: number;
+        page_size: number;
+    }>;
 }

@@ -1,97 +1,66 @@
 <div class="page-container">
-  <mat-card class="mat-card">
+  <div style="display: flex; padding: 10px">
     <mat-card-header class="mat-card-header">
-      <mat-card-title class="mat-card-title" style="padding: 10px !important"
+      <mat-card-title
+        class="mat-card-title"
+        style="padding: 10px !important; padding-left: 0px !important"
         >Gestión de Caja</mat-card-title
       >
     </mat-card-header>
-    <mat-card-content>
-      <form [formGroup]="filterForm" class="filter-form">
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Fecha Inicio</mat-label>
-          <input
-            matInput
-            [matDatepicker]="startDatePicker"
-            formControlName="startDate"
-          />
-          <mat-datepicker-toggle
-            matSuffix
-            [for]="startDatePicker"
-          ></mat-datepicker-toggle>
-          <mat-datepicker #startDatePicker></mat-datepicker>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Fecha Fin</mat-label>
-          <input
-            matInput
-            [matDatepicker]="endDatePicker"
-            formControlName="endDate"
-          />
-          <mat-datepicker-toggle
-            matSuffix
-            [for]="endDatePicker"
-          ></mat-datepicker-toggle>
-          <mat-datepicker #endDatePicker></mat-datepicker>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Tipo de Movimiento</mat-label>
-          <mat-select formControlName="typeMovement">
-            <mat-option value="">Todos</mat-option>
-            <mat-option value="INGRESO">Ingreso</mat-option>
-            <mat-option value="EGRESO">Egreso</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Forma de Pago</mat-label>
-          <mat-select formControlName="paymentsMethod">
-            <mat-option value="">Todos</mat-option>
-            <!-- <mat-option value="Efectivo">Efectivo</mat-option>
-            <mat-option value="Otros">Otros</mat-option> -->
-            <mat-option *ngFor="let type of paymentMethods" [value]="type">{{
-              type
-            }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <!-- Add user filter if needed -->
-      </form>
-      <div class="form-actions">
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="applyFilters()"
-          class="btn-corp-primary"
-        >
-          <mat-icon>filter_list</mat-icon> Aplicar Filtros
-        </button>
-        <button
-          mat-raised-button
-          color="accent"
-          (click)="openAddMovementDialog()"
-          class="btn-corp-primary"
-        >
-          <mat-icon>add</mat-icon> Registrar Movimiento
-        </button>
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="exportCashMovementsToExcel()"
-          class="btn-corp-primary"
-        >
-          <mat-icon>cloud_download</mat-icon> Exportar a Excel
-        </button>
-      </div>
-    </mat-card-content>
-  </mat-card>
-
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="exportCashMovementsToExcel()"
+      class="btn-corp-primary btn-excel"
+    >
+      <mat-icon>cloud_download</mat-icon> Exportar a Excel
+    </button>
+  </div>
   <mat-card class="mat-card summary-section">
     <mat-card-header class="mat-card-header">
       <mat-card-title class="mat-card-title">Resumen de Saldos</mat-card-title>
     </mat-card-header>
     <mat-card-content>
+      <form [formGroup]="summaryFilterForm" class="filter-form">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Fecha Inicio Resumen</mat-label>
+          <input
+            matInput
+            [matDatepicker]="summaryStartDatePicker"
+            formControlName="startDate"
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="summaryStartDatePicker"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #summaryStartDatePicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Fecha Fin Resumen</mat-label>
+          <input
+            matInput
+            [matDatepicker]="summaryEndDatePicker"
+            formControlName="endDate"
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="summaryEndDatePicker"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #summaryEndDatePicker></mat-datepicker>
+        </mat-form-field>
+      </form>
+      <div class="form-actions" style="padding-bottom: 10px !important">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="applySummaryFilters()"
+          class="btn-corp-primary"
+        >
+          <mat-icon>filter_list</mat-icon> Aplicar Filtros Resumen
+        </button>
+      </div>
+
       <div *ngIf="isLoadingSummary" class="loading-overlay">
         <mat-spinner diameter="30"></mat-spinner>
       </div>
@@ -189,6 +158,93 @@
         >Detalle de movimientos</mat-card-title
       >
     </mat-card-header>
+    <mat-card class="mat-card">
+      <!-- <mat-card-header class="mat-card-header">
+        <mat-card-title class="mat-card-title" style="padding: 10px !important"
+          >Gestión de Caja</mat-card-title
+        >
+      </mat-card-header> -->
+      <mat-card-content>
+        <form [formGroup]="filterForm" class="filter-form">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Fecha Inicio</mat-label>
+            <input
+              matInput
+              [matDatepicker]="startDatePicker"
+              formControlName="startDate"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="startDatePicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #startDatePicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Fecha Fin</mat-label>
+            <input
+              matInput
+              [matDatepicker]="endDatePicker"
+              formControlName="endDate"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="endDatePicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #endDatePicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Tipo de Movimiento</mat-label>
+            <mat-select formControlName="typeMovement">
+              <mat-option value="">Todos</mat-option>
+              <mat-option value="INGRESO">Ingreso</mat-option>
+              <mat-option value="EGRESO">Egreso</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Forma de Pago</mat-label>
+            <mat-select formControlName="paymentsMethod">
+              <mat-option value="">Todos</mat-option>
+              <!-- <mat-option value="Efectivo">Efectivo</mat-option>
+            <mat-option value="Otros">Otros</mat-option> -->
+              <mat-option *ngFor="let type of paymentMethods" [value]="type">{{
+                type
+              }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Add user filter if needed -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Buscar</mat-label>
+            <input
+              matInput
+              formControlName="search"
+              placeholder="Buscar..."
+            />
+          </mat-form-field>
+        </form>
+        <div class="form-actions">
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="applyFilters()"
+            class="btn-corp-primary"
+          >
+            <mat-icon>filter_list</mat-icon> Aplicar Filtros
+          </button>
+          <button
+            mat-raised-button
+            color="accent"
+            (click)="openAddMovementDialog()"
+            class="btn-corp-primary"
+          >
+            <mat-icon>add</mat-icon> Registrar Movimiento
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
     <mat-card-content>
       <div *ngIf="isLoadingResults" class="loading-overlay">
         <mat-spinner diameter="30"></mat-spinner>
@@ -317,7 +373,7 @@
                 <button
                   mat-menu-item
                   (click)="editMovement(element)"
-                  *ngIf="!isReceptionist()"
+                  *ngIf="isReceptionistOrAdmin()"
                 >
                   <mat-icon>edit</mat-icon>
                   <span>Editar</span>

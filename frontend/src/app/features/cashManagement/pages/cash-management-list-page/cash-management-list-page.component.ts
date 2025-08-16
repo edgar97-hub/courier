@@ -77,6 +77,7 @@ export class CashManagementListPageComponent implements OnInit, AfterViewInit {
   appStore = inject(AppStore);
 
   filterForm: FormGroup;
+  summaryFilterForm: FormGroup;
   displayedColumns: string[] = [
     'code',
     'date',
@@ -134,11 +135,18 @@ export class CashManagementListPageComponent implements OnInit, AfterViewInit {
       typeMovement: [''],
       paymentsMethod: [''],
       userId: [''],
+      search: [''],
+    });
+
+    this.summaryFilterForm = this.fb.group({
+      startDate: [today],
+      endDate: [today],
     });
   }
 
   ngOnInit(): void {
-    this.fetchCashMovementsAndSummary(this.filterForm.value);
+    this.fetchCashMovements(this.filterForm.value);
+    this.fetchCashMovementSummary(this.summaryFilterForm.value);
 
     this.filterForm.valueChanges
       .pipe(
@@ -149,7 +157,19 @@ export class CashManagementListPageComponent implements OnInit, AfterViewInit {
         )
       )
       .subscribe((formValues) => {
-        this.fetchCashMovementsAndSummary(formValues);
+        this.fetchCashMovements(formValues);
+      });
+
+    this.summaryFilterForm.valueChanges
+      .pipe(
+        takeUntil(this.destroy$),
+        debounceTime(400),
+        distinctUntilChanged(
+          (prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)
+        )
+      )
+      .subscribe((formValues) => {
+        this.fetchCashMovementSummary(formValues);
       });
   }
 
@@ -161,7 +181,7 @@ export class CashManagementListPageComponent implements OnInit, AfterViewInit {
     });
   }
 
-  fetchCashMovementsAndSummary(
+  fetchCashMovements(
     formValues: any,
     orderBy?: string,
     orderDirection?: string
@@ -176,7 +196,9 @@ export class CashManagementListPageComponent implements OnInit, AfterViewInit {
       filters.endDate =
         this.datePipe.transform(filters.endDate, 'yyyy-MM-dd') || '';
     }
-
+    if (filters.search) {
+      filters.search = filters.search.trim();
+    }
     this.isLoadingResults = true;
     this.cashManagementService
       .getAllCashMovements(
@@ -194,6 +216,19 @@ export class CashManagementListPageComponent implements OnInit, AfterViewInit {
         this.totalItems = response.total;
         this.cashMovements.sort = this.sort;
       });
+  }
+
+  fetchCashMovementSummary(formValues: any): void {
+    const filters: CashMovementQuery = { ...formValues };
+
+    if (filters.startDate) {
+      filters.startDate =
+        this.datePipe.transform(filters.startDate, 'yyyy-MM-dd') || '';
+    }
+    if (filters.endDate) {
+      filters.endDate =
+        this.datePipe.transform(filters.endDate, 'yyyy-MM-dd') || '';
+    }
 
     this.isLoadingSummary = true;
     this.summary$ = this.cashManagementService
@@ -202,11 +237,15 @@ export class CashManagementListPageComponent implements OnInit, AfterViewInit {
   }
 
   applyFilters(): void {
-    this.fetchCashMovementsAndSummary(
+    this.fetchCashMovements(
       this.filterForm.value,
       this.sort?.active,
       this.sort?.direction
     );
+  }
+
+  applySummaryFilters(): void {
+    this.fetchCashMovementSummary(this.summaryFilterForm.value);
   }
 
   onPageChange(event: any): void {
@@ -284,26 +323,39 @@ export class CashManagementListPageComponent implements OnInit, AfterViewInit {
     window.open(pdfUrl, '_blank');
   }
   async exportCashMovementsToExcel(): Promise<void> {
-    const filters: CashMovementQuery = this.filterForm.value;
+    const tableFilters: CashMovementQuery = this.filterForm.value;
+    const summaryFilters: CashMovementQuery = this.summaryFilterForm.value;
 
-    if (filters.startDate) {
-      filters.startDate =
-        this.datePipe.transform(filters.startDate, 'yyyy-MM-dd') || '';
+    if (tableFilters.startDate) {
+      tableFilters.startDate =
+        this.datePipe.transform(tableFilters.startDate, 'yyyy-MM-dd') || '';
     }
-    if (filters.endDate) {
-      filters.endDate =
-        this.datePipe.transform(filters.endDate, 'yyyy-MM-dd') || '';
+    if (tableFilters.endDate) {
+      tableFilters.endDate =
+        this.datePipe.transform(tableFilters.endDate, 'yyyy-MM-dd') || '';
+    }
+
+    if (summaryFilters.startDate) {
+      summaryFilters.startDate =
+        this.datePipe.transform(summaryFilters.startDate, 'yyyy-MM-dd') || '';
+    }
+    if (summaryFilters.endDate) {
+      summaryFilters.endDate =
+        this.datePipe.transform(summaryFilters.endDate, 'yyyy-MM-dd') || '';
     }
 
     // Fetch all movements (assuming a large page size is sufficient for export)
-    const movementsObservable = this.cashManagementService
-      .getAllCashMovements(filters, 1, 999999); // Fetch all movements
+    const movementsObservable = this.cashManagementService.getAllCashMovements(
+      tableFilters,
+      1,
+      999999
+    ); // Fetch all movements using table filters
     const movementsResponse = await firstValueFrom(movementsObservable);
     const movements = movementsResponse?.movements || [];
 
-    // Fetch detailed summary
-    const summaryObservable = this.cashManagementService
-      .getCashMovementSummary(filters); // Corrected method name
+    // Fetch detailed summary using summary filters
+    const summaryObservable =
+      this.cashManagementService.getCashMovementSummary(summaryFilters);
     const summary = await firstValueFrom(summaryObservable);
 
     const summaryForExcel: any[] = [];
@@ -312,11 +364,11 @@ export class CashManagementListPageComponent implements OnInit, AfterViewInit {
     // Prepare summary data
     summaryForExcel.push({
       label: 'Fecha Inicio',
-      value: this.datePipe.transform(filters.startDate, 'dd/MM/yyyy'),
+      value: this.datePipe.transform(summaryFilters.startDate, 'dd/MM/yyyy'),
     });
     summaryForExcel.push({
       label: 'Fecha Fin',
-      value: this.datePipe.transform(filters.endDate, 'dd/MM/yyyy'),
+      value: this.datePipe.transform(summaryFilters.endDate, 'dd/MM/yyyy'),
     });
 
     if (summary) {
@@ -375,12 +427,19 @@ export class CashManagementListPageComponent implements OnInit, AfterViewInit {
       summaryForExcel,
       movementsForExcel,
       fileName,
-      'Movimientos de Caja'
+      'Movimientos de Caja',
+      this.datePipe.transform(tableFilters.startDate, 'dd/MM/yyyy') || '',
+      this.datePipe.transform(tableFilters.endDate, 'dd/MM/yyyy') || ''
     );
   }
 
   isReceptionist(): boolean {
     const userRole = this.appStore.currentUser()?.role;
     return userRole === 'RECEPCIONISTA';
+  }
+
+  isReceptionistOrAdmin(): boolean {
+    const userRole = this.appStore.currentUser()?.role;
+    return userRole === 'RECEPCIONISTA' || userRole === 'ADMINISTRADOR';
   }
 }

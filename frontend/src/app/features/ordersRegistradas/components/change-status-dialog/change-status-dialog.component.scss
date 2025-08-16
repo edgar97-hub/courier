@@ -1,0 +1,251 @@
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh; // Evitar diálogos demasiado altos
+}
+
+.dialog-header {
+  padding: 20px 24px 0px 24px; // Padding estándar de diálogo
+  border-bottom: 1px solid var(--sys-outline-variant); // Separador sutil
+  margin-bottom: 20px;
+
+  h2.mat-mdc-dialog-title {
+    // Estilo específico para el título de Material
+    margin-bottom: 4px;
+    font-size: 1.5em; // Título más grande
+    font-weight: 500;
+    color: var(--sys-on-surface); // Un color oscuro pero no negro puro
+  }
+}
+
+.order-code-chip {
+  display: inline-block;
+  font-size: 0.85em;
+  color: var(--sys-on-surface-variant);
+  background-color: var(--sys-surface-container-low);
+  padding: 4px 10px;
+  border-radius: 16px; // Chip redondeado
+  margin-bottom: 16px; // Espacio después del chip
+  font-family: "Consolas", "Monaco", monospace; // Fuente monoespaciada para códigos
+}
+
+.dialog-content {
+  padding: 0 24px 20px 24px; // Padding estándar
+  overflow-y: auto; // Scroll si el contenido es muy largo
+  flex-grow: 1; // Para que ocupe el espacio disponible
+}
+
+.current-status-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  font-size: 1em;
+  color: var(--sys-on-surface-variant);
+
+  span:first-child {
+    margin-right: 8px;
+  }
+}
+
+// Reutiliza los estilos de status-badge de tu order-table.component.scss
+// o defínelos aquí si son diferentes para el diálogo.
+// Si los tienes en un archivo _variables.scss o _mixins.scss, impórtalos.
+.status-badge {
+  padding: 5px 12px;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  color: var(--sys-on-surface); // Color de texto blanco por defecto para badges
+}
+
+// Copia/adapta tus clases de color de status-badge aquí
+.status-registrado {
+  background-color: var(--status-registrado-bg);
+  color: var(--status-registrado-color);
+}
+.status-recogido {
+  background-color: var(--status-recogido-bg);
+  color: var(--status-recogido-color);
+}
+.status-en-almacen {
+  background-color: var(--status-en-almacen-bg);
+  color: var(--status-en-almacen-color);
+}
+.status-en-transito {
+  background-color: var(--status-en-transito-bg);
+  color: var(--status-en-transito-color);
+}
+.status-entregado {
+  background-color: var(--status-entregado-bg);
+  color: var(--status-entregado-color);
+}
+.status-no-entregado {
+  background-color: var(--status-no-entregado-bg);
+  color: var(--status-no-entregado-color);
+}
+.status-cancelado {
+  background-color: var(--status-cancelado-bg);
+  color: var(--status-cancelado-color);
+}
+.status-rechazado-en-punto {
+  background-color: var(--status-rechazado-bg);
+  color: var(--status-rechazado-color);
+}
+.status-reprogramado {
+  background-color: var(--status-reprogramado-bg);
+  color: var(--status-reprogramado-color);
+}
+
+.full-width {
+  width: 100%;
+}
+
+.select-status-field {
+  margin-bottom: 20px; // Espacio después del select
+}
+
+.reason-field {
+  margin-top: 10px; // Menos margen si el select ya tiene margen inferior
+  textarea {
+    min-height: 60px; // Altura mínima para el textarea
+  }
+}
+
+.dialog-actions {
+  padding: 16px 24px;
+  gap: 10px;
+  //   border-top: 1px solid mat.get-color-from-palette(mat.$gray-palette, 300);
+  //   background-color: mat.get-color-from-palette(mat.$gray-palette, 50);
+  button {
+    margin-left: 0px;
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+}
+@media (max-width: 480px) {
+  .dialog-actions {
+    gap: 10px;
+    flex-direction: row-reverse;
+  }
+}
+
+// Ajuste para que los mensajes de error o hints no muevan mucho el layout
+// Es mejor evitar ::ng-deep si es posible, pero a veces es necesario para componentes de Material.
+:host ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  min-height: 1.25em; // O la altura que necesites para el mensaje de error
+  height: auto;
+}
+
+.delivery-details-section {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+
+  h4 {
+    font-size: 1.1em;
+    font-weight: 500;
+    margin-bottom: 16px;
+    color: #444;
+  }
+}
+
+.image-upload-container {
+  // border: 1px solid black;
+  margin-bottom: 10px;
+
+  .image-upload-label {
+    text-align: center;
+    width: 100%;
+    display: block;
+    font-size: 0.9em;
+    color: #555;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .upload-button {
+    padding: 15px !important;
+    // margin-bottom: 10px; // Espacio si hay vista previa debajo
+    mat-icon {
+      // margin-right: 6px;
+    }
+  }
+}
+
+.image-preview-wrapper {
+  position: relative;
+  display: inline-block; // Para que el botón de borrar se posicione bien
+  border: 1px solid #ddd;
+  padding: 5px;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  margin-top: 10px;
+
+  .image-preview {
+    display: block;
+    max-width: 100%; // Responsiva
+    max-height: 200px; // Altura máxima para la vista previa
+    border-radius: 3px;
+  }
+
+  .remove-image-button {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: rgba(255, 255, 255, 0.8); // Fondo para mejor visibilidad
+    line-height: normal; // Reset
+    padding: 0;
+    width: 28px;
+    height: 28px;
+
+    mat-icon {
+      font-size: 20px;
+    }
+  }
+}
+
+.upload-spinner {
+  display: flex;
+  align-items: center;
+  font-size: 0.9em;
+  color: #555;
+  margin-top: 10px;
+  mat-progress-spinner {
+    margin-right: 8px;
+  }
+}
+
+.payment-method-field {
+  margin-top: 16px;
+}
+
+.close-button-header {
+  // Para el botón de cerrar en el header si lo añades
+  min-width: auto;
+  padding: 0;
+  line-height: normal;
+  color: #757575;
+}
+
+.camera-view {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  // border: 1px solid black !important;
+}
+.video-preview {
+  width: 100%;
+  height: 300px;
+}

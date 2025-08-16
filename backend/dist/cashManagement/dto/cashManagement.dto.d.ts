@@ -15,6 +15,7 @@ export declare class QueryCashMovementDto {
     userId?: string;
     orderBy?: string;
     orderDirection?: 'ASC' | 'DESC' | 'asc' | 'desc';
+    search?: string;
 }
 export declare class PaymentMethodSummary {
     income: number;

@@ -61,6 +61,10 @@ let OrdersService = class OrdersService {
             });
             if (!oldOrder)
                 throw new Error('Orden no encontrada');
+            if (body.payload.action === 'CAMBIO DE ESTADO' &&
+                (oldOrder.status === roles_1.STATES.DELIVERED ||
+                    oldOrder.status === roles_1.STATES.REJECTED))
+                throw new Error('Orden ya fue modificada');
             if (body.payload.action === 'CAMBIO DE ESTADO') {
                 await this.orderRepository.update(body.payload.orderId, {
                     status: body.payload.newStatus,
@@ -101,7 +105,11 @@ let OrdersService = class OrdersService {
                     let pagoDirectoCourier = 'Pago directo (Pago a COURIER)';
                     let pagoEfectivoCourier = 'Efectivo (Pago a COURIER)';
                     let pagoDirectoEmpresa = 'Pago directo (Pago a EMPRESA)';
-                    let paymentMethod = '';
+                    let paymentMethod = 'Efectivo';
+                    if (updatedOrder.payment_method_for_collection?.toLowerCase() ===
+                        'efectivo') {
+                        updatedOrder.payment_method_for_shipping_cost = pagoEfectivoCourier;
+                    }
                     if (updatedOrder.payment_method_for_shipping_cost ===
                         pagoEfectivoCourier) {
                         paymentMethod = 'Efectivo';
@@ -143,7 +151,11 @@ let OrdersService = class OrdersService {
                     let pagoDirectoCourier = 'Pago directo (Pago a COURIER)';
                     let pagoEfectivoCourier = 'Efectivo (Pago a COURIER)';
                     let pagoDirectoEmpresa = 'Pago directo (Pago a EMPRESA)';
-                    let paymentMethod = '';
+                    let paymentMethod = 'Efectivo';
+                    if (updatedOrder.payment_method_for_collection?.toLowerCase() ===
+                        'efectivo') {
+                        updatedOrder.payment_method_for_shipping_cost = pagoEfectivoCourier;
+                    }
                     if (updatedOrder.payment_method_for_shipping_cost ===
                         pagoEfectivoCourier) {
                         paymentMethod = 'Efectivo';
@@ -161,13 +173,18 @@ let OrdersService = class OrdersService {
                 where: { id: body.payload.orderId },
                 relations: ['assigned_driver', 'user'],
             });
-            if (body.payload.newStatus === roles_1.STATES.DELIVERED) {
+            if (body.payload.newStatus === roles_1.STATES.DELIVERED ||
+                body.payload.newStatus === roles_1.STATES.REJECTED) {
                 if (updatedOrder) {
                     const amount = updatedOrder.shipping_cost || 0;
                     let pagoDirectoCourier = 'Pago directo (Pago a COURIER)';
                     let pagoEfectivoCourier = 'Efectivo (Pago a COURIER)';
                     let pagoDirectoEmpresa = 'Pago directo (Pago a EMPRESA)';
-                    let paymentMethod = '';
+                    let paymentMethod = 'Efectivo';
+                    if (updatedOrder.payment_method_for_collection?.toLowerCase() ===
+                        'efectivo') {
+                        updatedOrder.payment_method_for_shipping_cost = pagoEfectivoCourier;
+                    }
                     if (updatedOrder.payment_method_for_shipping_cost ===
                         pagoEfectivoCourier) {
                         paymentMethod = 'Efectivo';
@@ -178,7 +195,9 @@ let OrdersService = class OrdersService {
                     if (updatedOrder.payment_method_for_shipping_cost === pagoDirectoEmpresa) {
                         paymentMethod = 'Yape/Transferencia BCP';
                     }
-                    await this.cashManagementService.createAutomaticIncome(amount, paymentMethod, updatedOrder.user.id, updatedOrder.id, updatedOrder.code);
+                    if (!updatedOrder.code || !updatedOrder.delivery_date)
+                        return;
+                    await this.cashManagementService.createAutomaticIncome(amount, paymentMethod, updatedOrder.user.id, updatedOrder.id, updatedOrder.code, updatedOrder.delivery_date);
                 }
             }
             else if (body.payload.newStatus === roles_1.STATES.ANNULLED) {
@@ -534,6 +553,9 @@ let OrdersService = class OrdersService {
             if (role === roles_1.ROLES.COMPANY) {
                 query.andWhere('company.id = :idUser', { idUser });
             }
+            else if (role === roles_1.ROLES.MOTORIZED && req.query.my_orders === 'true') {
+                query.andWhere('assigned_driver.id = :idUser', { idUser });
+            }
             if (status) {
                 let states = [status];
                 if (status === roles_1.STATES.DELIVERED) {
@@ -822,6 +844,82 @@ let OrdersService = class OrdersService {
                     rejectedToday,
                 },
                 statusDistribution: [],
+            };
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
+    async findOrdersByRegistrationDate({ pageNumber = 0, pageSize = 0, sortField = '', sortDirection = '', startDate, endDate, status = '', search_term = '', }, req) {
+        let idUser = req.idUser;
+        let role = req.roleUser;
+        try {
+            const skip = (pageNumber - 1) * pageSize;
+            const query = this.orderRepository
+                .createQueryBuilder('order')
+                .leftJoinAndSelect('order.user', 'user')
+                .leftJoinAndSelect('order.assigned_driver', 'assigned_driver')
+                .leftJoinAndSelect('order.company', 'company');
+            if (startDate && endDate) {
+                const todayStart = new Date();
+                const timeZone = 'America/Lima';
+                let _startDate = (0, date_fns_tz_1.formatInTimeZone)(startDate, timeZone, 'yyyy-MM-dd');
+                let _endDate = (0, date_fns_tz_1.formatInTimeZone)(endDate, timeZone, 'yyyy-MM-dd');
+                const startLocalString = `${_startDate} 00:00:00.000`;
+                const endLocalString = `${_endDate} 23:59:59.999`;
+                const refDate = new Date();
+                const startOfPeriodInLima = (0, date_fns_1.parse)(startLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
+                const endOfPeriodInLima = (0, date_fns_1.parse)(endLocalString, 'yyyy-MM-dd HH:mm:ss.SSS', refDate);
+                const startUTC = (0, date_fns_tz_1.fromZonedTime)(startOfPeriodInLima, timeZone);
+                const endUTC = (0, date_fns_tz_1.fromZonedTime)(endOfPeriodInLima, timeZone);
+                console.log(startUTC);
+                console.log(endUTC);
+                query.andWhere({
+                    createdAt: (0, typeorm_2.Between)(startUTC, endUTC),
+                });
+            }
+            if (role === roles_1.ROLES.COMPANY) {
+                query.andWhere('company.id = :idUser', { idUser });
+            }
+            if (status) {
+                let states = [status];
+                if (status === roles_1.STATES.DELIVERED) {
+                    states.push(roles_1.STATES.REJECTED);
+                }
+                query.andWhere('order.status IN (:...states)', {
+                    states: states,
+                });
+            }
+            if (search_term) {
+                const term = `%${search_term}%`;
+                query.andWhere(`(CAST(order.code AS TEXT) ILIKE :term OR
+          user.username ILIKE :term OR
+          assigned_driver.username ILIKE :term OR
+          company.username ILIKE :term OR
+          order.shipment_type ILIKE :term OR
+          order.recipient_name ILIKE :term OR
+          order.delivery_district_name ILIKE :term OR
+          CAST(order.amount_to_collect_at_delivery AS TEXT) ILIKE :term OR
+          order.tracking_code ILIKE :term
+          )`, { term });
+            }
+            const sortFieldMap = {
+                registration_date: 'order.createdAt',
+                motorizado: 'assigned_driver.username',
+                usuario_creacion: 'user.username',
+            };
+            const sortBy = sortFieldMap[sortField] || `order.${sortField}`;
+            const direction = sortDirection?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+            query
+                .orderBy(sortBy, direction)
+                .skip(skip)
+                .take(pageSize);
+            const [items, total] = await query.getManyAndCount();
+            return {
+                items,
+                total_count: total,
+                page_number: pageNumber,
+                page_size: pageSize,
             };
         }
         catch (error) {

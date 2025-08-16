@@ -1,0 +1,119 @@
+<div
+  class="dialog-container"
+  cdkDrag
+  cdkDragRootElement=".cdk-overlay-pane"
+  cdkDragHandle=".dialog-header-draggable"
+>
+  <div class="dialog-header dialog-header-draggable">
+    <h2 mat-dialog-title>Asignar / Cambiar Motorizado</h2>
+    <span class="order-code-chip"
+      >Pedido N°: {{ data.order.code || data.order.id }}</span
+    >
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <section>
+      <div
+        class="current-assignment"
+        *ngIf="
+          data.order.assigned_driver?.username as currentDriverName;
+          else noDriverAssigned
+        "
+      >
+        <p>
+          Actualmente asignado a: <strong>{{ currentDriverName }}</strong>
+        </p>
+      </div>
+      <ng-template #noDriverAssigned>
+        <p class="no-driver-message">
+          Este pedido aún no tiene un motorizado asignado.
+        </p>
+      </ng-template>
+    </section>
+
+    <mat-divider class="content-divider"></mat-divider>
+
+    <section>
+      <form [formGroup]="assignDriverForm" novalidate>
+        <mat-form-field
+          appearance="outline"
+          class="full-width driver-search-field"
+        >
+          <mat-label>Buscar y Seleccionar Motorizado</mat-label>
+          <input
+            type="text"
+            placeholder="Escriba el nombre del motorizado..."
+            aria-label="Motorizado"
+            matInput
+            [formControl]="driverSearchCtrl"
+            [matAutocomplete]="autoDriver"
+          />
+          <button
+            *ngIf="driverSearchCtrl.value && !isLoadingDrivers"
+            matSuffix
+            mat-icon-button
+            aria-label="Limpiar"
+            (click)="clearSelection()"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+          <mat-icon
+            matSuffix
+            *ngIf="!driverSearchCtrl.value && !isLoadingDrivers"
+            >person_search</mat-icon
+          >
+          <mat-progress-spinner
+            *ngIf="isLoadingDrivers"
+            matSuffix
+            mode="indeterminate"
+            diameter="20"
+          ></mat-progress-spinner>
+
+          <mat-autocomplete
+            #autoDriver="matAutocomplete"
+            [displayWith]="displayDriverName"
+            (optionSelected)="onDriverSelected($event)"
+          >
+            @for (driver of filteredDrivers$ | async; track driver.uid) {
+            <mat-option [value]="driver">
+              <div class="driver-option">
+                <mat-icon class="driver-option-icon">two_wheeler</mat-icon>
+                <span>{{ driver.username }}</span>
+              </div>
+            </mat-option>
+            } @if ((filteredDrivers$ | async)?.length === 0 && !isLoadingDrivers
+            && driverSearchCtrl.value) {
+            <mat-option disabled>No se encontraron motorizados.</mat-option>
+            }
+          </mat-autocomplete>
+          <mat-error
+            *ngIf="
+              assignDriverForm.hasError('required', 'driverId') &&
+              selectedDriver === null
+            "
+          >
+            <!-- Lógica de error si es necesaria -->
+            Debe seleccionar un motorizado.
+          </mat-error>
+        </mat-form-field>
+      </form>
+    </section>
+    <p *ngIf="selectedDriver" class="selected-driver-info">
+      Motorizado seleccionado: <strong>{{ selectedDriver.username }}</strong>
+    </p>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="dialog-actions">
+    <button mat-stroked-button class="cancel-button btn-corp-secondary" (click)="onCancel()">
+      Cancelar
+    </button>
+    <button
+      mat-flat-button
+      class="confirm-button btn-corp-primary"
+      (click)="onConfirm()"
+      [disabled]="!selectedDriver || isLoadingDrivers"
+    >
+      {{ data.currentDriverId ? "Reasignar" : "Asignar" }} Motorizado
+    </button>
+  </mat-dialog-actions>
+</div>

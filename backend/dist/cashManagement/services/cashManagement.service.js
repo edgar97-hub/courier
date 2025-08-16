@@ -66,13 +66,13 @@ let CashManagementService = class CashManagementService {
             throw new common_1.NotFoundException(`Cash movement with ID ${id} not found`);
         }
     }
-    async createAutomaticIncome(amount, paymentMethod, userId, orderId, code) {
+    async createAutomaticIncome(amount, paymentMethod, userId, orderId, code, delivery_date) {
         const user = await this.usersService.findUserById(userId);
         if (!user) {
             throw new common_1.NotFoundException(`User with ID ${userId} not found`);
         }
         const newMovement = this.cashMovementRepository.create({
-            date: (0, date_fns_tz_1.formatInTimeZone)(new Date(), 'America/Lima', 'yyyy-MM-dd'),
+            date: delivery_date,
             amount,
             typeMovement: cashManagement_entity_1.TYPES_MOVEMENTS.INCOME,
             paymentsMethod: paymentMethod,
@@ -108,33 +108,59 @@ let CashManagementService = class CashManagementService {
         return await this.cashMovementRepository.save(updatedMovement);
     }
     async findAllMovements(query, pageNumber = 1, pageSize = 10) {
-        const where = {};
+        const queryBuilder = this.cashMovementRepository
+            .createQueryBuilder('movement')
+            .leftJoinAndSelect('movement.user', 'user');
         if (query.startDate && query.endDate) {
-            where.date = (0, typeorm_2.Between)(query.startDate, query.endDate);
+            queryBuilder.andWhere('movement.date BETWEEN :startDate AND :endDate', {
+                startDate: query.startDate,
+                endDate: query.endDate,
+            });
         }
         if (query.typeMovement) {
-            where.typeMovement = query.typeMovement;
+            queryBuilder.andWhere('movement.typeMovement = :typeMovement', {
+                typeMovement: query.typeMovement,
+            });
         }
         if (query.paymentsMethod) {
-            where.paymentsMethod = query.paymentsMethod;
+            queryBuilder.andWhere('movement.paymentsMethod = :paymentsMethod', {
+                paymentsMethod: query.paymentsMethod,
+            });
         }
         if (query.userId) {
-            where.user = { id: query.userId };
+            queryBuilder.andWhere('user.id = :userId', {
+                userId: query.userId,
+            });
         }
-        const order = {};
-        if (query.orderBy && query.orderDirection) {
-            order[query.orderBy] = query.orderDirection.toUpperCase();
+        if (query.search) {
+            const searchQuery = query.search.toLowerCase();
+            const searchNumber = parseFloat(query.search);
+            queryBuilder.andWhere(new typeorm_2.Brackets((qb) => {
+                qb.where('LOWER(movement.description) LIKE :searchQuery', {
+                    searchQuery: `%${searchQuery}%`,
+                })
+                    .orWhere('LOWER(movement.paymentsMethod) LIKE :searchQuery', {
+                    searchQuery: `%${searchQuery}%`,
+                })
+                    .orWhere('LOWER(user.username) LIKE :searchQuery', {
+                    searchQuery: `%${searchQuery}%`,
+                });
+                if (!isNaN(searchNumber)) {
+                    qb.orWhere('movement.code = :searchNumber', {
+                        searchNumber: searchNumber,
+                    }).orWhere('movement.amount = :searchNumber', {
+                        searchNumber: searchNumber,
+                    });
+                }
+            }));
         }
-        else {
-            order.code = 'DESC';
-        }
-        const [movements, total] = await this.cashMovementRepository.findAndCount({
-            where,
-            order,
-            relations: ['user'],
-            skip: (pageNumber - 1) * pageSize,
-            take: pageSize,
-        });
+        const orderBy = query.orderBy || 'code';
+        const orderDirection = query.orderDirection?.toUpperCase() || 'DESC';
+        queryBuilder.orderBy(`movement.${orderBy}`, orderDirection);
+        const [movements, total] = await queryBuilder
+            .skip((pageNumber - 1) * pageSize)
+            .take(pageSize)
+            .getManyAndCount();
         return { movements, total };
     }
     async getBalanceSummary(query) {

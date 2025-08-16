@@ -1,0 +1,334 @@
+<div
+  class="dialog-container"
+  cdkDrag
+  cdkDragRootElement=".cdk-overlay-pane"
+  cdkDragHandle=".dialog-header-draggable"
+>
+  <div class="dialog-header dialog-header-draggable">
+    <!-- Añadida clase para cdkDragHandle -->
+    <h2 mat-dialog-title>Detalles del Pedido</h2>
+    <span class="order-code-chip"
+      >N°: {{ data.order.code || data.order.id }}</span
+    >
+    <!-- <button
+      mat-icon-button
+      class="close-button"
+      (click)="onClose()"
+      aria-label="Cerrar diálogo"
+      matTooltip="Cerrar"
+    >
+      <mat-icon>close</mat-icon>
+    </button> -->
+  </div>
+
+  <mat-dialog-content class="dialog-content" tabindex="-1">
+    <mat-card appearance="outlined" class="info-card">
+      <mat-card-header class="compact-card-header">
+        <mat-card-title>Información General</mat-card-title>
+        <span
+          class="status-badge-dialog"
+          [ngClass]="getStatusBadgeClass(data.order.status)"
+        >
+          {{ data.order.status | titlecase }}
+        </span>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-grid-list cols="2" rowHeight="80px">
+          <mat-grid-tile>
+            <div class="detail-item">
+              <mat-icon class="detail-icon">local_shipping</mat-icon>
+              <div>
+                <div class="detail-label">Tipo de Envío</div>
+                <div class="detail-value">
+                  {{ data.order.shipment_type | titlecase | default : "N/A" }}
+                </div>
+              </div>
+            </div>
+          </mat-grid-tile>
+          <mat-grid-tile>
+            <div class="detail-item">
+              <mat-icon class="detail-icon">calendar_today</mat-icon>
+              <div>
+                <div class="detail-label">Fecha Registro</div>
+                <div class="detail-value">
+                  {{
+                    data.order.createdAt
+                      | date : "dd/MM/yy HH:mm"
+                      | default : "N/A"
+                  }}
+                </div>
+              </div>
+            </div>
+          </mat-grid-tile>
+          <mat-grid-tile>
+            <div class="detail-item">
+              <mat-icon class="detail-icon">event_available</mat-icon>
+              <div>
+                <div class="detail-label">Fecha Entrega Prog.</div>
+                <div class="detail-value">
+                  {{
+                    data.order.delivery_date
+                      | date : "dd/MM/yyyy"
+                      | default : "No especificada"
+                  }}
+                </div>
+              </div>
+            </div>
+          </mat-grid-tile>
+          <mat-grid-tile *ngIf="data.order.user?.username">
+            <div class="detail-item">
+              <mat-icon class="detail-icon">account_circle</mat-icon>
+              <div>
+                <div class="detail-label">Usuario Creador</div>
+                <div class="detail-value">
+                  {{ data.order.user?.username | default : "N/A" }}
+                </div>
+              </div>
+            </div>
+          </mat-grid-tile>
+          <mat-grid-tile *ngIf="data.order.assigned_driver?.username">
+            <div class="detail-item">
+              <mat-icon class="detail-icon">account_circle</mat-icon>
+              <div>
+                <div class="detail-label">Motorizado</div>
+                <div class="detail-value">
+                  {{ data.order.assigned_driver?.username | default : "N/A" }}
+                </div>
+              </div>
+            </div>
+          </mat-grid-tile>
+        </mat-grid-list>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined" class="info-card">
+      <mat-card-header class="compact-card-header"
+        ><mat-card-title
+          >Destinatario y Entrega</mat-card-title
+        ></mat-card-header
+      >
+      <mat-card-content>
+        <mat-grid-list cols="2" rowHeight="80px">
+          <mat-grid-tile>
+            <div class="detail-item">
+              <mat-icon class="detail-icon">person_pin</mat-icon>
+              <div>
+                <div class="detail-label">Nombre Destinatario</div>
+                <div class="detail-value">
+                  {{ data.order.recipient_name | default : "N/A" }}
+                </div>
+              </div>
+            </div>
+          </mat-grid-tile>
+          <mat-grid-tile>
+            <div
+              class="detail-item"
+              (click)="callPhone(data.order.recipient_phone)"
+            >
+              <mat-icon class="detail-icon">phone_iphone</mat-icon>
+              <div>
+                <div class="detail-label">Teléfono Destinatario</div>
+                <div class="detail-value link-like">
+                  {{ data.order.recipient_phone || "N/A" }}
+                </div>
+              </div>
+            </div>
+          </mat-grid-tile>
+          <mat-grid-tile [colspan]="2">
+            <div class="detail-item">
+              <mat-icon class="detail-icon">location_on</mat-icon>
+              <div>
+                <div class="detail-label">Dirección de Entrega</div>
+                <div class="detail-value">
+                  {{ data.order.delivery_address | default : "N/A" }}
+                </div>
+              </div>
+            </div>
+          </mat-grid-tile>
+          <mat-grid-tile>
+            <div class="detail-item">
+              <mat-icon class="detail-icon">map</mat-icon>
+              <div>
+                <div class="detail-label">Distrito</div>
+                <div class="detail-value">
+                  {{
+                    data.order.delivery_district_name
+                      | titlecase
+                      | default : "N/A"
+                  }}
+                </div>
+              </div>
+            </div>
+          </mat-grid-tile>
+          <mat-grid-tile *ngIf="data.order.delivery_coordinates">
+            <div class="detail-item">
+              <mat-icon class="detail-icon">explore</mat-icon>
+              <div>
+                <div class="detail-label">Coordenadas</div>
+                <div class="detail-value">
+                  {{ data.order.delivery_coordinates }}
+                </div>
+              </div>
+            </div>
+          </mat-grid-tile>
+        </mat-grid-list>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined" class="info-card">
+      <mat-card-header class="compact-card-header"
+        ><mat-card-title>Detalles del Paquete</mat-card-title></mat-card-header
+      >
+      <mat-card-content>
+        <p class="item-description">
+          {{
+            data.order.item_description
+              | default : "Sin descripción del contenido."
+          }}
+        </p>
+        <mat-divider
+          *ngIf="data.order.package_size_type || data.order.package_weight_kg"
+        ></mat-divider>
+        <mat-grid-list cols="2" rowHeight="80px">
+          <mat-grid-tile *ngIf="data.order.package_size_type">
+            <div class="detail-item">
+              <mat-icon class="detail-icon">aspect_ratio</mat-icon>
+              <div>
+                <div class="detail-label">Tamaño Paquete</div>
+                <div class="detail-value">
+                  {{ data.order.package_size_type | titlecase }}
+                </div>
+              </div>
+            </div>
+          </mat-grid-tile>
+          <mat-grid-tile *ngIf="data.order.package_weight_kg">
+            <div class="detail-item">
+              <mat-icon class="detail-icon">fitness_center</mat-icon>
+              <div>
+                <div class="detail-label">Peso (kg)</div>
+                <div class="detail-value">
+                  {{ data.order.package_weight_kg | number : "1.1-2" }} kg
+                </div>
+              </div>
+            </div>
+          </mat-grid-tile>
+          <mat-grid-tile *ngIf="data.order.package_width_cm">
+            <div class="detail-item">
+              <mat-icon class="detail-icon">width_normal</mat-icon>
+              <!-- Placeholder icon -->
+              <div>
+                <div class="detail-label">Dimensiones (cm)</div>
+                <div class="detail-value">
+                  An: {{ data.order.package_width_cm }} x L:
+                  {{ data.order.package_length_cm }} x Al:
+                  {{ data.order.package_height_cm }}
+                </div>
+              </div>
+            </div>
+          </mat-grid-tile>
+        </mat-grid-list>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined" class="info-card">
+      <mat-card-header class="compact-card-header"
+        ><mat-card-title
+          >Información Financiera</mat-card-title
+        ></mat-card-header
+      >
+      <mat-card-content>
+        <mat-grid-list cols="2" rowHeight="80px">
+          <mat-grid-tile>
+            <div class="detail-item">
+              <mat-icon class="detail-icon">payments</mat-icon>
+              <div>
+                <div class="detail-label">Monto a Cobrar Entrega</div>
+                <div class="detail-value bold-value">
+                  {{
+                    data.order.amount_to_collect_at_delivery || 0
+                      | currency : "PEN" : "S/ " : "1.2-2"
+                  }}
+                </div>
+              </div>
+            </div>
+          </mat-grid-tile>
+          <mat-grid-tile>
+            <div class="detail-item">
+              <mat-icon class="detail-icon">local_atm</mat-icon>
+              <div>
+                <div class="detail-label">Costo de Envío</div>
+                <div class="detail-value bold-value">
+                  {{
+                    data.order.shipping_cost || 0
+                      | currency : "PEN" : "S/ " : "1.2-2"
+                  }}
+                </div>
+              </div>
+            </div>
+          </mat-grid-tile>
+          <mat-grid-tile *ngIf="data.order.payment_method_for_collection">
+            <div class="detail-item">
+              <mat-icon class="detail-icon">credit_card</mat-icon>
+              <div>
+                <div class="detail-label">Método de Cobro</div>
+                <div class="detail-value">
+                  {{ data.order.payment_method_for_collection | titlecase }}
+                </div>
+              </div>
+            </div>
+          </mat-grid-tile>
+        </mat-grid-list>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card
+      appearance="outlined"
+      class="info-card"
+      *ngIf="
+        data.order.observations || data.order.type_order_transfer_to_warehouse
+      "
+    >
+      <mat-card-header class="compact-card-header"
+        ><mat-card-title
+          >Observaciones y Logística</mat-card-title
+        ></mat-card-header
+      >
+      <mat-card-content>
+        <div *ngIf="data.order.observations" class="detail-block">
+          <div class="detail-label-block">
+            <mat-icon>speaker_notes</mat-icon> Observaciones Cliente/Pedido:
+          </div>
+          <p class="detail-value-block">{{ data.order.observations }}</p>
+        </div>
+        <mat-divider
+          *ngIf="
+            data.order.observations &&
+            data.order.type_order_transfer_to_warehouse
+          "
+        ></mat-divider>
+        <div
+          *ngIf="data.order.type_order_transfer_to_warehouse"
+          class="detail-block"
+        >
+          <div class="detail-label-block">
+            <mat-icon>warehouse</mat-icon> Tipo de Transferencia a Almacén:
+          </div>
+          <p class="detail-value-block">
+            {{ data.order.type_order_transfer_to_warehouse | titlecase }}
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="dialog-actions">
+    <!-- <button
+      mat-stroked-button
+      (click)="printOrder()"
+      matTooltip="Generar PDF/Imprimir (Función simulada)"
+    >
+      <mat-icon>print</mat-icon> Imprimir
+    </button> -->
+    <button mat-flat-button class="btn-corp-primary" (click)="onClose()">Cerrar</button>
+  </mat-dialog-actions>
+</div>

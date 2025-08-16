@@ -108,7 +108,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     'amount_to_collect_at_delivery',
     // 'delivery_date',
     'shipping_cost',
-    'observation_shipping_cost_modification',
+    // 'observation_shipping_cost_modification',
     // 'recipient_phone', // Puedes decidir cuáles mostrar por defecto
     // 'createdAt',
     // 'shipping_cost',

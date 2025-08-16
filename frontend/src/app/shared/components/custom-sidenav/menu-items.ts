@@ -87,10 +87,17 @@ export const menuItems: MenuItem[] = [
   },
   {
     icon: 'list_alt',
+    label: 'Pedidos Registrados',
+    route: 'orders-registered',
+    roles: ['ADMINISTRADOR', 'EMPRESA', 'RECEPCIONISTA'],
+  },
+  {
+    icon: 'list_alt',
     label: 'Pedidos entregados',
     route: 'orders-delivered',
     roles: ['ADMINISTRADOR', 'EMPRESA', 'RECEPCIONISTA'],
   },
+
   {
     icon: 'analytics',
     label: 'Reportes',

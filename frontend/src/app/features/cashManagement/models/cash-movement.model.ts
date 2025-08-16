@@ -31,6 +31,7 @@ export interface CashMovementQuery {
   typeMovement?: 'INGRESO' | 'EGRESO';
   paymentsMethod?: string;
   userId?: string;
+  search?: string;
   [key: string]: any; // Add index signature
 }
 

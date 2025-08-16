@@ -1,6 +1,8 @@
 .page-content-wrapper {
   padding: 20px 24px;
-  background-color: var(--sys-surface-container-lowest); // Un fondo de página muy claro
+  background-color: var(
+    --sys-surface-container-lowest
+  ); // Un fondo de página muy claro
   color: var(--sys-on-surface);
   min-height: calc(100vh - 64px); // Asumiendo un toolbar de 64px
 }
@@ -58,14 +60,18 @@
 }
 
 .orders-grid {
- display: grid;
- grid-template-columns: 1fr; // Default to single column
- gap: 20px;
+  display: grid;
+  grid-template-columns: 1fr; // Default to single column
+  gap: 20px;
 }
-
+.acciones-masivas {
+  padding: 25px !important;
+}
 @media (min-width: 768px) {
   .orders-grid {
     grid-template-columns: 1fr 1fr; // Two columns on larger screens
   }
+  .acciones-masivas {
+    padding: 20px !important;
+  }
 }
- 

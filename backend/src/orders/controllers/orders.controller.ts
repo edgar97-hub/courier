@@ -132,6 +132,31 @@ export class OrdersController {
     return await this.ordersService.getOrderByTrackingCode(queryParams);
   }
 
+  @Get('registered-orders')
+  public async findRegisteredOrders(
+    @Request() req,
+    @Query('page_number') pageNumber = 0,
+    @Query('page_size') pageSize = 0,
+    @Query('sort_field') sortField = 'created_at',
+    @Query('sort_direction') sortDirection = 'desc',
+    @Query('start_date') startDate?: string,
+    @Query('end_date') endDate?: string,
+    @Query('status') status?: string,
+    @Query('search_term') search_term?: string,
+  ) {
+    const queryParams = {
+      pageNumber,
+      pageSize,
+      sortField,
+      sortDirection,
+      startDate,
+      endDate,
+      status,
+      search_term,
+    };
+    return await this.ordersService.findOrdersByRegistrationDate(queryParams, req);
+  }
+
   @ApiParam({
     name: 'id',
   })

@@ -70,6 +70,19 @@ let OrdersController = class OrdersController {
         };
         return await this.ordersService.getOrderByTrackingCode(queryParams);
     }
+    async findRegisteredOrders(req, pageNumber = 0, pageSize = 0, sortField = 'created_at', sortDirection = 'desc', startDate, endDate, status, search_term) {
+        const queryParams = {
+            pageNumber,
+            pageSize,
+            sortField,
+            sortDirection,
+            startDate,
+            endDate,
+            status,
+            search_term,
+        };
+        return await this.ordersService.findOrdersByRegistrationDate(queryParams, req);
+    }
     async findOrderById(id) {
         return await this.ordersService.findOrderById(id);
     }
@@ -205,6 +218,21 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "getOrderByTrackingCode", null);
+__decorate([
+    (0, common_1.Get)('registered-orders'),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Query)('page_number')),
+    __param(2, (0, common_1.Query)('page_size')),
+    __param(3, (0, common_1.Query)('sort_field')),
+    __param(4, (0, common_1.Query)('sort_direction')),
+    __param(5, (0, common_1.Query)('start_date')),
+    __param(6, (0, common_1.Query)('end_date')),
+    __param(7, (0, common_1.Query)('status')),
+    __param(8, (0, common_1.Query)('search_term')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, String, String, String, String]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "findRegisteredOrders", null);
 __decorate([
     (0, swagger_1.ApiParam)({
         name: 'id',

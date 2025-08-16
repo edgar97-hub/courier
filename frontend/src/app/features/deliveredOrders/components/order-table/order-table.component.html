@@ -108,7 +108,7 @@
       </td>
     </ng-container>
 
-    <ng-container matColumnDef="observation_shipping_cost_modification">
+    <!-- <ng-container matColumnDef="observation_shipping_cost_modification">
       <th
         mat-header-cell
         *matHeaderCellDef
@@ -126,7 +126,7 @@
       >
         {{ order.observation_shipping_cost_modification }}
       </td>
-    </ng-container>
+    </ng-container> -->
 
     <!-- Actions Column -->
     <ng-container matColumnDef="actions">
@@ -160,14 +160,14 @@
             <span>Descargar evidencia</span>
           </button>
 
-          <button
+          <!-- <button
             mat-menu-item
             (click)="openEditShippingCostModal(order)"
             *ngIf="hasPermissionEdit()"
           >
             <mat-icon>price_change</mat-icon>
             <span>Modificar Costo Envío</span>
-          </button>
+          </button> -->
         </mat-menu>
       </td>
     </ng-container>

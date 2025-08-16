@@ -1,0 +1,74 @@
+.package-calculator-container {
+  margin-top: 20px;
+  // margin-bottom: 20px;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+.section-subtitle {
+  font-size: 1.1em;
+  font-weight: 500;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+mat-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.package-option {
+  font-weight: normal;
+}
+
+.custom-dimensions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); // Responsivo
+  gap: 30px;
+  margin-top: 16px;
+  align-items: start; // Alinear campos si tienen diferente altura de error
+}
+
+.calculate-button-container {
+  grid-column: 1 / -1; // Ocupar todo el ancho si está en grid
+  display: flex;
+  justify-content: flex-start; // Alinear botón a la izquierda
+  margin-top: 10px;
+
+  button {
+    min-width: 120px; // Ancho mínimo para el botón
+  }
+}
+
+.button-spinner {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.max-dimensions-info {
+  margin-top: 0px !important;
+  font-size: 16px;
+  color: #575555;
+  text-align: center;
+  padding: 8px;
+  background-color: #efefef;
+  border-radius: 4px;
+  // border: 1px solid black;
+}
+
+.warning-paquete-size {
+  // border: 1px solid black;
+  font-size: 17px;
+  font-weight: bold;
+  margin: 0;
+  text-align: left; // O donde prefieras mostrarlo
+  color: #d32f2f; // Color rojo como en la imagen
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; // Alinea a la derecha
+}

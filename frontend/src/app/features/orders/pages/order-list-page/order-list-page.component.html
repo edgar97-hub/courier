@@ -1,11 +1,7 @@
 <div class="page-content-wrapper">
   <div class="page-title-bar">
     <h1 class="page-title">Listado de pedidos</h1>
-    <div class="breadcrumbs">
-      <!-- Ejemplo de Breadcrumbs (puedes hacerlo más dinámico) -->
-      <!-- <a routerLink="/">Inicio</a> /
-      <span>Listado de pedidos Lima</span> -->
-    </div>
+    <div class="breadcrumbs"></div>
   </div>
 
   <app-order-filters
@@ -13,11 +9,19 @@
   ></app-order-filters>
 
   <div class="table-controls-bar">
+    <div class="my-orders-toggle" *ngIf="isDriver()">
+      <mat-slide-toggle
+        [checked]="showMyOrders"
+        (change)="onToggleMyOrders($event)"
+      >
+        Mostrar mis pedidos
+      </mat-slide-toggle>
+    </div>
     <div class="records-info"></div>
     <div class="actions-group">
       <button
         mat-flat-button
-        class="btn-corp-primary"
+        class="btn-corp-primary acciones-masivas"
         [matMenuTriggerFor]="massiveActionsMenu"
       >
         Acciones Masivas <mat-icon>arrow_drop_down</mat-icon>
@@ -48,5 +52,6 @@
     (motorizedChanged)="handleMotorizedChanged($event)"
     (rescheduleChanged)="handleRescheduleChanged($event)"
     (amountToCollectChanged)="handleAmountToCollectChanged($event)"
+    (shippingCostChanged)="handleShippingCostChanged($event)"
   ></app-order-table>
 </div>

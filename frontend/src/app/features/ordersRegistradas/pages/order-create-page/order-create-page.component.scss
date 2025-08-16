@@ -1,0 +1,66 @@
+.order-create-page {
+  padding: 0px 0px;
+  background-color: #f4f6f8;
+}
+
+// Estilos para la sección final de envío
+.final-submission-section {
+  margin-top: 30px;
+  padding: 24px;
+  background-color: #fff;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pickup-option-section {
+  .full-width {
+    width: 100%;
+  }
+}
+
+.terms-section {
+  display: flex;
+  flex-direction: column; // Para que el error aparezca debajo
+  align-items: flex-start; // Alinear checkbox a la izquierda
+
+  a {
+    // color: mat.get-theme-color(
+    //   theme.$primary-palette,
+    //   default
+    // ); // Usar tu color primario del tema
+    text-decoration: none;
+    font-weight: 500;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  .terms-error {
+    font-size: 0.75em;
+    margin-top: 4px;
+  }
+}
+
+.submit-batch-button-container {
+  margin-top: 16px;
+  text-align: center;
+
+  .submit-all-button {
+    padding: 25px 28px !important;
+    font-size: 1.1em;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    min-width: 250px; // Ancho mínimo para el botón
+  }
+}
+
+.button-spinner {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 10px;
+}
+
+// Asegúrate de tener tu tema de Material importado o definido en styles.scss
+// @use '@angular/material' as mat;
+// @use 'path/to/your/theme-definition' as theme;

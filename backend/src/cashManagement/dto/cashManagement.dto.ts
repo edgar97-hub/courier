@@ -69,6 +69,11 @@ export class QueryCashMovementDto {
   @IsString()
   @IsEnum(['ASC', 'DESC', 'asc', 'desc'])
   orderDirection?: 'ASC' | 'DESC' | 'asc' | 'desc';
+
+  @ApiProperty({ example: 'description', description: 'Campo de búsqueda general', required: false })
+  @IsOptional()
+  @IsString()
+  search?: string;
 }
 
 export class PaymentMethodSummary {

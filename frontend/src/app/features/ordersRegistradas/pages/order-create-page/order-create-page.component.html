@@ -1,0 +1,87 @@
+<div class="page-content-wrapper order-create-page">
+  <!-- Aquí puedes poner un breadcrumb o título de página si es necesario -->
+  <!-- <div class="page-title-bar"> ... </div> -->
+
+  <app-order-creation-form
+    (orderSubmit)="handleOrderAdded($event)"
+    (formValidityChanged)="onOrderFormValidityChanged($event)"
+  >
+  </app-order-creation-form>
+
+  <app-temporary-orders-table
+    [pendingOrders]="pendingOrders()"
+    (removeOrder)="handleRemoveOrder($event)"
+  >
+  </app-temporary-orders-table>
+
+  <div
+    class="final-submission-section mat-elevation-z1"
+    *ngIf="pendingOrders().length > 0"
+  >
+    <div class="pickup-option-section">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label
+          >¿Cómo se hará el traslado de los pedidos al almacén?</mat-label
+        >
+        <mat-select [formControl]="pickupOptionControl">
+          <mat-option *ngFor="let option of pickupOptions" [value]="option">
+            {{ option.replace("_", " ") | titlecase }}
+            <!-- Formatear para mostrar mejor -->
+          </mat-option>
+        </mat-select>
+        <mat-error
+          *ngIf="
+            pickupOptionControl.hasError('required') &&
+            pickupOptionControl.touched
+          "
+        >
+          Debe seleccionar una opción de traslado.
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="terms-section">
+      <mat-checkbox [formControl]="termsAcceptedControl">
+        acepto los
+        <a href="/terms-and-conditions" target="_blank" style="color: #012147; font-weight: bold;"
+          >términos y condiciones</a
+        >
+      </mat-checkbox>
+      <mat-error
+        *ngIf="
+          termsAcceptedControl.hasError('required') &&
+          termsAcceptedControl.touched
+        "
+        class="terms-error"
+      >
+        Debe aceptar los términos y condiciones.
+      </mat-error>
+    </div>
+
+    <div class="submit-batch-button-container">
+      <button
+        mat-flat-button
+        class="submit-all-button btn-corp-primary"
+        (click)="submitAllOrders()"
+        [disabled]="
+          pendingOrders().length === 0 ||
+          !termsAcceptedControl.value ||
+          !pickupOptionControl.valid ||
+          isSubmittingBatch()
+        "
+      >
+        <mat-progress-spinner
+          *ngIf="isSubmittingBatch()"
+          mode="indeterminate"
+          diameter="24"
+          class="button-spinner"
+        ></mat-progress-spinner>
+        {{
+          isSubmittingBatch()
+            ? "Generando Pedidos..."
+            : "Haz click aquí para guardar los pedidos"
+        }}
+      </button>
+    </div>
+  </div>
+</div>

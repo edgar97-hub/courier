@@ -1,0 +1,92 @@
+<form [formGroup]="filterForm" class="filters-container">
+  <!-- <mat-form-field appearance="outline">
+    <mat-label>Fecha de entrega inicio</mat-label>
+    <input
+      matInput
+      [matDatepicker]="startDatePicker"
+      formControlName="start_date"
+      placeholder="mm/dd/yyyy"
+    />
+    <mat-datepicker-toggle
+      matSuffix
+      [for]="startDatePicker"
+    ></mat-datepicker-toggle>
+    <mat-datepicker #startDatePicker></mat-datepicker>
+  </mat-form-field> -->
+
+  <mat-form-field appearance="outline">
+    <mat-label>Fecha de registro inicio</mat-label>
+    <input
+      matInput
+      [matDatepicker]="registrationStartDatePicker"
+      formControlName="registration_date_start"
+      placeholder="mm/dd/yyyy"
+    />
+    <mat-datepicker-toggle
+      matSuffix
+      [for]="registrationStartDatePicker"
+    ></mat-datepicker-toggle>
+    <mat-datepicker #registrationStartDatePicker></mat-datepicker>
+  </mat-form-field>
+<!-- 
+  <mat-form-field appearance="outline">
+    <mat-label>Fecha de entrega fin</mat-label>
+    <input
+      matInput
+      [matDatepicker]="endDatePicker"
+      formControlName="end_date"
+      placeholder="mm/dd/yyyy"
+    />
+    <mat-datepicker-toggle
+      matSuffix
+      [for]="endDatePicker"
+    ></mat-datepicker-toggle>
+    <mat-datepicker #endDatePicker></mat-datepicker>
+  </mat-form-field> -->
+
+  <mat-form-field appearance="outline">
+    <mat-label>Fecha de registro fin</mat-label>
+    <input
+      matInput
+      [matDatepicker]="registrationEndDatePicker"
+      formControlName="registration_date_end"
+      placeholder="mm/dd/yyyy"
+    />
+    <mat-datepicker-toggle
+      matSuffix
+      [for]="registrationEndDatePicker"
+    ></mat-datepicker-toggle>
+    <mat-datepicker #registrationEndDatePicker></mat-datepicker>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Estado</mat-label>
+    <mat-select formControlName="status" placeholder="Seleccione estado...">
+      <mat-option [value]="null">Todos</mat-option>
+      <mat-option
+        *ngFor="let status of orderStatuses$ | async"
+        [value]="status"
+      >
+        {{ status }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <div class="filter-actions">
+    <mat-form-field appearance="outline" style="margin-top: 15px">
+      <mat-label>Buscar</mat-label>
+      <input matInput formControlName="search_term" placeholder="Buscar..." />
+    </mat-form-field>
+    <button
+      mat-flat-button
+      class="btn-corp-primary"
+      type="button"
+      (click)="applyFilters()"
+    >
+      <mat-icon>search</mat-icon> Buscar
+    </button>
+    <button mat-stroked-button class="btn-corp-secondary" type="button" (click)="clearFilters()">
+      <mat-icon>clear_all</mat-icon> Limpiar
+    </button>
+  </div>
+</form>

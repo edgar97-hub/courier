@@ -72,6 +72,9 @@ export class OrderService {
       if (filters.search_term && filters.search_term.trim() !== '') {
         params = params.set('search_term', filters.search_term.trim());
       }
+      if (filters.myOrders) {
+        params = params.set('my_orders', 'true');
+      }
     }
 
     const headers = this.getAuthHeaders();
@@ -237,15 +240,15 @@ export class OrderService {
               'kg';
 
             let info_text =
-              'MEDIDAS MAXIMAS (Largo ' +
+              'Las entregas en motorizado permiten paquetes de hasta ' +
               apiResponse[0].maximum_measurements_length +
-              ' cm x Ancho ' +
+              ' cm x ' +
               apiResponse[0].maximum_measurements_width +
-              ' cm x Alto ' +
+              ' cm x  ' +
               apiResponse[0].maximum_measurements_height +
-              ' cm) y PESO MAXIMO (' +
+              ' cm y ' +
               apiResponse[0].maximum_measurements_weight +
-              ' kilogramos)';
+              ' kg. Si se exceden estas medidas o peso, se cobrará una tarifa distinta porque la entrega será en una van.';
 
             return {
               max_length_cm: apiResponse[0].maximum_measurements_length,
@@ -284,6 +287,7 @@ export class OrderService {
             'OrderService: API error fetching max package dimensions. Details:',
             error.message
           );
+
           return of({
             max_length_cm: 30,
             max_width_cm: 25,
@@ -291,7 +295,7 @@ export class OrderService {
             max_weight_kg: 5,
             standard_package_info: 'Estándar : 30cmx15cmx20cm 1.5kg',
             info_text:
-              'MEDIDAS MAXIMAS (Largo 30 cm x Ancho 25 cm x Alto 45 cm) y PESO MAXIMO (5 kilogramos)',
+              'Las entregas en motorizado permiten paquetes de hasta 25 cm x 30 cm x 45 cm y 5 kg. Si se exceden estas medidas o peso, se cobrará una tarifa distinta porque la entrega será en una van.',
           }).pipe(delay(200));
         })
       );
@@ -508,6 +512,38 @@ export class OrderService {
       newValue,
       notes,
       action: 'MODIFICACIÓN DEL MONTO A COBRAR',
+    };
+
+    return this.http
+      .post<{ success: boolean; message: string; batchId?: string }>(
+        `${this.apiUrlOrders}/update-order-status`,
+        {
+          payload,
+        },
+        { headers }
+      )
+      .pipe(catchError(this.handleError));
+  }
+
+  updateOrderShippingCost(
+    orderId: number | string,
+    newValue: number,
+    notes?: string
+  ): Observable<any> {
+    // event.orderId,
+    //   event.newShippingCost,
+    //   event.observation
+
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(() => new Error('Not authenticated to fetch users.'));
+    }
+
+    let payload: any = {
+      orderId,
+      newValue,
+      notes,
+      action: 'MODIFICACIÓN DEL COSTO DE ENVÍO',
     };
 
     return this.http

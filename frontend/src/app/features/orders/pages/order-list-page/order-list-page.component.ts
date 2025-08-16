@@ -42,6 +42,8 @@ import { OrderImportModalComponent } from '../../components/order-import-modal/o
 import { Order_importacion, STATES } from '../../models/order.model';
 import { ExcelExportService } from '../../services/excel-export.service';
 import { CommonModule, DatePipe } from '@angular/common';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { AppStore } from '../../../../app.store';
 
 @Component({
   selector: 'app-order-list-page',
@@ -55,6 +57,7 @@ import { CommonModule, DatePipe } from '@angular/common';
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
+    MatSlideToggleModule,
   ],
   templateUrl: './order-list-page.component.html',
   styleUrls: ['./order-list-page.component.scss'],
@@ -66,6 +69,8 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
   private dialog = inject(MatDialog);
   private excelExportService = inject(ExcelExportService);
   private datePipe = inject(DatePipe);
+  appStore = inject(AppStore); // Inject AppStore
+
   orders: Order_[] = [];
   isLoading = false;
   totalOrderCount = 0;
@@ -73,6 +78,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
   currentPageSize = 10;
   currentSortField = 'registration_date';
   currentSortDirection: 'asc' | 'desc' = 'desc';
+  showMyOrders: boolean = false; // New property for the toggle
 
   private filterCriteriaSubject = new BehaviorSubject<OrderFilterCriteria>({});
   private destroy$ = new Subject<void>();
@@ -90,6 +96,19 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
       .subscribe((criteria) => {
         this.fetchOrders();
       });
+  }
+
+  isDriver(): boolean {
+    return this.appStore.currentUser()?.role === 'MOTORIZADO';
+  }
+
+  onToggleMyOrders(event: any): void {
+    this.showMyOrders = event.checked;
+    const currentFilters = this.filterCriteriaSubject.value;
+    this.filterCriteriaSubject.next({
+      ...currentFilters,
+      myOrders: this.showMyOrders,
+    });
   }
 
   private async getAllFilteredOrdersForExport(): Promise<Order[]> {
@@ -178,9 +197,17 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     const currentFilters = this.filterCriteriaSubject.value;
 
+    // Add myOrders filter if the switch is toggled
+    const filtersToSend: OrderFilterCriteria = { ...currentFilters };
+    if (this.showMyOrders) {
+      filtersToSend.myOrders = true;
+    } else {
+      delete filtersToSend.myOrders; // Ensure it's not sent if false
+    }
+
     this.orderService
       .getOrders(
-        currentFilters,
+        filtersToSend, // Use filtersToSend
         this.currentPageIndex + 1,
         this.currentPageSize,
         this.currentSortField,
@@ -361,6 +388,42 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
         next: (updatedOrder) => {
           this.snackBar.open(
             `Monto a cobrar del pedido ${updatedOrder.code} actualizado.`,
+            'OK',
+            { duration: 3000, panelClass: ['success-snackbar'] }
+          );
+          this.fetchOrders();
+        },
+        error: (err) => {
+          this.snackBar.open(
+            `Error al actualizar costo: ${err.message || 'Intente de nuevo'}`,
+            'Cerrar',
+            { duration: 5000, panelClass: ['error-snackbar'] }
+          );
+          this.isLoading = false;
+        },
+        complete: () => {
+          this.isLoading = false;
+        },
+      });
+  }
+  handleShippingCostChanged(event: {
+    orderId: string | number;
+    newShippingCost: number;
+    observation: string;
+  }): void {
+    this.isLoading = true;
+    console.log('OrderListPage: Shipping cost change requested', event);
+
+    this.orderService
+      .updateOrderShippingCost(
+        event.orderId,
+        event.newShippingCost,
+        event.observation
+      )
+      .subscribe({
+        next: (updatedOrder) => {
+          this.snackBar.open(
+            `Costo de envío del pedido ${updatedOrder.code} actualizado.`,
             'OK',
             { duration: 3000, panelClass: ['success-snackbar'] }
           );
