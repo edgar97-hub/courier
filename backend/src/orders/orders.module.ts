@@ -11,7 +11,7 @@ import { CashManagementModule } from '../cashManagement/cashManagement.module'; 
 @Module({
   imports: [
     TypeOrmModule.forFeature([OrdersEntity, OrderLogEntity]),
-    CashManagementModule, // Add CashManagementModule here
+    CashManagementModule, 
   ],
   providers: [OrdersService, OrderPdfGeneratorService],
   controllers: [OrdersController],

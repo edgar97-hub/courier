@@ -242,7 +242,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     if (
       this.selectedLogoFile ||
       this.selectedBackgroundImageFile ||
-      /* ... otros selectedFile ... */ this.selectedTermsFile ||
+      this.selectedTermsFile ||
       this.selectedGlobalNoticeImageFile ||
       this.selectedExcelImportTemplateFile
     ) {

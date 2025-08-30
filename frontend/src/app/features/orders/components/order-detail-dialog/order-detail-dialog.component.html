@@ -5,20 +5,10 @@
   cdkDragHandle=".dialog-header-draggable"
 >
   <div class="dialog-header dialog-header-draggable">
-    <!-- Añadida clase para cdkDragHandle -->
     <h2 mat-dialog-title>Detalles del Pedido</h2>
     <span class="order-code-chip"
       >N°: {{ data.order.code || data.order.id }}</span
     >
-    <!-- <button
-      mat-icon-button
-      class="close-button"
-      (click)="onClose()"
-      aria-label="Cerrar diálogo"
-      matTooltip="Cerrar"
-    >
-      <mat-icon>close</mat-icon>
-    </button> -->
   </div>
 
   <mat-dialog-content class="dialog-content" tabindex="-1">
@@ -329,6 +319,8 @@
     >
       <mat-icon>print</mat-icon> Imprimir
     </button> -->
-    <button mat-flat-button class="btn-corp-primary" (click)="onClose()">Cerrar</button>
+    <button mat-flat-button class="btn-corp-primary" (click)="onClose()">
+      Cerrar
+    </button>
   </mat-dialog-actions>
 </div>
