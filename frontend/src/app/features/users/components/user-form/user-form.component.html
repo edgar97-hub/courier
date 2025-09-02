@@ -90,6 +90,20 @@
               Rol es requerido.
             </mat-error>
           </mat-form-field>
+
+          <mat-form-field
+            appearance="outline"
+            class="form-field small-field"
+            *ngIf="roleControl.value === 'MOTORIZADO'"
+          >
+            <mat-label>Codigo Conductor</mat-label>
+            <input
+              matInput
+              formControlName="driverCode"
+              autocomplete="off"
+              required
+            />
+          </mat-form-field>
         </div>
       </div>
       <ng-container *ngIf="roleControl.value === 'EMPRESA'">

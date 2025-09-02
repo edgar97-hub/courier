@@ -1,0 +1,120 @@
+.import-modal-container {
+  padding: 20px;
+  min-width: 400px;
+}
+
+.instructions {
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+ol {
+  margin-bottom: 20px;
+  padding-left: 20px;
+}
+
+li {
+  margin-bottom: 10px;
+}
+
+.template-button {
+  margin-top: 10px;
+}
+
+.column-descriptions {
+  list-style-type: disc;
+  margin-left: 20px;
+  margin-top: 10px;
+}
+
+.column-descriptions li {
+  margin-bottom: 5px;
+}
+
+.file-input-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.file-name-display {
+  font-style: italic;
+  color: #555;
+}
+
+.upload-progress-container {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.import-results {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #f0f0f0;
+}
+
+.success-message {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.error-message {
+  color: #f44336;
+  font-weight: bold;
+}
+
+.error-details {
+  margin-top: 10px;
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+}
+
+.error-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 5px;
+  word-break: break-word;
+}
+
+.error-item mat-icon {
+  margin-right: 8px;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.error-data-preview {
+  font-family: monospace;
+  background-color: #e0e0e0;
+  padding: 2px 5px;
+  border-radius: 3px;
+  word-break: break-all;
+}
+
+/* Custom button styles (assuming btn-corp-primary and btn-corp-secondary are defined elsewhere) */
+.btn-corp-primary {
+  background-color: #007bff; /* Example color */
+  color: white;
+}
+
+.btn-corp-secondary {
+  border-color: #007bff; /* Example color */
+  color: #007bff;
+}
+
+.warn-snackbar {
+  background-color: #ffc107;
+  color: #333;
+}
+
+.success-snackbar {
+  background-color: #28a745;
+  color: white;
+}
+
+.error-snackbar {
+  background-color: #dc3545;
+  color: white;
+}

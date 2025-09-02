@@ -5,6 +5,7 @@ import { IUser } from '../../interfaces/user.interface';
 import { BaseEntity } from '../../config/base.entity';
 import { OrdersEntity } from '../../orders/entities/orders.entity';
 import { CashManagementEntity } from 'src/cashManagement/entities/cashManagement.entity';
+import { Route } from 'src/planningEvents/entities/route.entity';
 
 @Entity({ name: 'users' })
 export class UsersEntity extends BaseEntity implements IUser {
@@ -21,6 +22,9 @@ export class UsersEntity extends BaseEntity implements IUser {
   @Column()
   @Exclude()
   password: string;
+
+  @Column({ nullable: true })
+  driverCode: string;
 
   @Column({ default: '' })
   photo_url: string;
@@ -88,6 +92,9 @@ export class UsersEntity extends BaseEntity implements IUser {
   @OneToMany(() => OrdersEntity, (order) => order.company)
   companyOrdersIncludes: OrdersEntity[];
 
-  @OneToMany(() => CashManagementEntity, (cashManagement) => cashManagement.user)
+  @OneToMany(
+    () => CashManagementEntity,
+    (cashManagement) => cashManagement.user,
+  )
   cashManagementIncludes: CashManagementEntity[];
 }

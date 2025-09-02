@@ -66,11 +66,11 @@ import {
   ɵɵdefineInjector,
   ɵɵdefineNgModule
 } from "./chunk-ZLCRWG4V.js";
+import "./chunk-5KXDAEEK.js";
 import {
   animationFrameScheduler,
   merge
 } from "./chunk-VMI3K6GE.js";
-import "./chunk-5KXDAEEK.js";
 import {
   BehaviorSubject,
   Observable,

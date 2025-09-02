@@ -42,6 +42,11 @@ __decorate([
 ], UserDTO.prototype, "role", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UserDTO.prototype, "driverCode", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], UserDTO.prototype, "business_type", void 0);
 __decorate([
@@ -134,6 +139,11 @@ __decorate([
     (0, class_validator_1.IsEnum)(roles_1.ROLES),
     __metadata("design:type", String)
 ], UserUpdateDTO.prototype, "role", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UserUpdateDTO.prototype, "driverCode", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)

@@ -80,7 +80,15 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
   currentSortDirection: 'asc' | 'desc' = 'desc';
   showMyOrders: boolean = false; // New property for the toggle
 
-  private filterCriteriaSubject = new BehaviorSubject<OrderFilterCriteria>({});
+  now = new Date();
+  firstDay = new Date(this.now.getFullYear(), this.now.getMonth(), 1);
+  lastDay = new Date(this.now.getFullYear(), this.now.getMonth() + 1, 0);
+
+  private filterCriteriaSubject = new BehaviorSubject<OrderFilterCriteria>({
+    start_date: this.datePipe.transform(this.firstDay, 'yyyy-MM-dd'),
+    end_date: this.datePipe.transform(this.lastDay, 'yyyy-MM-dd'),
+    status: null,
+  });
   private destroy$ = new Subject<void>();
 
   constructor() {}
@@ -89,11 +97,9 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
     this.filterCriteriaSubject
       .pipe(
         takeUntil(this.destroy$),
-        // debounceTime(300), // Opcional: añadir debounce si los filtros emiten muy rápido
-        // distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
-        tap(() => (this.currentPageIndex = 0)) // Resetear a la primera página cuando los filtros cambian
+        tap(() => (this.currentPageIndex = 0))
       )
-      .subscribe((criteria) => {
+      .subscribe(() => {
         this.fetchOrders();
       });
   }
@@ -193,21 +199,88 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  async exportDataToExcel2(): Promise<void> {
+    this.isLoading = true;
+    this.snackBar.open(
+      'Preparando la exportación a Excel, esto puede tardar un momento...',
+      '',
+      { duration: 0 }
+    );
+    const standardPackageMeasurement = await firstValueFrom(
+      this.orderService
+        .getStandardPackageMeasurements()
+        .pipe(takeUntil(this.destroy$))
+    );
+    try {
+      const allFilteredOrders = await this.getAllFilteredOrdersForExport();
+      if (allFilteredOrders && allFilteredOrders.length > 0) {
+        const dataForSheet = allFilteredOrders.map((order: any) => {
+          let package_height_cm = standardPackageMeasurement.sta_height_cm;
+          let package_length_cm = standardPackageMeasurement.sta_length_cm;
+          let package_width_cm = standardPackageMeasurement.sta_width_cm;
+          let package_weight_kg = standardPackageMeasurement.sta_weight_kg;
+
+          if (order.package_size_type === 'custom') {
+            package_height_cm = order.package_height_cm;
+            package_length_cm = order.package_length_cm;
+            package_width_cm = order.package_width_cm;
+            package_weight_kg = order.package_weight_kg;
+          }
+
+          return {
+            pedido_id: order.code,
+            peso_kg: package_weight_kg,
+            largo_cm: package_length_cm,
+            ancho_cm: package_width_cm,
+            alto_cm: package_height_cm,
+            direccion:
+              order.delivery_address + '-' + order.delivery_district_name,
+          };
+        });
+
+        this.excelExportService.exportAsExcelFile(
+          dataForSheet,
+          'Listado_Pedidos_Filtrados',
+          'Pedidos'
+        );
+        this.snackBar.dismiss();
+        this.snackBar.open('¡Archivo Excel exportado exitosamente!', 'OK', {
+          duration: 3500,
+          panelClass: ['success-snackbar'],
+        });
+      } else {
+        this.snackBar.dismiss();
+        this.snackBar.open(
+          'No hay datos disponibles para exportar con los filtros actuales.',
+          'OK',
+          { duration: 3000 }
+        );
+      }
+    } catch (error) {
+      console.error('Error during Excel export process:', error);
+      this.snackBar.dismiss();
+      this.snackBar.open('An error occurred during Excel export.', 'Close', {
+        duration: 3000,
+        panelClass: ['error-snackbar'],
+      });
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
   fetchOrders(): void {
     this.isLoading = true;
     const currentFilters = this.filterCriteriaSubject.value;
-
-    // Add myOrders filter if the switch is toggled
     const filtersToSend: OrderFilterCriteria = { ...currentFilters };
     if (this.showMyOrders) {
       filtersToSend.myOrders = true;
     } else {
-      delete filtersToSend.myOrders; // Ensure it's not sent if false
+      delete filtersToSend.myOrders;
     }
 
     this.orderService
       .getOrders(
-        filtersToSend, // Use filtersToSend
+        filtersToSend,
         this.currentPageIndex + 1,
         this.currentPageSize,
         this.currentSortField,

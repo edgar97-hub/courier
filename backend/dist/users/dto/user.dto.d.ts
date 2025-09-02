@@ -4,6 +4,7 @@ export declare class UserDTO {
     username: string;
     password: string;
     role: ROLES;
+    driverCode: string;
     business_type: string;
     business_name: string;
     business_district: string;
@@ -27,6 +28,7 @@ export declare class UserUpdateDTO {
     username: string;
     password?: string;
     role: ROLES;
+    driverCode: string;
     business_type: string;
     business_name: string;
     business_district: string;

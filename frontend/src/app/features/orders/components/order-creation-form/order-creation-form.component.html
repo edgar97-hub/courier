@@ -227,7 +227,6 @@
         [for]="deliveryDatePicker"
       ></mat-datepicker-toggle>
       <mat-datepicker #deliveryDatePicker></mat-datepicker>
-      <!-- <mat-hint>Formato dd/mm/yyyy</mat-hint> -->
       <mat-error *ngIf="orderForm.get('delivery_date')?.hasError('required')"
         >Requerido</mat-error
       >
@@ -286,7 +285,6 @@
         placeholder="S/"
       />
       <span matPrefix>S/ </span>
-      <!-- <mat-hint>Si solo hay que entregar colocar 0</mat-hint> -->
       <mat-error
         *ngIf="
           orderForm.get('amount_to_collect_at_delivery')?.hasError('required')

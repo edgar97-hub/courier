@@ -22,7 +22,6 @@ import { User } from '../../models/user.model'; // Tu modelo User
     CommonModule,
     RouterModule,
     UserFormComponent,
-    // MatSnackBarModule,
     MatIconModule,
     MatButtonModule,
   ],
@@ -32,10 +31,7 @@ import { User } from '../../models/user.model'; // Tu modelo User
 export class UserCreatePageComponent implements OnInit, OnDestroy {
   private store = inject(Store);
   private router = inject(Router);
-  
-  // private snackBar = inject(MatSnackBar); // Si los Effects manejan snackbars
 
-  // Usamos isSubmitting del store para el estado de carga del formulario
   isSubmitting$: Observable<boolean>;
   error$: Observable<string | null>;
 

@@ -64,18 +64,7 @@ export class UserFormComponent implements OnInit {
   get roleControl(): FormControl {
     return this.userForm.get('role') as FormControl;
   }
-  handleRoleChange(role: string): void {
-    // const sectionsToToggle = [
-    //   'mainPhone',
-    //   'secondaryPhone',
-    //   'addressLine1',
-    //   'addressLine2',
-    //   'preferredLanguage',
-    //   'enableEmailNotifications',
-    //   'enableSmsNotifications',
-    //   'notes',
-    // ];
-  }
+  handleRoleChange(role: string): void {}
 
   private initForm(): void {
     this.userForm = this.fb.group({
@@ -84,6 +73,7 @@ export class UserFormComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       password: ['', []],
       role: ['COMPANY'],
+      driverCode: ['', []],
 
       business_type: ['', []],
       business_name: ['', []],

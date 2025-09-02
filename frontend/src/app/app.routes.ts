@@ -127,6 +127,20 @@ export const routes: Routes = [
             (m) => m.CASH_MANAGEMENT_ROUTES
           ),
       },
+      {
+        path: 'planning-events',
+        loadChildren: () =>
+          import('./features/planning-events/planning-events.routes').then(
+            (m) => m.PLANNING_EVENTS_ROUTES
+          ),
+      },
+      {
+        path: 'my-orders',
+        loadComponent: () =>
+          import(
+            './features/myRoute/pages/my-route-page/my-route-page.component'
+          ).then((m) => m.MyRoutePageComponent),
+      },
     ],
   },
   {

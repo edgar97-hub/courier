@@ -97,7 +97,18 @@ export const menuItems: MenuItem[] = [
     route: 'orders-delivered',
     roles: ['ADMINISTRADOR', 'EMPRESA', 'RECEPCIONISTA'],
   },
-
+  {
+    icon: 'list_alt',
+    label: 'Planes de Rutas',
+    route: 'planning-events',
+    roles: ['ADMINISTRADOR', 'RECEPCIONISTA'],
+  },
+  {
+    icon: 'shopping_basket',
+    label: 'Mis Rutas',
+    route: 'my-orders',
+    roles: ['MOTORIZADO'],
+  },
   {
     icon: 'analytics',
     label: 'Reportes',

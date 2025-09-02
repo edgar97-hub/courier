@@ -17,9 +17,7 @@ exports.DataSourceConfig = {
     database: configService.get('DB_NAME'),
     entities: [__dirname + '/../**/**/*.entity{.ts,.js}'],
     migrations: [__dirname + '/../migrations/*{.ts,.js}'],
-    synchronize: false,
-    migrationsRun: true,
-    logging: false,
+    synchronize: true,
     namingStrategy: new typeorm_naming_strategies_1.SnakeNamingStrategy(),
 };
 exports.default = new typeorm_1.DataSource(exports.DataSourceConfig);

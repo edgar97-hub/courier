@@ -80,7 +80,16 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
   currentSortDirection: 'asc' | 'desc' = 'desc';
   showMyOrders: boolean = false; // New property for the toggle
 
-  private filterCriteriaSubject = new BehaviorSubject<OrderFilterCriteria>({});
+  now = new Date();
+  firstDay = new Date(this.now.getFullYear(), this.now.getMonth(), 1);
+  lastDay = new Date(this.now.getFullYear(), this.now.getMonth() + 1, 0);
+
+  private filterCriteriaSubject = new BehaviorSubject<OrderFilterCriteria>({
+    start_date: this.datePipe.transform(this.firstDay, 'yyyy-MM-dd'),
+    end_date: this.datePipe.transform(this.lastDay, 'yyyy-MM-dd'),
+    status: null,
+  });
+
   private destroy$ = new Subject<void>();
 
   constructor() {}

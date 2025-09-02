@@ -1,0 +1,32 @@
+.filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.mat-form-field {
+  flex: 1 1 auto; /* Allow fields to grow and shrink */
+  min-width: 200px; /* Minimum width for each field */
+}
+
+.filter-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-left: auto; /* Push buttons to the right */
+}
+
+.btn-corp-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-corp-secondary {
+  border-color: #007bff;
+  color: #007bff;
+}

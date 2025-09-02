@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Route } from '../../routes/entities/route.entity';
+import { Route } from './route.entity';
 
 export enum PlanningEventStatus {
   PENDING = 'PENDING',
@@ -15,8 +15,8 @@ export class PlanningEvent {
   @Column({ unique: true })
   planningEventIdExternal: string;
 
-  @Column({ type: 'date' })
-  planningDate: Date;
+  @Column()
+  planningDate: string;
 
   @Column({
     type: 'enum',

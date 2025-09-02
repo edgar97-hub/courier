@@ -1,0 +1,130 @@
+<!-- planning-event-import-modal.component.html -->
+<div class="import-modal-container">
+  <h2 mat-dialog-title>Importar Eventos de Planificación desde Excel</h2>
+
+  <mat-dialog-content class="mat-typography">
+    <p class="instructions">
+      Sigue estos pasos para importar tus eventos de planificación de forma
+      masiva:
+    </p>
+    <ol>
+      <li>
+        <div style="margin-bottom: 10px">
+          Descarga la plantilla de Excel para asegurar el formato correcto de
+          los datos.
+        </div>
+      </li>
+      <li>
+        Completa la plantilla con la información de tus eventos. Asegúrate de
+        que el orden y nombre de las columnas coincidan con la plantilla.
+      </li>
+      <li>
+        <strong>Descripción de las Columnas Esperadas en la Plantilla:</strong>
+        <ul class="column-descriptions">
+          <li>
+            <strong>ID_PLANIFICACION:</strong> Identificador único de la
+            planificación.
+          </li>
+          <li>
+            <strong>FECHA_PLANIFICACION:</strong> Fecha de la planificación.
+            Formato DD/MM/AAAA.
+          </li>
+          <li>
+            <strong>ID_RUTA_PLANIFICADOR:</strong> Identificador de la ruta del
+            planificador.
+          </li>
+          <li>
+            <strong>ID_CONDUCTOR:</strong> Identificador del conductor asignado.
+          </li>
+          <li><strong>ORDEN_PARADA:</strong> Orden de la parada en la ruta.</li>
+          <li>
+            <strong>ID_PEDIDO:</strong> Identificador del pedido asociado.
+          </li>
+          <li>
+            <strong>DIRECCION_ENTREGA:</strong> Dirección de entrega del pedido.
+          </li>
+          <li>
+            <strong>HORA_ESTIMADA_LLEGADA:</strong> Hora estimada de llegada.
+            Formato HH:MM.
+          </li>
+        </ul>
+      </li>
+      <li>Guarda el archivo en formato .xlsx o .xls.</li>
+      <li>Selecciona el archivo completo y haz clic en "Importar Eventos".</li>
+    </ol>
+
+    <div class="file-input-container">
+      <button
+        mat-raised-button
+        class="btn-corp-primary"
+        (click)="fileInput.click()"
+        [disabled]="isUploading"
+        style="height: 60px"
+      >
+        <mat-icon>attach_file</mat-icon> Seleccionar Archivo Excel
+      </button>
+      <input
+        hidden
+        type="file"
+        #fileInput
+        (change)="onFileSelected($event)"
+        accept=".xlsx, .xls"
+      />
+      <span *ngIf="fileName" class="file-name-display">{{ fileName }}</span>
+    </div>
+
+    <div *ngIf="isUploading" class="upload-progress-container">
+      <p>Importando archivo... {{ uploadProgress }}%</p>
+      <mat-progress-bar
+        mode="determinate"
+        [value]="uploadProgress"
+      ></mat-progress-bar>
+    </div>
+
+    <div *ngIf="importResult" class="import-results">
+      <h3
+        [ngClass]="{
+          'success-message': importResult.success,
+          'error-message': !importResult.success
+        }"
+      >
+        {{ importResult.message }}
+      </h3>
+      <div
+        *ngIf="importResult.errors && importResult.errors.length > 0"
+        class="error-details"
+      >
+        <h4>Detalles de Errores:</h4>
+        <mat-list dense>
+          <div *ngFor="let error of importResult.errors" class="error-item">
+            <mat-icon matListItemIcon color="warn">error_outline</mat-icon>
+            <div style="overflow-wrap: break-word !important">
+              Fila {{ error.row }}:
+              {{ error.message }}
+            </div>
+          </div>
+        </mat-list>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button
+      mat-stroked-button
+      class="btn-corp-secondary"
+      (click)="closeDialog()"
+      [disabled]="isUploading"
+    >
+      Cerrar
+    </button>
+    <button
+      mat-flat-button
+      class="btn-corp-primary"
+      (click)="processImport()"
+      [disabled]="!selectedFile || isUploading"
+    >
+      <mat-icon>upload</mat-icon>
+      {{ isUploading ? "Importando..." : "Importar Eventos" }}
+    </button>
+  </mat-dialog-actions>
+</div>

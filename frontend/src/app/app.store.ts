@@ -12,7 +12,6 @@ import {
 import { AuthService } from './core/services/auth.service';
 import { Credentials } from './features/login/models/credentials.interface';
 import { AuthResponse } from './features/login/models/auth-response.interface';
-import { User } from './features/login/models/user.interface';
 
 interface AppUiState {
   isLoading: boolean;
@@ -84,14 +83,6 @@ export const AppStore = signalStore(
             verticalPosition: 'top',
           });
         },
-
-        //        updateCurrentUser(updatedUser: User): void {
-        //   patchState(store, { currentUser: updatedUser });
-        //   // También actualiza el localStorage si AuthService guarda el usuario ahí
-        //   // inject(AuthService).storeUserInfo(updatedUser); // Necesitarías inyectar AuthService o manejarlo diferente
-        //   localStorage.setItem('user_info', JSON.stringify(updatedUser)); // Ejemplo simple
-        // }
-
         clearError(): void {
           patchState(store, { error: null });
         },

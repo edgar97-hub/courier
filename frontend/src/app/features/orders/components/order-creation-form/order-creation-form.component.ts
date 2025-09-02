@@ -74,7 +74,7 @@ import { AppStore } from '../../../../app.store';
 })
 export class OrderCreationFormComponent implements OnInit, OnDestroy {
   @Output() orderSubmit = new EventEmitter<NewOrderData>();
-  @Output() formValidityChanged = new EventEmitter<boolean>(); // Para notificar al padre
+  @Output() formValidityChanged = new EventEmitter<boolean>();
 
   orderForm!: FormGroup;
   // deliveryDistricts$: Observable<DistrictOption[]>;

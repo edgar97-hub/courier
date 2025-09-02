@@ -214,35 +214,10 @@ export class OrderImportModalComponent implements OnInit {
             return;
           }
           const ws: XLSX.WorkSheet = wb.Sheets[wsname];
-          // Convertir la hoja a JSON. SheetJS usará la primera fila como cabeceras por defecto.
-          // El backend debería estar preparado para recibir objetos donde las claves son
-          // los nombres de las cabeceras del Excel.
           const jsonData: any[] = XLSX.utils.sheet_to_json(ws, {
             raw: false,
             defval: null,
           });
-          // raw: false intenta convertir valores (ej. números, fechas si cellDates es true)
-          // defval: null para celdas vacías en lugar de undefined, podría ser más fácil de manejar en el backend
-
-          // Opcional: Mapear a tus claves de entidad aquí si quieres que el backend reciba las claves en inglés
-          // o dejar que el backend maneje el mapeo de las cabeceras en español.
-          // Para este ejemplo, enviaremos el JSON tal cual lo parsea sheet_to_json.
-          // Si quieres mapear:
-          // const mappedData = jsonData.map(row => {
-          //   const newRow: any = {};
-          //   for (const excelHeader in row) {
-          //     const modelKey = EXPECTED_EXCEL_HEADERS_FOR_PARSING[excelHeader.trim().toUpperCase()];
-          //     if (modelKey) {
-          //       newRow[modelKey] = row[excelHeader];
-          //     } else {
-          //       // Podrías ignorar columnas no esperadas o loguearlas
-          //       console.warn(`Cabecera no esperada en Excel: ${excelHeader}`);
-          //     }
-          //   }
-          //   return newRow;
-          // });
-          // resolve(mappedData.filter(row => Object.keys(row).length > 0));
-
           resolve(
             jsonData.filter((row) =>
               Object.values(row).some((val) => val !== null && val !== '')

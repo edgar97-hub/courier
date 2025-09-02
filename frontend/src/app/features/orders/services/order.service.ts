@@ -301,6 +301,95 @@ export class OrderService {
       );
   }
 
+  getStandardPackageMeasurements(): Observable<MaxPackageDimensions> {
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(() => new Error('Not authenticated to fetch users.'));
+    }
+    return this.http
+      .get<MaxPackageDimensions>(`${this.apiUrlSettings}/all`, { headers })
+      .pipe(
+        tap((apiResponse) =>
+          console.log(
+            'OrderService: API response for max dimensions:',
+            apiResponse
+          )
+        ),
+        map((apiResponse: any): MaxPackageDimensions => {
+          console.log('apiResponse', apiResponse);
+          if (apiResponse.length) {
+            let standard_package_info =
+              'Estándar : ' +
+              apiResponse[0].standard_measurements_length +
+              'cmx' +
+              apiResponse[0].standard_measurements_width +
+              'cmx' +
+              apiResponse[0].standard_measurements_height +
+              'cm ' +
+              apiResponse[0].standard_measurements_weight +
+              'kg';
+
+            let info_text =
+              'Las entregas en motorizado permiten paquetes de hasta ' +
+              apiResponse[0].maximum_measurements_length +
+              ' cm x ' +
+              apiResponse[0].maximum_measurements_width +
+              ' cm x  ' +
+              apiResponse[0].maximum_measurements_height +
+              ' cm y ' +
+              apiResponse[0].maximum_measurements_weight +
+              ' kg. Si se exceden estas medidas o peso, se cobrará una tarifa distinta porque la entrega será en una van.';
+
+            return {
+              max_length_cm: apiResponse[0].maximum_measurements_length,
+              max_width_cm: apiResponse[0].maximum_measurements_width,
+              max_height_cm: apiResponse[0].maximum_measurements_height,
+              max_weight_kg: apiResponse[0].maximum_measurements_weight,
+
+              sta_length_cm: apiResponse[0].standard_measurements_length,
+              sta_width_cm: apiResponse[0].standard_measurements_width,
+              sta_height_cm: apiResponse[0].standard_measurements_height,
+              sta_weight_kg: apiResponse[0].standard_measurements_weight,
+
+              volumetric_factor: apiResponse[0].volumetric_factor,
+
+              standard_package_info: standard_package_info,
+              info_text: info_text,
+            };
+          }
+          return {
+            max_length_cm: 0,
+            max_width_cm: 0,
+            max_height_cm: 0,
+            max_weight_kg: 0,
+
+            sta_length_cm: 0,
+            sta_width_cm: 0,
+            sta_height_cm: 0,
+            sta_weight_kg: 0,
+            volumetric_factor: 0,
+            standard_package_info: '',
+            info_text: '',
+          };
+        }),
+        catchError((error: HttpErrorResponse) => {
+          console.error(
+            'OrderService: API error fetching max package dimensions. Details:',
+            error.message
+          );
+
+          return of({
+            max_length_cm: 30,
+            max_width_cm: 25,
+            max_height_cm: 45,
+            max_weight_kg: 5,
+            standard_package_info: 'Estándar : 30cmx15cmx20cm 1.5kg',
+            info_text:
+              'Las entregas en motorizado permiten paquetes de hasta 25 cm x 30 cm x 45 cm y 5 kg. Si se exceden estas medidas o peso, se cobrará una tarifa distinta porque la entrega será en una van.',
+          }).pipe(delay(200));
+        })
+      );
+  }
   calculateShippingCost(packageData: {
     delivery_district_id: string | number;
     package_size_type: 'standard' | 'custom';
@@ -530,10 +619,6 @@ export class OrderService {
     newValue: number,
     notes?: string
   ): Observable<any> {
-    // event.orderId,
-    //   event.newShippingCost,
-    //   event.observation
-
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
       return throwError(() => new Error('Not authenticated to fetch users.'));

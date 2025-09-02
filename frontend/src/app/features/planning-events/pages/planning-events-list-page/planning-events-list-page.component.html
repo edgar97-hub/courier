@@ -1,0 +1,34 @@
+<div class="page-content-wrapper">
+  <div class="page-title-bar">
+    <h1 class="page-title">Listado de Planes de Ruta</h1>
+    <div class="breadcrumbs"></div>
+  </div>
+
+  <app-planning-events-filters
+    (filtersChanged)="onFiltersChanged($event)"
+  ></app-planning-events-filters>
+
+  <div class="table-controls-bar">
+    <div class="records-info"></div>
+    <div class="actions-group">
+      <button
+        mat-flat-button
+        class="btn-corp-primary"
+        (click)="openImportModal()"
+      >
+        Importar Nuevo Plan de Ruta
+      </button>
+    </div>
+  </div>
+
+  <app-planning-events-table
+    [planningEvents]="planningEvents"
+    [isLoading]="isLoading"
+    [totalCount]="totalPlanningEventCount"
+    [pageSize]="currentPageSize"
+    [pageIndex]="currentPageIndex"
+    (pageChanged)="onPageChanged($event)"
+    (sortChanged)="onSortChanged($event)"
+    (viewDetailsClicked)="onViewDetails($event)"
+  ></app-planning-events-table>
+</div>

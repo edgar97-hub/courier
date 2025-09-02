@@ -1,0 +1,111 @@
+<div class="my-route-container">
+  <mat-card class="route-summary-card">
+    <div style="margin: 20px;font-weight: 600;">Mis Rutas de Hoy</div>
+    <mat-card-content>
+      <div class="header-controls">
+        <mat-form-field appearance="outline" class="date-picker">
+          <mat-label>Fecha de Ruta</mat-label>
+          <input
+            matInput
+            [matDatepicker]="picker"
+            [(ngModel)]="selectedDate"
+            (dateChange)="onDateChange()"
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="picker"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="generateFullRouteMapsUrl()"
+          [disabled]="!selectedRoute"
+          class="full-route-button"
+        >
+          <mat-icon>map</mat-icon>
+          Ver Ruta Completa en Mapa
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <div *ngIf="routesForSelectedDate.length > 0; else noRoutes">
+    <mat-tab-group
+      (selectedTabChange)="selectRoute($event.index)"
+      animationDuration="0ms"
+    >
+      <mat-tab
+        *ngFor="let route of routesForSelectedDate; let i = index"
+        [label]="'Ruta ' + (i + 1)"
+      >
+        <!-- El contenido se muestra fuera del tab para que no se oculte -->
+      </mat-tab>
+    </mat-tab-group>
+
+    <div class="stops-manifest" *ngIf="selectedRoute">
+      <mat-card
+        *ngFor="let stop of selectedRoute.stops"
+        class="stop-card"
+        [ngClass]="{
+          'completed-stop': isStopCompleted(stop),
+          'active-stop': isStopActive(stop)
+        }"
+      >
+        <mat-card-header>
+          <div mat-card-avatar class="stop-number">
+            {{ stop.sequenceOrder }}
+          </div>
+          <mat-card-title>{{ stop.order.recipient_name }}</mat-card-title>
+          <mat-card-subtitle>{{ stop.address }}</mat-card-subtitle>
+          <div class="stop-status">
+            <mat-chip
+              [ngClass]="getStopStatusClass(stop.order.status)"
+              selected
+            >
+              {{ stop.order.status }}
+            </mat-chip>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="stop-details">
+            <span
+              ><strong>Hora estimada:</strong>
+              {{ stop.plannedArrivalTime }}</span
+            >
+            <span><strong>Pedido:</strong> #{{ stop.orderCode }}</span>
+          </div>
+          <p *ngIf="stop.order.observations" class="notes">
+            <strong>Notas:</strong> {{ stop.order.observations }}
+          </p>
+        </mat-card-content>
+        <mat-card-actions align="end">
+          <button
+            mat-icon-button
+            (click)="navigateToStop(stop)"
+            matTooltip="Navegar a esta parada"
+          >
+            <mat-icon>navigation</mat-icon>
+          </button>
+          <button
+            mat-flat-button
+            color="primary"
+            (click)="manageDelivery(stop)"
+            [disabled]="!isStopActive(stop)"
+          >
+            Gestionar Entrega
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+
+  <ng-template #noRoutes>
+    <mat-card class="no-routes-card">
+      <mat-icon>explore_off</mat-icon>
+      <p>No hay rutas asignadas para la fecha seleccionada.</p>
+    </mat-card>
+  </ng-template>
+</div>

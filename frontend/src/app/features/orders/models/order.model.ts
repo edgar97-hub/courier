@@ -91,7 +91,6 @@ export interface ShippingCostResponse {
   shipping_cost: number;
 }
 
-// Suponiendo que tienes algo así en tus modelos
 export enum STATES {
   PENDING = 'Pending',
   PROCESSING = 'Processing',

@@ -38,6 +38,10 @@ __decorate([
     __metadata("design:type", String)
 ], UsersEntity.prototype, "password", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], UsersEntity.prototype, "driverCode", void 0);
+__decorate([
     (0, typeorm_1.Column)({ default: '' }),
     __metadata("design:type", String)
 ], UsersEntity.prototype, "photo_url", void 0);

@@ -1,0 +1,150 @@
+<div class="page-container" *ngIf="planningEvent; else loadingOrError">
+  <!-- Encabezado de la Página -->
+  <mat-card class="page-header-card">
+    <mat-card-header>
+      <div mat-card-avatar class="header-icon">
+        <mat-icon>event_note</mat-icon>
+      </div>
+      <mat-card-title>
+        {{ "N°: " }}{{ planningEvent.planningEventIdExternal }}</mat-card-title
+      >
+      <mat-card-subtitle>
+        Planificación para el
+        {{ planningEvent.planningDate | date : "fullDate" }}
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-actions align="end">
+      <a
+        mat-stroked-button
+        routerLink="/planning-events"
+        class="btn-corp-primary"
+      >
+        <mat-icon>arrow_back</mat-icon> Volver a la Lista
+      </a>
+    </mat-card-actions>
+  </mat-card>
+
+  <!-- Layout Principal -->
+  <div class="detail-layout">
+    <!-- Columna Izquierda: Lista de Rutas -->
+    <div class="route-list-panel">
+      <mat-card>
+        <mat-card-content>
+          <mat-list>
+            <h3 mat-subheader>Rutas de la Jornada</h3>
+            <mat-list-item
+              *ngFor="let route of planningEvent.routes"
+              (click)="selectRoute(route)"
+              [class.selected-route]="route.id === selectedRoute?.id"
+            >
+              <mat-icon matListItemIcon>person_pin</mat-icon>
+              <div matListItemTitle>
+                {{ route.driverCode || "Sin Conductor" }}
+              </div>
+              <div matListItemLine>
+                <span>{{ route.vehicle || "Sin Vehículo" }}</span>
+                <div class="progress-summary">
+                  <span
+                    >{{ getCompletedStops(route) }} /
+                    {{ route.stops.length }} Paradas</span
+                  >
+                  <mat-progress-bar
+                    mode="determinate"
+                    [value]="getRouteProgress(route)"
+                  ></mat-progress-bar>
+                </div>
+              </div>
+            </mat-list-item>
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Columna Derecha: Detalle de la Ruta Seleccionada -->
+    <div class="route-detail-panel">
+      <mat-card *ngIf="selectedRoute; else noRouteSelected">
+        <mat-card-header>
+          <mat-card-title
+            >Detalle de Ruta: {{ selectedRoute.driverCode }}</mat-card-title
+          >
+          <mat-card-subtitle
+            >Vehículo: {{ selectedRoute.vehicle }}</mat-card-subtitle
+          >
+        </mat-card-header>
+        <mat-card-content>
+          <div class="timeline">
+            <!-- Punto de Partida -->
+            <div class="timeline-item">
+              <div class="timeline-icon start">
+                <mat-icon>warehouse</mat-icon>
+              </div>
+              <div class="timeline-content">
+                <strong
+                  >Partida:
+                  {{ selectedRoute.startingPoint || "No definido" }}</strong
+                >
+                <p>
+                  Hora de Salida Estimada:
+                  {{ selectedRoute.vehicleStartTime | date : "shortTime" }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Paradas Intermedias (Bucle) -->
+            <div class="timeline-item" *ngFor="let stop of selectedRoute.stops">
+              <div class="timeline-connector"></div>
+              <div
+                class="timeline-icon"
+                [ngClass]="getStopStatusClass(stop.order.status)"
+              >
+                <span>{{ stop.sequenceOrder }}</span>
+              </div>
+              <div class="timeline-content">
+                <strong>{{ stop.address }}</strong>
+                <p class="stop-details">
+                  <span>Pedido #{{ stop.orderCode }}</span> |
+                  <span>Llegada Estimada: {{ stop.plannedArrivalTime }}</span>
+                  |
+                  <span
+                    class="status-text"
+                    [ngClass]="getStopStatusClass(stop.order.status)"
+                    >{{ stop.order.status }}</span
+                  >
+                </p>
+              </div>
+            </div>
+
+            <!-- Punto de Destino -->
+            <div class="timeline-item">
+              <div class="timeline-connector"></div>
+              <div class="timeline-icon end"><mat-icon>flag</mat-icon></div>
+              <div class="timeline-content">
+                <strong
+                  >Destino:
+                  {{ selectedRoute.completionPoint || "No definido" }}</strong
+                >
+                <p>
+                  Hora de Llegada Estimada:
+                  {{ selectedRoute.vehicleEndTime | date : "shortTime" }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      <ng-template #noRouteSelected>
+        <div class="placeholder">
+          <mat-icon>touch_app</mat-icon>
+          <p>Selecciona una ruta de la lista para ver su detalle.</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>
+
+<ng-template #loadingOrError>
+  <div class="placeholder">
+    <mat-spinner *ngIf="!planningEvent"></mat-spinner>
+    <p *ngIf="!planningEvent">Cargando detalles de la planificación...</p>
+  </div>
+</ng-template>

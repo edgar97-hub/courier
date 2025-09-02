@@ -62,13 +62,12 @@ export class OrderFiltersComponent implements OnInit, OnDestroy {
       start_date: [firstDay],
       end_date: [lastDay],
       status: [null],
-      search_term: [''], // Para el input de búsqueda general en la tabla
+      search_term: [''],
     });
-    this.orderStatuses$ = this.orderService.getOrderStatuses(); // Carga los estados
+    this.orderStatuses$ = this.orderService.getOrderStatuses();
   }
 
   ngOnInit(): void {
-    // Emitir cambios cuando el formulario cambie, con un debounce para no emitir en cada keystroke
     this.filterForm.valueChanges
       .pipe(
         takeUntil(this.destroy$),
