@@ -23,6 +23,10 @@ export interface Route {
   vehicle: string;
   startingPoint: string;
   completionPoint: string;
+
+  latitudeStartPoint: string;
+  longitudeEndPoint: string;
+
   vehicleStartTime: string;
   vehicleEndTime: string;
 }
@@ -36,6 +40,8 @@ export interface Stop {
   plannedEndTime: string;
   status: StopStatus;
   address: string;
+  latitude: string;
+  longitude: string;
   notes: string;
   order: any;
 }

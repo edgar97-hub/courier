@@ -31,6 +31,12 @@ export class Route {
   completionPoint: string;
 
   @Column()
+  latitudeStartPoint: string;
+
+  @Column()
+  longitudeEndPoint: string;
+
+  @Column()
   planningEventId: number;
 
   @ManyToOne(() => PlanningEvent, (planningEvent) => planningEvent.routes)

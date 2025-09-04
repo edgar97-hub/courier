@@ -37,7 +37,11 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], Stop.prototype, "plannedEndTime", void 0);
+], Stop.prototype, "latitude", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], Stop.prototype, "longitude", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)

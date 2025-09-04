@@ -124,24 +124,32 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
 
   // Genera la URL para ver la ruta completa en Google Maps
   generateFullRouteMapsUrl(): void {
-    alert('funcionalidad pendiente');
+    // alert('funcionalidad pendiente');
     if (!this.selectedRoute || this.selectedRoute.stops.length === 0) return;
 
-    // const origin = `${this.selectedRoute.startWarehouse.latitude},${this.selectedRoute.startWarehouse.longitude}`;
-    // const destination = `${this.selectedRoute.endWarehouse.latitude},${this.selectedRoute.endWarehouse.longitude}`;
-    // const waypoints = this.selectedRoute.stops
-    //   .map((stop: any) => `${stop.latitude},${stop.longitude}`)
-    //   .join('|');
+    console.log(this.selectedRoute);
+    let _origin: any = this.selectedRoute.stops[0];
+    let _destination: any =
+      this.selectedRoute.stops[this.selectedRoute.stops.length - 1];
+    console.log(_origin, _destination);
+    const origin = `${this.selectedRoute.latitudeStartPoint},${this.selectedRoute.longitudeEndPoint}`;
+    const destination = `${_destination.latitude},${_destination.longitude}`;
 
-    // const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&waypoints=${waypoints}&travelmode=driving`;
-    // window.open(mapsUrl, '_blank');
+    const waypoints = this.selectedRoute.stops
+      .filter((item, index) => index !== 0)
+      .slice(0, -1)
+      .map((stop: any) => `${stop.latitude},${stop.longitude}`)
+      .join('|');
+
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&waypoints=${waypoints}&travelmode=driving`;
+    window.open(mapsUrl, '_blank');
   }
 
   // Genera la URL para navegar a una parada específica
   navigateToStop(stop: Stop): void {
-    // const destination = `${stop.latitude},${stop.longitude}`;
-    // const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`;
-    // window.open(mapsUrl, '_blank');
+    const destination = `${stop.latitude},${stop.longitude}`;
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`;
+    window.open(mapsUrl, '_blank');
   }
 
   // Navega a la página de detalle de pedido existente

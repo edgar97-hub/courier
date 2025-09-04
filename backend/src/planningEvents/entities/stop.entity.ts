@@ -26,7 +26,10 @@ export class Stop {
   plannedStartTime: string;
 
   @Column()
-  plannedEndTime: string;
+  latitude: string;
+
+  @Column()
+  longitude: string;
 
   @Column()
   address: string;

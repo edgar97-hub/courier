@@ -42,6 +42,14 @@ __decorate([
 ], Route.prototype, "completionPoint", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], Route.prototype, "latitudeStartPoint", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], Route.prototype, "longitudeEndPoint", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
 ], Route.prototype, "planningEventId", void 0);
 __decorate([

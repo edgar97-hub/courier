@@ -7,6 +7,8 @@ export declare class Route {
     vehicle: string;
     startingPoint: string;
     completionPoint: string;
+    latitudeStartPoint: string;
+    longitudeEndPoint: string;
     planningEventId: number;
     planningEvent: PlanningEvent;
     stops: Stop[];

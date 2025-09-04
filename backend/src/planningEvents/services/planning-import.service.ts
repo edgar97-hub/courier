@@ -131,6 +131,9 @@ export class PlanningImportService {
               vehicle: row.VEHICULO,
               startingPoint: row.PUNTO_INICIO_RUTA,
               completionPoint: row.PUNTO_FINALIZACION_RUTA,
+
+              latitudeStartPoint: row.LATITUD_INCIO_RUTA,
+              longitudeEndPoint: row.LONGITUD_INCIO_RUTA,
               planningEvent: { id: planningEvent.id },
             });
             await queryRunner.manager.save(route);
@@ -144,6 +147,8 @@ export class PlanningImportService {
             address: row.DIRECCION_ENTREGA,
             plannedStartTime: row.HORA_ESTIMADA_LLEGADA,
             plannedEndTime: row.HORA_ESTIMADA_SALIDA,
+            latitude: row.LATITUD_PARADA,
+            longitude: row.LONGITUD_PARADA,
             status: StopStatus.PENDING,
           });
           await queryRunner.manager.save(stop);
