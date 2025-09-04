@@ -32,7 +32,8 @@ export interface Stop {
   routeId: number;
   orderCode: string;
   sequenceOrder: number;
-  plannedArrivalTime: string;
+  plannedStartTime: string;
+  plannedEndTime: string;
   status: StopStatus;
   address: string;
   notes: string;

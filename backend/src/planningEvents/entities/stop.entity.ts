@@ -23,7 +23,10 @@ export class Stop {
   sequenceOrder: number;
 
   @Column()
-  plannedArrivalTime: string;
+  plannedStartTime: string;
+
+  @Column()
+  plannedEndTime: string;
 
   @Column()
   address: string;

@@ -33,7 +33,11 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], Stop.prototype, "plannedArrivalTime", void 0);
+], Stop.prototype, "plannedStartTime", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], Stop.prototype, "plannedEndTime", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)

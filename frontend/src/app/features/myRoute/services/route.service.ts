@@ -7,7 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
 interface Stop {
   orderId: string;
   sequenceOrder: number;
-  plannedArrivalTime: string;
+  plannedStartTime: string;
   address: string;
   status: 'PENDING' | 'COMPLETED' | 'SKIPPED';
   customerName: string;

@@ -103,7 +103,8 @@
                 <strong>{{ stop.address }}</strong>
                 <p class="stop-details">
                   <span>Pedido #{{ stop.orderCode }}</span> |
-                  <span>Llegada Estimada: {{ stop.plannedArrivalTime }}</span>
+                  <span>Llegada: {{ stop.plannedStartTime }}</span> -
+                  <span>Salida: {{ stop.plannedEndTime }}</span>
                   |
                   <span
                     class="status-text"
@@ -115,7 +116,7 @@
             </div>
 
             <!-- Punto de Destino -->
-            <div class="timeline-item">
+            <div class="timeline-item" *ngIf="selectedRoute.completionPoint">
               <div class="timeline-connector"></div>
               <div class="timeline-icon end"><mat-icon>flag</mat-icon></div>
               <div class="timeline-content">

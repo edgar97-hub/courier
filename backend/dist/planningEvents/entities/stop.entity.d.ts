@@ -8,7 +8,8 @@ export declare enum StopStatus {
 export declare class Stop {
     id: number;
     sequenceOrder: number;
-    plannedArrivalTime: string;
+    plannedStartTime: string;
+    plannedEndTime: string;
     address: string;
     status: StopStatus;
     routeId: number;

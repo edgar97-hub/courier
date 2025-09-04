@@ -12,8 +12,6 @@ import {
   Query,
 } from '@nestjs/common';
 import { PlanningImportService } from '../services/planning-import.service';
-import { Response } from 'express';
-import { StopStatus } from '../entities/stop.entity';
 import { ImportResult } from '../dto/import-result.dto';
 
 @Controller('planning-events')

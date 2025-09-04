@@ -76,6 +76,23 @@ export class PlanningImportService {
           });
           rowHasErrors = true;
         }
+        if (!row.HORA_ESTIMADA_LLEGADA) {
+          errors.push({
+            rowExcel: excelRowNumber,
+            message: 'HORA_ESTIMADA_LLEGADA is required.',
+            rowData: row,
+          });
+          rowHasErrors = true;
+        }
+
+        if (!row.HORA_ESTIMADA_SALIDA) {
+          errors.push({
+            rowExcel: excelRowNumber,
+            message: 'HORA_ESTIMADA_SALIDA is required.',
+            rowData: row,
+          });
+          rowHasErrors = true;
+        }
 
         if (rowHasErrors) {
           continue; // Skip to the next row if there are basic validation errors
@@ -125,7 +142,8 @@ export class PlanningImportService {
             orderCode: row.ID_PEDIDO,
             sequenceOrder: row.ORDEN_PARADA,
             address: row.DIRECCION_ENTREGA,
-            plannedArrivalTime: row.HORA_ESTIMADA_LLEGADA,
+            plannedStartTime: row.HORA_ESTIMADA_LLEGADA,
+            plannedEndTime: row.HORA_ESTIMADA_SALIDA,
             status: StopStatus.PENDING,
           });
           await queryRunner.manager.save(stop);

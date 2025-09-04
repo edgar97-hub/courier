@@ -1,6 +1,6 @@
 <div class="my-route-container">
   <mat-card class="route-summary-card">
-    <div style="margin: 20px;font-weight: 600;">Mis Rutas de Hoy</div>
+    <div style="margin: 20px; font-weight: 600">Mis Rutas de Hoy</div>
     <mat-card-content>
       <div class="header-controls">
         <mat-form-field appearance="outline" class="date-picker">
@@ -72,9 +72,10 @@
         <mat-card-content>
           <div class="stop-details">
             <span
-              ><strong>Hora estimada:</strong>
-              {{ stop.plannedArrivalTime }}</span
-            >
+              ><strong>Hora llegada:</strong> {{ stop.plannedStartTime }}</span
+            >-
+            <span><strong>Hora salida:</strong> {{ stop.plannedEndTime }}</span>
+            |
             <span><strong>Pedido:</strong> #{{ stop.orderCode }}</span>
           </div>
           <p *ngIf="stop.order.observations" class="notes">
