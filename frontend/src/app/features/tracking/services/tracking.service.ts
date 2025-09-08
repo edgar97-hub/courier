@@ -33,14 +33,6 @@ export class TrackingService {
         tap((order) => console.log('TrackingService: Fetched order:', order)),
         catchError(this.handleError)
       );
-    // return this.http
-    //   .get<TrackingOrder>(`${API_TRACKING_URL}/${trackingCode.trim()}`)
-    //   .pipe(
-    //     // Ejemplo como query param:
-    //     // delay(1000), // Simular latencia
-    //     tap((order) => console.log('TrackingService: Fetched order:', order)),
-    //     catchError(this.handleError)
-    //   );
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {

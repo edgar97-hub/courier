@@ -10,7 +10,6 @@ const swagger_1 = require("@nestjs/swagger");
 const path_1 = require("path");
 const bodyParser = require("body-parser");
 async function bootstrap() {
-    const certPath = '/etc/letsencrypt/live/app.jncourier.com/';
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.use(morgan('dev'));
     app.useGlobalPipes(new common_1.ValidationPipe({

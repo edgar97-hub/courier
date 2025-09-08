@@ -53,7 +53,9 @@ __decorate([
     __metadata("design:type", Number)
 ], Route.prototype, "planningEventId", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => planning_event_entity_1.PlanningEvent, (planningEvent) => planningEvent.routes),
+    (0, typeorm_1.ManyToOne)(() => planning_event_entity_1.PlanningEvent, (planningEvent) => planningEvent.routes, {
+        onDelete: 'CASCADE',
+    }),
     (0, typeorm_1.JoinColumn)({ name: 'planning_event_id' }),
     __metadata("design:type", planning_event_entity_1.PlanningEvent)
 ], Route.prototype, "planningEvent", void 0);
@@ -61,6 +63,14 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => stop_entity_1.Stop, (stop) => stop.route),
     __metadata("design:type", Array)
 ], Route.prototype, "stops", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Route.prototype, "breakStart", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Route.prototype, "breakDuration", void 0);
 exports.Route = Route = __decorate([
     (0, typeorm_1.Entity)('routes')
 ], Route);

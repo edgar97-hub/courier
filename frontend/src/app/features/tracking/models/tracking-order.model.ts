@@ -34,4 +34,5 @@ export interface TrackingOrder {
   status: string; // Viene de tu enum STATES
   logs: TrackingOrderLog[]; // El historial de tracking
   user?: { company_name?: string }; // Ejemplo: solo el nombre de la empresa del remitente
+  stops: any;
 }

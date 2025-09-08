@@ -12,4 +12,6 @@ export declare class Route {
     planningEventId: number;
     planningEvent: PlanningEvent;
     stops: Stop[];
+    breakStart: string;
+    breakDuration: string;
 }

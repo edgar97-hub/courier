@@ -123,8 +123,8 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     'company',
     'shipment_type',
     'recipient_name',
-    'recipient_phone', // Puedes decidir cuáles mostrar por defecto
-    'status', // Moví estado más a la izquierda para visibilidad
+    'recipient_phone',
+    'status',
     'delivery_district_name',
     'delivery_address',
     'delivery_date',
@@ -143,7 +143,6 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   // Inyectar servicios de Material
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
-  // private orderService = inject(OrderService); // Inyecta tu servicio de pedidos
 
   readonly OrderStatus = OrderStatus; // Para usar la enum en la plantilla
 
@@ -155,40 +154,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     }
   }
 
-  ngAfterViewInit(): void {
-    // El sort y paginator ya están configurados para emitir eventos al padre
-    // No es necesario configurar dataSource.sort y dataSource.paginator aquí
-    // si el padre maneja la paginación y el ordenamiento del lado del servidor.
-    // Si es del lado del cliente, SÍ debes configurarlos:
-    // this.dataSource.sort = this.sort;
-    // this.dataSource.paginator = this.paginator;
-  }
-
-  // --- Funciones de ayuda para la lógica de acciones ---
-  // canMarkAs(order: Order, targetStatus: OrderStatus): boolean {
-  //   // Lógica simplificada, necesitarás adaptarla a tu flujo exacto de estados
-  //   // y roles de usuario (que obtendrías de tu AppStore o AuthService)
-  //   const currentStatus = order.status;
-  //   // const userRole = this.appStore.currentUser()?.role;
-
-  //   // if (userRole === 'MOTORIZADO' || userRole === 'ADMINISTRADOR') {
-  //   // switch (targetStatus) {
-  //   //   case OrderStatus.EN_TRANSITO:
-  //   //     return (
-  //   //       currentStatus === OrderStatus.LISTO_PARA_RECOGER ||
-  //   //       currentStatus === OrderStatus.EN_PREPARACION
-  //   //     );
-  //   //   case OrderStatus.ENTREGADO:
-  //   //     return currentStatus === OrderStatus.EN_TRANSITO;
-  //   //   case OrderStatus.NO_ENTREGADO: // O INCIDENCIA
-  //   //     return currentStatus === OrderStatus.EN_TRANSITO;
-  //   //   // Añade más casos según tu lógica
-  //   //   default:
-  //   //     return false;
-  //   // }
-  //   // }
-  //   return false;
-  // }
+  ngAfterViewInit(): void {}
 
   onViewPdfA4(order: Order_): void {
     const pdfUrl = environment.apiUrl + '/orders/' + order.id + '/pdf-a4';
@@ -218,7 +184,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
 
   getStatusClass(status: string | undefined | null): string {
     if (!status) {
-      return 'status-desconocido'; // O una clase por defecto
+      return 'status-desconocido';
     }
     const formattedStatus = status.toLowerCase().replace(/[\s_]+/g, '-');
     return `status-${formattedStatus}`;
@@ -282,6 +248,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
 
   getAvailableStatuses(order: Order_): OrderStatus[] {
     const userRole = this.appStore.currentUser()?.role;
+    order.status === OrderStatus.REGISTRADO;
 
     let almacen = [OrderStatus.EN_ALMACEN];
     if (userRole === 'MOTORIZADO' && OrderStatus.REGISTRADO) {
@@ -290,51 +257,56 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
 
     let anulado: any = [];
     if (userRole === 'ADMINISTRADOR') {
-      anulado = [OrderStatus.ANULADO];
+      // anulado = [OrderStatus.ANULADO];
+      // return [
+      //   OrderStatus.REGISTRADO,
+      //   OrderStatus.RECOGIDO,
+      //   OrderStatus.EN_ALMACEN,
+      //   OrderStatus.EN_TRANSITO,
+      //   OrderStatus.ENTREGADO,
+      //   OrderStatus.RECHAZADO,
+      //   OrderStatus.ANULADO,
+      //   OrderStatus.REPROGRAMADO,
+      // ];
+      switch (order.status) {
+        case OrderStatus.ENTREGADO:
+          return [OrderStatus.ANULADO];
+        case OrderStatus.RECHAZADO:
+          return [OrderStatus.ANULADO];
+        default:
+          return [
+            OrderStatus.REGISTRADO,
+            OrderStatus.RECOGIDO,
+            OrderStatus.EN_ALMACEN,
+            OrderStatus.EN_TRANSITO,
+            OrderStatus.ENTREGADO,
+            OrderStatus.RECHAZADO,
+            OrderStatus.REPROGRAMADO,
+          ];
+      }
     }
 
-    order.status === OrderStatus.REGISTRADO;
     switch (order.status) {
       case OrderStatus.REGISTRADO:
-        return [
-          OrderStatus.RECOGIDO,
-          ...almacen,
-          OrderStatus.CANCELADO,
-          ...anulado,
-        ];
+        return [OrderStatus.RECOGIDO, ...almacen, ...anulado];
       case OrderStatus.RECOGIDO:
-        return [OrderStatus.EN_ALMACEN, OrderStatus.CANCELADO, ...anulado];
+        return [OrderStatus.EN_ALMACEN, ...anulado];
       case OrderStatus.EN_ALMACEN:
-        return [OrderStatus.EN_TRANSITO, OrderStatus.CANCELADO, ...anulado];
+        return [OrderStatus.EN_TRANSITO, ...anulado];
       case OrderStatus.EN_TRANSITO:
         return [
           OrderStatus.ENTREGADO,
-          OrderStatus.CANCELADO,
+          // OrderStatus.CANCELADO,
           OrderStatus.RECHAZADO,
           OrderStatus.REPROGRAMADO,
           ...anulado,
         ];
       case OrderStatus.REPROGRAMADO:
-        return [OrderStatus.EN_TRANSITO, OrderStatus.CANCELADO, ...anulado];
+        return [OrderStatus.EN_TRANSITO, ...anulado];
       default:
         return [];
     }
   }
-
-  // // Abrir modal para reportar incidencia
-  // openReportIssueModal(order: Order): void {
-  //   console.log(`Open modal to report issue for order: ${order.code}`);
-  //   // const dialogRef = this.dialog.open(ReportIssueDialogComponent, {
-  //   //   width: '450px',
-  //   //   data: { order: order }
-  //   // });
-
-  //   // dialogRef.afterClosed().subscribe(result => {
-  //   //   if (result && result.issueDescription) {
-  //   //     this.statusChanged.emit({ orderId: order.id, newStatus: OrderStatus.INCIDENCIA, details: result });
-  //   //   }
-  //   // });
-  // }
 
   onViewOrderDetails(order: Order_): void {
     this.viewDetailsClicked.emit(order);
@@ -424,7 +396,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     });
   }
 
-  isAdminOrDriver(order: Order_): boolean {
+  hasPermision(order: Order_): boolean {
     const userRole = this.appStore.currentUser()?.role;
 
     if (userRole === 'MOTORIZADO') {

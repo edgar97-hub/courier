@@ -20,7 +20,7 @@ const planning_event_entity_1 = require("../entities/planning-event.entity");
 const route_entity_1 = require("../entities/route.entity");
 const stop_entity_1 = require("../entities/stop.entity");
 const orders_entity_1 = require("../../orders/entities/orders.entity");
-const roles_1 = require("../../constants/roles");
+const users_entity_1 = require("../../users/entities/users.entity");
 let PlanningImportService = class PlanningImportService {
     constructor(planningEventRepository, routeRepository, stopRepository, orderRepository, connection) {
         this.planningEventRepository = planningEventRepository;
@@ -39,6 +39,27 @@ let PlanningImportService = class PlanningImportService {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
+            let planningEvent = await queryRunner.manager.findOne(planning_event_entity_1.PlanningEvent, {
+                where: {
+                    planningEventIdExternal: excelRows[0].ID_PLANIFICACION,
+                },
+                relations: ['routes'],
+            });
+            if (planningEvent) {
+                let routeIds = planningEvent.routes.map((item) => item.id);
+                await queryRunner.manager.delete(route_entity_1.Route, {
+                    id: (0, typeorm_2.In)(routeIds),
+                });
+                let stops = await queryRunner.manager.findBy(stop_entity_1.Stop, {
+                    routeId: (0, typeorm_2.In)(routeIds),
+                });
+                if (stops) {
+                    let stopIds = stops.map((item) => item.id);
+                    await queryRunner.manager.delete(stop_entity_1.Stop, {
+                        id: (0, typeorm_2.In)(stopIds),
+                    });
+                }
+            }
             for (let i = 0; i < excelRows.length; i++) {
                 const row = excelRows[i];
                 const excelRowNumber = i + 2;
@@ -125,6 +146,8 @@ let PlanningImportService = class PlanningImportService {
                             latitudeStartPoint: row.LATITUD_INCIO_RUTA,
                             longitudeEndPoint: row.LONGITUD_INCIO_RUTA,
                             planningEvent: { id: planningEvent.id },
+                            breakStart: row.HORA_ALMUERZO_RUTA,
+                            breakDuration: row.DURACION_ALMUERZO_RUTA,
                         });
                         await queryRunner.manager.save(route);
                     }
@@ -140,6 +163,22 @@ let PlanningImportService = class PlanningImportService {
                         status: stop_entity_1.StopStatus.PENDING,
                     });
                     await queryRunner.manager.save(stop);
+                    if (stop.orderCode && route.driverCode) {
+                        let order = await queryRunner.manager.findOne(orders_entity_1.OrdersEntity, {
+                            where: {
+                                code: Number(stop.orderCode),
+                            },
+                        });
+                        let driver = await queryRunner.manager.findOne(users_entity_1.UsersEntity, {
+                            where: {
+                                driverCode: route.driverCode,
+                            },
+                        });
+                        if (order && driver) {
+                            order.assigned_driver = driver;
+                            await queryRunner.manager.save(order);
+                        }
+                    }
                     importedCount++;
                 }
                 catch (individualError) {
@@ -216,48 +255,20 @@ let PlanningImportService = class PlanningImportService {
     async getPlanningEventDetails(id) {
         return this.planningEventRepository.findOne({
             where: { id },
-            relations: ['routes', 'routes.stops', 'routes.stops.order'],
+            relations: [
+                'routes',
+                'routes.stops',
+                'routes.stops.order',
+                'routes.stops.order.company',
+            ],
+            order: {
+                routes: {
+                    stops: {
+                        sequenceOrder: 'ASC',
+                    },
+                },
+            },
         });
-    }
-    async updateStopStatus(id, status) {
-        const queryRunner = this.connection.createQueryRunner();
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
-        try {
-            const stop = await queryRunner.manager.findOne(stop_entity_1.Stop, { where: { id } });
-            if (!stop) {
-                throw new Error('Stop not found');
-            }
-            stop.status = status;
-            await queryRunner.manager.save(stop);
-            const order = await queryRunner.manager.findOne(orders_entity_1.OrdersEntity, {
-                where: { tracking_code: stop.orderCode },
-            });
-            if (order) {
-                let newOrderStatus;
-                switch (status) {
-                    case stop_entity_1.StopStatus.COMPLETED:
-                        newOrderStatus = roles_1.STATES.DELIVERED;
-                        break;
-                    case stop_entity_1.StopStatus.SKIPPED:
-                        newOrderStatus = roles_1.STATES.CANCELED;
-                        break;
-                    default:
-                        newOrderStatus = roles_1.STATES.REGISTERED;
-                        break;
-                }
-                order.status = newOrderStatus;
-                await queryRunner.manager.save(order);
-            }
-            await queryRunner.commitTransaction();
-        }
-        catch (err) {
-            await queryRunner.rollbackTransaction();
-            throw err;
-        }
-        finally {
-            await queryRunner.release();
-        }
     }
 };
 exports.PlanningImportService = PlanningImportService;

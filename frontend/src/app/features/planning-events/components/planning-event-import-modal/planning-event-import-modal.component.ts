@@ -83,13 +83,6 @@ export class PlanningEventImportModalComponent implements OnInit {
     }
   }
 
-  // downloadTemplate(): string {
-  //   this.snackBar.open('Plantilla con validación descargada.', 'OK', {
-  //     duration: 2000,
-  //   });
-  //   return this.enlace || '';
-  // }
-
   async processImport(): Promise<void> {
     if (!this.selectedFile) {
       this.snackBar.open('Por favor, selecciona un archivo Excel.', 'OK', {

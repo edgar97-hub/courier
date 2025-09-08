@@ -39,10 +39,18 @@ export class Route {
   @Column()
   planningEventId: number;
 
-  @ManyToOne(() => PlanningEvent, (planningEvent) => planningEvent.routes)
+  @ManyToOne(() => PlanningEvent, (planningEvent) => planningEvent.routes, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'planning_event_id' })
   planningEvent: PlanningEvent;
 
   @OneToMany(() => Stop, (stop) => stop.route)
   stops: Stop[];
+
+  @Column({ nullable: true })
+  breakStart: string;
+
+  @Column({ nullable: true })
+  breakDuration: string;
 }

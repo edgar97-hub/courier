@@ -37,6 +37,10 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
+], Stop.prototype, "plannedEndTime", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
 ], Stop.prototype, "latitude", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
@@ -59,7 +63,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Stop.prototype, "routeId", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => route_entity_1.Route, (route) => route.stops),
+    (0, typeorm_1.ManyToOne)(() => route_entity_1.Route, (route) => route.stops, { onDelete: 'CASCADE' }),
     (0, typeorm_1.JoinColumn)({ name: 'route_id' }),
     __metadata("design:type", route_entity_1.Route)
 ], Stop.prototype, "route", void 0);

@@ -9,6 +9,7 @@ export declare class Stop {
     id: number;
     sequenceOrder: number;
     plannedStartTime: string;
+    plannedEndTime: string;
     latitude: string;
     longitude: string;
     address: string;

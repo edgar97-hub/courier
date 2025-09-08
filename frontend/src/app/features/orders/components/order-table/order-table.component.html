@@ -15,7 +15,6 @@
     class="orders-table"
   >
     <!-- Columnas existentes (código, tipo, destinatario, etc.) -->
-    <!-- ID Column -->
     <ng-container matColumnDef="code">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>N° Pedido</th>
       <td mat-cell *matCellDef="let order" class="">
@@ -180,7 +179,7 @@
           <button
             mat-menu-item
             (click)="openChangeStatusModal(order)"
-            *ngIf="isAdminOrDriver(order)"
+            *ngIf="hasPermision(order)"
           >
             <mat-icon>swap_horiz</mat-icon>
             <span>Cambiar Estado General</span>

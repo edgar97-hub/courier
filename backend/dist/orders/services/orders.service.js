@@ -61,10 +61,14 @@ let OrdersService = class OrdersService {
             });
             if (!oldOrder)
                 throw new Error('Orden no encontrada');
-            if (body.payload.action === 'CAMBIO DE ESTADO' &&
-                (oldOrder.status === roles_1.STATES.DELIVERED ||
-                    oldOrder.status === roles_1.STATES.REJECTED))
-                throw new Error('Orden ya fue modificada');
+            if (body.payload.newStatus === roles_1.STATES.ANNULLED) {
+            }
+            else {
+                if (body.payload.action === 'CAMBIO DE ESTADO' &&
+                    (oldOrder.status === roles_1.STATES.DELIVERED ||
+                        oldOrder.status === roles_1.STATES.REJECTED))
+                    throw new Error('Orden ya fue modificada');
+            }
             if (body.payload.action === 'CAMBIO DE ESTADO') {
                 await this.orderRepository.update(body.payload.orderId, {
                     status: body.payload.newStatus,
@@ -669,7 +673,7 @@ let OrdersService = class OrdersService {
         try {
             const order = await this.orderRepository.findOne({
                 where: { tracking_code },
-                relations: ['logs'],
+                relations: ['logs', 'stops'],
             });
             return order;
         }

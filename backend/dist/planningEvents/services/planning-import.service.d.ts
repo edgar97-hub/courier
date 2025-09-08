@@ -1,7 +1,7 @@
 import { Repository, Connection } from 'typeorm';
 import { PlanningEvent } from '../entities/planning-event.entity';
 import { Route } from '../entities/route.entity';
-import { Stop, StopStatus } from '../entities/stop.entity';
+import { Stop } from '../entities/stop.entity';
 import { OrdersEntity } from '../../orders/entities/orders.entity';
 import { ImportResult } from '../dto/import-result.dto';
 export declare class PlanningImportService {
@@ -19,5 +19,4 @@ export declare class PlanningImportService {
         page_size: number;
     }>;
     getPlanningEventDetails(id: number): Promise<PlanningEvent | null>;
-    updateStopStatus(id: number, status: StopStatus): Promise<void>;
 }

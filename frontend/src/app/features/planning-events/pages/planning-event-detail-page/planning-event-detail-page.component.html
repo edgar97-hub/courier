@@ -95,11 +95,12 @@
               <div class="timeline-connector"></div>
               <div
                 class="timeline-icon"
-                [ngClass]="getStopStatusClass(stop.order.status)"
+                [ngClass]="getStatusClass(stop.order.status)"
               >
                 <span>{{ stop.sequenceOrder }}</span>
               </div>
               <div class="timeline-content">
+                <strong>{{ stop.order.company.username }}</strong>
                 <strong>{{ stop.address }}</strong>
                 <p class="stop-details">
                   <span>Pedido #{{ stop.orderCode }}</span> |
@@ -107,8 +108,8 @@
                   <span>Salida: {{ stop.plannedEndTime }}</span>
                   |
                   <span
-                    class="status-text"
-                    [ngClass]="getStopStatusClass(stop.order.status)"
+                    class="status-badge"
+                    [ngClass]="getStatusClass(stop.order.status)"
                     >{{ stop.order.status }}</span
                   >
                 </p>

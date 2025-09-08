@@ -105,9 +105,19 @@
           <mat-icon>event</mat-icon>
           <span
             ><span>Entrega Estimada:</span>
-            {{
-              order.delivery_date | date : "fullDate" | default : "N/A"
-            }}</span
+            {{ order.delivery_date | date : "fullDate" | default : "N/A" }}
+          </span>
+        </div>
+        <div
+          class="summary-item"
+          *ngIf="order.stops[0]?.plannedStartTime"
+          style="font-weight: 700 !important"
+        >
+          <mat-icon>schedule</mat-icon>
+          <span
+            ><span>Hora Estimada:</span>
+            {{ order.stops[0]?.plannedStartTime }} -
+            {{ order.stops[0]?.plannedEndTime }}</span
           >
         </div>
         @if(order.delivery_coordinates){

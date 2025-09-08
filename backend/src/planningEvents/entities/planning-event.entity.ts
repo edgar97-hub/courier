@@ -25,6 +25,8 @@ export class PlanningEvent {
   })
   status: PlanningEventStatus;
 
-  @OneToMany(() => Route, (route) => route.planningEvent)
+  @OneToMany(() => Route, (route) => route.planningEvent, {
+    onDelete: 'CASCADE',
+  })
   routes: Route[];
 }

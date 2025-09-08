@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Connection, Between, FindManyOptions } from 'typeorm';
+import { Repository, Connection, Between, FindManyOptions, In } from 'typeorm';
 import {
   PlanningEvent,
   PlanningEventStatus,
@@ -10,6 +10,7 @@ import { Stop, StopStatus } from '../entities/stop.entity';
 import { OrdersEntity } from '../../orders/entities/orders.entity';
 import { STATES } from '../../constants/roles';
 import { ImportResult } from '../dto/import-result.dto';
+import { UsersEntity } from 'src/users/entities/users.entity';
 
 @Injectable()
 export class PlanningImportService {
@@ -38,6 +39,29 @@ export class PlanningImportService {
     await queryRunner.startTransaction();
 
     try {
+      let planningEvent = await queryRunner.manager.findOne(PlanningEvent, {
+        where: {
+          planningEventIdExternal: excelRows[0].ID_PLANIFICACION,
+        },
+        relations: ['routes'],
+      });
+
+      if (planningEvent) {
+        let routeIds = planningEvent.routes.map((item) => item.id);
+        await queryRunner.manager.delete(Route, {
+          id: In(routeIds),
+        });
+        let stops = await queryRunner.manager.findBy(Stop, {
+          routeId: In(routeIds),
+        });
+        if (stops) {
+          let stopIds = stops.map((item) => item.id);
+          await queryRunner.manager.delete(Stop, {
+            id: In(stopIds),
+          });
+        }
+      }
+
       for (let i = 0; i < excelRows.length; i++) {
         const row = excelRows[i];
         const excelRowNumber = i + 2; // +1 because it's 0-indexed, +1 because row 1 is header in Excel
@@ -135,6 +159,8 @@ export class PlanningImportService {
               latitudeStartPoint: row.LATITUD_INCIO_RUTA,
               longitudeEndPoint: row.LONGITUD_INCIO_RUTA,
               planningEvent: { id: planningEvent.id },
+              breakStart: row.HORA_ALMUERZO_RUTA,
+              breakDuration: row.DURACION_ALMUERZO_RUTA,
             });
             await queryRunner.manager.save(route);
           }
@@ -152,6 +178,24 @@ export class PlanningImportService {
             status: StopStatus.PENDING,
           });
           await queryRunner.manager.save(stop);
+          if (stop.orderCode && route.driverCode) {
+            let order = await queryRunner.manager.findOne(OrdersEntity, {
+              where: {
+                code: Number(stop.orderCode),
+              },
+            });
+
+            let driver = await queryRunner.manager.findOne(UsersEntity, {
+              where: {
+                driverCode: route.driverCode,
+              },
+            });
+            if (order && driver) {
+              order.assigned_driver = driver;
+              await queryRunner.manager.save(order);
+            }
+          }
+
           importedCount++;
         } catch (individualError: any) {
           errors.push({
@@ -248,52 +292,64 @@ export class PlanningImportService {
   async getPlanningEventDetails(id: number): Promise<PlanningEvent | null> {
     return this.planningEventRepository.findOne({
       where: { id },
-      relations: ['routes', 'routes.stops', 'routes.stops.order'],
+      relations: [
+        'routes',
+        'routes.stops',
+        'routes.stops.order',
+        'routes.stops.order.company',
+      ],
+      order: {
+        routes: {
+          stops: {
+            sequenceOrder: 'ASC',
+          },
+        },
+      },
     });
   }
 
-  async updateStopStatus(id: number, status: StopStatus): Promise<void> {
-    const queryRunner = this.connection.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+  // async updateStopStatus(id: number, status: StopStatus): Promise<void> {
+  //   const queryRunner = this.connection.createQueryRunner();
+  //   await queryRunner.connect();
+  //   await queryRunner.startTransaction();
 
-    try {
-      const stop = await queryRunner.manager.findOne(Stop, { where: { id } });
-      if (!stop) {
-        throw new Error('Stop not found');
-      }
+  //   try {
+  //     const stop = await queryRunner.manager.findOne(Stop, { where: { id } });
+  //     if (!stop) {
+  //       throw new Error('Stop not found');
+  //     }
 
-      stop.status = status;
-      await queryRunner.manager.save(stop);
+  //     stop.status = status;
+  //     await queryRunner.manager.save(stop);
 
-      const order = await queryRunner.manager.findOne(OrdersEntity, {
-        where: { tracking_code: stop.orderCode },
-      });
-      if (order) {
-        // Map StopStatus to OrderStatus (assuming a direct mapping or a conversion logic)
-        // This is a placeholder, adjust according to your actual STATES enum and logic
-        let newOrderStatus: STATES;
-        switch (status) {
-          case StopStatus.COMPLETED:
-            newOrderStatus = STATES.DELIVERED; // Assuming 'DELIVERED' is a valid status in STATES
-            break;
-          case StopStatus.SKIPPED:
-            newOrderStatus = STATES.CANCELED; // Assuming 'CANCELED' is a valid status in STATES
-            break;
-          default:
-            newOrderStatus = STATES.REGISTERED; // Or another appropriate default
-            break;
-        }
-        order.status = newOrderStatus;
-        await queryRunner.manager.save(order);
-      }
+  //     const order = await queryRunner.manager.findOne(OrdersEntity, {
+  //       where: { tracking_code: stop.orderCode },
+  //     });
+  //     if (order) {
+  //       // Map StopStatus to OrderStatus (assuming a direct mapping or a conversion logic)
+  //       // This is a placeholder, adjust according to your actual STATES enum and logic
+  //       let newOrderStatus: STATES;
+  //       switch (status) {
+  //         case StopStatus.COMPLETED:
+  //           newOrderStatus = STATES.DELIVERED; // Assuming 'DELIVERED' is a valid status in STATES
+  //           break;
+  //         case StopStatus.SKIPPED:
+  //           newOrderStatus = STATES.CANCELED; // Assuming 'CANCELED' is a valid status in STATES
+  //           break;
+  //         default:
+  //           newOrderStatus = STATES.REGISTERED; // Or another appropriate default
+  //           break;
+  //       }
+  //       order.status = newOrderStatus;
+  //       await queryRunner.manager.save(order);
+  //     }
 
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
-    } finally {
-      await queryRunner.release();
-    }
-  }
+  //     await queryRunner.commitTransaction();
+  //   } catch (err) {
+  //     await queryRunner.rollbackTransaction();
+  //     throw err;
+  //   } finally {
+  //     await queryRunner.release();
+  //   }
+  // }
 }

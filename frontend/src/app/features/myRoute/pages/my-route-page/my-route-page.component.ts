@@ -25,6 +25,13 @@ import {
   Stop,
   StopStatus,
 } from '../../../planning-events/models/planning-event.model';
+import { Order_, OrderStatus } from '../../../orders/models/order.model';
+import {
+  ChangeStatusDialogComponent,
+  ChangeStatusDialogResult,
+} from '../../../orders/components/change-status-dialog/change-status-dialog.component';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { OrderService } from '../../../orders/services/order.service';
 
 @Component({
   selector: 'app-my-route-page',
@@ -42,6 +49,7 @@ import {
     MatNativeDateModule,
     MatChipsModule,
     MatTabsModule,
+    MatDialogModule,
   ],
   templateUrl: './my-route-page.component.html',
   styleUrls: ['./my-route-page.component.scss'],
@@ -59,6 +67,10 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
 
   private pollingInterval: any;
   private navigationSubscription: Subscription;
+  private dialog = inject(MatDialog);
+
+  private orderService = inject(OrderService);
+  isLoading = false;
 
   constructor() {
     // Suscripción a eventos de navegación para forzar la recarga de datos al volver a esta página
@@ -79,13 +91,22 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
     this.startPolling();
   }
   // Método para la clase CSS del icono de la parada en la línea de tiempo
-  getStopStatusClass(status: string): string {
-    return `status-${status}`;
+  getStatusClass(status: string | undefined | null): string {
+    if (!status) {
+      return 'status-desconocido'; // O una clase por defecto
+    }
+    const formattedStatus = status.toLowerCase().replace(/[\s_]+/g, '-');
+    return `status-${formattedStatus}`;
   }
 
   loadRoutesForDate(): void {
     // this.appStore.setLoading(true);
-    const dateString = this.selectedDate.toISOString().split('T')[0];
+    const dateString = this.selectedDate.toLocaleString('sv-SE', {
+      timeZone: 'America/Bogota',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
 
     this.routeService.getMyRoutesByDate(dateString).subscribe({
       next: (data: any) => {
@@ -152,20 +173,153 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
     window.open(mapsUrl, '_blank');
   }
 
+  hasPermision(order: Order_): boolean {
+    const userRole = this.appStore.currentUser()?.role;
+
+    if (userRole === 'MOTORIZADO') {
+      if (order.status === OrderStatus.REGISTRADO) {
+        return true;
+      }
+
+      if (order.assigned_driver?.id === this.appStore.currentUser()?.id) {
+        return true;
+      }
+    }
+    if (userRole === 'ADMINISTRADOR' || userRole === 'RECEPCIONISTA') {
+      return true;
+    }
+    return false;
+  }
+
   // Navega a la página de detalle de pedido existente
+  // manageDelivery(stop: Stop): void {
+  //   alert('funcionalidad pendiente');
+  //   return;
+  //   this.router.navigate(['/orders', stop.orderCode], {
+  //     queryParams: { returnUrl: this.router.url },
+  //   });
+  // }
+  getAvailableStatuses(order: Order_): OrderStatus[] {
+    const userRole = this.appStore.currentUser()?.role;
+    order.status === OrderStatus.REGISTRADO;
+
+    let almacen = [OrderStatus.EN_ALMACEN];
+    if (userRole === 'MOTORIZADO' && OrderStatus.REGISTRADO) {
+      almacen = [];
+    }
+
+    switch (order.status) {
+      case OrderStatus.REGISTRADO:
+        return [OrderStatus.RECOGIDO, ...almacen, OrderStatus.CANCELADO];
+      case OrderStatus.RECOGIDO:
+        return [OrderStatus.EN_ALMACEN, OrderStatus.CANCELADO];
+      case OrderStatus.EN_ALMACEN:
+        return [OrderStatus.EN_TRANSITO, OrderStatus.CANCELADO];
+      case OrderStatus.EN_TRANSITO:
+        return [
+          OrderStatus.ENTREGADO,
+          OrderStatus.RECHAZADO,
+          OrderStatus.REPROGRAMADO,
+        ];
+      case OrderStatus.REPROGRAMADO:
+        return [OrderStatus.EN_TRANSITO, OrderStatus.CANCELADO];
+      default:
+        return [];
+    }
+  }
   manageDelivery(stop: Stop): void {
-    alert('funcionalidad pendiente');
-    return;
-    this.router.navigate(['/orders', stop.orderCode], {
-      queryParams: { returnUrl: this.router.url },
+    let order: Order_ = stop.order;
+
+    const availableStatuses = this.getAvailableStatuses(order);
+    if (availableStatuses.length === 0) {
+      this.snackBar.open(
+        'No hay cambios de estado disponibles para este pedido.',
+        'OK',
+        { duration: 3000 }
+      );
+      return;
+    }
+
+    const dialogRef = this.dialog.open<
+      ChangeStatusDialogComponent,
+      { order: Order_; availableStatuses: OrderStatus[] },
+      ChangeStatusDialogResult
+    >(ChangeStatusDialogComponent, {
+      width: '450px',
+      data: { order: order, availableStatuses: availableStatuses },
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result && result.newStatus) {
+        console.log('Dialog result:', result);
+        const updatePayload: any = {
+          newStatus: result.newStatus,
+          reason: result.reason || '',
+          proofOfDeliveryImageUrl: '',
+          shippingCostPaymentMethod: '',
+          collectionPaymentMethod: '',
+        };
+        if (result.newStatus === OrderStatus.ENTREGADO) {
+          if (result.proofOfDeliveryImageUrl) {
+            updatePayload.proofOfDeliveryImageUrl =
+              result.proofOfDeliveryImageUrl;
+          }
+          if (result.shippingCostPaymentMethod) {
+            updatePayload.shippingCostPaymentMethod =
+              result.shippingCostPaymentMethod;
+          }
+          if (result.collectionPaymentMethod) {
+            updatePayload.collectionPaymentMethod =
+              result.collectionPaymentMethod;
+          }
+        }
+        this.orderService
+          .updateOrderStatus(
+            order.id,
+            result.newStatus,
+            result.reason || '',
+            result.proofOfDeliveryImageUrl,
+            result.shippingCostPaymentMethod,
+            result.collectionPaymentMethod
+          )
+          .subscribe({
+            next: (updatedOrder) => {
+              this.snackBar.open(
+                `Estado del pedido ${updatedOrder.code} actualizado a ${result.newStatus}.`,
+                'OK',
+                { duration: 3000, panelClass: ['success-snackbar'] }
+              );
+              this.loadRoutesForDate();
+            },
+            error: (err) => {
+              this.snackBar.open(
+                `Error al actualizar estado: ${
+                  err.message || 'Intente de nuevo'
+                }`,
+                'Cerrar',
+                { duration: 5000, panelClass: ['error-snackbar'] }
+              );
+              this.isLoading = false;
+            },
+            complete: () => {
+              this.isLoading = false;
+            },
+          });
+        console.log('updatePayload', updatePayload);
+      } else {
+        console.log('Cambio de estado cancelado o sin selección.');
+      }
     });
   }
 
-  // Lógica para el flujo guiado
   isStopActive(stop: Stop): boolean {
     if (!this.selectedRoute) return false;
     const firstPendingStop = this.selectedRoute.stops.find(
-      (s) => s.status === StopStatus.PENDING
+      (s) =>
+        s.order.status !== OrderStatus.ENTREGADO &&
+        s.order.status !== OrderStatus.RECHAZADO &&
+        s.order.status !== OrderStatus.ANULADO
     );
     return firstPendingStop ? firstPendingStop.id === stop.id : false;
   }
@@ -182,7 +336,7 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
     this.stopPolling(); // Asegura que no haya intervalos duplicados
     this.pollingInterval = setInterval(() => {
       this.loadRoutesForDate();
-    }, 30000); // Refresca cada 30 segundos
+    }, 20000); // Refresca cada 20 segundos
   }
 
   stopPolling(): void {

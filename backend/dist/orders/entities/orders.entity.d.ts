@@ -3,6 +3,7 @@ import { UsersEntity } from '../../users/entities/users.entity';
 import { STATES } from '../../constants/roles';
 import { OrderLogEntity } from './orderLog.entity';
 import { CashManagementEntity } from 'src/cashManagement/entities/cashManagement.entity';
+import { Stop } from 'src/planningEvents/entities/stop.entity';
 export declare class OrdersEntity extends BaseEntity {
     code?: number;
     shipment_type?: string;
@@ -33,4 +34,5 @@ export declare class OrdersEntity extends BaseEntity {
     product_delivery_photo_url?: string;
     observation_shipping_cost_modification?: string;
     cashManagementIncludes: CashManagementEntity[];
+    stops: Stop[];
 }

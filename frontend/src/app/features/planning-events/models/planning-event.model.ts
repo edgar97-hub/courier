@@ -27,8 +27,10 @@ export interface Route {
   latitudeStartPoint: string;
   longitudeEndPoint: string;
 
-  vehicleStartTime: string;
-  vehicleEndTime: string;
+  vehicleStartTime?: string;
+  vehicleEndTime?: string;
+  breakStart?: string;
+  breakDuration?: string;
 }
 
 export interface Stop {

@@ -42,7 +42,9 @@ __decorate([
     __metadata("design:type", String)
 ], PlanningEvent.prototype, "status", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => route_entity_1.Route, (route) => route.planningEvent),
+    (0, typeorm_1.OneToMany)(() => route_entity_1.Route, (route) => route.planningEvent, {
+        onDelete: 'CASCADE',
+    }),
     __metadata("design:type", Array)
 ], PlanningEvent.prototype, "routes", void 0);
 exports.PlanningEvent = PlanningEvent = __decorate([

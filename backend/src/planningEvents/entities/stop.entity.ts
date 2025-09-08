@@ -26,6 +26,9 @@ export class Stop {
   plannedStartTime: string;
 
   @Column()
+  plannedEndTime: string;
+
+  @Column()
   latitude: string;
 
   @Column()
@@ -44,7 +47,7 @@ export class Stop {
   @Column()
   routeId: number;
 
-  @ManyToOne(() => Route, (route) => route.stops)
+  @ManyToOne(() => Route, (route) => route.stops, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'route_id' })
   route: Route;
 

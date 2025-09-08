@@ -41,10 +41,22 @@
         *ngFor="let route of routesForSelectedDate; let i = index"
         [label]="'Ruta ' + (i + 1)"
       >
-        <!-- El contenido se muestra fuera del tab para que no se oculte -->
       </mat-tab>
     </mat-tab-group>
-
+    <div
+      class="summary-item"
+      *ngIf="selectedRoute?.breakStart"
+      style="margin: 10px"
+    >
+      <div>
+        <strong>Refrigerio:</strong>
+        <br />
+        <small>
+          Hora: {{ selectedRoute?.breakStart }} | Duración:
+          {{ selectedRoute?.breakDuration }}
+        </small>
+      </div>
+    </div>
     <div class="stops-manifest" *ngIf="selectedRoute">
       <mat-card
         *ngFor="let stop of selectedRoute.stops"
@@ -54,20 +66,21 @@
           'active-stop': isStopActive(stop)
         }"
       >
+        <div class="stop-status">
+          <span
+            class="status-badge"
+            [ngClass]="getStatusClass(stop.order.status)"
+            selected
+          >
+            {{ stop.order.status }}
+          </span>
+        </div>
         <mat-card-header>
           <div mat-card-avatar class="stop-number">
             {{ stop.sequenceOrder }}
           </div>
           <mat-card-title>{{ stop.order.recipient_name }}</mat-card-title>
           <mat-card-subtitle>{{ stop.address }}</mat-card-subtitle>
-          <div class="stop-status">
-            <mat-chip
-              [ngClass]="getStopStatusClass(stop.order.status)"
-              selected
-            >
-              {{ stop.order.status }}
-            </mat-chip>
-          </div>
         </mat-card-header>
         <mat-card-content>
           <div class="stop-details">

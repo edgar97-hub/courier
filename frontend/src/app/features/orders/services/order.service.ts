@@ -152,7 +152,7 @@ export class OrderService {
         'EN ALMACEN',
         'EN TRANSITO',
         'ENTREGADO',
-        'CANCELADO',
+        // 'CANCELADO',
         'RECHAZADO EN PUNTO',
         'REPROGRAMADO',
         'ANULADO',

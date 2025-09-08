@@ -12,6 +12,7 @@ import { UsersEntity } from '../../users/entities/users.entity';
 import { STATES } from '../../constants/roles';
 import { OrderLogEntity } from './orderLog.entity';
 import { CashManagementEntity } from 'src/cashManagement/entities/cashManagement.entity';
+import { Stop } from 'src/planningEvents/entities/stop.entity';
 
 @Entity({ name: 'orders' })
 export class OrdersEntity extends BaseEntity {
@@ -113,4 +114,7 @@ export class OrdersEntity extends BaseEntity {
     (cashManagement) => cashManagement.order,
   )
   cashManagementIncludes: CashManagementEntity[];
+
+  @OneToMany(() => Stop, (stop) => stop.order)
+  stops: Stop[];
 }

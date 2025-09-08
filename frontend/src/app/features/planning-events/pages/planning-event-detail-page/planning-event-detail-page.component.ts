@@ -90,8 +90,12 @@ export class PlanningEventDetailPageComponent implements OnInit, OnDestroy {
   }
 
   // Método para la clase CSS del icono de la parada en la línea de tiempo
-  getStopStatusClass(status: string): string {
-    return `status-${status}`;
+  getStatusClass(status: string | undefined | null): string {
+    if (!status) {
+      return 'status-desconocido'; // O una clase por defecto
+    }
+    const formattedStatus = status.toLowerCase().replace(/[\s_]+/g, '-');
+    return `status-${formattedStatus}`;
   }
 
   startPolling(): void {

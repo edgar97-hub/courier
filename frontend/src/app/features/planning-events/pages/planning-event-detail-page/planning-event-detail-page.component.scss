@@ -157,24 +157,58 @@
 }
 
 // Status Colors for Timeline Icons and Text
-.status-PENDIENTE {
-  background-color: #9e9e9e;
-} // Grey
-.status-ENTREGADO {
-  background-color: #4caf50;
-} // Green
-.status-INCIDENCIA {
-  background-color: #ff9800;
-} // Orange
-
-.status-text.status-PENDIENTE {
-  color: #9e9e9e;
+.status-registrado {
+  background-color: #6610f2;
+  color: #fff;
+} // Índigo con texto blanco
+.status-recogido {
+  background-color: #fd7e14;
+  color: #fff;
+} // Naranja con texto blanco
+.status-en-almacen {
+  background-color: #0d6efd;
+  color: #fff;
+  white-space: nowrap;
+} // Azul primario con texto blanco
+.status-en-transito {
+  background-color: #0c1a77;
+  color: #d0c8c8;
+  white-space: nowrap;
 }
-.status-text.status-ENTREGADO {
-  color: #ffffff;
-  font-weight: bold;
+.status-entregado {
+  background-color: #198754;
+  color: #fff;
+} // Verde éxito con texto blanco
+.status-anulado {
+  background-color: #dc3545;
+  color: #fff;
+  white-space: nowrap;
+} // Rojo peligro con texto blanco
+.status-cancelado {
+  background-color: #6c757d;
+  color: #fff;
+} // Gris secundario con texto blanco
+.status-rechazado-en-punto {
+  background-color: #ff6b6b;
+  color: #fff;
+  white-space: nowrap;
 }
-.status-text.status-INCIDENCIA {
-  color: #ff9800;
-  font-weight: bold;
+.status-reprogramado {
+  background-color: #adb5bd;
+  color: #212529;
+}
+.status-badge {
+  padding: 5px 12px; // Más padding horizontal
+  border-radius: 16px; // Totalmente redondeado
+  font-size: 0.75rem; // Ligeramente más pequeño
+  font-weight: 600; // Más peso
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex; // Para alinear ícono y texto si añades íconos
+  align-items: center;
+  line-height: 1; // Ajustar línea de altura
+  // mat-icon { // Si añades íconos a los badges
+  //   font-size: 1rem;
+  //   margin-right: 4px;
+  // }
 }
