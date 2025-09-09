@@ -851,7 +851,8 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
       (s) =>
         s.order.status !== OrderStatus.ENTREGADO &&
         s.order.status !== OrderStatus.RECHAZADO &&
-        s.order.status !== OrderStatus.ANULADO
+        s.order.status !== OrderStatus.ANULADO &&
+        s.order.status !== OrderStatus.REPROGRAMADO
     );
     return firstPendingStop ? firstPendingStop.id === stop.id : false;
   }

@@ -1,9 +1,11 @@
 .table-wrapper {
   position: relative;
-  min-height: 200px; /* Adjust as needed */
-  //   background: #fff;
-  border-radius: 8px;
-  overflow: hidden; /* Ensures rounded corners apply to table */
+  overflow: auto;
+  background-color: var(--sys-surface);
+  color: var(--sys-on-surface);
+  margin-top: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); // Sombra más suave y moderna
+  transition: box-shadow 0.3s ease-in-out;
 }
 
 .spinner-overlay {

@@ -77,9 +77,6 @@ export class PlanningEventsTableComponent implements AfterViewInit, OnChanges {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  private dialog = inject(MatDialog);
-  private snackBar = inject(MatSnackBar);
-
   readonly PlanningEventStatus = PlanningEventStatus;
 
   constructor() {}
@@ -116,14 +113,14 @@ export class PlanningEventsTableComponent implements AfterViewInit, OnChanges {
       return route.stops.every((stop: any) => {
         if (
           stop.order.status === OrderStatus.ENTREGADO ||
-          stop.order.status === OrderStatus.RECHAZADO // rechazado en punto tambien se considera entragado
+          stop.order.status === OrderStatus.RECHAZADO // rechazado en punto tambien se considera entregado
         ) {
           return true;
         }
         return false;
       });
     });
-    let status = isCompleted ? 'completed' : 'pending';
+    let status = isCompleted ? 'COMPLETADO' : 'PENDIENTE';
     return status;
   }
 

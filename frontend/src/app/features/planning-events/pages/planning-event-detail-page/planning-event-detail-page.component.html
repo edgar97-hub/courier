@@ -143,9 +143,9 @@
                   >Destino:
                   {{ selectedRoute.completionPoint || "No definido" }}</strong
                 >
-                <p>
+                <p *ngIf="selectedRoute.vehicleEndTime">
                   Hora de Llegada Estimada:
-                  {{ selectedRoute.vehicleEndTime | date : "shortTime" }}
+                  {{ selectedRoute.vehicleEndTime }}
                 </p>
               </div>
             </div>
