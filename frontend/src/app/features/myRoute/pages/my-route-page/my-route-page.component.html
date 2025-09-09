@@ -17,17 +17,6 @@
           ></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
-
-        <button
-          mat-flat-button
-          color="primary"
-          (click)="generateFullRouteMapsUrl()"
-          [disabled]="!selectedRoute"
-          class="full-route-button"
-        >
-          <mat-icon>map</mat-icon>
-          Ver Ruta Completa en Mapa
-        </button>
       </div>
     </mat-card-content>
   </mat-card>
@@ -43,12 +32,36 @@
       >
       </mat-tab>
     </mat-tab-group>
+    <div class="map-container" *ngIf="selectedRoute">
+      <google-map height="400px" width="100%" [options]="mapOptions">
+        <map-marker
+          *ngFor="let marker of markers"
+          [options]="marker"
+        ></map-marker>
+        <map-polyline
+          *ngFor="let polyline of polylines"
+          [options]="polyline"
+        ></map-polyline>
+      </google-map>
+    </div>
+
     <div
       class="summary-item"
       *ngIf="selectedRoute?.breakStart"
       style="margin: 10px"
     >
-      <div>
+      <div class="timeline-item">
+        <br />
+        <strong
+          >Partida: {{ selectedRoute?.startingPoint || "No definido" }}</strong
+        >
+        <br />
+        <small>
+          Hora de Salida Estimada:
+          {{ selectedRoute?.vehicleStartTime || "" }}
+        </small>
+        <br />
+        <br />
         <strong>Refrigerio:</strong>
         <br />
         <small>
@@ -59,7 +72,8 @@
     </div>
     <div class="stops-manifest" *ngIf="selectedRoute">
       <mat-card
-        *ngFor="let stop of selectedRoute.stops"
+        *ngFor="let stop of selectedRoute.stops; let i = index"
+        class="stop-item"
         class="stop-card"
         [ngClass]="{
           'completed-stop': isStopCompleted(stop),
@@ -79,8 +93,25 @@
           <div mat-card-avatar class="stop-number">
             {{ stop.sequenceOrder }}
           </div>
-          <mat-card-title>{{ stop.order.recipient_name }}</mat-card-title>
-          <mat-card-subtitle>{{ stop.address }}</mat-card-subtitle>
+          <div class="stop-head">
+            <span
+              ><strong>Empresa:</strong> {{ stop.order.company.username }}</span
+            >
+            <span
+              ><strong>Cliente:</strong> {{ stop.order.recipient_name }}</span
+            >
+            <span><strong>Dirección:</strong> {{ stop.address }}</span>
+            <span
+              ><strong>Telefono:</strong>
+              <a
+                [href]="getWhatsAppLink(stop.order.recipient_phone)"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {{ stop.order.recipient_phone }}
+              </a>
+            </span>
+          </div>
         </mat-card-header>
         <mat-card-content>
           <div class="stop-details">
@@ -95,19 +126,26 @@
             <strong>Notas:</strong> {{ stop.order.observations }}
           </p>
         </mat-card-content>
-        <mat-card-actions align="end">
+        <mat-card-actions
+          align="end"
+          style="display: flex; justify-content: space-around; gap: 10px"
+        >
           <button
-            mat-icon-button
-            (click)="navigateToStop(stop)"
-            matTooltip="Navegar a esta parada"
+            mat-raised-button
+            color="secondary"
+            class="navigate-button"
+            (click)="navigateToStop(i)"
+            style="padding: 25px"
           >
             <mat-icon>navigation</mat-icon>
+            Navegar a Parada
           </button>
           <button
             mat-flat-button
             color="primary"
             (click)="manageDelivery(stop)"
             [disabled]="!isStopActive(stop)"
+            style="padding: 25px"
           >
             Gestionar Entrega
           </button>

@@ -25,15 +25,27 @@ export class Route {
   vehicle: string;
 
   @Column({ nullable: true })
+  vehicleStartTime: string;
+
+  @Column({ nullable: true })
+  vehicleEndTime: string;
+
+  @Column({ nullable: true })
   startingPoint: string;
 
   @Column({ nullable: true })
   completionPoint: string;
 
-  @Column()
+  @Column({ nullable: true })
   latitudeStartPoint: string;
 
-  @Column()
+  @Column({ nullable: true })
+  longitudeStartPoint: string;
+
+  @Column({ nullable: true })
+  latitudeEndPoint: string;
+
+  @Column({ nullable: true })
   longitudeEndPoint: string;
 
   @Column()

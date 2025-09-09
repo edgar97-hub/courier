@@ -38,6 +38,7 @@ let RoutesService = class RoutesService {
             .leftJoinAndSelect('route.planningEvent', 'planningEvent')
             .leftJoinAndSelect('route.stops', 'stop')
             .leftJoinAndSelect('stop.order', 'order')
+            .leftJoinAndSelect('order.company', 'user')
             .where('planningEvent.planningDate = :date', { date })
             .andWhere('route.driverCode = :driverCode', {
             driverCode: user?.driverCode,

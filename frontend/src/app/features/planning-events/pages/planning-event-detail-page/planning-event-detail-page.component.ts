@@ -74,6 +74,7 @@ export class PlanningEventDetailPageComponent implements OnInit, OnDestroy {
   }
 
   selectRoute(route: Route): void {
+    console.log(route);
     this.selectedRoute = route;
   }
 
@@ -131,6 +132,28 @@ export class PlanningEventDetailPageComponent implements OnInit, OnDestroy {
           },
         });
     }
+  }
+
+  getWhatsAppLink(phoneNumber: string): string {
+    // Remove any non-numeric characters from the phone number
+    const cleanedPhoneNumber = phoneNumber.replace(/\D/g, '');
+
+    // Determine if a country code is already present.
+    // This is a simplified check; a more robust solution might involve a library
+    // or a more complex regex to validate phone numbers and extract country codes.
+    let formattedPhoneNumber = cleanedPhoneNumber;
+    if (
+      !cleanedPhoneNumber.startsWith('51') &&
+      !cleanedPhoneNumber.startsWith('+51')
+    ) {
+      // Assuming +51 for Peru if no country code is present
+      formattedPhoneNumber = '51' + cleanedPhoneNumber;
+    } else if (cleanedPhoneNumber.startsWith('+')) {
+      // Remove '+' if present, as wa.me links don't use it
+      formattedPhoneNumber = cleanedPhoneNumber.substring(1);
+    }
+
+    return `https://wa.me/${formattedPhoneNumber}`;
   }
 
   ngOnDestroy(): void {

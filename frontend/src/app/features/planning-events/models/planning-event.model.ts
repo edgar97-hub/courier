@@ -25,6 +25,7 @@ export interface Route {
   completionPoint: string;
 
   latitudeStartPoint: string;
+  longitudeStartPoint: string;
   longitudeEndPoint: string;
 
   vehicleStartTime?: string;

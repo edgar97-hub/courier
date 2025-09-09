@@ -85,12 +85,11 @@
                 >
                 <p>
                   Hora de Salida Estimada:
-                  {{ selectedRoute.vehicleStartTime | date : "shortTime" }}
+                  {{ selectedRoute.vehicleStartTime }}
                 </p>
               </div>
             </div>
 
-            <!-- Paradas Intermedias (Bucle) -->
             <div class="timeline-item" *ngFor="let stop of selectedRoute.stops">
               <div class="timeline-connector"></div>
               <div
@@ -100,8 +99,27 @@
                 <span>{{ stop.sequenceOrder }}</span>
               </div>
               <div class="timeline-content">
-                <strong>{{ stop.order.company.username }}</strong>
-                <strong>{{ stop.address }}</strong>
+                <div class="stop-head">
+                  <span
+                    ><strong>Empresa:</strong>
+                    {{ stop.order.company.username }}</span
+                  >
+                  <span
+                    ><strong>Cliente:</strong>
+                    {{ stop.order.recipient_name }}</span
+                  >
+                  <span><strong>Dirección:</strong> {{ stop.address }}</span>
+                  <span
+                    ><strong>Telefono:</strong>
+                    <a
+                      [href]="getWhatsAppLink(stop.order.recipient_phone)"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {{ stop.order.recipient_phone }}
+                    </a>
+                  </span>
+                </div>
                 <p class="stop-details">
                   <span>Pedido #{{ stop.orderCode }}</span> |
                   <span>Llegada: {{ stop.plannedStartTime }}</span> -

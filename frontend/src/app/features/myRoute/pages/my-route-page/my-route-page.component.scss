@@ -23,7 +23,10 @@
     min-width: 200px;
   }
 }
-
+.navigate-button {
+  // Estilo base para el botón de navegar
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
 .stops-manifest {
   margin-top: 16px;
 }
@@ -55,6 +58,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
+    gap: 5px;
   }
 
   &.active-stop .stop-number {
@@ -66,13 +71,18 @@
   }
 
   .stop-status {
-    // position: absolute;
-    // border: 1px solid black;
     color: white !important;
-    // top: 16px;
-    // right: 16px;
   }
 
+  .stop-head {
+    padding-left: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 0.9em;
+    color: #555;
+    margin-bottom: 8px;
+  }
   .stop-details {
     display: flex;
     gap: 16px;
@@ -156,8 +166,10 @@
   display: inline-flex; // Para alinear ícono y texto si añades íconos
   align-items: center;
   line-height: 1; // Ajustar línea de altura
-  // mat-icon { // Si añades íconos a los badges
-  //   font-size: 1rem;
-  //   margin-right: 4px;
-  // }
+}
+.map-container {
+  margin-top: 16px;
+  border-radius: 8px;
+  overflow: hidden; // Para que el mapa respete el borde redondeado
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }

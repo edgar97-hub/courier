@@ -17,6 +17,7 @@ import {
   MenuItem,
   menuItems as baseMenuItems,
 } from './shared/components/custom-sidenav/menu-items';
+import { DirectionsService } from './core/services/directions.service';
 
 @Component({
   selector: 'app-root',
@@ -36,6 +37,8 @@ export class AppComponent implements OnInit {
   private currentNoticeDialogRef: MatDialogRef<RouteSpecificNoticeDialogComponent> | null =
     null;
   private justShowedRouteNotice = false;
+  private directionsService = inject(DirectionsService);
+
   constructor(private authService: AuthService) {}
 
   ngOnInit() {
@@ -45,6 +48,9 @@ export class AppComponent implements OnInit {
         next: () => console.log('Usuario cargado al iniciar'),
         error: () => console.warn('No se pudo cargar usuario al iniciar'),
       });
+      console.log(
+        'AppComponent initialized, triggering Google Maps API load...'
+      );
     }
 
     this.router.events

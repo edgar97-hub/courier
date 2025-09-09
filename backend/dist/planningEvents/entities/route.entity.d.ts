@@ -5,9 +5,13 @@ export declare class Route {
     routeIdExternal: string;
     driverCode: string;
     vehicle: string;
+    vehicleStartTime: string;
+    vehicleEndTime: string;
     startingPoint: string;
     completionPoint: string;
     latitudeStartPoint: string;
+    longitudeStartPoint: string;
+    latitudeEndPoint: string;
     longitudeEndPoint: string;
     planningEventId: number;
     planningEvent: PlanningEvent;
