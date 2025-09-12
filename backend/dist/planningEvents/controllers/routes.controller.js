@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const auth_guard_1 = require("../../auth/guards/auth.guard");
 const routes_service_1 = require("../services/routes.service");
 const get_my_routes_dto_1 = require("../dto/get-my-routes.dto");
+const update_location_dto_1 = require("../dto/update-location.dto");
 let RoutesController = class RoutesController {
     constructor(routesService) {
         this.routesService = routesService;
@@ -25,6 +26,12 @@ let RoutesController = class RoutesController {
         const userId = req.idUser;
         const { date } = query;
         return this.routesService.findMyRoutesByDate(userId, date);
+    }
+    async updateRouteLocation(routeId, updateLocationDto) {
+        await this.routesService.updateRouteLocation(routeId, updateLocationDto);
+    }
+    async getLiveRouteLocations(id) {
+        return this.routesService.getLiveRouteLocations(id);
     }
 };
 exports.RoutesController = RoutesController;
@@ -36,6 +43,22 @@ __decorate([
     __metadata("design:paramtypes", [Object, get_my_routes_dto_1.GetMyRoutesDto]),
     __metadata("design:returntype", Promise)
 ], RoutesController.prototype, "getMyRoutesByDate", null);
+__decorate([
+    (0, common_1.Patch)('routes/:routeId/location'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
+    __param(0, (0, common_1.Param)('routeId', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, update_location_dto_1.UpdateLocationDto]),
+    __metadata("design:returntype", Promise)
+], RoutesController.prototype, "updateRouteLocation", null);
+__decorate([
+    (0, common_1.Get)(':id/live-locations'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], RoutesController.prototype, "getLiveRouteLocations", null);
 exports.RoutesController = RoutesController = __decorate([
     (0, common_1.Controller)('routes'),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard),

@@ -173,3 +173,24 @@
   overflow: hidden; // Para que el mapa respete el borde redondeado
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+.tracking-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #e8f5e9; // Un verde claro
+  color: #2e7d32; // Un verde oscuro
+  font-size: 0.9em;
+  border-top: 1px solid #c8e6c9;
+
+  mat-icon {
+    animation: pulse-green 2s infinite;
+  }
+}
+
+@keyframes pulse-green {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}

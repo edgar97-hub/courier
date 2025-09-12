@@ -220,8 +220,12 @@
   display: inline-flex; // Para alinear ícono y texto si añades íconos
   align-items: center;
   line-height: 1; // Ajustar línea de altura
-  // mat-icon { // Si añades íconos a los badges
-  //   font-size: 1rem;
-  //   margin-right: 4px;
-  // }
+}
+
+.map-container {
+  height: 400px;
+  width: 100%;
+  margin-bottom: 24px;
+  border-radius: 8px;
+  overflow: hidden;
 }

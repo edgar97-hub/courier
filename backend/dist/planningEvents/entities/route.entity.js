@@ -87,6 +87,18 @@ __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], Route.prototype, "breakDuration", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 8, nullable: true }),
+    __metadata("design:type", Number)
+], Route.prototype, "currentLatitude", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 11, scale: 8, nullable: true }),
+    __metadata("design:type", Number)
+], Route.prototype, "currentLongitude", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'timestamptz', nullable: true }),
+    __metadata("design:type", Date)
+], Route.prototype, "lastLocationUpdate", void 0);
 exports.Route = Route = __decorate([
     (0, typeorm_1.Entity)('routes')
 ], Route);

@@ -18,4 +18,7 @@ export declare class Route {
     stops: Stop[];
     breakStart: string;
     breakDuration: string;
+    currentLatitude: number;
+    currentLongitude: number;
+    lastLocationUpdate: Date;
 }

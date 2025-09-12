@@ -4,7 +4,7 @@ import {
   provideHttpClient,
   withInterceptorsFromDi,
 } from '@angular/common/http';
-import { LOCALE_ID } from '@angular/core';
+import { LOCALE_ID, isDevMode } from '@angular/core';
 import { DatePipe, registerLocaleData } from '@angular/common';
 import { provideStore, StoreModule } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
@@ -25,5 +25,13 @@ export const appConfig: ApplicationConfig = {
     DatePipe,
     { provide: LOCALE_ID, useValue: 'es-PE' },
     { provide: MatPaginatorIntl, useClass: CustomMatPaginatorIntl },
+    //  provideServiceWorker('ngsw-worker.js', {
+    //     enabled: !isDevMode(),
+    //     registrationStrategy: 'registerWhenStable:30000'
+    //   }),
+    // provideServiceWorker('ngsw-worker.js', {
+    //   enabled: !isDevMode(),
+    //   registrationStrategy: 'registerWhenStable:30000'
+    // }),
   ],
 };

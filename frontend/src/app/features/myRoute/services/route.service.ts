@@ -4,6 +4,11 @@ import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
 
+interface UpdateLocationPayload {
+  latitude: number;
+  longitude: number;
+}
+
 interface Stop {
   orderId: string;
   sequenceOrder: number;
@@ -30,6 +35,7 @@ interface Route {
 })
 export class RouteService {
   private http = inject(HttpClient);
+  // private apiUrl = `${environment.apiUrl}/planning-events`; // Changed to planning-events
   private apiUrl = `${environment.apiUrl}/routes`;
   private authService = inject(AuthService);
 
@@ -55,5 +61,34 @@ export class RouteService {
     return this.http.get<Route[]>(`${this.apiUrl}/my-routes?date=${date}`, {
       headers,
     });
+  }
+
+  getLiveRouteLocations(id: number): Observable<Route[]> {
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(
+        () => new Error('Not authenticated to fetch planning event details.')
+      );
+    }
+    return this.http.get<Route[]>(`${this.apiUrl}/${id}/live-locations`, {
+      headers,
+    });
+  }
+
+  updateRouteLocation(
+    routeId: number,
+    payload: UpdateLocationPayload
+  ): Observable<void> {
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(
+        () => new Error('Not authenticated to update route location.')
+      );
+    }
+    return this.http.patch<void>(
+      `${this.apiUrl}/routes/${routeId}/location`,
+      payload,
+      { headers }
+    );
   }
 }

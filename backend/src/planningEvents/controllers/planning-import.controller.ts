@@ -10,9 +10,12 @@ import {
   ValidationPipe,
   Get,
   Query,
+  ParseIntPipe, // Importar ParseIntPipe
+  HttpCode, // Importar HttpCode
 } from '@nestjs/common';
 import { PlanningImportService } from '../services/planning-import.service';
 import { ImportResult } from '../dto/import-result.dto';
+import { UpdateLocationDto } from '../dto/update-location.dto'; // Importar el nuevo DTO
 
 @Controller('planning-events')
 export class PlanningImportController {
@@ -59,4 +62,5 @@ export class PlanningImportController {
       );
     }
   }
+ 
 }

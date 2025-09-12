@@ -72,6 +72,19 @@
           >
         </mat-card-header>
         <mat-card-content>
+       
+          <!-- ¡NUEVO MAPA AQUÍ! -->
+          <div class="map-container">
+            <google-map height="400px" width="100%" [options]="mapOptions">
+              <!-- Marcadores de la ruta planificada -->
+              <map-marker *ngFor="let marker of plannedRouteMarkers" [options]="marker"></map-marker>
+              <!-- Polilínea de la ruta planificada -->
+              <map-polyline *ngIf="plannedRoutePolyline" [options]="plannedRoutePolyline"></map-polyline>
+              <!-- Marcador del vehículo en tiempo real -->
+              <map-marker *ngIf="liveVehicleMarker" [options]="liveVehicleMarker"></map-marker>
+            </google-map>
+          </div>
+
           <div class="timeline">
             <!-- Punto de Partida -->
             <div class="timeline-item">

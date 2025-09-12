@@ -4,6 +4,7 @@ import { Stop } from '../entities/stop.entity';
 import { PlanningEvent } from '../entities/planning-event.entity';
 import { OrdersEntity } from '../../orders/entities/orders.entity';
 import { UsersEntity } from 'src/users/entities/users.entity';
+import { UpdateLocationDto } from '../dto/update-location.dto';
 export declare class RoutesService {
     private routeRepository;
     private stopRepository;
@@ -12,4 +13,6 @@ export declare class RoutesService {
     private userRepository;
     constructor(routeRepository: Repository<Route>, stopRepository: Repository<Stop>, planningEventRepository: Repository<PlanningEvent>, ordersRepository: Repository<OrdersEntity>, userRepository: Repository<UsersEntity>);
     findMyRoutesByDate(userId: string, date: string): Promise<Route[]>;
+    updateRouteLocation(routeId: number, dto: UpdateLocationDto): Promise<void>;
+    getLiveRouteLocations(planningEventId: number): Promise<any[]>;
 }

@@ -47,6 +47,47 @@ let RoutesService = class RoutesService {
             .getMany();
         return routes;
     }
+    async updateRouteLocation(routeId, dto) {
+        try {
+            const result = await this.routeRepository.update(routeId, {
+                currentLatitude: dto.latitude,
+                currentLongitude: dto.longitude,
+                lastLocationUpdate: new Date(),
+            });
+            if (result.affected === 0) {
+                throw new common_1.NotFoundException(`Ruta con ID ${routeId} no encontrada.`);
+            }
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    async getLiveRouteLocations(planningEventId) {
+        try {
+            const routes = await this.routeRepository.find({
+                where: { planningEventId: planningEventId },
+                select: [
+                    'id',
+                    'driverCode',
+                    'vehicle',
+                    'currentLatitude',
+                    'currentLongitude',
+                    'lastLocationUpdate',
+                ],
+            });
+            return routes.map(route => ({
+                routeId: route.id,
+                driverCode: route.driverCode,
+                vehicle: route.vehicle,
+                latitude: route.currentLatitude,
+                longitude: route.currentLongitude,
+                lastUpdate: route.lastLocationUpdate,
+            }));
+        }
+        catch (error) {
+            throw error;
+        }
+    }
 };
 exports.RoutesService = RoutesService;
 exports.RoutesService = RoutesService = __decorate([

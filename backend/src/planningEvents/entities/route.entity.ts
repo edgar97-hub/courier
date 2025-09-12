@@ -5,6 +5,7 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  UpdateDateColumn, // Importar UpdateDateColumn
 } from 'typeorm';
 import { PlanningEvent } from './planning-event.entity';
 import { Stop } from './stop.entity';
@@ -65,4 +66,15 @@ export class Route {
 
   @Column({ nullable: true })
   breakDuration: string;
+
+  // --- NUEVAS COLUMNAS PARA SEGUIMIENTO EN TIEMPO REAL ---
+
+  @Column({ type: 'decimal', precision: 10, scale: 8, nullable: true })
+  currentLatitude: number;
+
+  @Column({ type: 'decimal', precision: 11, scale: 8, nullable: true })
+  currentLongitude: number;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  lastLocationUpdate: Date;
 }
