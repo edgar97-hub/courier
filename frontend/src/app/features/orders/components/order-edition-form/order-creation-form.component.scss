@@ -1,0 +1,82 @@
+.order-creation-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 20px 20px 20px;
+}
+
+.form-section-title {
+  font-size: 1.5em;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(280px, 1fr)
+  ); // Grid responsivo
+  gap: 20px 24px; // Espacio entre filas y columnas
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr; // Stack form fields on smaller screens
+  }
+}
+
+.full-span-column {
+  grid-column: 1 / -1; // Ocupar todo el ancho del grid
+}
+
+mat-form-field {
+  width: 100%; // Para que ocupen el espacio de la celda del grid
+}
+
+.section-divider {
+  margin: 24px 0;
+}
+
+.shipping-cost-display {
+  font-size: 1.3em;
+  font-weight: bold;
+  // margin: 10px 0;
+  // border: 1px solid black;
+  text-align: right;
+  color: #d32f2f;
+  display: flex;
+
+  @media (max-width: 600px) {
+    text-align: left; // Align left on smaller screens
+    justify-content: flex-start;
+  }
+  align-items: center;
+  justify-content: flex-end; // Alinea a la derecha
+  gap: 8px;
+
+  .cost-value {
+    // Estilos adicionales si es necesario
+  }
+  .cost-spinner {
+    // Ya tiene estilos por defecto, pero puedes ajustar
+  }
+}
+
+.add-order-button-container {
+  margin-top: 24px;
+  text-align: center; // Centrar el botón de agregar
+
+  button {
+    padding: 12px 24px;
+    font-size: 1.1em;
+    letter-spacing: 0.5px;
+  }
+}
+
+// Reutilizar estilos para el hint como en el ejemplo
+mat-hint[align="end"] {
+  font-size: 0.75em;
+  opacity: 0.7;
+}

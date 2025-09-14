@@ -70,7 +70,6 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
         }
       })
     );
-    console.log(this.maxDimensions$);
   }
 
   ngOnInit(): void {
@@ -183,20 +182,13 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
       }
 
       if (customData.delivery_district_id) {
-        console.log(
-          'customData.delivery_district_id',
-          customData.delivery_district_id
-        );
         let districtFound = this.districtsCache?.find(
           (item) => item.id === customData.delivery_district_id
         );
-        console.log('this.listaDeDistritos', this.districtsCache);
-        console.log('districtFound', districtFound);
         if (districtFound) {
           let filtrados = this.districtsCache?.filter(
             (item) => item.name == districtFound?.name
           );
-          console.log('filtrados', filtrados);
           function getTarifa(
             peso_cobrado: number,
             filtrados: any[] = []
@@ -206,7 +198,6 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
                 peso_cobrado >= tarifa.weight_from &&
                 peso_cobrado <= tarifa.weight_to
               ) {
-                console.log('tarifa', tarifa);
                 return tarifa;
               }
             }
