@@ -95,7 +95,7 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadRoutesForDate();
-            this.startPolling();
+    this.startPolling();
   }
 
   loadRoutesForDate(): void {
@@ -117,7 +117,7 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
               r.stops.some((s: any) => s.status === 'PENDIENTE')
             ) || data[0];
           this.updateMapDisplay();
-                    this.startGeolocationTracking();
+          this.startGeolocationTracking();
         } else {
           this.updateMapDisplay(); // Limpia el mapa si no hay rutas
           this.geolocationTrackingService.stopTracking();
@@ -154,10 +154,12 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
   private startGeolocationTracking(): void {
     // Primero, detenemos cualquier seguimiento anterior para evitar duplicados
     this.geolocationTrackingService.stopTracking();
-    
+
     if (this.selectedRoute && this.selectedRoute.id) {
       // Solo iniciamos si la ruta tiene paradas pendientes
-      const hasPendingStops = this.selectedRoute.stops.some(s => s.status === StopStatus.PENDING);
+      const hasPendingStops = this.selectedRoute.stops.some(
+        (s) => s.status === StopStatus.PENDING
+      );
       if (hasPendingStops) {
         this.geolocationTrackingService.startTracking(this.selectedRoute.id);
       }
@@ -309,7 +311,6 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
     return `https://wa.me/${formattedPhoneNumber}`;
   }
 
- 
   getAvailableStatuses(order: Order_): OrderStatus[] {
     const userRole = this.appStore.currentUser()?.role;
     order.status === OrderStatus.REGISTRADO;
@@ -321,11 +322,11 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
 
     switch (order.status) {
       case OrderStatus.REGISTRADO:
-        return [OrderStatus.RECOGIDO, ...almacen, OrderStatus.CANCELADO];
+        return [OrderStatus.RECOGIDO, ...almacen];
       case OrderStatus.RECOGIDO:
-        return [OrderStatus.EN_ALMACEN, OrderStatus.CANCELADO];
+        return [OrderStatus.EN_ALMACEN];
       case OrderStatus.EN_ALMACEN:
-        return [OrderStatus.EN_TRANSITO, OrderStatus.CANCELADO];
+        return [OrderStatus.EN_TRANSITO];
       case OrderStatus.EN_TRANSITO:
         return [
           OrderStatus.ENTREGADO,
@@ -333,7 +334,7 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
           OrderStatus.REPROGRAMADO,
         ];
       case OrderStatus.REPROGRAMADO:
-        return [OrderStatus.EN_TRANSITO, OrderStatus.CANCELADO];
+        return [OrderStatus.EN_TRANSITO];
       default:
         return [];
     }

@@ -9,7 +9,7 @@ import { Observable, of, throwError } from 'rxjs';
 import { catchError, delay, map, tap } from 'rxjs/operators';
 import { OrderFilterCriteria } from '../models/order-filter.model';
 import {
-  PaginatedOrdersResponse, // Ya existente
+  PaginatedOrdersResponse,
   DistrictOption,
   MaxPackageDimensions,
   ShippingCostResponse,
@@ -39,8 +39,8 @@ export class OrderService {
     if (token) {
       return new HttpHeaders({
         'Content-Type': 'application/json',
-        // 'Authorization': `Bearer ${token}` // ESTÁNDAR
-        codrr_token: token, // Como lo tenías
+        // 'Authorization': `Bearer ${token}`
+        codrr_token: token,
       });
     }
     return new HttpHeaders({ 'Content-Type': 'application/json' });
@@ -48,13 +48,13 @@ export class OrderService {
 
   getOrders(
     filters?: OrderFilterCriteria,
-    page: number = 1, // API suele esperar page index 1-based
+    page: number = 1,
     pageSize: number = 10,
-    sortField: string = 'id', // Campo por defecto para ordenar
-    sortDirection: 'asc' | 'desc' = 'desc' // Dirección por defecto
+    sortField: string = 'id',
+    sortDirection: 'asc' | 'desc' = 'desc'
   ): Observable<PaginatedOrdersResponse> {
     let params = new HttpParams()
-      .set('page_number', page.toString()) // Asegúrate que estos nombres de param coincidan con tu API
+      .set('page_number', page.toString())
       .set('page_size', pageSize.toString())
       .set('sort_field', sortField)
       .set('sort_direction', sortDirection);
@@ -99,8 +99,8 @@ export class OrderService {
 
   getOrders2(
     filters?: OrderFilterCriteria,
-    sortField: string = 'id', // Campo por defecto para ordenar
-    sortDirection: 'asc' | 'desc' = 'desc' // Dirección por defecto
+    sortField: string = 'id',
+    sortDirection: 'asc' | 'desc' = 'desc'
   ): Observable<Order[]> {
     let params = new HttpParams()
       .set('sort_field', sortField)
@@ -152,7 +152,6 @@ export class OrderService {
         'EN ALMACEN',
         'EN TRANSITO',
         'ENTREGADO',
-        // 'CANCELADO',
         'RECHAZADO EN PUNTO',
         'REPROGRAMADO',
         'ANULADO',
@@ -389,35 +388,6 @@ export class OrderService {
           }).pipe(delay(200));
         })
       );
-  }
-  calculateShippingCost(packageData: {
-    delivery_district_id: string | number;
-    package_size_type: 'standard' | 'custom';
-    package_width_cm?: number | null;
-    package_length_cm?: number | null;
-    package_height_cm?: number | null;
-    package_weight_kg?: number | null;
-  }): Observable<ShippingCostResponse> {
-    console.log('packageData', packageData);
-    // return this.http.post<ShippingCostResponse>(`${this.baseUrl}/shipping/calculate-cost`, packageData).pipe(catchError(this.handleError));
-    // Simulación:
-    console.log(
-      'OrderService: Calculating shipping cost (simulated) for',
-      packageData
-    );
-    let cost = 8; // Costo base estándar
-    if (packageData.package_size_type === 'custom') {
-      cost = 10; // Costo base para custom
-      if ((packageData.package_weight_kg || 0) > 2) cost += 5;
-      if (
-        (packageData.package_length_cm || 0) > 30 ||
-        (packageData.package_width_cm || 0) > 25 ||
-        (packageData.package_height_cm || 0) > 20
-      )
-        cost += 4;
-    }
-    if (packageData.delivery_district_id === 'D003') cost += 2; // Surquillo un poco más
-    return of({ shipping_cost: cost }).pipe(delay(500));
   }
 
   createBatchOrders(

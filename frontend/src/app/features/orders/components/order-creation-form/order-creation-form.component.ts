@@ -101,52 +101,35 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   // Para mostrar el nombre del distrito seleccionado, no solo el ID
   selectedDistrictName = () => {
     const districtId = this.orderForm?.get('delivery_district_id')?.value;
-    console.log('districtId', districtId);
-    console.log('this._districtsCache', this._districtsCache);
-    if (!districtId || !this._districtsCache) return '';
-    return this._districtsCache.find((d) => d.id === districtId)?.name || '';
+    if (!districtId || !this.districtsCache) return '';
+    return this.districtsCache.find((d) => d.id === districtId)?.name || '';
   };
 
   private orderService = inject(OrderService);
   private fb = inject(FormBuilder);
   private datePipe = inject(DatePipe);
   private destroy$ = new Subject<void>();
-  _districtsCache: DistrictOption[] = [];
+  districtsCache: DistrictOption[] = [];
 
-  drivers$: Observable<User[]> = of([]); // Observable para la lista de motorizados
+  drivers$: Observable<User[]> = of([]);
   isLoadingDrivers = false;
   selectedDriver: User | null = null;
   driverSearchCtrl = new FormControl('');
   filteredDrivers$: Observable<User[]>;
 
-  ditricts$: Observable<User[]> = of([]); // Observable para la lista de motorizados
+  ditricts$: Observable<User[]> = of([]);
   isLoadingDistricts = false;
   selectedDistrict: User | null = null;
   districSearchCtrl = new FormControl('');
   filteredDistricts$: Observable<DistrictOption[]>;
 
   constructor() {
-    this.minDeliveryDate = new Date(); // No se puede entregar en el pasado
-    this.orderService
-      .getDeliveryDistricts()
-      .pipe(
-        map((allDistricts: DistrictOption[]) => {
-          this._districtsCache = allDistricts;
-          console.log('this._districtsCache', this._districtsCache);
-          return allDistricts.filter((district) => district.isStandard);
-        })
-      )
-      .subscribe((standardDistricts) => {
-        // this._districtsCache = standardDistricts; // o lo que necesites hacer
-      });
-    // this.deliveryDistricts$ = this.orderService.getDeliveryDistricts().pipe(
-    //   map((allDistricts: DistrictOption[]) => {
-    //     this._districtsCache = allDistricts;
-    //     console.log('this._districtsCache', this._districtsCache);
-    //     return allDistricts.filter((district) => district.isStandard);
-    //   })
-    //   // tap((districts) => (this._districtsCache = districts)) // Cachear para buscar nombre
-    // );
+    this.minDeliveryDate = new Date();
+    this.orderService.getDeliveryDistricts().subscribe((allDistricts) => {
+      this.districtsCache = allDistricts;
+      console.log('this._districtsCache', this.districtsCache);
+    });
+
     this.buildForm();
 
     this.filteredDrivers$ = this.driverSearchCtrl.valueChanges.pipe(
@@ -160,7 +143,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
           tap(() => (this.isLoadingDrivers = false)),
           catchError(() => {
             this.isLoadingDrivers = false;
-            return of([]); // Devuelve array vacío en caso de error
+            return of([]);
           })
         );
       }),
@@ -178,7 +161,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
           tap(() => (this.isLoadingDistricts = false)),
           catchError(() => {
             this.isLoadingDistricts = false;
-            return of([]); // Devuelve array vacío en caso de error
+            return of([]);
           })
         );
       }),
@@ -194,13 +177,8 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   }
   onDriverSelected(event: MatAutocompleteSelectedEvent): void {
     this.selectedDriver = event.option.value as User;
-    console.log('cliente selected:', this.selectedDriver);
-
     this.orderForm.get('company_id')?.setValue(this.selectedDriver.id);
     this.orderForm.markAllAsTouched();
-    console.log('Order form is invalid:', this.getFormErrors(this.orderForm));
-    const formValue = this.orderForm.getRawValue(); // getRawValue para incluir campos deshabilitados (como los de paquete estándar)
-    console.log('formValue', formValue);
   }
 
   clearSelection(): void {
@@ -208,7 +186,6 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     this.driverSearchCtrl.setValue('');
     this.orderForm.markAllAsTouched();
     this.orderForm.get('company_id')?.setValue(null);
-    console.log('Order form is invalid:', this.getFormErrors(this.orderForm));
   }
 
   displayDistricName(driver: DistrictOption | null): string {
@@ -216,15 +193,10 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   }
   onDistrictSelected(event: MatAutocompleteSelectedEvent): void {
     this.selectedDistrict = event.option.value as User;
-    console.log('district selected:', this.selectedDistrict);
-
     this.orderForm
       .get('delivery_district_id')
       ?.setValue(this.selectedDistrict.id);
     this.orderForm.markAllAsTouched();
-    console.log('Order form is invalid:', this.getFormErrors(this.orderForm));
-    const formValue = this.orderForm.getRawValue(); // getRawValue para incluir campos deshabilitados (como los de paquete estándar)
-    console.log('formValue', formValue);
   }
 
   clearDistrictSelection(): void {
@@ -249,44 +221,21 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       .subscribe((newDistrictId) => {
         console.log('District changed to:', newDistrictId);
         if (newDistrictId) {
-          if (
+          let isStandard =
             this.packageDetailsFormGroup.get('package_size_type')?.value ===
-            'standard'
-          ) {
-            let ditrict = this._districtsCache.find(
+            'standard';
+          if (isStandard) {
+            let districtStandard = this.districtsCache.find(
               (item) => item.id === newDistrictId
             );
-            if (ditrict) {
-              this.calculatedShippingCost.set(parseFloat(ditrict.price));
+            if (districtStandard) {
+              this.calculatedShippingCost.set(
+                parseFloat(districtStandard.price)
+              );
             }
           } else {
             this.calculatedShippingCost.set(0);
           }
-
-          // this.resetPackageTypeSelection();
-          // También es un buen momento para recalcular el costo de envío
-          // si el tipo de paquete ya estaba seleccionado como 'standard'
-          // if (
-          //   this.packageDetailsFormGroup.get('package_size_type')?.value ===
-          //   'standard'
-          // ) {
-          //   // Llama al método que el PackageCalculatorComponent usa para el costo estándar
-          //   // Esto es un poco indirecto. Sería mejor si PackageCalculatorComponent
-          //   // también escuchara el cambio de distrito si su cálculo depende de él.
-          //   // Por ahora, reseteamos el costo calculado en el formulario padre:
-          //   this.calculatedShippingCost.set(0); // O null, e indicarle al usuario que recalcule
-          //   // const packageCalculator = this.getChildPackageCalculator(); // Necesitarás un ViewChild
-          //   // if (
-          //   //   packageCalculator &&
-          //   //   packageCalculator.packageFormGroup.get('package_size_type')
-          //   //     ?.value === 'standard'
-          //   // ) {
-          //   //   packageCalculator.calculateStandardShippingCost();
-          //   // }
-          // } else {
-          //   // Si era 'custom', simplemente limpiar el costo para que el usuario recalcule
-          //   this.calculatedShippingCost.set(0); // O null
-          // }
         }
       });
 
@@ -299,35 +248,17 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
           'delivery_district_id'
         )?.value;
         if (deliveryDistrictId && type === 'standard') {
-          let ditrict = this._districtsCache.find(
+          let districtStandard = this.districtsCache.find(
             (item) => item.id === deliveryDistrictId
           );
-          if (ditrict) {
-            this.calculatedShippingCost.set(parseFloat(ditrict.price));
+          if (districtStandard) {
+            this.calculatedShippingCost.set(parseFloat(districtStandard.price));
           }
         } else {
           this.calculatedShippingCost.set(0);
         }
       });
   }
-
-  // private resetPackageTypeSelection(): void {
-  //   const packageTypeControl =
-  //     this.packageDetailsFormGroup.get('package_size_type');
-  //   if (packageTypeControl) {
-  //     // Opción A: Desmarcar todo (si mat-radio-group lo permite sin un valor)
-  //     // packageTypeControl.reset(null, { emitEvent: false }); // emitEvent: false para evitar bucles si hay otras suscripciones
-  //     // Opción B: Resetear a un valor por defecto, por ejemplo 'standard'
-  //     // packageTypeControl.setValue('standard', { emitEvent: true }); // emitEvent: true para que PackageCalculator reaccione
-  //     // console.log('Package type reset to standard');
-  //     // Si reseteas a 'standard', el PackageCalculatorComponent (si está bien implementado)
-  //     // debería deshabilitar los campos custom y recalcular el costo para estándar.
-  //     // Si reseteas a null, PackageCalculatorComponent debería manejar ese estado.
-  //   }
-  //   // También reseteamos el costo de envío calculado
-  //   this.calculatedShippingCost.set(0); // O null
-  //   this.isCalculatingShipping.set(false);
-  // }
 
   get packageDetailsFormGroup(): FormGroup {
     return this.orderForm.get('package_details') as FormGroup;
@@ -338,12 +269,6 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     if (this.isCompany()) {
       company_id = this.appStore.currentUser()?.id;
     }
-
-    // var d = new Date();
-    // let date = d.toLocaleString('en-US', { timeZone: 'America/Bogota' });
-    // console.log('date', date);
-    // const todayString = this.datePipe.transform(date, 'yyyy-MM-dd');
-    // const todayString = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
 
     this.orderForm = this.fb.group({
       shipment_type: [this.shipmentTypes[0], Validators.required],
@@ -396,9 +321,12 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.calculatedShippingCost() === 0) {
+      alert('El costo de envío no puede ser 0.');
+      return;
+    }
     const formValue = this.orderForm.getRawValue(); // getRawValue para incluir campos deshabilitados (como los de paquete estándar)
     console.log('this.selectedDistrictName()', this.selectedDistrictName());
-    // return;
     const newOrderData: NewOrderData = {
       ...formValue, // Todos los campos del formulario principal
       ...formValue.package_details, // Desestructurar los detalles del paquete
@@ -411,7 +339,6 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
 
     console.log('Submitting New Order Data:', newOrderData);
     this.orderSubmit.emit(newOrderData);
-    // El componente padre (OrderCreatePage) reseteará este formulario
   }
 
   resetFormForNextOrder(): void {
@@ -429,16 +356,14 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     const defaultShipmentType =
       this.orderForm.get('shipment_type')?.value || this.shipmentTypes[0];
     const defaultPaymentMethod = this.paymentMethodsForCollection[0];
-    // const todayString = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
 
     this.orderForm.reset({
       company_id: company_id,
       shipment_type: defaultShipmentType,
       delivery_date: null,
-      package_details: { package_size_type: 'standard' }, // Resetear subformulario también
+      package_details: { package_size_type: 'standard' },
       amount_to_collect_at_delivery: 0,
       payment_method_for_collection: defaultPaymentMethod,
-      // Los otros campos se resetean a null/'' por defecto
     });
     this.calculatedShippingCost.set(0); // Resetear costo de envío
     // Forzar la re-evaluación del estado de los controles de paquete
@@ -447,20 +372,6 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       ?.setValue('standard', { emitEvent: true });
     this.formValidityChanged.emit(this.orderForm.valid); // Emitir nuevo estado de validez
   }
-
-  getDistrictCoverageInfo(districtId: string | number | null): string {
-    if (
-      !districtId ||
-      !this._districtsCache ||
-      this._districtsCache.length === 0
-    ) {
-      return ''; // O un mensaje por defecto si no hay distrito seleccionado o caché no cargado
-    }
-    const foundDistrict = this._districtsCache.find((d) => d.id === districtId);
-    return foundDistrict?.name || ''; // Devuelve coverage_info o string vacío si no se encuentra
-  }
-
-  // Helper para obtener el FormGroup de package_details
 
   ngOnDestroy(): void {
     this.destroy$.next();

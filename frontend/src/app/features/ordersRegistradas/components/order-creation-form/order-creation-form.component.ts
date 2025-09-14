@@ -448,17 +448,17 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     this.formValidityChanged.emit(this.orderForm.valid); // Emitir nuevo estado de validez
   }
 
-  getDistrictCoverageInfo(districtId: string | number | null): string {
-    if (
-      !districtId ||
-      !this._districtsCache ||
-      this._districtsCache.length === 0
-    ) {
-      return ''; // O un mensaje por defecto si no hay distrito seleccionado o caché no cargado
-    }
-    const foundDistrict = this._districtsCache.find((d) => d.id === districtId);
-    return foundDistrict?.name || ''; // Devuelve coverage_info o string vacío si no se encuentra
-  }
+  // getDistrictCoverageInfo(districtId: string | number | null): string {
+  //   if (
+  //     !districtId ||
+  //     !this._districtsCache ||
+  //     this._districtsCache.length === 0
+  //   ) {
+  //     return ''; // O un mensaje por defecto si no hay distrito seleccionado o caché no cargado
+  //   }
+  //   const foundDistrict = this._districtsCache.find((d) => d.id === districtId);
+  //   return foundDistrict?.name || ''; // Devuelve coverage_info o string vacío si no se encuentra
+  // }
 
   // Helper para obtener el FormGroup de package_details
 

@@ -260,7 +260,7 @@ export class ChangeStatusDialogComponent implements OnInit {
     const currentStatus = status || this.selectedStatus;
     if (!currentStatus) return false;
     const statusesRequiringReason: OrderStatus[] = [
-      OrderStatus.CANCELADO,
+      // OrderStatus.CANCELADO,
       OrderStatus.REPROGRAMADO,
       OrderStatus.RECHAZADO,
       OrderStatus.ANULADO,

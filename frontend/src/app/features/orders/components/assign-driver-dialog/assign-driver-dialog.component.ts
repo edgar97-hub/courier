@@ -22,8 +22,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   MatAutocompleteModule,
   MatAutocompleteSelectedEvent,
-} from '@angular/material/autocomplete'; // Para búsqueda mejorada
-import { MatListModule } from '@angular/material/list'; // Para mostrar resultados de búsqueda
+} from '@angular/material/autocomplete';
+import { MatListModule } from '@angular/material/list';
 import { Observable, Subject, of, BehaviorSubject } from 'rxjs';
 import {
   debounceTime,
@@ -46,7 +46,7 @@ export interface AssignDriverDialogData {
 }
 
 export interface AssignDriverDialogResult {
-  selectedDriver: User; // Devolvemos el objeto Driver completo
+  selectedDriver: User;
 }
 
 @Component({
@@ -54,11 +54,11 @@ export interface AssignDriverDialogResult {
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule, // Usaremos Reactive Forms
+    ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
-    MatSelectModule, // Se puede usar si la lista es corta y sin búsqueda
-    MatAutocompleteModule, // Mejor para listas largas con búsqueda
+    MatSelectModule,
+    MatAutocompleteModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
@@ -71,16 +71,16 @@ export interface AssignDriverDialogResult {
 })
 export class AssignDriverDialogComponent implements OnInit, OnDestroy {
   assignDriverForm: FormGroup;
-  drivers$: Observable<User[]> = of([]); // Observable para la lista de motorizados
+  drivers$: Observable<User[]> = of([]);
   isLoadingDrivers = false;
-  selectedDriver: User | null = null; // Para mantener el objeto Driver seleccionado
+  selectedDriver: User | null = null;
 
   // Para el autocompletado
   driverSearchCtrl = new FormControl('');
   filteredDrivers$: Observable<User[]>;
 
   private destroy$ = new Subject<void>();
-  private orderService = inject(OrderService); // Inyectar servicio de motorizados
+  private orderService = inject(OrderService);
   private fb = inject(FormBuilder);
 
   constructor(
@@ -115,7 +115,6 @@ export class AssignDriverDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Si hay un motorizado actualmente asignado, intentar preseleccionar su nombre en la búsqueda
     if (this.data.currentDriverId && this.data.order.assigned_driver) {
       this.selectedDriver = this.data.order.assigned_driver;
       this.driverSearchCtrl.setValue(
@@ -133,16 +132,11 @@ export class AssignDriverDialogComponent implements OnInit, OnDestroy {
 
   onDriverSelected(event: MatAutocompleteSelectedEvent): void {
     this.selectedDriver = event.option.value as User;
-    console.log('Driver selected:', this.selectedDriver);
   }
 
   onConfirm(): void {
     if (this.selectedDriver) {
       this.dialogRef.close({ selectedDriver: this.selectedDriver });
-    } else {
-      // Opcional: Mostrar error si no se seleccionó ningún motorizado
-      console.warn('No driver selected');
-      // this.assignDriverForm.get('driverSearch')?.setErrors({'required': true}); // Marcar como error
     }
   }
 

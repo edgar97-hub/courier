@@ -3,13 +3,13 @@ import { User } from '../../../shared/models/user';
 export interface Order {
   id: number | string;
   code: number | string;
-  type: string; // Considera si este campo también es snake_case desde la API (ej. order_type)
+  type: string;
   recipient_name: string;
   recipient_phone: string;
   district: string;
-  registration_date: string | Date; // La API probablemente devuelva string
-  delivery_date: string | Date; // La API probablemente devuelva string
-  status: string; // Considera si este campo también es snake_case desde la API (ej. order_status)
+  registration_date: string | Date;
+  delivery_date: string | Date;
+  status: string;
   amount_to_collect: number;
   service_amount: number;
   tracking_code?: string;
@@ -47,10 +47,8 @@ export interface NewOrderData {
   observations?: string;
 
   // Para mostrar en la tabla temporal
-  delivery_district_name?: string; // Nombre del distrito para UI
-  temp_id?: string; // ID temporal para la lista local
-
-  // para el cliente
+  delivery_district_name?: string;
+  temp_id?: string;
   company_id?: string;
 }
 
@@ -68,7 +66,6 @@ export interface DistrictOption {
   isStandard: boolean;
   price: string;
   name_and_price?: string;
-  // coverage_info?: string; // "En caso de registrar el pedido, no verificar..."
 }
 
 export interface MaxPackageDimensions {
@@ -102,7 +99,7 @@ export enum OrderStatus {
   EN_ALMACEN = 'EN ALMACEN',
   EN_TRANSITO = 'EN TRANSITO',
   ENTREGADO = 'ENTREGADO',
-  CANCELADO = 'CANCELADO',
+  // CANCELADO = 'CANCELADO',
   RECHAZADO = 'RECHAZADO EN PUNTO',
   ANULADO = 'ANULADO',
   REPROGRAMADO = 'REPROGRAMADO',

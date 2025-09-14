@@ -22,7 +22,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field'; // Para el select de pickup
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
@@ -61,13 +61,12 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
 
   pendingOrders: WritableSignal<NewOrderData[]> = signal([]);
   isSubmittingBatch: WritableSignal<boolean> = signal(false);
-  isOrderFormValid: WritableSignal<boolean> = signal(false); // Para habilitar/deshabilitar botón global
+  isOrderFormValid: WritableSignal<boolean> = signal(false);
 
-  // Controles para la sección final
   pickupOptionControl = new FormControl(
     'RECOGER EN DOMICILIO',
     Validators.required
-  ); // Valor por defecto como en la imagen
+  );
   termsAcceptedControl = new FormControl(false, Validators.requiredTrue);
 
   pickupOptions: string[] = ['RECOGER EN DOMICILIO', 'ENTREGAR EN ALMACEN'];
@@ -75,7 +74,7 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
   private orderService = inject(OrderService);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
-  private cdr = inject(ChangeDetectorRef); // Para forzar detección de cambios si es necesario
+  private cdr = inject(ChangeDetectorRef);
   private destroy$ = new Subject<void>();
 
   constructor() {}

@@ -18,17 +18,12 @@ import {
 } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatRadioModule } from '@angular/material/radio'; // O MatCheckboxModule si prefieres checkboxes
+import { MatRadioModule } from '@angular/material/radio';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'; // Para el spinner del botón calcular
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subject, Observable } from 'rxjs';
 import { startWith, takeUntil, tap } from 'rxjs/operators';
-
-import {
-  DistrictOption,
-  MaxPackageDimensions,
-  ShippingCostResponse,
-} from '../../models/order.model';
+import { DistrictOption, MaxPackageDimensions } from '../../models/order.model';
 import { OrderService } from '../../services/order.service';
 import { AutoSelectDirective } from '../../../../shared/directives/auto-select.directive';
 
@@ -49,20 +44,15 @@ import { AutoSelectDirective } from '../../../../shared/directives/auto-select.d
   styleUrls: ['./package-calculator.component.scss'],
 })
 export class PackageCalculatorComponent implements OnInit, OnDestroy {
-  // Este FormGroup será un subgrupo del formulario principal de la página de creación
-  @Input() packageFormGroup!: FormGroup; // Recibe el FormGroup para 'package_details'
-  @Input() deliveryDistrictId: string | number | null = null; // Necesario para el cálculo de costo
-  @Input() listaDeDistritos: DistrictOption[] | null = []; // Recibe la lista del padre
-  // @Input() districts: Observable<DistrictOption[]>;
-  // @Input() _districtsCache: DistrictOption[] = [];
-
-  // private _districtsCache: DistrictOption[] = [];
+  @Input() packageFormGroup!: FormGroup;
+  @Input() deliveryDistrictId: string | number | null = null;
+  @Input() districtsCache: DistrictOption[] | null = [];
 
   @Output() shippingCostCalculated = new EventEmitter<number>();
-  @Output() calculationLoading = new EventEmitter<boolean>(); // Para notificar al padre
+  @Output() calculationLoading = new EventEmitter<boolean>();
 
   maxDimensions$: Observable<MaxPackageDimensions>;
-  standardPackageLabel: WritableSignal<string> = signal('Estándar'); // Para mostrar info del paquete estándar
+  standardPackageLabel: WritableSignal<string> = signal('Estándar');
   volumetric_factor: WritableSignal<number> = signal(0);
 
   isCalculating: WritableSignal<boolean> = signal(false);
@@ -74,13 +64,13 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
     this.maxDimensions$ = this.orderService.getMaxPackageDimensions().pipe(
       tap((dims) => {
         if (dims.standard_package_info && dims.volumetric_factor) {
+          console.log(dims.standard_package_info);
           this.standardPackageLabel.set(dims.standard_package_info);
           this.volumetric_factor.set(dims.volumetric_factor);
         }
-        // Podríamos usar estas dimensiones para validadores dinámicos en los campos custom
       })
     );
-    // this.districts = new Observable<DistrictOption[]>();
+    console.log(this.maxDimensions$);
   }
 
   ngOnInit(): void {
@@ -100,20 +90,6 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
       )
       .subscribe((type) => {
         this.toggleCustomDimensionControls(type === 'custom');
-        // console.log('type', type);
-        // console.log('this.districts', this._districtsCache);
-
-        // if (type === 'standard') {
-        //   if (!this.deliveryDistrictId) {
-        //     this.shippingCostCalculated.emit(0);
-        //   }
-        //   // this.calculateStandardShippingCost(); // Calcular costo si se selecciona estándar
-        // } else {
-        //   this.shippingCostCalculated.emit(0);
-
-        //   // Si se cambia a custom y ya había un costo, podría resetearse o esperar al botón "Calcular"
-        //   // Por ahora, lo dejamos que el usuario presione "Calcular"
-        // }
       });
   }
 
@@ -133,7 +109,7 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
             Validators.required,
             Validators.min(0.1),
             Validators.max(999),
-          ]); // Añadir validadores
+          ]);
         } else {
           control.disable();
           control.clearValidators();
@@ -146,42 +122,11 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
     });
   }
 
-  calculateStandardShippingCost(): void {
-    if (!this.deliveryDistrictId) {
-      console.warn(
-        'Cannot calculate standard shipping cost: deliveryDistrictId is missing.'
-      );
-      this.shippingCostCalculated.emit(0); // O un valor por defecto, o manejar error
-      return;
-    }
-    this.isCalculating.set(true);
-    this.calculationLoading.emit(true);
-    this.orderService
-      .calculateShippingCost({
-        delivery_district_id: this.deliveryDistrictId,
-        package_size_type: 'standard',
-      })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response: ShippingCostResponse) => {
-          this.shippingCostCalculated.emit(response.shipping_cost);
-          this.isCalculating.set(false);
-          this.calculationLoading.emit(false);
-        },
-        error: (err) => {
-          console.error('Error calculating standard shipping cost:', err);
-          this.shippingCostCalculated.emit(0); // Emitir 0 o un valor de error
-          this.isCalculating.set(false);
-          this.calculationLoading.emit(false);
-        },
-      });
-  }
-
   onCalculateCustomCost(): void {
     if (this.packageFormGroup.get('package_size_type')?.value !== 'custom')
       return;
     if (!this.deliveryDistrictId) {
-      alert('Por favor, seleccione un distrito de entrega primero.'); // O un MatSnackBar
+      alert('Por favor, seleccione un distrito de entrega primero.');
       return;
     }
 
@@ -211,18 +156,12 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
 
     const customData = {
       delivery_district_id: this.deliveryDistrictId,
-      package_size_type: 'custom' as 'custom', // Asegurar el tipo literal
+      package_size_type: 'custom' as 'custom',
       package_width_cm: this.packageFormGroup.get('package_width_cm')?.value,
       package_length_cm: this.packageFormGroup.get('package_length_cm')?.value,
       package_height_cm: this.packageFormGroup.get('package_height_cm')?.value,
       package_weight_kg: this.packageFormGroup.get('package_weight_kg')?.value,
     };
-
-    this.maxDimensions$;
-
-    // console.log('listaDeDistritos', this.listaDeDistritos);
-    // console.log('customData', customData);
-    // console.log('this.volumetric_factor', this.volumetric_factor());
 
     if (
       customData.package_width_cm &&
@@ -248,39 +187,21 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
           'customData.delivery_district_id',
           customData.delivery_district_id
         );
-        let districtFound = this.listaDeDistritos?.find(
+        let districtFound = this.districtsCache?.find(
           (item) => item.id === customData.delivery_district_id
         );
-        console.log('this.listaDeDistritos', this.listaDeDistritos);
+        console.log('this.listaDeDistritos', this.districtsCache);
         console.log('districtFound', districtFound);
         if (districtFound) {
-          let filtrados = this.listaDeDistritos?.filter(
+          let filtrados = this.districtsCache?.filter(
             (item) => item.name == districtFound?.name
           );
           console.log('filtrados', filtrados);
-          // interface Tarifa {
-          //   id: number | string; // Identificador único de la tarifa
-          //   weight_from: number; // Límite inferior del rango de peso (inclusivo)
-          //   weight_to: number; // Límite superior del rango de peso (inclusivo)
-          //   precio: number; // Precio para esta tarifa
-          // }
           function getTarifa(
             peso_cobrado: number,
             filtrados: any[] = []
           ): any | undefined {
             for (const tarifa of filtrados) {
-              // console.log(
-              //   'peso_cobrado >= tarifa.weight_from',
-              //   peso_cobrado,
-              //   tarifa.weight_from,
-              //   peso_cobrado >= tarifa.weight_from
-              // );
-              // console.log(
-              //   'peso_cobrado <= tarifa.weight_to',
-              //   peso_cobrado,
-              //   tarifa.weight_to,
-              //   peso_cobrado <= tarifa.weight_to
-              // );
               if (
                 peso_cobrado >= tarifa.weight_from &&
                 peso_cobrado <= tarifa.weight_to
@@ -293,14 +214,11 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
           }
 
           if (filtrados) {
-            // console.log('filtrados', filtrados);
             let tarifa = getTarifa(peso_cobrado, filtrados);
             precio = tarifa?.price || 0;
           }
         }
       }
-      // console.log('peso_volumetrico', peso_volumetrico);
-      // console.log('customData.package_weight_kg', customData.package_weight_kg);
       console.log('peso_cobrado', peso_cobrado);
       console.log('precio', precio);
 
@@ -317,25 +235,7 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
     } else {
       alert('las entradas no son validas');
     }
-
     return;
-    // this.orderService
-    //   .calculateShippingCost(customData)
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe({
-    //     next: (response: ShippingCostResponse) => {
-    //       this.shippingCostCalculated.emit(response.shipping_cost);
-    //       this.isCalculating.set(false);
-    //       this.calculationLoading.emit(false);
-    //     },
-    //     error: (err) => {
-    //       console.error('Error calculating custom shipping cost:', err);
-    //       // Podrías emitir un valor de error o null para indicar fallo
-    //       this.shippingCostCalculated.emit(0); // O un valor que indique error
-    //       this.isCalculating.set(false);
-    //       this.calculationLoading.emit(false);
-    //     },
-    //   });
   }
 
   ngOnDestroy(): void {

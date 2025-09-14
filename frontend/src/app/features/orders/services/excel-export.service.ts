@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx'; // Importar todo el namespace como XLSX
+import * as XLSX from 'xlsx';
 
 const EXCEL_TYPE =
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-TFG-8';
@@ -52,19 +52,4 @@ export class ExcelExportService {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
   }
-
-  // Función de ejemplo para calcular anchos (simplificada)
-  // private calculateColumnWidths(jsonData: any[]): any[] {
-  //   if (!jsonData || jsonData.length === 0) return [];
-  //   const widths: any[] = [];
-  //   const header = Object.keys(jsonData[0]);
-  //   header.forEach(key => {
-  //     const maxLength = Math.max(
-  //       key.length,
-  //       ...jsonData.map(item => (item[key] ? String(item[key]).length : 0))
-  //     );
-  //     widths.push({ wch: maxLength + 2 }); // +2 para un poco de padding
-  //   });
-  //   return widths;
-  // }
 }

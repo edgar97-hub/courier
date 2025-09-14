@@ -16,27 +16,18 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import {
-  MatNativeDateModule,
-  MAT_DATE_LOCALE,
-  DateAdapter,
-} from '@angular/material/core'; // MAT_DATE_LOCALE y DateAdapter para localización
-// Para localización de fecha si es necesario:
-// import { MAT_MOMENT_DATE_ADAPTER_OPTIONS, MomentDateAdapter } from '@angular/material-moment-adapter';
+import { MatNativeDateModule } from '@angular/material/core';
 import { MatDividerModule } from '@angular/material/divider';
-
-import { Order } from '../../models/order.model'; // Ajusta la ruta
+import { Order } from '../../models/order.model';
 
 export interface RescheduleOrderDialogData {
   order: Order;
-  minDate?: Date; // Fecha mínima para reprogramar (ej. mañana)
+  minDate?: Date;
 }
 
 export interface RescheduleOrderDialogResult {
-  newDeliveryDate: Date; // Enviar como objeto Date
+  newDeliveryDate: Date;
   reason?: string;
-  // Podrías añadir timeSlot si tienes esa lógica
-  // newTimeSlot?: string;
 }
 
 @Component({
@@ -51,23 +42,17 @@ export interface RescheduleOrderDialogResult {
     MatButtonModule,
     MatIconModule,
     MatDatepickerModule,
-    MatNativeDateModule, // O MatMomentDateModule si usas Moment.js
-    // TitleCasePipe,
+    MatNativeDateModule,
     MatDividerModule,
   ],
   templateUrl: './reschedule-order-dialog.component.html',
   styleUrls: ['./reschedule-order-dialog.component.scss'],
-  providers: [
-    // Opcional: Configurar el locale para el datepicker
-    // { provide: MAT_DATE_LOCALE, useValue: 'es-ES' },
-    // { provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS] },
-    // { provide: MAT_MOMENT_DATE_ADAPTER_OPTIONS, useValue: { useUtc: true } }
-  ],
+  providers: [],
 })
 export class RescheduleOrderDialogComponent implements OnInit {
   rescheduleForm: FormGroup;
-  minDateForReschedule: Date; // Fecha mínima para el datepicker
-  formSubmitted: boolean = false; // <--- ESTA ES LA BANDERA
+  minDateForReschedule: Date;
+  formSubmitted: boolean = false;
   private fb = inject(FormBuilder);
 
   constructor(
@@ -94,8 +79,7 @@ export class RescheduleOrderDialogComponent implements OnInit {
           : null, // Pre-llenar si existe
         Validators.required,
       ],
-      reason: ['', Validators.maxLength(250)], // Motivo opcional pero con límite
-      // timeSlot: [''], // Si tienes franjas horarias
+      reason: ['', Validators.maxLength(250)],
     });
   }
 
@@ -109,7 +93,7 @@ export class RescheduleOrderDialogComponent implements OnInit {
   }
 
   onConfirm(): void {
-    this.formSubmitted = true; // <--- SE ESTABLECE AQUÍ AL INTENTAR CONFIRMAR
+    this.formSubmitted = true;
     if (this.rescheduleForm.valid) {
       this.dialogRef.close({
         newDeliveryDate: this.newDeliveryDateCtrl?.value as Date,

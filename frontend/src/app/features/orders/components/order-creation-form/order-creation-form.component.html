@@ -101,36 +101,6 @@
       >
     </mat-form-field>
 
-    <!-- <mat-form-field appearance="outline">
-      <mat-label>Distrito de entrega</mat-label>
-      <mat-select formControlName="delivery_district_id">
-        <mat-option
-          *ngFor="let district of deliveryDistricts$ | async"
-          [value]="district.id"
-          class="district-option-content"
-        >
-          <div
-            style="
-              display: flex;
-              justify-content: space-between;
-              width: 100%;
-              align-items: center;
-            "
-          >
-            <span>{{ district.name }} </span>
-            &nbsp;{{ "-" }}&nbsp;
-            <span style="font-weight: 500; color: #555">
-              S/ {{ district.price | number : "1.2-2" }}</span
-            >
-          </div>
-        </mat-option>
-      </mat-select>
-
-      <mat-error
-        *ngIf="orderForm.get('delivery_district_id')?.hasError('required')"
-        >Requerido</mat-error
-      >
-    </mat-form-field> -->
     <mat-form-field appearance="outline" class="driver-search-field">
       <mat-label>Buscar y Seleccionar distrito</mat-label>
       <input
@@ -167,10 +137,10 @@
         [displayWith]="displayDistricName"
         (optionSelected)="onDistrictSelected($event)"
       >
-        @for (driver of filteredDistricts$ | async; track driver.id) {
-        <mat-option [value]="driver">
+        @for (district of filteredDistricts$ | async; track district.id) {
+        <mat-option [value]="district">
           <div class="driver-option">
-            <span>{{ driver.name_and_price }}</span>
+            <span>{{ district.name_and_price }}</span>
           </div>
         </mat-option>
         } @if ((filteredDistricts$ | async)?.length === 0 && !isLoadingDistricts
@@ -238,7 +208,7 @@
   <!-- Sección 2: Tamaño del Paquete y Costo -->
   <app-package-calculator
     [packageFormGroup]="packageDetailsFormGroup"
-    [listaDeDistritos]="_districtsCache"
+    [districtsCache]="districtsCache"
     [deliveryDistrictId]="orderForm.get('delivery_district_id')?.value"
     (shippingCostCalculated)="onShippingCostCalculated($event)"
     (calculationLoading)="onPackageCalculationLoading($event)"
