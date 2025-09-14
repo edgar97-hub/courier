@@ -191,7 +191,12 @@
               </div>
             </div>
           </mat-grid-tile>
-          <mat-grid-tile *ngIf="data.order.package_weight_kg">
+          <mat-grid-tile
+            *ngIf="
+              data.order.package_size_type === 'custom' &&
+              data.order.package_weight_kg
+            "
+          >
             <div class="detail-item">
               <mat-icon class="detail-icon">fitness_center</mat-icon>
               <div>
@@ -202,7 +207,12 @@
               </div>
             </div>
           </mat-grid-tile>
-          <mat-grid-tile *ngIf="data.order.package_width_cm">
+          <mat-grid-tile
+            *ngIf="
+              data.order.package_size_type === 'custom' &&
+              data.order.package_width_cm
+            "
+          >
             <div class="detail-item">
               <mat-icon class="detail-icon">width_normal</mat-icon>
               <!-- Placeholder icon -->

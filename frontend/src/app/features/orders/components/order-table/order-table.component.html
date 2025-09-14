@@ -156,6 +156,10 @@
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #orderActionMenu="matMenu" xPosition="before">
+          <button mat-menu-item (click)="editOrder(order)" *ngIf="isAdmin()">
+            <mat-icon>edit</mat-icon>
+            <span>Editar Pedido</span>
+          </button>
           <button
             mat-menu-item
             (click)="openEditAmountToCollectModal(order)"

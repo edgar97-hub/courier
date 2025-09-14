@@ -15,6 +15,8 @@ import {
   ShippingCostResponse,
   CreateBatchOrderPayload,
   Order,
+  Order_,
+  UpdateOrderRequestDto,
 } from '../models/order.model';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
@@ -407,6 +409,38 @@ export class OrderService {
       .pipe(catchError(this.handleError));
   }
 
+  updateOrder(
+    orderId: string | number,
+    order: UpdateOrderRequestDto,
+  ): Observable<any> {
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(() => new Error('Not authenticated to fetch users.'));
+    }
+
+    return this.http
+      .put<{ success: boolean; message: string }>(
+        `${this.apiUrlOrders}/update-order/` + orderId,
+        order,
+        { headers },
+      )
+      .pipe(catchError(this.handleError));
+  }
+
+  getOrderById(orderId: string): Observable<any> {
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(() => new Error('Not authenticated to fetch users.'));
+    }
+
+    return this.http
+      .get<{ success: boolean; message: string }>(
+        `${this.apiUrlOrders}/order/` + orderId,
+        { headers }
+      )
+      .pipe(catchError(this.handleError));
+  }
+
   importOrdersFromParsedJson(parsedOrders: any[]): Observable<ImportResult> {
     console.log(
       'OrderService: Sending parsed JSON to backend for import',
@@ -466,53 +500,6 @@ export class OrderService {
       .get<any>(`${this.apiUrlDistricts}/filtered`, { params, headers })
       .pipe(catchError(this.handleError));
   }
-
-  // getOrders2(
-  //   filters?: OrderFilterCriteria,
-  //   sortField: string = 'id', // Campo por defecto para ordenar
-  //   sortDirection: 'asc' | 'desc' = 'desc' // Dirección por defecto
-  // ): Observable<Order[]> {
-  //   let params = new HttpParams()
-  //     .set('sort_field', sortField)
-  //     .set('sort_direction', sortDirection);
-
-  //   if (filters) {
-  //     if (filters.start_date) {
-  //       params = params.set('start_date', filters.start_date);
-  //     }
-  //     if (filters.end_date) {
-  //       params = params.set('end_date', filters.end_date);
-  //     }
-  //     if (filters.status) {
-  //       params = params.set('status', filters.status);
-  //     }
-  //     if (filters.search_term && filters.search_term.trim() !== '') {
-  //       params = params.set('search_term', filters.search_term.trim());
-  //     }
-  //   }
-
-  //   const headers = this.getAuthHeaders();
-  //   if (!this.authService.getAccessToken()) {
-  //     return throwError(() => new Error('Not authenticated to fetch users.'));
-  //   }
-  //   return this.http
-  //     .get<Order[]>(this.apiUrlOrders + '/filtered-orders', {
-  //       params,
-  //       headers,
-  //     })
-  //     .pipe(
-  //       map((response: any) => {
-  //         // Si necesitas transformar las fechas de string a Date object aquí:
-  //         // response.items = response.items.map(order => ({
-  //         //   ...order,
-  //         //   registration_date: new Date(order.registration_date),
-  //         //   delivery_date: order.delivery_date ? new Date(order.delivery_date) : null,
-  //         // }));
-  //         return response.items;
-  //       }),
-  //       catchError(this.handleError)
-  //     );
-  // }
 
   assignDriverToOrder(
     orderId: string | number,

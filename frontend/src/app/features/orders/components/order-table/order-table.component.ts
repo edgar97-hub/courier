@@ -51,6 +51,7 @@ import {
   EditShippingCostDialogResult,
   EditShippingCostDialogData,
 } from '../edit-shipping-cost-dialog/edit-shipping-cost-dialog.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-order-table',
@@ -76,6 +77,7 @@ import {
 })
 export class OrderTableComponent implements AfterViewInit, OnChanges {
   appStore = inject(AppStore);
+  private router = inject(Router);
 
   @Input() orders: Order_[] | null = [];
   @Input() isLoading: boolean = false;
@@ -417,6 +419,27 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   isAdminOrReceptionist(): boolean {
     const userRole = this.appStore.currentUser()?.role;
     return userRole === 'ADMINISTRADOR' || userRole === 'RECEPCIONISTA';
+  }
+
+  isAdmin(): boolean {
+    const userRole = this.appStore.currentUser()?.role;
+    return userRole === 'ADMINISTRADOR';
+  }
+
+  editOrder(order: Order_): void {
+    if (!order.id) {
+      console.error(
+        'Order ID or current monto a cabrar is missing for editing.',
+        order
+      );
+      this.snackBar.open(
+        'No se puede modificar el monto a cabrar: faltan datos del pedido.',
+        'Cerrar',
+        { duration: 3000 }
+      );
+      return;
+    }
+    this.router.navigate(['/orders/edit', order.id]);
   }
 
   openEditAmountToCollectModal(order: Order_): void {

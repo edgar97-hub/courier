@@ -151,15 +151,34 @@ export interface Order_ {
   type_order_transfer_to_warehouse?: string;
   status: OrderStatus; // Usando el enum
   user?: User; // Información básica del usuario que creó la orden
+  company?: User;
   assigned_driver?: User;
   createdAt?: string | Date; // Fecha de creación
   updatedAt?: string | Date; // Fecha de última actualización
   delivered_at?: string | Date; // Fecha real de entrega (si la tienes)
   product_delivery_photo_url?: string;
+  observation_shipping_cost_modification?: string;
 }
 
 export interface Motorized {
   assigned_driver_id?: string | number | null;
   assigned_driver_name?: string;
   assigned_driver?: User | null;
+}
+
+export interface UpdateOrderRequestDto {
+  recipient_name?: string;
+  recipient_phone?: string;
+  delivery_district_name?: string;
+  delivery_address?: string;
+  package_size_type?: string;
+  package_width_cm?: number;
+  package_length_cm?: number;
+  package_height_cm?: number;
+  package_weight_kg?: number;
+  shipping_cost?: number;
+  item_description?: string;
+  observations?: string;
+  company_id?: string;
+  observation_shipping_cost_modification?: string;
 }

@@ -1,0 +1,21 @@
+<div class="order-edition-page">
+  <mat-card>
+    <!-- <mat-card-header>
+      <mat-card-title>Editar Pedido</mat-card-title>
+    </mat-card-header> -->
+    <mat-card-content>
+      <div *ngIf="isLoading" class="loading-spinner">
+        <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+      </div>
+      <div *ngIf="!isLoading && order">
+        <app-order-edition-form
+          [order]="order"
+          (orderSubmit)="onOrderUpdated($event)"
+        ></app-order-edition-form>
+      </div>
+      <div *ngIf="!isLoading && !order">
+        <p>No se pudo cargar el pedido.</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,41 @@
+.order-edition-page {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: calc(100vh - 64px); /* Adjust based on your header height */
+  background-color: #f0f2f5;
+}
+
+mat-card {
+  width: 100%;
+  max-width: 800px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+mat-card-header {
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 20px;
+}
+
+mat-card-title {
+  font-size: 1.8em;
+  font-weight: 600;
+  color: #333;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px; /* Adjust as needed */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  mat-card {
+    margin: 10px;
+  }
+}

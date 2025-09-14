@@ -110,11 +110,11 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
             Validators.max(999),
           ]);
         } else {
-          control.disable();
-          control.clearValidators();
-          // control.setValue(0, { emitEvent: false }); // Usar setValue para establecerlo en 0
-          control.updateValueAndValidity({ emitEvent: false }); // Evitar re-trigger innecesario de valueChanges si no es necesario
-          // control.reset(); // Limpiar valores si se cambia a estándar
+          // control.disable();
+          // control.clearValidators();
+          // // control.setValue(0, { emitEvent: false }); // Usar setValue para establecerlo en 0
+          // control.updateValueAndValidity({ emitEvent: false }); // Evitar re-trigger innecesario de valueChanges si no es necesario
+          // // control.reset(); // Limpiar valores si se cambia a estándar
         }
         control.updateValueAndValidity();
       }
