@@ -3,7 +3,7 @@
   (ngSubmit)="onSubmit()"
   class="order-creation-form"
 >
-  <h2 class="form-section-title">Editar pedido</h2>
+  <!-- <h2 class="form-section-title">Editar pedido</h2> -->
 
   <!-- Sección 1: Datos de Envío y Destinatario -->
   <mat-form-field appearance="outline" class="full-width driver-search-field">
@@ -150,9 +150,7 @@
         formControlName="delivery_address"
         placeholder="Ingresar lugar de entrega (Mínimo 6 caracteres)"
       />
-      <mat-hint align="end"
-        >No acepta caracteres especiales se borran automáticos</mat-hint
-      >
+
       <mat-error *ngIf="orderForm.get('delivery_address')?.hasError('required')"
         >Requerido</mat-error
       >
@@ -238,7 +236,7 @@
     </mat-form-field>
   </div>
 
-  <div class="add-order-button-container">
+  <!-- <div class="add-order-button-container">
     <button
       mat-flat-button
       class="btn-corp-primary"
@@ -247,5 +245,5 @@
     >
       <mat-icon>save</mat-icon> Guardar Cambios
     </button>
-  </div>
+  </div> -->
 </form>

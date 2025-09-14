@@ -25,7 +25,12 @@ import { MatMenuModule } from '@angular/material/menu'; // <--- AÑADIR MatMenuM
 import { MatDialog, MatDialogModule } from '@angular/material/dialog'; // <--- AÑADIR MatDialog
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar'; // <--- AÑADIR MatSnackBar
 import { MatDividerModule } from '@angular/material/divider';
-import { Order, Order_, OrderStatus } from '../../models/order.model'; // Asegúrate que OrderStatus esté aquí
+import {
+  Order,
+  Order_,
+  OrderStatus,
+  UpdateOrderRequestDto,
+} from '../../models/order.model'; // Asegúrate que OrderStatus esté aquí
 // Necesitarás crear estos componentes de diálogo más adelante
 import {
   ChangeStatusDialogComponent,
@@ -52,6 +57,10 @@ import {
   EditShippingCostDialogData,
 } from '../edit-shipping-cost-dialog/edit-shipping-cost-dialog.component';
 import { Router } from '@angular/router';
+import {
+  OrderEditionDialogComponent,
+  OrderEditionDialogData,
+} from '../order-edition-dialog/order-edition-dialog.component';
 
 @Component({
   selector: 'app-order-table',
@@ -118,6 +127,10 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     orderId: string | number;
     newShippingCost: number;
     observation: string;
+  }>();
+
+  @Output() orderChanged = new EventEmitter<{
+    order: UpdateOrderRequestDto;
   }>();
 
   displayedColumns: string[] = [
@@ -428,18 +441,35 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
 
   editOrder(order: Order_): void {
     if (!order.id) {
-      console.error(
-        'Order ID or current monto a cabrar is missing for editing.',
-        order
-      );
+      console.error('Order ID is missing for editing.', order);
       this.snackBar.open(
-        'No se puede modificar el monto a cabrar: faltan datos del pedido.',
+        'No se puede editar el pedido: faltan datos.',
         'Cerrar',
-        { duration: 3000 }
+        {
+          duration: 3000,
+        }
       );
       return;
     }
-    this.router.navigate(['/orders/edit', order.id]);
+
+    const dialogRef = this.dialog.open<
+      OrderEditionDialogComponent,
+      OrderEditionDialogData,
+      any
+    >(OrderEditionDialogComponent, {
+      width: '800px', // Adjust width as needed
+      data: { orderId: order.id.toString() },
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((updatedOrder) => {
+      if (updatedOrder) {
+        console.log('Order updated via dialog:', updatedOrder);
+        this.orderChanged.emit(updatedOrder);
+      } else {
+        console.log('Edición de pedido cancelada.');
+      }
+    });
   }
 
   openEditAmountToCollectModal(order: Order_): void {

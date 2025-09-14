@@ -30,6 +30,7 @@ import {
   Order_,
   OrderStatus,
   PaginatedOrdersResponse,
+  UpdateOrderRequestDto,
 } from '../../models/order.model';
 import { OrderFilterCriteria } from '../../models/order-filter.model';
 
@@ -328,7 +329,34 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
       // Puedes hacer algo con el 'result' si el modal devuelve datos al cerrarse
     });
   }
+  handleEditOrderChanged(event: { order: UpdateOrderRequestDto }): void {
+    console.log('OrderListPage: Status change requested', event);
+    this.fetchOrders();
 
+    // this.orderService
+    //   .updateOrderStatus(event.orderId, event.newStatus)
+    //   .subscribe({
+    //     next: (updatedOrder) => {
+    //       this.snackBar.open(
+    //         `Estado del pedido ${updatedOrder.code} actualizado a ${event.newStatus}.`,
+    //         'OK',
+    //         { duration: 3000, panelClass: ['success-snackbar'] }
+    //       );
+    //       this.fetchOrders();
+    //     },
+    //     error: (err) => {
+    //       this.snackBar.open(
+    //         `Error al actualizar estado: ${err.message || 'Intente de nuevo'}`,
+    //         'Cerrar',
+    //         { duration: 5000, panelClass: ['error-snackbar'] }
+    //       );
+    //       this.isLoading = false;
+    //     },
+    //     complete: () => {
+    //       this.isLoading = false;
+    //     },
+    //   });
+  }
   handleStatusChanged(event: {
     orderId: number | string;
     newStatus: OrderStatus;

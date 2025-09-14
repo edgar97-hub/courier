@@ -1,0 +1,31 @@
+<mat-toolbar color="primary">
+  <span>Editar Pedido: {{ order?.code }}</span>
+  <span class="spacer"></span>
+  <button mat-icon-button (click)="onCancel()" aria-label="Cerrar diálogo">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-toolbar>
+
+<mat-dialog-content class="mat-typography">
+  <app-order-edition-form
+    #orderEditionForm
+    [order]="order"
+    (orderSubmit)="onOrderUpdated($event)"
+    (formValidityChanged)="onFormValidityChanged($event)"
+  ></app-order-edition-form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" class="btn-corp-secondary">
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    class="btn-corp-primary"
+    (click)="orderEditionForm.onSubmit()"
+    [disabled]="!isFormValid"
+  >
+    Guardar Cambios
+  </button>
+</mat-dialog-actions>

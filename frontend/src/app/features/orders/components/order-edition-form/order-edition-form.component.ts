@@ -331,7 +331,7 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           console.log('Order updated successfully', response);
-          this.orderSubmit.emit(response); // Emit the updated order
+          this.orderSubmit.emit(response);
         },
         error: (error) => {
           console.error('Error updating order', error);
