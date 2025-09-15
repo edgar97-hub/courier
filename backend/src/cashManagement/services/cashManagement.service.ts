@@ -141,60 +141,6 @@ export class CashManagementService {
     return await this.cashMovementRepository.save(updatedMovement);
   }
 
-  // async findAllMovements(
-  //   query: QueryCashMovementDto,
-  //   pageNumber: number = 1,
-  //   pageSize: number = 10,
-  // ): Promise<{ movements: CashManagementEntity[]; total: number }> {
-  //   const where: any = {};
-
-  //   if (query.startDate && query.endDate) {
-  //     where.date = Between(query.startDate, query.endDate);
-  //   }
-
-  //   if (query.typeMovement) {
-  //     where.typeMovement = query.typeMovement;
-  //   }
-  //   if (query.paymentsMethod) {
-  //     where.paymentsMethod = query.paymentsMethod;
-  //   }
-  //   if (query.userId) {
-  //     where.user = { id: query.userId };
-  //   }
-
-  //   if (query.search) {
-  //     const searchQuery = query.search.toLowerCase();
-  //     const searchNumber = parseFloat(query.search);
-
-  //     Object.assign(where, [
-  //       { description: ILike(`%${searchQuery}%`) },
-  //       { paymentsMethod: ILike(`%${searchQuery}%`) },
-  //       { user: { username: ILike(`%${searchQuery}%`) } },
-  //       ...(isNaN(searchNumber) ? [] : [{ code: searchNumber }]),
-  //       ...(isNaN(searchNumber) ? [] : [{ amount: searchNumber }]),
-  //     ]);
-  //   }
-
-  //   const order: { [key: string]: 'ASC' | 'DESC' } = {};
-  //   if (query.orderBy && query.orderDirection) {
-  //     order[query.orderBy] = query.orderDirection.toUpperCase() as
-  //       | 'ASC'
-  //       | 'DESC';
-  //   } else {
-  //     order.code = 'DESC'; // Default sort
-  //   }
-
-  //   const [movements, total] = await this.cashMovementRepository.findAndCount({
-  //     where,
-  //     order,
-  //     relations: ['user'],
-  //     skip: (pageNumber - 1) * pageSize,
-  //     take: pageSize,
-  //   });
-
-  //   return { movements, total };
-  // }
-
   async findAllMovements(
     query: QueryCashMovementDto,
     pageNumber: number = 1,

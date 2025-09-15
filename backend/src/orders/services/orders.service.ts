@@ -9,7 +9,7 @@ import {
   Repository,
   UpdateResult,
 } from 'typeorm';
-import { OrderDTO, OrderUpdateDTO } from '../dto/order.dto';
+import { OrderDTO, UpdateOrderRequestDto } from '../dto/order.dto';
 import { OrdersEntity } from '../entities/orders.entity';
 import { DistrictsService } from 'src/districts/services/districts.service';
 import { DistrictsEntity } from 'src/districts/entities/districts.entity';
@@ -56,13 +56,6 @@ export class OrdersService {
     @InjectEntityManager()
     private entityManager: EntityManager,
   ) {}
-  public async createOrder(body: OrderDTO): Promise<OrdersEntity> {
-    try {
-      return await this.orderRepository.save(body);
-    } catch (error) {
-      throw ErrorManager.createSignatureError(error.message);
-    }
-  }
 
   public async updateOrderStatus(body: any, idUser: string): Promise<any> {
     let log: OrderLogEntity;
@@ -1062,52 +1055,12 @@ export class OrdersService {
     }
   }
 
-  public async findOrderById(id: string): Promise<OrdersEntity> {
+  public async findOrderById(id: string): Promise<any> {
     try {
-      const order: OrdersEntity = (await this.orderRepository
-        .createQueryBuilder('user')
-        .where({ id })
-        // .leftJoinAndSelect('user.projectsIncludes', 'projectsIncludes')
-        // .leftJoinAndSelect('projectsIncludes.project', 'project')
-        .getOne()) as any;
-      if (!order) {
-        throw new ErrorManager({
-          type: 'BAD_REQUEST',
-          message: 'No se encontro resultado',
-        });
-      }
-      return order;
-    } catch (error) {
-      throw ErrorManager.createSignatureError(error.message);
-    }
-  }
-
-  public async findBy({ key, value }: { key: keyof OrderDTO; value: any }) {
-    try {
-      const order: OrdersEntity = (await this.orderRepository
-        .createQueryBuilder('user')
-        .addSelect('user.password')
-        .where({ [key]: value })
-        .getOne()) as any;
-
-      return order;
-    } catch (error) {
-      throw ErrorManager.createSignatureError(error.message);
-    }
-  }
-
-  public async updateOrder(
-    body: OrderUpdateDTO,
-    id: string,
-  ): Promise<UpdateResult | undefined> {
-    try {
-      const order: UpdateResult = await this.orderRepository.update(id, body);
-      if (order.affected === 0) {
-        throw new ErrorManager({
-          type: 'BAD_REQUEST',
-          message: 'No se pudo actualizar',
-        });
-      }
+      const order = await this.orderRepository.findOne({
+        where: { id: id },
+        relations: ['company'],
+      });
       return order;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
@@ -1175,10 +1128,10 @@ export class OrdersService {
         where: { id },
       });
 
-      let action = 'REPROGRAMADO';
-      let previousValue = oldOrder.delivery_date;
-      let newValue = updatedOrder?.delivery_date;
-      let notes = body.reason;
+      // let action = 'REPROGRAMADO';
+      // let previousValue = oldOrder.delivery_date;
+      // let newValue = updatedOrder?.delivery_date;
+      // let notes = body.reason;
       // const log = await this.orderLogRepository.create({
       //   // order: { id },
       //   performedBy: { id: idUser },
@@ -1194,16 +1147,96 @@ export class OrdersService {
     }
   }
 
-  public async deleteOrder(id: string): Promise<DeleteResult | undefined> {
+  public async updateOrder(
+    id: string,
+    updateData: UpdateOrderRequestDto,
+    idUser: string,
+  ): Promise<OrdersEntity> {
     try {
-      const order: DeleteResult = await this.orderRepository.delete(id);
-      if (order.affected === 0) {
+      const orderToUpdate = await this.orderRepository.findOne({
+        where: { id },
+      });
+
+      if (!orderToUpdate) {
         throw new ErrorManager({
           type: 'BAD_REQUEST',
-          message: 'No se pudo borrar',
+          message: 'Order not found',
         });
       }
-      return order;
+      // Handle relations
+      if (updateData.company_id) {
+        orderToUpdate.company = { id: updateData.company_id } as UsersEntity;
+      }
+
+      let updatedOrder;
+      if (
+        orderToUpdate &&
+        (orderToUpdate.shipping_cost !== updateData.shipping_cost ||
+          orderToUpdate.delivery_district_name !==
+            updateData.delivery_district_name)
+      ) {
+        Object.assign(orderToUpdate, updateData);
+        updatedOrder = await this.orderRepository.save(orderToUpdate);
+
+        let log = await this.orderLogRepository.create({
+          order: { id: updatedOrder.id },
+          performedBy: { id: idUser },
+          action: 'MODIFICACIÓN DEL COSTO DE ENVÍO',
+          previousValue: orderToUpdate.shipping_cost?.toString(),
+          newValue: updatedOrder.shipping_cost?.toString(),
+          notes: updatedOrder.observation_shipping_cost_modification,
+        });
+        await this.orderLogRepository.save(log);
+
+        if (updatedOrder) {
+          const amount = updatedOrder.shipping_cost || 0;
+
+          let pagoDirectoCourier = 'Pago directo (Pago a COURIER)';
+          let pagoEfectivoCourier = 'Efectivo (Pago a COURIER)';
+          let pagoDirectoEmpresa = 'Pago directo (Pago a EMPRESA)';
+          let paymentMethod = 'Efectivo';
+
+          /**
+           * Cuando el monto a cobrar sea en efectivo,
+           * el registro del coste del servicio en la caja debe ser efectivo.
+           */
+          if (
+            updatedOrder.payment_method_for_collection?.toLowerCase() ===
+            'efectivo'
+          ) {
+            updatedOrder.payment_method_for_shipping_cost = pagoEfectivoCourier;
+          }
+
+          if (
+            updatedOrder.payment_method_for_shipping_cost ===
+            pagoEfectivoCourier
+          ) {
+            paymentMethod = 'Efectivo';
+          }
+          if (
+            updatedOrder.payment_method_for_shipping_cost === pagoDirectoCourier
+          ) {
+            paymentMethod = 'Yape/Transferencia BCP';
+          }
+
+          if (
+            updatedOrder.payment_method_for_shipping_cost === pagoDirectoEmpresa
+          ) {
+            paymentMethod = 'Yape/Transferencia BCP';
+          }
+          await this.cashManagementService.updateDueToOrderModification(
+            updatedOrder.id,
+            amount,
+            paymentMethod,
+          );
+        }
+      } else {
+        Object.assign(orderToUpdate, updateData);
+        delete orderToUpdate.observation_shipping_cost_modification;
+        updatedOrder = await this.orderRepository.save(orderToUpdate);
+      }
+
+      return updatedOrder;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }

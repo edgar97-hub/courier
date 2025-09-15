@@ -11,7 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 export interface RouteNoticeDialogData {
   title: string;
   message: string;
-  imageUrl?: string;
+  imageUrl: string;
   confirmButtonText?: string;
 }
 

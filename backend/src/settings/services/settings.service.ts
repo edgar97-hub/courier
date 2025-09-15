@@ -300,11 +300,6 @@ export class SettingsService {
     try {
       const setting = await this.userRepository.findOne({ where: {} });
 
-      let imageResponse;
-      if (setting?.global_notice_image_url) {
-        imageResponse = await fetch(setting.global_notice_image_url);
-      }
-
       if (setting?.global_notice_image_url) {
         console.log(`Fetching logo from: ${setting.global_notice_image_url}`);
         const imageResponse = await fetch(setting.global_notice_image_url);
@@ -315,6 +310,8 @@ export class SettingsService {
           const { pipeline } = await import('stream/promises');
           await pipeline(imageResponse.body, res);
         }
+      } else {
+        throw ErrorManager.createSignatureError('no existe imagen');
       }
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);

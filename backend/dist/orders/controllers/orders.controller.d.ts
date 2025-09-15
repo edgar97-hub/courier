@@ -1,4 +1,4 @@
-import { OrderDTO, OrderUpdateDTO } from '../dto/order.dto';
+import { UpdateOrderRequestDto } from '../dto/order.dto';
 import { OrdersService } from '../services/orders.service';
 import { Response } from 'express';
 import { ImportResult } from '../dto/import-result.dto';
@@ -7,13 +7,13 @@ export declare class OrdersController {
     private readonly ordersService;
     private readonly orderPdfGeneratorService;
     constructor(ordersService: OrdersService, orderPdfGeneratorService: OrderPdfGeneratorService);
-    register(body: OrderDTO): Promise<import("../entities/orders.entity").OrdersEntity>;
     batchCreateOrders(body: any, req: any): Promise<{
         success: boolean;
         message: string;
         createdOrders?: import("../entities/orders.entity").OrdersEntity[];
         errors?: any[];
     }>;
+    findOrderById(id: string): Promise<any>;
     importOrders(ordersData: any[], req: any): Promise<ImportResult | undefined>;
     findAllOrders(req: any, pageNumber?: number, pageSize?: number, sortField?: string, sortDirection?: string, startDate?: string, endDate?: string, status?: string, search_term?: string, delivery_date?: string): Promise<{
         items: any;
@@ -32,12 +32,10 @@ export declare class OrdersController {
         page_number: number;
         page_size: number;
     }>;
-    findOrderById(id: string): Promise<import("../entities/orders.entity").OrdersEntity>;
-    updateOrder(id: string, body: OrderUpdateDTO): Promise<import("typeorm").UpdateResult | undefined>;
     updateOrderStatus(body: any, req: any): Promise<any>;
     assignDriverToOrder(id: string, body: any, req: any): Promise<any>;
     rescheduleOrder(id: string, body: any, req: any): Promise<any>;
-    deleteOrder(id: string): Promise<import("typeorm").DeleteResult | undefined>;
+    updateOrder(id: string, updateData: UpdateOrderRequestDto, req: any): Promise<import("../entities/orders.entity").OrdersEntity>;
     getOrderPdfA4(orderId: string, req: Request, res: Response): Promise<void>;
     getOrderPdfA4Landscape(orderId: string, req: Request, res: Response): Promise<void>;
     getOrderPdfTicket80mm(orderId: string, req: Request, res: Response): Promise<void>;

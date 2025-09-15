@@ -1,5 +1,5 @@
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
-import { OrderDTO, OrderUpdateDTO } from '../dto/order.dto';
+import { Repository } from 'typeorm';
+import { UpdateOrderRequestDto } from '../dto/order.dto';
 import { OrdersEntity } from '../entities/orders.entity';
 import { DistrictsEntity } from 'src/districts/entities/districts.entity';
 import { ImportResult } from '../dto/import-result.dto';
@@ -13,7 +13,6 @@ export declare class OrdersService {
     private readonly cashManagementService;
     private entityManager;
     constructor(orderRepository: Repository<OrdersEntity>, orderLogRepository: Repository<OrderLogEntity>, districtsRepository: Repository<DistrictsEntity>, cashManagementService: CashManagementService, entityManager: EntityManager);
-    createOrder(body: OrderDTO): Promise<OrdersEntity>;
     updateOrderStatus(body: any, idUser: string): Promise<any>;
     batchCreateOrders(payload: any, idUser: any): Promise<{
         success: boolean;
@@ -55,15 +54,10 @@ export declare class OrdersService {
     getOrderByTrackingCode({ tracking_code, }: {
         tracking_code?: string;
     }): Promise<OrdersEntity | null>;
-    findOrderById(id: string): Promise<OrdersEntity>;
-    findBy({ key, value }: {
-        key: keyof OrderDTO;
-        value: any;
-    }): Promise<OrdersEntity>;
-    updateOrder(body: OrderUpdateDTO, id: string): Promise<UpdateResult | undefined>;
+    findOrderById(id: string): Promise<any>;
     assignDriverToOrder(body: any, id: string, idUser: string): Promise<any>;
     rescheduleOrder(body: any, id: string, idUser: string): Promise<any>;
-    deleteOrder(id: string): Promise<DeleteResult | undefined>;
+    updateOrder(id: string, updateData: UpdateOrderRequestDto, idUser: string): Promise<OrdersEntity>;
     dashboardOrders(req: any): Promise<any>;
     findOrdersByRegistrationDate({ pageNumber, pageSize, sortField, sortDirection, startDate, endDate, status, search_term, }: {
         pageNumber?: number;

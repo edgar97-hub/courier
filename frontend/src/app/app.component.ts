@@ -86,12 +86,31 @@ export class AppComponent implements OnInit {
         takeUntil(this.destroy$)
       )
       .subscribe((noticeData) => {
+        console.log('noticeData', noticeData);
         if (this.currentNoticeDialogRef) {
           this.currentNoticeDialogRef.close();
         }
+        // function isImageUrl(url: string) {
+        //   console.log(url);
+        //   return new Promise((resolve) => {
+        //     const img = new Image();
+        //     img.onload = () => resolve(true); // Image loaded successfully
+        //     img.onerror = () => resolve(false); // Image failed to load
+        //     img.src = url;
+        //   });
+        // }
         this.justShowedRouteNotice = true;
         this.openRouteNoticeDialog(noticeData);
         setTimeout(() => (this.justShowedRouteNotice = false), 500);
+
+        // isImageUrl(noticeData.imageUrl).then((isImage) => {
+        //   console.log('isImage', isImage);
+        //   if (isImage) {
+        //     this.justShowedRouteNotice = true;
+        //     this.openRouteNoticeDialog(noticeData);
+        //     setTimeout(() => (this.justShowedRouteNotice = false), 500);
+        //   }
+        // });
       });
 
     // let previousIsAuthenticated = this.appStore.isAuthenticated();
@@ -144,28 +163,46 @@ export class AppComponent implements OnInit {
   openRouteNoticeDialog(data: RouteNoticeDialogData): void {
     const isMobile = window.innerWidth < 768; // Detección simple de móvil
 
-    this.currentNoticeDialogRef = this.dialog.open<
-      RouteSpecificNoticeDialogComponent,
-      RouteNoticeDialogData
-    >(RouteSpecificNoticeDialogComponent, {
-      data: data,
-      width: isMobile ? '95vw' : '600px', // Más ancho en móvil
-      maxWidth: '95vw', // Consistente en móvil
-      height: '90vh', // Altura automática
-      // height: isMobile ? 'auto' : 'auto', // Altura automática
-      // maxHeight: isMobile ? '90vh' : '85vh', // Ligeramente diferente para móvil
-      disableClose: false,
-      autoFocus: 'dialog',
-      panelClass: [
-        'app-notice-dialog-panel',
-        isMobile ? 'mobile-fullscreen-dialog' : '',
-      ], // Clases condicionales
-    });
+    async function isImageUrlByContentTypeFetch(url: string): Promise<boolean> {
+      try {
+        const response = await fetch(url, { method: 'HEAD' });
+        const contentType = response.headers.get('Content-Type');
+        return contentType ? contentType.startsWith('image/') : false;
+      } catch (error) {
+        console.error('Error checking image URL:', error);
+        return false;
+      }
+    }
+    isImageUrlByContentTypeFetch(data.imageUrl).then((isImage) => {
+      console.log('isImage', isImage);
+      if (isImage) {
+        this.currentNoticeDialogRef = this.dialog.open<
+          RouteSpecificNoticeDialogComponent,
+          RouteNoticeDialogData
+        >(RouteSpecificNoticeDialogComponent, {
+          data: data,
+          width: isMobile ? '95vw' : '600px', // Más ancho en móvil
+          maxWidth: '95vw', // Consistente en móvil
+          height: '90vh', // Altura automática
+          // maxHeight: isMobile ? '90vh' : '85vh', // Ligeramente diferente para móvil
+          disableClose: false,
+          autoFocus: 'dialog',
+          panelClass: [
+            'app-notice-dialog-panel',
+            isMobile ? 'mobile-fullscreen-dialog' : '',
+          ],
+        });
 
-    this.currentNoticeDialogRef.afterClosed().subscribe((result) => {
-      console.log('Notice dialog closed, result:', result);
-      this.currentNoticeDialogRef = null;
+        this.currentNoticeDialogRef.afterClosed().subscribe((result) => {
+          console.log('Notice dialog closed, result:', result);
+          this.currentNoticeDialogRef = null;
+        });
+      }
     });
+    // let isImage = await isImageUrlByContentTypeFetch(data.imageUrl);
+    // console.log(isImage);
+    // if (isImage) {
+    // }
   }
   cleanRoute(route: string): string {
     let cleaned = route;

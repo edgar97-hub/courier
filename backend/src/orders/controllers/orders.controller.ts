@@ -31,9 +31,9 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { AccessLevelGuard } from 'src/auth/guards/access-level.guard';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { OrderDTO, OrderUpdateDTO } from '../dto/order.dto';
+import { OrderDTO, UpdateOrderRequestDto } from '../dto/order.dto';
 import { OrdersService } from '../services/orders.service';
-import { Response } from 'express'; // Asegúrate de importar Response de 'express'
+import { Response } from 'express';
 import { ImportResult } from '../dto/import-result.dto';
 import { OrderPdfGeneratorService } from '../services/order-pdf-generator.service';
 
@@ -46,15 +46,16 @@ export class OrdersController {
     private readonly orderPdfGeneratorService: OrderPdfGeneratorService,
   ) {}
 
-  @Post('create')
-  public async register(@Body() body: OrderDTO) {
-    return await this.ordersService.createOrder(body);
-  }
-
   @Post('batch-create')
   public async batchCreateOrders(@Body() body: any, @Request() req) {
     return await this.ordersService.batchCreateOrders(body, req.idUser);
   }
+
+  @Get('order/:id')
+  public async findOrderById(@Param('id', new ParseUUIDPipe()) id: string) {
+    return await this.ordersService.findOrderById(id);
+  }
+
   @Post('import-batch-json')
   @HttpCode(HttpStatus.OK)
   async importOrders(
@@ -154,7 +155,10 @@ export class OrdersController {
       status,
       search_term,
     };
-    return await this.ordersService.findOrdersByRegistrationDate(queryParams, req);
+    return await this.ordersService.findOrdersByRegistrationDate(
+      queryParams,
+      req,
+    );
   }
 
   @ApiParam({
@@ -167,22 +171,6 @@ export class OrdersController {
     status: 400,
     description: 'No se encontro resultado',
   })
-  @Get(':id')
-  public async findOrderById(@Param('id', new ParseUUIDPipe()) id: string) {
-    return await this.ordersService.findOrderById(id);
-  }
-
-  @ApiParam({
-    name: 'id',
-  })
-  @Put('edit/:id')
-  public async updateOrder(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() body: OrderUpdateDTO,
-  ) {
-    return await this.ordersService.updateOrder(body, id);
-  }
-
   @Post('update-order-status')
   public async updateOrderStatus(@Body() body: any, @Request() req) {
     return await this.ordersService.updateOrderStatus(body, req.idUser);
@@ -206,12 +194,13 @@ export class OrdersController {
     return await this.ordersService.rescheduleOrder(body, id, req.idUser);
   }
 
-  @ApiParam({
-    name: 'id',
-  })
-  @Delete('delete/:id')
-  public async deleteOrder(@Param('id', new ParseUUIDPipe()) id: string) {
-    return await this.ordersService.deleteOrder(id);
+  @Put('update-order/:id')
+  public async updateOrder(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() updateData: UpdateOrderRequestDto,
+    @Request() req,
+  ) {
+    return await this.ordersService.updateOrder(id, updateData, req.idUser);
   }
 
   @PublicAccess()

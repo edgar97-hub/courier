@@ -72,7 +72,7 @@ export class SettingsService {
       })
       .pipe(
         tap((savedSettings) => {
-          this.settingsSubject.next(savedSettings); // Actualiza el BehaviorSubject con la respuesta guardada
+          this.settingsSubject.next(savedSettings);
           console.log(
             'SettingsService: Settings saved and Subject updated',
             savedSettings

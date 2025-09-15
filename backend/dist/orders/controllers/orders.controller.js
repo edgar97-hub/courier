@@ -27,11 +27,11 @@ let OrdersController = class OrdersController {
         this.ordersService = ordersService;
         this.orderPdfGeneratorService = orderPdfGeneratorService;
     }
-    async register(body) {
-        return await this.ordersService.createOrder(body);
-    }
     async batchCreateOrders(body, req) {
         return await this.ordersService.batchCreateOrders(body, req.idUser);
+    }
+    async findOrderById(id) {
+        return await this.ordersService.findOrderById(id);
     }
     async importOrders(ordersData, req) {
         return await this.ordersService.importOrdersFromExcelData(ordersData, req.idUser);
@@ -83,12 +83,6 @@ let OrdersController = class OrdersController {
         };
         return await this.ordersService.findOrdersByRegistrationDate(queryParams, req);
     }
-    async findOrderById(id) {
-        return await this.ordersService.findOrderById(id);
-    }
-    async updateOrder(id, body) {
-        return await this.ordersService.updateOrder(body, id);
-    }
     async updateOrderStatus(body, req) {
         return await this.ordersService.updateOrderStatus(body, req.idUser);
     }
@@ -98,8 +92,8 @@ let OrdersController = class OrdersController {
     async rescheduleOrder(id, body, req) {
         return await this.ordersService.rescheduleOrder(body, id, req.idUser);
     }
-    async deleteOrder(id) {
-        return await this.ordersService.deleteOrder(id);
+    async updateOrder(id, updateData, req) {
+        return await this.ordersService.updateOrder(id, updateData, req.idUser);
     }
     async getOrderPdfA4(orderId, req, res) {
         try {
@@ -155,13 +149,6 @@ let OrdersController = class OrdersController {
 };
 exports.OrdersController = OrdersController;
 __decorate([
-    (0, common_1.Post)('create'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [order_dto_1.OrderDTO]),
-    __metadata("design:returntype", Promise)
-], OrdersController.prototype, "register", null);
-__decorate([
     (0, common_1.Post)('batch-create'),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
@@ -169,6 +156,13 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "batchCreateOrders", null);
+__decorate([
+    (0, common_1.Get)('order/:id'),
+    __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "findOrderById", null);
 __decorate([
     (0, common_1.Post)('import-batch-json'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
@@ -244,24 +238,6 @@ __decorate([
         status: 400,
         description: 'No se encontro resultado',
     }),
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], OrdersController.prototype, "findOrderById", null);
-__decorate([
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-    }),
-    (0, common_1.Put)('edit/:id'),
-    __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, order_dto_1.OrderUpdateDTO]),
-    __metadata("design:returntype", Promise)
-], OrdersController.prototype, "updateOrder", null);
-__decorate([
     (0, common_1.Post)('update-order-status'),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
@@ -288,15 +264,14 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "rescheduleOrder", null);
 __decorate([
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-    }),
-    (0, common_1.Delete)('delete/:id'),
+    (0, common_1.Put)('update-order/:id'),
     __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, order_dto_1.UpdateOrderRequestDto, Object]),
     __metadata("design:returntype", Promise)
-], OrdersController.prototype, "deleteOrder", null);
+], OrdersController.prototype, "updateOrder", null);
 __decorate([
     (0, public_decorator_1.PublicAccess)(),
     (0, common_1.Get)(':id/pdf-a4'),

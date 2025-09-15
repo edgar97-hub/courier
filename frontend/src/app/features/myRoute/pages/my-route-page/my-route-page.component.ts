@@ -268,10 +268,11 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
       });
   }
 
-  // --- FIN DE LA ARQUITECTURA DE MAPA ---
-
   navigateToStop(stopIndex: number): void {
     if (!this.selectedRoute || !this.selectedRoute.stops) return;
+
+    this.geolocationTrackingService.forceUpdateLocation();
+
     const sortedStops = this.selectedRoute.stops
       .slice()
       .sort((a, b) => a.sequenceOrder - b.sequenceOrder);
@@ -352,6 +353,7 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
       );
       return;
     }
+    this.geolocationTrackingService.forceUpdateLocation();
 
     const dialogRef = this.dialog.open<
       ChangeStatusDialogComponent,

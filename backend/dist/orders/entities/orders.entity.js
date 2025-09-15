@@ -121,7 +121,9 @@ __decorate([
     __metadata("design:type", users_entity_1.UsersEntity)
 ], OrdersEntity.prototype, "assigned_driver", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => users_entity_1.UsersEntity, (user) => user.companyOrdersIncludes),
+    (0, typeorm_1.ManyToOne)(() => users_entity_1.UsersEntity, (user) => user.companyOrdersIncludes, {
+        nullable: true,
+    }),
     (0, typeorm_1.JoinColumn)({ name: 'company_id' }),
     __metadata("design:type", users_entity_1.UsersEntity)
 ], OrdersEntity.prototype, "company", void 0);

@@ -115,4 +115,32 @@ export class GeolocationTrackingService {
       });
     }
   }
+
+  public forceUpdateLocation(): void {
+    if (!this.currentRouteId || !navigator.geolocation) {
+      console.warn(
+        'No se puede forzar la actualización: no hay ruta activa o no hay geolocalización.'
+      );
+      return;
+    }
+
+    console.log('Forzando actualización de ubicación inmediata...');
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log('Ubicación forzada obtenida.');
+        this.onPositionUpdate(position); // Reutilizamos el método de envío
+        this.snackBar.open('Ubicación actualizada.', 'OK', { duration: 1500 });
+      },
+      (error) => {
+        console.error('Error en la actualización forzada:', error.message);
+        this.snackBar.open(
+          `No se pudo obtener la ubicación: ${error.message}`,
+          'Cerrar',
+          { duration: 3000 }
+        );
+      },
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+    );
+  }
 }

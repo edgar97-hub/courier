@@ -1,36 +1,16 @@
-<div
-  class="notice-dialog-wrapper"
-  cdkDrag
-  cdkDragRootElement=".cdk-overlay-pane"
-  cdkDragHandle=".dialog-header-draggable"
->
-  <!-- <div mat-dialog-title class="dialog-header dialog-header-draggable">
-    <span>{{ data.title || "Aviso Importante" }}</span>
-    <button
-      mat-icon-button
-      (click)="onClose()"
-      class="close-button"
-      aria-label="Cerrar aviso"
-    >
-      <mat-icon>close</mat-icon>
-    </button>
-  </div> -->
-
+<div class="notice-dialog-wrapper">
   <div class="dialog-content">
-    @if (data.imageUrl) {
     <img [src]="data.imageUrl" class="notice-image" />
-    }
   </div>
-  <!-- <mat-dialog-content class="dialog-content"> -->
-  <!-- @if (data.imageUrl) {
-  <img [src]="data.imageUrl" class="notice-image" />
-  } -->
-  <!-- <p [innerHTML]="data.message"></p> -->
-  <!-- Usar innerHTML si el mensaje puede tener formato HTML básico -->
-  <!-- </mat-dialog-content> -->
 
-  <!-- <mat-dialog-actions align="center"> -->
-  <div style="display: flex; align-items: center;justify-content: center;padding-top: 5px;">
+  <div
+    style="
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-top: 5px;
+    "
+  >
     <button
       mat-flat-button
       color="primary"
@@ -40,5 +20,4 @@
       {{ data.confirmButtonText || "Comprendo" }}
     </button>
   </div>
-  <!-- </mat-dialog-actions> -->
 </div>

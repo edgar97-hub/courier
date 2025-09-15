@@ -20,8 +20,10 @@
       </div>
     </mat-card-content>
 
-    <!-- ¡NUEVO INDICADOR DE ESTADO DE SEGUIMIENTO! -->
-    <div class="tracking-status-bar" *ngIf="(geolocationTrackingService.isTracking$ | async)">
+    <div
+      class="tracking-status-bar"
+      *ngIf="geolocationTrackingService.isTracking$ | async"
+    >
       <mat-icon>location_on</mat-icon>
       <span>Compartiendo ubicación en tiempo real</span>
     </div>

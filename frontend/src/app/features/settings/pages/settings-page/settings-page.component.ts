@@ -25,10 +25,9 @@ import {
   PromotionalSetItem,
 } from '../../models/app-settings.interface';
 
-import { MatDividerModule } from '@angular/material/divider'; // Para separar los sets
-import { MatSlideToggleModule } from '@angular/material/slide-toggle'; // Para isActive
-
-import { v4 as uuidv4 } from 'uuid'; // Para generar IDs únicos para los sets
+import { MatDividerModule } from '@angular/material/divider';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { v4 as uuidv4 } from 'uuid';
 
 @Component({
   selector: 'app-settings-page',
@@ -43,8 +42,8 @@ import { v4 as uuidv4 } from 'uuid'; // Para generar IDs únicos para los sets
     MatIconModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
-    MatDividerModule, // Añadido
-    MatSlideToggleModule, // Añadido
+    MatDividerModule,
+    MatSlideToggleModule,
   ],
   templateUrl: './settings-page.component.html',
   styleUrls: ['./settings-page.component.scss'],
@@ -168,14 +167,12 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
           );
           // Luego, parchear el resto del formulario
           this.settingsForm.patchValue({
-            ...loadedSettings, // Parchea campos comunes
-            promotional_sets: [], // Evita que patchValue intente parchear el FormArray directamente aquí
+            ...loadedSettings,
+            promotional_sets: [],
           });
 
-          // ... (actualización de previews para logo, background, etc. como antes) ...
           this.currentLogoUrl = loadedSettings.logo_url;
           this.logoPreviewUrl = loadedSettings.logo_url;
-          // ... (resto de las previews)
           this.currentBackgroundImageUrl = loadedSettings.background_image_url;
           this.backgroundImagePreviewUrl = loadedSettings.background_image_url;
           this.currentRatesImageUrl = loadedSettings.rates_image_url;
@@ -187,42 +184,6 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
             loadedSettings.global_notice_image_url;
           this.globalNoticeImagePreviewUrl =
             loadedSettings.global_notice_image_url;
-          // if (loadedSettings.length) {
-          //   this.settingsForm.patchValue({
-          //     ...loadedSettings,
-          //     id: loadedSettings[0].id,
-          //     ruc: loadedSettings[0].ruc,
-          //     business_name: loadedSettings[0].business_name,
-          //     address: loadedSettings[0].address,
-          //     phone_number: loadedSettings[0].phone_number,
-
-          //     logo_url: loadedSettings[0].logo_url,
-          //     terms_conditions_url: loadedSettings[0].terms_conditions_url,
-          //     background_image_url: loadedSettings[0].background_image_url,
-          //     rates_image_url: loadedSettings[0].rates_image_url,
-          //     coverage_map_url: loadedSettings[0].coverage_map_url,
-          //   });
-          //   this.currentLogoUrl = loadedSettings[0].logo_url;
-          //   this.logoPreviewUrl = loadedSettings[0].logo_url;
-
-          //   this.currentBackgroundImageUrl =
-          //     loadedSettings[0].background_image_url;
-          //   this.backgroundImagePreviewUrl =
-          //     loadedSettings[0].background_image_url;
-
-          //   this.currentRatesImageUrl = loadedSettings[0].rates_image_url;
-          //   this.ratesImagePreviewUrl = loadedSettings[0].rates_image_url;
-
-          //   this.currentExcelImportTemplateUrl =
-          //     loadedSettings[0].excel_import_template_url;
-
-          //   this.currentTermsUrl = loadedSettings[0].terms_conditions_url;
-
-          //   this.currentGlobalNoticeImageUrl =
-          //     loadedSettings[0].global_notice_image_url;
-          //   this.globalNoticeImagePreviewUrl =
-          //     loadedSettings[0].global_notice_image_url;
-          // }
         },
         error: (err) => {
           this.snackBar.open(
@@ -394,6 +355,13 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
       this.selectedGlobalNoticeImageFile = null;
       this.globalNoticeImagePreviewUrl = this.currentGlobalNoticeImageUrl;
     }
+  }
+
+  removeGlobalNoticeImage(): void {
+    this.selectedGlobalNoticeImageFile = null;
+    this.globalNoticeImagePreviewUrl = 'assets/images/placeholder-image.png'; // Or a default placeholder
+    this.settingsForm.get('global_notice_image_url')?.setValue(null); // Clear the form control value
+    this.settingsForm.get('global_notice_image_url')?.markAsDirty(); // Mark as dirty to ensure save
   }
 
   onTermsFileSelected(event: Event): void {
@@ -625,6 +593,8 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
         this.isSaving = false;
         return;
       }
+    } else {
+      formValues.global_notice_image_url = '';
     }
     this.settingsService
       .saveSettings(formValues)
@@ -640,6 +610,8 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
             panelClass: ['success-snackbar'],
           });
           this.buildForm(savedSettings); // Reconstruye el form con los datos guardados (incluye promotional_sets)
+          // window.location.reload();
+
           // this.settingsForm.patchValue(savedSettings);
           this.settingsForm.markAsPristine();
 

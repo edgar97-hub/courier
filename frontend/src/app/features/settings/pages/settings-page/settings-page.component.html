@@ -282,6 +282,20 @@
                 : "Subir nueva imagen"
             }}
           </button>
+          <button
+            mat-stroked-button
+            type="button"
+            class="remove-button btn-corp-warn btn-corp-primary"
+            (click)="removeGlobalNoticeImage()"
+            *ngIf="
+              globalNoticeImagePreviewUrl &&
+              globalNoticeImagePreviewUrl !==
+                'assets/images/placeholder-image.png'
+            "
+          >
+            <mat-icon>delete_forever</mat-icon>
+            Quitar imagen
+          </button>
           <p class="mat-caption hint">Recomendado: PNG, JPG, SVG. Max 2MB.</p>
         </div>
 

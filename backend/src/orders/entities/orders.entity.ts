@@ -93,7 +93,9 @@ export class OrdersEntity extends BaseEntity {
   @JoinColumn({ name: 'assigned_driver_id' })
   assigned_driver: UsersEntity;
 
-  @ManyToOne(() => UsersEntity, (user) => user.companyOrdersIncludes)
+  @ManyToOne(() => UsersEntity, (user) => user.companyOrdersIncludes, {
+    nullable: true,
+  })
   @JoinColumn({ name: 'company_id' })
   company: UsersEntity;
 
