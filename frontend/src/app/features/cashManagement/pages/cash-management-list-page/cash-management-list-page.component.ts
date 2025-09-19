@@ -67,7 +67,7 @@ import { AppStore } from '../../../../app.store';
     MatNativeDateModule,
     ReactiveFormsModule,
     MatProgressSpinnerModule,
-    ConfirmDialogComponent, // Correctly imported as a standalone component
+    ConfirmDialogComponent, 
     MatMenuModule,
   ],
   templateUrl: './cash-management-list-page.component.html',

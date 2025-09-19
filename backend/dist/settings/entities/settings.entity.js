@@ -103,6 +103,10 @@ __decorate([
     (0, typeorm_1.Column)({ nullable: false, type: 'float', default: 0.0 }),
     __metadata("design:type", Number)
 ], SettingsEntity.prototype, "volumetric_factor", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], SettingsEntity.prototype, "googleMapsApiKey", void 0);
 exports.SettingsEntity = SettingsEntity = __decorate([
     (0, typeorm_1.Entity)({ name: 'settings' })
 ], SettingsEntity);

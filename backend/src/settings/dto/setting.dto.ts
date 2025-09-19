@@ -142,7 +142,7 @@ export class SettingUpdateDTO {
 
   @IsOptional()
   @IsArray()
-  @ValidateNested({ each: true }) // Valida cada objeto en el array
+  @ValidateNested({ each: true })
   @ArrayMaxSize(3, {
     message: 'Se permite un máximo de 3 conjuntos promocionales.',
   })
@@ -175,4 +175,7 @@ export class SettingUpdateDTO {
 
   @ApiProperty()
   volumetric_factor: number;
+
+  @ApiProperty()
+  googleMapsApiKey: string;
 }

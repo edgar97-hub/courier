@@ -1,4 +1,6 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { SettingsService } from '../../features/settings/services/settings.service';
+import { firstValueFrom } from 'rxjs';
 
 // Declaramos una variable global para gestionar el estado de la carga.
 // Esto previene que se intente cargar el script múltiples veces si el servicio se instancia de nuevo.
@@ -12,6 +14,7 @@ declare global {
 export class DirectionsService {
   // La instancia del servicio de direcciones se inicializará después de que la API esté cargada.
   private directionsService: google.maps.DirectionsService | undefined;
+  private settingsService = inject(SettingsService);
 
   // Esta promesa se resolverá cuando tanto la API esté cargada como el servicio interno esté inicializado.
   private readyPromise: Promise<void>;
@@ -20,25 +23,33 @@ export class DirectionsService {
     // El constructor inicia el proceso de carga y preparación.
     this.readyPromise = this.loadApiAndInitialize();
   }
+  ngOnInit(): void {}
 
   /**
    * Método privado que maneja la carga del script de Google Maps y la inicialización
    * del servicio de direcciones. Es idempotente, lo que significa que solo cargará el script una vez.
    */
-  private loadApiAndInitialize(): Promise<void> {
-    // Usamos una promesa global en el objeto 'window' para asegurar que el script se cargue solo una vez
-    // en toda la aplicación, sin importar cuántos servicios intenten cargarlo.
+  async loadApiAndInitialize(): Promise<void> {
+    let loadedSettings: any = await firstValueFrom(
+      this.settingsService.loadSettings()
+    );
+
     if (!window.googleMapsApiPromise) {
       window.googleMapsApiPromise = new Promise<void>((resolve, reject) => {
-        // Comprobar si el script ya fue inyectado por otro medio.
         if (window.google && window.google.maps) {
           resolve();
           return;
         }
-
+        loadedSettings =
+          loadedSettings && loadedSettings.length > 0
+            ? loadedSettings[0]
+            : null;
+        console.log(loadedSettings);
+        if (!loadedSettings) {
+          return;
+        }
         const script = document.createElement('script');
-        // ¡IMPORTANTE! Obtiene la API Key de tus archivos de entorno.
-        let googleMapsApiKey = 'AIzaSyBhUbLFbasymqM2cMgC3inBK7OeGkAkO3M';
+        let googleMapsApiKey = loadedSettings.googleMapsApiKey;
         script.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places`;
         script.async = true;
         script.defer = true;

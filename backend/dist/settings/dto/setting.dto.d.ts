@@ -48,4 +48,5 @@ export declare class SettingUpdateDTO {
     maximum_measurements_height: number;
     maximum_measurements_weight: number;
     volumetric_factor: number;
+    googleMapsApiKey: string;
 }

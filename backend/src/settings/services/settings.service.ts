@@ -107,7 +107,6 @@ export class SettingsService {
           id: set.id || Date.now().toString(),
         }));
       }
-
       const user = await this.userRepository.update(id, body);
       if (user.affected === 0) {
         throw new ErrorManager({

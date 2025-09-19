@@ -26,7 +26,6 @@ exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
             config_1.ConfigModule.forRoot({
-                envFilePath: `.${process.env.NODE_ENV}.env`,
                 isGlobal: true,
             }),
             typeorm_1.TypeOrmModule.forRoot({ ...data_source_1.DataSourceConfig }),

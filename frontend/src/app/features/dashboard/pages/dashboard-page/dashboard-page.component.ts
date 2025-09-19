@@ -27,8 +27,8 @@ import { ImageSliderComponent } from '../../components/image-slider/image-slider
     KpiCardComponent,
     MatGridListModule,
     MatProgressSpinnerModule,
-    MatButtonModule, // Añadido
-    MatIconModule, // Añadido
+    MatButtonModule,  
+    MatIconModule,  
     MatCardModule,
     ImageSliderComponent,
   ],

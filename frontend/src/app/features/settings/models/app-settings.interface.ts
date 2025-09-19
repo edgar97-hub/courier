@@ -24,6 +24,7 @@ export interface AppSettings {
   coverage_map_url: string | null;
   global_notice_image_url: string | null;
   promotional_sets: PromotionalSetItem[];
+  googleMapsApiKey?: string;
 }
 
 // Valor inicial para el formulario, útil si la API no devuelve nada la primera vez

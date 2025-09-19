@@ -51,29 +51,6 @@ export class SettingsEntity extends BaseEntity {
   })
   promotional_sets: PromotionalSetItem[];
 
-  //   @Column({
-  //     type: 'jsonb',
-  //     array: false,
-  //     default: () => "'[]'",
-  //     nullable: false,
-  //   })
-  //   public usstandard_measurementsers!: Array<{ id: string }>;
-  // @Column('simple-json', { nullable: true })
-  // usstandard_measurementsers: {
-  //   width: string;
-  //   height: string;
-  //   length: string;
-  //   weight: string;
-  // };
-
-  // @Column('simple-json', { nullable: true })
-  // maximum_measurements: {
-  //   width: string;
-  //   height: string;
-  //   length: string;
-  //   weight: string;
-  // };
-
   @Column({ nullable: false, type: 'float', default: 0.0 })
   standard_measurements_width: number;
 
@@ -100,4 +77,7 @@ export class SettingsEntity extends BaseEntity {
 
   @Column({ nullable: false, type: 'float', default: 0.0 })
   volumetric_factor: number;
+
+  @Column({ nullable: true })
+  googleMapsApiKey: string;
 }

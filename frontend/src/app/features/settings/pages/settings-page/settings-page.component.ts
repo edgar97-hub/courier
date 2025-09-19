@@ -101,12 +101,13 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
       logo_url: [settings.logo_url],
       terms_conditions_url: [settings.terms_conditions_url],
       global_notice_image_url: [settings.global_notice_image_url],
+      googleMapsApiKey: [settings.googleMapsApiKey],
 
       background_image_url: [settings.background_image_url],
       rates_image_url: [settings.rates_image_url],
       coverage_map_url: [settings.coverage_map_url],
       promotional_sets: this.fb.array(
-        settings.promotional_sets.map((set) =>
+        settings.promotional_sets?.map((set) =>
           this.createPromotionalSetGroup(set)
         )
       ),
@@ -392,6 +393,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
 
     this.isSaving = true;
     let formValues = { ...this.settingsForm.value } as AppSettings;
+    console.log(formValues);
 
     // Subir imágenes de los promotional_sets una por una
     const promotionalSetsData: PromotionalSetItem[] = [];
@@ -610,34 +612,12 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
             panelClass: ['success-snackbar'],
           });
           this.buildForm(savedSettings); // Reconstruye el form con los datos guardados (incluye promotional_sets)
-          // window.location.reload();
-
-          // this.settingsForm.patchValue(savedSettings);
           this.settingsForm.markAsPristine();
-
-          // this.currentLogoUrl = savedSettings.logo_url;
-          // this.logoPreviewUrl = savedSettings.logo_url;
           this.selectedLogoFile = null;
-
-          // this.currentBackgroundImageUrl = savedSettings.background_image_url;
-          // this.backgroundImagePreviewUrl = savedSettings.background_image_url;
           this.selectedBackgroundImageFile = null;
-
-          // this.currentRatesImageUrl = savedSettings.rates_image_url;
-          // this.ratesImagePreviewUrl = savedSettings.rates_image_url;
           this.selectedRatesImageFile = null;
-
-          // this.currentExcelImportTemplateUrl =
-          //   savedSettings.excel_import_template_url;
           this.selectedExcelImportTemplateFile = null;
-
-          // this.currentTermsUrl = savedSettings.terms_conditions_url;
           this.selectedTermsFile = null;
-
-          // this.currentGlobalNoticeImageUrl =
-          //   savedSettings.global_notice_image_url;
-          // this.globalNoticeImagePreviewUrl =
-          //   savedSettings.global_notice_image_url;
           this.selectedGlobalNoticeImageFile = null;
         },
         error: (err) => {

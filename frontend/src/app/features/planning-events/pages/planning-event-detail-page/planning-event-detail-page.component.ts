@@ -233,27 +233,6 @@ export class PlanningEventDetailPageComponent implements OnInit, OnDestroy {
       stopover: true,
     }));
 
-    // this.directionsService
-    //   .getDirections(origin, destination, waypoints)
-    //   .then((response) => {
-    //     if (response.routes.length > 0) {
-    //       const path = response.routes.overview_path.map(
-    //         (p: google.maps.LatLng) => ({ lat: p.lat(), lng: p.lng() })
-    //       );
-    //       this.plannedRoutePolyline = {
-    //         path,
-    //         strokeColor: '#4285F4',
-    //         strokeWeight: 5,
-    //         strokeOpacity: 0.7,
-    //       };
-
-    //       // Ajustar el mapa a la polilínea completa
-    //       if (this.map && this.map.googleMap) {
-    //         this.map.googleMap.fitBounds(response.routes.bounds || bounds);
-    //       }
-    //     }
-    //   });
-
     this.directionsService
       .getDirections(origin, destination, waypoints)
       .then((response) => {

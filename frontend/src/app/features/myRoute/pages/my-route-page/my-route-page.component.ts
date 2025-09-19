@@ -143,20 +143,14 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
     if (this.routesForSelectedDate && this.routesForSelectedDate[index]) {
       this.selectedRoute = this.routesForSelectedDate[index];
       this.updateMapDisplay();
-      // ¡INICIAR SEGUIMIENTO PARA LA NUEVA RUTA SELECCIONADA!
       this.startGeolocationTracking();
     }
   }
 
-  /**
-   * Inicia el seguimiento de geolocalización para la ruta actualmente seleccionada.
-   */
   private startGeolocationTracking(): void {
-    // Primero, detenemos cualquier seguimiento anterior para evitar duplicados
     this.geolocationTrackingService.stopTracking();
 
     if (this.selectedRoute && this.selectedRoute.id) {
-      // Solo iniciamos si la ruta tiene paradas pendientes
       const hasPendingStops = this.selectedRoute.stops.some(
         (s) => s.status === StopStatus.PENDING
       );
@@ -280,16 +274,16 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
       console.error('Índice de parada inválido');
       return;
     }
-    let origin: string;
-    if (stopIndex === 0) {
-      origin = `${this.selectedRoute.latitudeStartPoint},${this.selectedRoute.longitudeStartPoint}`;
-    } else {
-      const previousStop = sortedStops[stopIndex - 1];
-      origin = `${previousStop.latitude},${previousStop.longitude}`;
-    }
+    // let origin: string;
+    // if (stopIndex === 0) {
+    //   origin = `${this.selectedRoute.latitudeStartPoint},${this.selectedRoute.longitudeStartPoint}`;
+    // } else {
+    //   const previousStop = sortedStops[stopIndex - 1];
+    //   origin = `${previousStop.latitude},${previousStop.longitude}`;
+    // }
     const currentStop = sortedStops[stopIndex];
     const destination = `${currentStop.latitude},${currentStop.longitude}`;
-    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${destination}&destination=${origin}&travelmode=driving&dir_action=navigate`;
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving&dir_action=navigate`;
     window.open(mapsUrl, '_blank');
   }
 

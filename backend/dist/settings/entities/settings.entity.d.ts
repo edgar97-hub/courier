@@ -29,4 +29,5 @@ export declare class SettingsEntity extends BaseEntity {
     maximum_measurements_length: number;
     maximum_measurements_weight: number;
     volumetric_factor: number;
+    googleMapsApiKey: string;
 }

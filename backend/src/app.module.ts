@@ -16,7 +16,6 @@ import { PlanningEventModule } from './planningEvents/planning-events.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `.${process.env.NODE_ENV}.env`,
       isGlobal: true,
     }),
     TypeOrmModule.forRoot({ ...DataSourceConfig }),

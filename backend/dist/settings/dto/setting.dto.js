@@ -221,4 +221,8 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", Number)
 ], SettingUpdateDTO.prototype, "volumetric_factor", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], SettingUpdateDTO.prototype, "googleMapsApiKey", void 0);
 //# sourceMappingURL=setting.dto.js.map
