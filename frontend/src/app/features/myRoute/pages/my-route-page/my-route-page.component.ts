@@ -106,7 +106,7 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
       day: '2-digit',
     });
     this.isLoading = true;
-    this.selectedRoute = null;
+    // this.selectedRoute = null;
 
     this.routeService.getMyRoutesByDate(dateString).subscribe({
       next: (data: any[]) => {
@@ -444,6 +444,7 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
   startPolling(): void {
     this.stopPolling();
     this.pollingInterval = setInterval(() => this.loadRoutesForDate(), 20000);
+    // this.pollingInterval = setInterval(() => this.loadRoutesForDate(), 2000);
   }
 
   stopPolling(): void {
