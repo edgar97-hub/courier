@@ -106,6 +106,10 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], OrderDTO.prototype, "tracking_code", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], OrderDTO.prototype, "isExpress", void 0);
 class UpdateOrderRequestDto extends (0, swagger_2.PartialType)(OrderDTO) {
 }
 exports.UpdateOrderRequestDto = UpdateOrderRequestDto;

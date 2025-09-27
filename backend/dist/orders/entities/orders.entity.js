@@ -151,6 +151,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => stop_entity_1.Stop, (stop) => stop.order),
     __metadata("design:type", Array)
 ], OrdersEntity.prototype, "stops", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'bool', default: false }),
+    __metadata("design:type", Boolean)
+], OrdersEntity.prototype, "isExpress", void 0);
 exports.OrdersEntity = OrdersEntity = __decorate([
     (0, typeorm_1.Entity)({ name: 'orders' })
 ], OrdersEntity);

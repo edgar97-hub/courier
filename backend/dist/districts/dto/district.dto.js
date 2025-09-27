@@ -41,6 +41,16 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", Boolean)
 ], DistrictDTO.prototype, "isStandard", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], DistrictDTO.prototype, "isExpress", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], DistrictDTO.prototype, "surchargePercentage", void 0);
 class DistrictUpdateDTO {
 }
 exports.DistrictUpdateDTO = DistrictUpdateDTO;
@@ -70,4 +80,14 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", Boolean)
 ], DistrictUpdateDTO.prototype, "isStandard", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], DistrictUpdateDTO.prototype, "isExpress", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], DistrictUpdateDTO.prototype, "surchargePercentage", void 0);
 //# sourceMappingURL=district.dto.js.map

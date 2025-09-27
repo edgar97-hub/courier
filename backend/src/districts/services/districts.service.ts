@@ -53,7 +53,11 @@ export class DistrictsService {
       const [items, total] = await query.getManyAndCount();
 
       return {
-        items,
+        items: items.map((item) => ({
+          ...item,
+          montoConRecargo:
+            (item.price / 100) * item.surchargePercentage + item.price,
+        })),
         total_count: total,
         page_number: pageNumber,
         page_size: pageSize,
@@ -65,8 +69,10 @@ export class DistrictsService {
 
   public async findDistricts2({
     search_term = '',
+    is_express,
   }: {
     search_term?: string;
+    is_express?: boolean;
   }): Promise<DistrictsEntity[]> {
     try {
       const queryBuilder = this.userRepository.createQueryBuilder('district');
@@ -77,15 +83,37 @@ export class DistrictsService {
         });
       }
 
-      let users: DistrictsEntity[] = await queryBuilder.getMany();
-      users = users.filter((item) => item.isStandard);
-      users = users.map((item) => {
+      let districts: DistrictsEntity[] = await queryBuilder.getMany();
+      if (is_express) {
+        districts = districts.filter((item) => {
+          if (item.isStandard && item.isExpress) {
+            return true;
+          }
+          return false;
+        });
+      } else {
+        districts = districts.filter((item) => {
+          if (item.isStandard) {
+            return true;
+          }
+          return false;
+        });
+      }
+
+      districts = districts.map((item) => {
+        let name_and_price = item.name + ' - S/ ' + item.price.toFixed(2);
+        if (is_express && item.isStandard && item.isExpress) {
+          item.price =
+            (item.price / 100) * item.surchargePercentage + item.price;
+          name_and_price =
+            item.name + ' - S/ ' + item.price.toFixed(2) + ' Express';
+        }
         return {
           ...item,
-          name_and_price: item.name + ' - S/ ' + item.price.toFixed(2),
+          name_and_price: name_and_price,
         };
       });
-      return users;
+      return districts;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
@@ -98,14 +126,33 @@ export class DistrictsService {
     }
   }
 
-  public async findUsers(): Promise<DistrictsEntity[]> {
+  public async findUsers(is_express?: boolean): Promise<DistrictsEntity[]> {
     try {
-      const users: DistrictsEntity[] = await this.userRepository.find({
+      let districts: DistrictsEntity[] = await this.userRepository.find({
         order: {
           code: 'ASC',
         },
       });
-      return users;
+
+      if (is_express) {
+        districts = districts.filter((item) => {
+          if (item.isExpress) {
+            return true;
+          }
+          return false;
+        });
+      }
+
+      districts = districts.map((item) => {
+        if (is_express && item.isExpress) {
+          item.price =
+            (item.price / 100) * item.surchargePercentage + item.price;
+        }
+        return {
+          ...item,
+        };
+      });
+      return districts;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
@@ -116,8 +163,6 @@ export class DistrictsService {
       const user: DistrictsEntity = (await this.userRepository
         .createQueryBuilder('districts')
         .where({ id })
-        // .leftJoinAndSelect('user.projectsIncludes', 'projectsIncludes')
-        // .leftJoinAndSelect('projectsIncludes.project', 'project')
         .getOne()) as any;
       if (!user) {
         throw new ErrorManager({

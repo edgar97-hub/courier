@@ -377,6 +377,7 @@ export class OrdersService {
           orderToCreate.user = { id: idUser } as UsersEntity;
           orderToCreate.company = { id: orderDto.company_id } as UsersEntity;
           orderToCreate.tracking_code = await generateTrackingCode();
+          orderToCreate.isExpress = orderDto.isExpress;
 
           const savedOrder = await queryRunner.manager.save(
             OrdersEntity,
@@ -836,8 +837,12 @@ export class OrdersService {
 
       if (role === ROLES.COMPANY) {
         query.andWhere('company.id = :idUser', { idUser });
-      } else if (role === ROLES.MOTORIZED && req.query.my_orders === 'true') {
+      } else if (role === ROLES.MOTORIZED && req.query.my_orders) {
         query.andWhere('assigned_driver.id = :idUser', { idUser });
+      }
+
+      if (req.query.isExpress) {
+        query.andWhere('order.isExpress = :isExpress', { isExpress: true });
       }
 
       if (status) {

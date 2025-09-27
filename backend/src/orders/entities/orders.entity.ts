@@ -119,4 +119,7 @@ export class OrdersEntity extends BaseEntity {
 
   @OneToMany(() => Stop, (stop) => stop.order)
   stops: Stop[];
+
+  @Column({ type: 'bool', default: false })
+  isExpress: boolean;
 }

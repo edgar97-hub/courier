@@ -33,13 +33,21 @@ __decorate([
     __metadata("design:type", Number)
 ], DistrictsEntity.prototype, "weight_to", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'bool', default: false }),
+    __metadata("design:type", Boolean)
+], DistrictsEntity.prototype, "isStandard", void 0);
+__decorate([
     (0, typeorm_1.Column)({ nullable: false, type: 'float', default: 0.0 }),
     __metadata("design:type", Number)
 ], DistrictsEntity.prototype, "price", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'bool', default: false }),
     __metadata("design:type", Boolean)
-], DistrictsEntity.prototype, "isStandard", void 0);
+], DistrictsEntity.prototype, "isExpress", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: false, type: 'float', default: 0.0 }),
+    __metadata("design:type", Number)
+], DistrictsEntity.prototype, "surchargePercentage", void 0);
 exports.DistrictsEntity = DistrictsEntity = __decorate([
     (0, typeorm_1.Entity)({ name: 'districts' })
 ], DistrictsEntity);

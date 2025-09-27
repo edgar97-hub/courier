@@ -4,6 +4,8 @@ export declare class DistrictsEntity extends BaseEntity {
     name: string;
     weight_from: number;
     weight_to: number;
-    price: number;
     isStandard: boolean;
+    price: number;
+    isExpress: boolean;
+    surchargePercentage: number;
 }

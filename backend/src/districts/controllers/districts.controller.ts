@@ -41,8 +41,8 @@ export class DistrictsController {
   }
 
   @Get('all')
-  public async findAllUsers() {
-    return await this.usersService.findUsers();
+  public async findAllUsers(@Query('is_express') is_express?: boolean) {
+    return await this.usersService.findUsers(is_express);
   }
 
   @Get('')
@@ -64,9 +64,13 @@ export class DistrictsController {
   }
 
   @Get('filtered')
-  public async findUsersByRol(@Query('search_term') search_term: string) {
+  public async findUsersByRol(
+    @Query('search_term') search_term: string,
+    @Query('is_express') is_express?: boolean,
+  ) {
     const queryParams = {
       search_term,
+      is_express,
     };
     return await this.usersService.findDistricts2(queryParams);
   }

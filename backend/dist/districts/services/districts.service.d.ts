@@ -16,11 +16,12 @@ export declare class DistrictsService {
         page_number: number;
         page_size: number;
     }>;
-    findDistricts2({ search_term, }: {
+    findDistricts2({ search_term, is_express, }: {
         search_term?: string;
+        is_express?: boolean;
     }): Promise<DistrictsEntity[]>;
     createUser(body: DistrictDTO): Promise<DistrictsEntity>;
-    findUsers(): Promise<DistrictsEntity[]>;
+    findUsers(is_express?: boolean): Promise<DistrictsEntity[]>;
     findUserById(id: string): Promise<DistrictsEntity>;
     findBy({ key, value }: {
         key: keyof DistrictDTO;

@@ -4,6 +4,8 @@ export declare class DistrictDTO {
     weight_to: number;
     price: number;
     isStandard: boolean;
+    isExpress: boolean;
+    surchargePercentage: number;
 }
 export declare class DistrictUpdateDTO {
     name: string;
@@ -11,4 +13,6 @@ export declare class DistrictUpdateDTO {
     weight_to: number;
     price: number;
     isStandard: boolean;
+    isExpress: boolean;
+    surchargePercentage: number;
 }

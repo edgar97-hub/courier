@@ -22,6 +22,7 @@ export declare class OrderDTO {
     status: STATES;
     product_delivery_photo_url: string;
     tracking_code: string;
+    isExpress?: string;
 }
 declare const UpdateOrderRequestDto_base: import("@nestjs/common").Type<Partial<OrderDTO>>;
 export declare class UpdateOrderRequestDto extends UpdateOrderRequestDto_base {

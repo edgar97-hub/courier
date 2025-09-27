@@ -29,6 +29,18 @@ export class DistrictDTO {
   @ApiProperty()
   @IsNotEmpty()
   isStandard: boolean;
+
+  @ApiProperty()
+  @IsOptional()
+  isExpress: boolean;
+
+  @ApiProperty()
+  @IsOptional()
+  surchargePercentage: number;
+
+  // @ApiProperty()
+  // @IsOptional()
+  // priceWithSurcharge: number;
 }
 
 export class DistrictUpdateDTO {
@@ -52,4 +64,16 @@ export class DistrictUpdateDTO {
   @ApiProperty()
   @IsNotEmpty()
   isStandard: boolean;
+
+  @ApiProperty()
+  @IsOptional()
+  isExpress: boolean;
+
+  @ApiProperty()
+  @IsOptional()
+  surchargePercentage: number;
+
+  // @ApiProperty()
+  // @IsOptional()
+  // priceWithSurcharge: number;
 }

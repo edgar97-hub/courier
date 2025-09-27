@@ -35,4 +35,5 @@ export declare class OrdersEntity extends BaseEntity {
     observation_shipping_cost_modification?: string;
     cashManagementIncludes: CashManagementEntity[];
     stops: Stop[];
+    isExpress: boolean;
 }

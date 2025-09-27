@@ -16,9 +16,15 @@ export class DistrictsEntity extends BaseEntity {
   @Column({ nullable: false, type: 'float', default: 0.0 })
   weight_to!: number;
 
+  @Column({ type: 'bool', default: false })
+  isStandard: boolean;
+
   @Column({ nullable: false, type: 'float', default: 0.0 })
   price!: number;
 
   @Column({ type: 'bool', default: false })
-  isStandard: boolean;
+  isExpress: boolean;
+
+  @Column({ nullable: false, type: 'float', default: 0.0 })
+  surchargePercentage!: number;
 }

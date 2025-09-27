@@ -28,8 +28,8 @@ let DistrictsController = class DistrictsController {
     async registerUser(body) {
         return await this.usersService.createUser(body);
     }
-    async findAllUsers() {
-        return await this.usersService.findUsers();
+    async findAllUsers(is_express) {
+        return await this.usersService.findUsers(is_express);
     }
     async findAllOrders(pageNumber = 0, pageSize = 0, sortField = 'updatedAt', sortDirection = 'desc', search = '') {
         const queryParams = {
@@ -41,9 +41,10 @@ let DistrictsController = class DistrictsController {
         };
         return await this.usersService.findDistricts(queryParams);
     }
-    async findUsersByRol(search_term) {
+    async findUsersByRol(search_term, is_express) {
         const queryParams = {
             search_term,
+            is_express,
         };
         return await this.usersService.findDistricts2(queryParams);
     }
@@ -69,8 +70,9 @@ __decorate([
 ], DistrictsController.prototype, "registerUser", null);
 __decorate([
     (0, common_1.Get)('all'),
+    __param(0, (0, common_1.Query)('is_express')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Boolean]),
     __metadata("design:returntype", Promise)
 ], DistrictsController.prototype, "findAllUsers", null);
 __decorate([
@@ -87,8 +89,9 @@ __decorate([
 __decorate([
     (0, common_1.Get)('filtered'),
     __param(0, (0, common_1.Query)('search_term')),
+    __param(1, (0, common_1.Query)('is_express')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Boolean]),
     __metadata("design:returntype", Promise)
 ], DistrictsController.prototype, "findUsersByRol", null);
 __decorate([

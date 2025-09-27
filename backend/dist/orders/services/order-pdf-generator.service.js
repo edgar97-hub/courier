@@ -508,6 +508,16 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                     alignment: 'left',
                     margin: [0, 0, 0, 3],
                 },
+                ...(order.isExpress
+                    ? [
+                        {
+                            text: 'ENTREGA EXPRESS',
+                            style: 'orderTitleRef',
+                            alignment: 'left',
+                            margin: [0, 0, 0, 3],
+                        },
+                    ]
+                    : []),
                 {
                     table: {
                         widths: ['*', '*'],
@@ -1161,6 +1171,16 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                     style: 'ticketSeparator',
                     alignment: 'center',
                 },
+                ...(order.isExpress
+                    ? [
+                        {
+                            text: 'ENTREGA EXPRESS',
+                            style: 'ticketSectionTitle',
+                            alignment: 'left',
+                            margin: [0, 0, 0, 3],
+                        },
+                    ]
+                    : []),
                 {
                     text: `Tipo Envío: ${getValue(order.shipment_type).toUpperCase()}`,
                     style: 'ticketDetail',
