@@ -77,6 +77,10 @@ export class OrderService {
       if (filters.myOrders) {
         params = params.set('my_orders', 'true');
       }
+
+      if (filters.isExpress) {
+        params = params.set('isExpress', 'true');
+      }
     }
 
     const headers = this.getAuthHeaders();
@@ -162,13 +166,15 @@ export class OrderService {
     });
   }
 
-  getDeliveryDistricts(): Observable<DistrictOption[]> {
+  getDeliveryDistricts(isExpress?: boolean): Observable<DistrictOption[]> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
       return throwError(() => new Error('Not authenticated to fetch users.'));
     }
+
+    let params = new HttpParams().set('is_express', isExpress ? isExpress : '');
     return this.http
-      .get<DistrictOption[]>(`${this.apiUrlDistricts}/all`, { headers })
+      .get<DistrictOption[]>(`${this.apiUrlDistricts}/all`, { params, headers })
       .pipe(catchError(this.handleError));
   }
 
@@ -411,7 +417,7 @@ export class OrderService {
 
   updateOrder(
     orderId: string | number,
-    order: UpdateOrderRequestDto,
+    order: UpdateOrderRequestDto
   ): Observable<any> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
@@ -422,7 +428,7 @@ export class OrderService {
       .put<{ success: boolean; message: string }>(
         `${this.apiUrlOrders}/update-order/` + orderId,
         order,
-        { headers },
+        { headers }
       )
       .pipe(catchError(this.handleError));
   }
@@ -489,12 +495,14 @@ export class OrderService {
       .pipe(catchError(this.handleError));
   }
 
-  getDistricts(searchTerm: string): Observable<any> {
+  getDistricts(searchTerm: string, isExpress?: boolean): Observable<any> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
       return throwError(() => new Error('Not authenticated to fetch users.'));
     }
-    let params = new HttpParams().set('search_term', searchTerm);
+    let params = new HttpParams()
+      .set('search_term', searchTerm)
+      .set('is_express', isExpress ? isExpress : '');
 
     return this.http
       .get<any>(`${this.apiUrlDistricts}/filtered`, { params, headers })

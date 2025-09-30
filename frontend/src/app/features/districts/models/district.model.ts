@@ -6,6 +6,8 @@ export interface District {
   weight_to: number;
   price: number;
   isStandard: boolean;
+  isExpress?: boolean;
+  surchargePercentage?: number;
   // Añade createdAt, updatedAt si los tienes y los necesitas mostrar/usar
   createdAt?: string | Date;
   updatedAt?: string | Date;

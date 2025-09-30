@@ -36,8 +36,10 @@ export class OrderEditionPageComponent implements OnInit {
       this.orderService.getOrderById(this.orderId).subscribe({
         next: (order: Order_) => {
           console.log(order);
-          this.order = order;
-          this.isLoading = false;
+          if (this.order) {
+            this.order = order;
+            this.isLoading = false;
+          }
         },
         error: (error: any) => {
           console.error('Error fetching order:', error);

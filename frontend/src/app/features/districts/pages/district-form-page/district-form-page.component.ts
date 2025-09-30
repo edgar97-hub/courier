@@ -49,7 +49,7 @@ export class DistrictFormPageComponent implements OnInit, OnDestroy {
 
     if (this.districtId) {
       this.pageTitle = 'Editar Distrito/Tarifa';
-      this.isLoading = true; // <--- SE ESTABLECE ANTES DE CREAR EL OBSERVABLE
+      this.isLoading = true;
       this.districtToEdit$ = this.districtService
         .getDistrictById(this.districtId)
         .pipe(

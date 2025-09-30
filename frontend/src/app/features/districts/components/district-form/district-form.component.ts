@@ -29,7 +29,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Observable, of, startWith, map, switchMap } from 'rxjs';
 
 import { District } from '../../models/district.model';
-import { DistrictService } from '../../services/district.service'; // Para el autocompletado
+import { DistrictService } from '../../services/district.service'; 
 import { MatCardModule } from '@angular/material/card';
 @Component({
   selector: 'app-district-form',
@@ -58,7 +58,7 @@ export class DistrictFormComponent implements OnInit, OnChanges {
 
   districtForm!: FormGroup;
   private districtService = inject(DistrictService);
-  filteredDistrictNames$: Observable<string[]> = of([]); // Para el autocompletado
+  filteredDistrictNames$: Observable<string[]> = of([]);
 
   constructor(private fb: FormBuilder) {}
 
@@ -67,9 +67,14 @@ export class DistrictFormComponent implements OnInit, OnChanges {
     this.setupNameAutocomplete();
   }
 
+  // @Column({ type: 'bool', default: false })
+  // isExpress: boolean;
+
+  // @Column({ nullable: false, type: 'float', default: 0.0 })
+  // surchargePercentage!: number;
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['districtToEdit'] && this.districtToEdit && this.districtForm) {
-      // Usar patchValue para actualizar el formulario si districtToEdit cambia después de la inicialización
       this.districtForm.patchValue({
         code: this.districtToEdit.code || null,
         name: this.districtToEdit.name,
@@ -77,19 +82,21 @@ export class DistrictFormComponent implements OnInit, OnChanges {
         weight_to: this.districtToEdit.weight_to,
         price: this.districtToEdit.price,
         isStandard: this.districtToEdit.isStandard,
+        isExpress: this.districtToEdit.isExpress,
+        surchargePercentage: this.districtToEdit.surchargePercentage,
       });
     } else if (
       changes['districtToEdit'] &&
       !this.districtToEdit &&
       this.districtForm
     ) {
-      this.districtForm.reset({ isStandard: false }); // Resetear si se quita districtToEdit
+      this.districtForm.reset({ isStandard: false });
     }
   }
 
   private initForm(): void {
     this.districtForm = this.fb.group({
-      code: [null], // Puede ser opcional o generado por el backend
+      code: [null],
       name: ['', Validators.required],
       weight_from: [
         0,
@@ -108,16 +115,16 @@ export class DistrictFormComponent implements OnInit, OnChanges {
         ],
       ],
       price: [0, [Validators.required, Validators.min(0)]],
-      isStandard: [false, Validators.required], // Checkbox por defecto no marcado
+      isStandard: [false, Validators.required],
+      isExpress: [false],
+      surchargePercentage: [0],
     });
 
-    // Si hay datos para editar, popular el formulario
     if (this.districtToEdit) {
       this.districtForm.patchValue(this.districtToEdit);
     }
   }
 
-  // Validador personalizado para asegurar que weight_from <= weight_to
   private weightRangeCrossValidator: (
     control: AbstractControl
   ) => ValidationErrors | null = (
@@ -132,7 +139,7 @@ export class DistrictFormComponent implements OnInit, OnChanges {
       !weightFromCtrl.value ||
       !weightToCtrl.value
     ) {
-      return null; // No validar si los controles o sus valores no existen
+      return null;
     }
 
     const from = parseFloat(weightFromCtrl.value);
@@ -140,7 +147,6 @@ export class DistrictFormComponent implements OnInit, OnChanges {
 
     let errors: ValidationErrors | null = null;
 
-    // Limpiar errores previos en ambos controles para evitar que se queden "pegados"
     if (weightFromCtrl.hasError('weightOrder')) {
       const currentErrors = { ...weightFromCtrl.errors };
       delete currentErrors['weightOrder'];
@@ -159,8 +165,6 @@ export class DistrictFormComponent implements OnInit, OnChanges {
     }
 
     if (from > to && to !== 0) {
-      // Permitir que 'to' sea 0 si 'from' también es 0 o si se está ingresando
-      // Establecer el error en el control 'weight_from'
       const currentFromErrors = weightFromCtrl.errors || {};
       weightFromCtrl.setErrors({
         ...currentFromErrors,
@@ -169,14 +173,7 @@ export class DistrictFormComponent implements OnInit, OnChanges {
       errors = { weightRangeInvalid: true }; // Error a nivel de grupo (opcional)
     }
 
-    // Ya no necesitamos validar "to < from" aquí porque la lógica anterior lo cubre
-    // si 'from' es mayor que 'to'. Si 'from' no es mayor que 'to', entonces 'to' >= 'from'
-    // lo cual es generalmente válido a menos que quieras una validación estricta de 'to' > 'from'.
-
-    // Si no hay errores de rango, pero los controles tenían errores 'weightOrder' de validaciones previas,
-    // se limpiaron arriba.
-
-    return errors; // Devuelve null si es válido, o un objeto de error para el FormGroup
+    return errors;
   };
 
   private setupNameAutocomplete(): void {
@@ -185,24 +182,21 @@ export class DistrictFormComponent implements OnInit, OnChanges {
         .get('name')!
         .valueChanges.pipe(
           startWith(''),
-          // Retrasar ligeramente para no sobrecargar con cada tipeo si el servicio es lento
-          // debounceTime(300),
-          // distinctUntilChanged(),
           switchMap((value) => {
             if (typeof value === 'string' && value.length > 0) {
               return this.districtService.filterDistrictNames(value);
             }
-            return this.districtService.districtNames$; // Mostrar todos si el campo está vacío
+            return this.districtService.districtNames$;
           })
         );
     }
   }
 
-  // Cuando se selecciona una opción del autocompletado
-  onDistrictNameSelected(event: MatAutocompleteSelectedEvent): void {
-    // this.districtForm.get('name')?.setValue(event.option.viewValue);
-    // No es necesario si usas [displayWith] o si el valor es el que quieres.
-  }
+  // // Cuando se selecciona una opción del autocompletado
+  // onDistrictNameSelected(event: MatAutocompleteSelectedEvent): void {
+  //   // this.districtForm.get('name')?.setValue(event.option.viewValue);
+  //   // No es necesario si usas [displayWith] o si el valor es el que quieres.
+  // }
 
   onSubmit(): void {
     if (this.districtForm.valid) {
@@ -214,6 +208,8 @@ export class DistrictFormComponent implements OnInit, OnChanges {
         weight_to: parseFloat(formData.weight_to),
         price: parseFloat(formData.price),
         isStandard: formData.isStandard,
+        isExpress: formData.isExpress,
+        surchargePercentage: parseFloat(formData.surchargePercentage),
       };
       if (
         formData.code !== null &&

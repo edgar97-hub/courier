@@ -24,11 +24,6 @@ export class ExcelExportService {
     // Crear el worksheet
     const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(jsonData);
 
-    // Opcional: Ajustar anchos de columnas (esto es un poco más avanzado y a veces no perfecto)
-    // Podrías necesitar una función para calcular anchos basados en el contenido
-    // const columnWidths = this.calculateColumnWidths(jsonData);
-    // worksheet['!cols'] = columnWidths;
-
     // Crear el workbook
     const workbook: XLSX.WorkBook = {
       Sheets: { [sheetName]: worksheet },

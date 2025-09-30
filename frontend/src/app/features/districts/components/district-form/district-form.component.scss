@@ -1,11 +1,10 @@
-@use "@angular/material" as mat;
-
 .district-form-container {
   padding: 10px 0; // Espacio si el form se usa directamente en una página
 }
 
 mat-card {
   border-radius: 8px;
+  padding: 20px;
   // box-shadow: 0 2px 8px rgba(0,0,0,0.08); // Sombra sutil si no es outlined
 }
 
@@ -46,9 +45,10 @@ mat-card-content {
   margin-bottom: 20px;
 }
 
-mat-card-actions {
+.card-actions {
   padding: 16px 0 0 0; // Padding solo arriba para las acciones
   margin-top: 24px;
+  gap: 10px;
   button {
     font-weight: 500;
   }

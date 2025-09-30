@@ -13,6 +13,11 @@
       }}</mat-card-title>
     </mat-card-header>
     <mat-card-content>
+      <div style="padding-bottom: 20px" *ngIf="districtForm.get('code')?.value">
+        N°:
+        <span>{{ districtForm.get("code")?.value }}</span>
+      </div>
+
       <div class="form-row">
         <mat-form-field appearance="outline" class="full-width-field">
           <mat-label>Nombre del Distrito</mat-label>
@@ -23,10 +28,8 @@
             placeholder="Ej: Carabayllo"
             [matAutocomplete]="autoDistrictName"
           />
-          <mat-autocomplete
-            #autoDistrictName="matAutocomplete"
-            (optionSelected)="onDistrictNameSelected($event)"
-          >
+          <!--            (optionSelected)="onDistrictNameSelected($event)" -->
+          <mat-autocomplete #autoDistrictName="matAutocomplete">
             @for (name of filteredDistrictNames$ | async; track name) {
             <mat-option [value]="name">{{ name }}</mat-option>
             }
@@ -91,7 +94,7 @@
           required
           placeholder="0.00"
         />
-        <span matTextPrefix>S/ </span>
+        <span matTextPrefix>S/ </span>
         @if (weightToCtrl?.hasError('weightOrder') && (weightToCtrl?.touched ||
         weightToCtrl?.dirty)) {
         <mat-error>{{ weightToCtrl?.errors?.['weightOrder'] }}</mat-error>
@@ -107,8 +110,47 @@
           ¿Es tarifa estándar para este distrito?
         </mat-checkbox>
       </div>
+
+      <div class="form-row">
+        <mat-checkbox
+          formControlName="isExpress"
+          color="primary"
+          class="standard-checkbox"
+        >
+          Express
+        </mat-checkbox>
+      </div>
+
+      <mat-form-field
+        appearance="outline"
+        class="full-width-field"
+        *ngIf="districtForm.get('isExpress')?.value"
+      >
+        <mat-label>porcentaje de recargo (%)</mat-label>
+        <input
+          matInput
+          formControlName="surchargePercentage"
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="0.00"
+        />
+      </mat-form-field>
+
+      <div
+        class="full-width-field"
+        style="display: flex; margin-left: 10px"
+        *ngIf="districtForm.get('isExpress')?.value"
+      >
+        <span>Monto con Recargo: S/ </span>
+        <span>{{
+          (districtForm.get("price")?.value / 100) *
+            districtForm.get("surchargePercentage")?.value +
+            districtForm.get("price")?.value
+        }}</span>
+      </div>
     </mat-card-content>
-    <mat-card-actions align="end">
+    <mat-card-actions class="card-actions" align="end">
       <button
         mat-stroked-button
         type="button"

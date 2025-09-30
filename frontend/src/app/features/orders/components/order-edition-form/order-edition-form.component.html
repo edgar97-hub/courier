@@ -6,6 +6,16 @@
   <!-- <h2 class="form-section-title">Editar pedido</h2> -->
 
   <!-- Sección 1: Datos de Envío y Destinatario -->
+
+  <mat-checkbox
+    formControlName="isExpress"
+    color="primary"
+    class="standard-checkbox"
+    (click)="getCheckboxValue()"
+  >
+    Express
+  </mat-checkbox>
+
   <mat-form-field appearance="outline" class="full-width driver-search-field">
     <mat-label>Buscar y Seleccionar empresa</mat-label>
     <input

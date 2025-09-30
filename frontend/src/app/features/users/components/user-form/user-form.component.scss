@@ -1,12 +1,9 @@
-// Importa el tema de Material si no está globalmente o para acceder a las variables de tema
-@use "@angular/material" as mat;
-// @use "path/to/your/global/theme-definition" as theme;
-
 .multi-section-form-card {
   max-width: 900px; // Ancho máximo para el formulario
   margin: 24px auto; // Centrado y con margen
   padding: 16px 24px; // Padding interno
   border-radius: 8px; // Bordes redondeados
+  // background-color: rgb(255, 255, 255);
 }
 
 mat-card-title {
@@ -125,12 +122,9 @@ mat-card-subtitle {
   ::ng-deep .mdc-form-field {
     font-size: 0.9em;
   }
-  // Puedes intentar ajustar márgenes/paddings internos si es necesario,
-  // pero los checkboxes de Material son un poco más rígidos para el re-styling profundo.
 }
 
 .form-actions-sticky {
-  background-color: #fff;
   display: flex;
   gap: 10px !important;
 }

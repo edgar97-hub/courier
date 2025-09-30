@@ -40,7 +40,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 import { OrderImportModalComponent } from '../../components/order-import-modal/order-import-modal.component';
-import { Order_importacion, STATES } from '../../models/order.model';
 import { ExcelExportService } from '../../services/excel-export.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -65,12 +64,11 @@ import { AppStore } from '../../../../app.store';
 })
 export class OrderListPageComponent implements OnInit, OnDestroy {
   private orderService = inject(OrderService);
-  private router = inject(Router);
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
   private excelExportService = inject(ExcelExportService);
   private datePipe = inject(DatePipe);
-  appStore = inject(AppStore); // Inject AppStore
+  appStore = inject(AppStore);
 
   orders: Order_[] = [];
   isLoading = false;
@@ -79,7 +77,8 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
   currentPageSize = 10;
   currentSortField = 'registration_date';
   currentSortDirection: 'asc' | 'desc' = 'desc';
-  showMyOrders: boolean = false; // New property for the toggle
+  showMyOrders: boolean = false;
+  isExpress: boolean = false;
 
   now = new Date();
   firstDay = new Date(this.now.getFullYear(), this.now.getMonth(), 1);
@@ -115,6 +114,15 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
     this.filterCriteriaSubject.next({
       ...currentFilters,
       myOrders: this.showMyOrders,
+    });
+  }
+
+  onToggleIsExpress(event: any): void {
+    this.isExpress = event.checked;
+    const currentFilters = this.filterCriteriaSubject.value;
+    this.filterCriteriaSubject.next({
+      ...currentFilters,
+      isExpress: this.isExpress,
     });
   }
 
@@ -278,6 +286,12 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
     } else {
       delete filtersToSend.myOrders;
     }
+    console.log(currentFilters, this.isExpress);
+    if (this.isExpress) {
+      filtersToSend.isExpress = true;
+    } else {
+      delete filtersToSend.isExpress;
+    }
 
     this.orderService
       .getOrders(
@@ -312,7 +326,6 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
       width: '90%', // Hacerlo más ancho por defecto, el componente interno puede tener max-width
       maxWidth: '700px', // Máximo ancho para desktop
       autoFocus: false, // Evitar que el primer botón tome foco automáticamente
-      // disableClose: true, // Si quieres que solo se cierre con botones
     });
 
     dialogRef.componentInstance.importCompleted.subscribe(
@@ -330,32 +343,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
     });
   }
   handleEditOrderChanged(event: { order: UpdateOrderRequestDto }): void {
-    console.log('OrderListPage: Status change requested', event);
     this.fetchOrders();
-
-    // this.orderService
-    //   .updateOrderStatus(event.orderId, event.newStatus)
-    //   .subscribe({
-    //     next: (updatedOrder) => {
-    //       this.snackBar.open(
-    //         `Estado del pedido ${updatedOrder.code} actualizado a ${event.newStatus}.`,
-    //         'OK',
-    //         { duration: 3000, panelClass: ['success-snackbar'] }
-    //       );
-    //       this.fetchOrders();
-    //     },
-    //     error: (err) => {
-    //       this.snackBar.open(
-    //         `Error al actualizar estado: ${err.message || 'Intente de nuevo'}`,
-    //         'Cerrar',
-    //         { duration: 5000, panelClass: ['error-snackbar'] }
-    //       );
-    //       this.isLoading = false;
-    //     },
-    //     complete: () => {
-    //       this.isLoading = false;
-    //     },
-    //   });
   }
   handleStatusChanged(event: {
     orderId: number | string;

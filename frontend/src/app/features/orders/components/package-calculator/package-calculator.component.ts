@@ -103,12 +103,12 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
       const control = this.packageFormGroup.get(controlName);
       if (control) {
         if (enable) {
-          control.enable();
-          control.setValidators([
-            Validators.required,
-            Validators.min(0.1),
-            Validators.max(999),
-          ]);
+          // control.enable();
+          // control.setValidators([
+          //   // Validators.required,
+          //   Validators.min(0.1),
+          //   Validators.max(999),
+          // ]);
         } else {
           // control.disable();
           // control.clearValidators();
@@ -116,7 +116,7 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
           // control.updateValueAndValidity({ emitEvent: false }); // Evitar re-trigger innecesario de valueChanges si no es necesario
           // // control.reset(); // Limpiar valores si se cambia a estándar
         }
-        control.updateValueAndValidity();
+        // control.updateValueAndValidity();
       }
     });
   }
@@ -221,11 +221,11 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
         );
       }
       this.shippingCostCalculated.emit(precio);
-      this.isCalculating.set(false);
-      this.calculationLoading.emit(false);
     } else {
       alert('las entradas no son validas');
     }
+    this.isCalculating.set(false);
+    this.calculationLoading.emit(false);
     return;
   }
 

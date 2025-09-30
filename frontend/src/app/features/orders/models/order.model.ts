@@ -22,14 +22,13 @@ export interface PaginatedOrdersResponse {
   page_size?: number;
 }
 
-// Para los datos que se envían al backend al crear UN pedido individual
-// (antes de agruparlos en el lote final)
 export interface NewOrderData {
   // id?: string | number; // El ID lo asigna el backend, o un ID temporal en frontend
-  shipment_type: string; // ej: 'SOLO_ENTREGA_NO_COBRAR'
+  isExpress?: boolean;
+  shipment_type: string;
   recipient_name: string;
   recipient_phone: string;
-  delivery_district_id: string | number; // El ID del distrito
+  delivery_district_id: string | number;
   delivery_address: string;
   delivery_coordinates?: string; // Formato "lat,lng"
   delivery_date: string; // Formato YYYY-MM-DD
@@ -39,9 +38,9 @@ export interface NewOrderData {
   package_length_cm?: number | null;
   package_height_cm?: number | null;
   package_weight_kg?: number | null;
-  shipping_cost: number; // Calculado o fijo para estándar
+  shipping_cost: number;
 
-  item_description: string; // "¿Qué envía?"
+  item_description: string;
   amount_to_collect_at_delivery: number;
   payment_method_for_collection: string; // ej: 'NO_COBRAR', 'EFECTIVO'
   observations?: string;
@@ -66,6 +65,7 @@ export interface DistrictOption {
   isStandard: boolean;
   price: string;
   name_and_price?: string;
+  isExpress?: boolean;
 }
 
 export interface MaxPackageDimensions {
@@ -158,6 +158,7 @@ export interface Order_ {
   delivered_at?: string | Date; // Fecha real de entrega (si la tienes)
   product_delivery_photo_url?: string;
   observation_shipping_cost_modification?: string;
+  isExpress?: boolean;
 }
 
 export interface Motorized {
@@ -167,6 +168,7 @@ export interface Motorized {
 }
 
 export interface UpdateOrderRequestDto {
+  isExpress?: boolean;
   recipient_name?: string;
   recipient_phone?: string;
   delivery_district_name?: string;

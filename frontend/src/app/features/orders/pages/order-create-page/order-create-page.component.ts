@@ -93,7 +93,7 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
     if (this.orderCreationFormComponent) {
       this.orderCreationFormComponent.resetFormForNextOrder();
     }
-    this.cdr.detectChanges(); // Forzar detección si la tabla no se actualiza inmediatamente
+    this.cdr.detectChanges();
   }
 
   handleRemoveOrder(tempIdToRemove: string): void {
@@ -136,6 +136,13 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
       this.termsAcceptedControl.markAsTouched();
       return;
     }
+    console.log(
+      this.pendingOrders().map((order) => {
+        const { temp_id, ...orderDataForBackend } = order;
+        return orderDataForBackend;
+      })
+    );
+    // return;
 
     this.isSubmittingBatch.set(true);
 
@@ -152,7 +159,6 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
       pickup_option: this.pickupOptionControl.value || 'RECOGER EN DOMICILIO',
       terms_accepted: true,
     };
-
     this.orderService
       .createBatchOrders(payload)
       .pipe(

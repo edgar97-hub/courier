@@ -253,7 +253,7 @@ let OrdersService = class OrdersService {
                     orderToCreate.user = { id: idUser };
                     orderToCreate.company = { id: orderDto.company_id };
                     orderToCreate.tracking_code = await generateTrackingCode();
-                    orderToCreate.isExpress = orderDto.isExpress;
+                    orderToCreate.isExpress = orderDto.isExpress || false;
                     const savedOrder = await queryRunner.manager.save(orders_entity_1.OrdersEntity, orderToCreate);
                     createdOrders.push(savedOrder);
                 }
@@ -448,6 +448,7 @@ let OrdersService = class OrdersService {
                     return nanoid();
                 }
                 orderEntity.tracking_code = await generateTrackingCode();
+                orderEntity.isExpress = false;
                 ordersToSave.push(orderEntity);
             }
         }

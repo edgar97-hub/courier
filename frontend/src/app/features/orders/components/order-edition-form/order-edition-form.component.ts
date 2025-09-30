@@ -55,6 +55,7 @@ import {
 } from '@angular/material/autocomplete';
 import { User } from '../../../users/models/user.model';
 import { AppStore } from '../../../../app.store';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-order-edition-form',
@@ -73,6 +74,7 @@ import { AppStore } from '../../../../app.store';
     PackageCalculatorComponent,
     MatProgressSpinnerModule,
     MatAutocompleteModule,
+    MatCheckboxModule,
   ],
   templateUrl: './order-edition-form.component.html',
   styleUrls: ['./order-edition-form.component.scss'],
@@ -84,10 +86,9 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
 
   orderForm!: FormGroup;
   minDeliveryDate: Date;
-  private originalShippingCost: number = -1; // To store the initial shipping cost
+  private originalShippingCost: number = -1;
   private originalDistrict: string = '';
 
-  // calculatedShippingCost: WritableSignal<number> = signal(0);
   isCalculatingShipping: WritableSignal<boolean> = signal(false);
   appStore = inject(AppStore);
 
@@ -133,30 +134,58 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
 
     this.filteredDistricts$ = this.districSearchCtrl.valueChanges.pipe(
       startWith(''),
-      debounceTime(300),
-      distinctUntilChanged(),
+      debounceTime(900),
       switchMap((searchTerm) => {
         this.isLoadingDistricts = true;
-        return this.orderService.getDistricts(searchTerm || '').pipe(
-          tap(() => (this.isLoadingDistricts = false)),
-          catchError(() => {
-            this.isLoadingDistricts = false;
-            return of([]);
-          })
-        );
+        return this.orderService
+          .getDistricts(
+            searchTerm || '',
+            this.orderForm.get('isExpress')?.value
+          )
+          .pipe(
+            tap(() => (this.isLoadingDistricts = false)),
+            catchError(() => {
+              this.isLoadingDistricts = false;
+              return of([]);
+            })
+          );
       }),
       takeUntil(this.destroy$)
     );
   }
 
-  ngOnInit(): void {
-    this.orderService.getDeliveryDistricts().subscribe((allDistricts) => {
-      this.districtsCache = allDistricts;
+  getCheckboxValue(): void {
+    this.districSearchCtrl.setValue('', { emitEvent: true });
+    this.orderForm.markAllAsTouched();
+    this.orderForm
+      .get('delivery_district_id')
+      ?.setValue(null, { emitEvent: true });
+    this.packageDetailsFormGroup
+      .get('package_size_type')
+      ?.setValue('standard', { emitEvent: true });
 
-      if (this.order) {
-        this.populateForm(this.order, this.districtsCache);
-      }
-    });
+    console.log('test', this.orderForm.get('isExpress')?.value);
+    this.orderService
+      .getDeliveryDistricts(this.orderForm.get('isExpress')?.value)
+      .subscribe((allDistricts) => {
+        this.districtsCache = allDistricts;
+      });
+  }
+
+  ngOnInit(): void {
+    console.log(this.order);
+    if (this.order) {
+      console.log(this.order);
+      this.orderService
+        .getDeliveryDistricts(this.order?.isExpress)
+        .subscribe((allDistricts) => {
+          this.districtsCache = allDistricts;
+          if (this.order) {
+            this.populateForm(this.order, this.districtsCache);
+            console.log(this.districtsCache);
+          }
+        });
+    }
 
     // Emitir validez del formulario cuando cambie
     this.orderForm.statusChanges
@@ -233,8 +262,8 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
     this.orderForm.get('company_id')?.setValue(null);
   }
 
-  displayDistricName(driver: DistrictOption | null): string {
-    return driver && driver.name_and_price ? driver.name_and_price : '';
+  displayDistricName(district: DistrictOption | null): string {
+    return district && district.name_and_price ? district.name_and_price : '';
   }
   onDistrictSelected(event: MatAutocompleteSelectedEvent): void {
     this.orderForm.get('delivery_district_id')?.setValue(event.option.value.id);
@@ -253,6 +282,7 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
 
   private buildForm(): void {
     this.orderForm = this.fb.group({
+      isExpress: [false],
       recipient_name: ['', Validators.required],
       recipient_phone: [
         '',
@@ -263,10 +293,10 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
       delivery_address: ['', [Validators.required, Validators.minLength(6)]],
       package_details: this.fb.group({
         package_size_type: ['standard'],
-        package_width_cm: [{ value: 0 }],
-        package_length_cm: [{ value: 0 }],
-        package_height_cm: [{ value: 0 }],
-        package_weight_kg: [{ value: 0 }],
+        package_width_cm: [0],
+        package_length_cm: [0],
+        package_height_cm: [0],
+        package_weight_kg: [0],
       }),
       item_description: ['', Validators.required],
       observations: [''],
@@ -306,6 +336,7 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
 
     const formValue = this.orderForm.getRawValue();
     const updatedOrderData: UpdateOrderRequestDto = {
+      isExpress: formValue.isExpress || false,
       recipient_name: formValue.recipient_name,
       recipient_phone: formValue.recipient_phone,
       delivery_district_name: this.selectedDistrictName(),
@@ -354,7 +385,6 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
       delivery_date: null,
       package_details: { package_size_type: 'standard' },
     });
-    // this.calculatedShippingCost.set(0); // Resetear costo de envío
     this.orderForm.get('shipping_cost')?.setValue(0); // Update form control
 
     // Forzar la re-evaluación del estado de los controles de paquete
@@ -376,6 +406,7 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
 
     this.orderForm.patchValue(
       {
+        isExpress: order.isExpress || false,
         recipient_name: order.recipient_name,
         recipient_phone: order.recipient_phone,
         company_id: order.company?.id,

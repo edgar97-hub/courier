@@ -11,7 +11,6 @@
     <h1>{{ pageTitle }}</h1>
   </div>
 
-  <!-- Mostrar el spinner MIENTRAS isLoading es true -->
   <div *ngIf="isLoading" class="loading-indicator">
     <mat-progress-spinner
       mode="indeterminate"
@@ -20,8 +19,6 @@
     <p>Cargando datos del distrito...</p>
   </div>
 
-  <!-- El formulario se muestra CUANDO isLoading es false.
-       El async pipe dentro del formulario se encargará de esperar los datos si es necesario. -->
   <app-district-form
     *ngIf="!isLoading"
     [districtToEdit]="districtId ? (districtToEdit$ | async) : null"

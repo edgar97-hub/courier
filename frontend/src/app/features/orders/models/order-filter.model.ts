@@ -4,4 +4,5 @@ export interface OrderFilterCriteria {
   status?: string | null;
   search_term?: string | null;
   myOrders?: boolean;
+  isExpress?: boolean;
 }

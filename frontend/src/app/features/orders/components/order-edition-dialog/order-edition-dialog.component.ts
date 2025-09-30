@@ -47,8 +47,9 @@ export class OrderEditionDialogComponent {
   ngOnInit(): void {
     this.orderService.getOrderById(this.data.orderId).subscribe({
       next: (order: Order_) => {
-        console.log(order);
-        this.order = order;
+        if (order) {
+          this.order = order;
+        }
       },
       error: (error: any) => {
         console.error('Error fetching order:', error);

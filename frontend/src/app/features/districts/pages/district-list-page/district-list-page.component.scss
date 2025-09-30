@@ -1,16 +1,11 @@
 :host {
-  display: block; // Buena práctica para componentes de página
+  display: block;
 }
 
 .page-container {
-  // border: 1px solid black;
-  padding: 28px 32px; // Mayor padding para un look más espacioso
-  background-color: var(
-    --sys-background,
-    #f4f6f8
-  ); // Fondo de página ligeramente texturizado o color de tema
+  padding: 28px 32px;
   color: var(--sys-on-background, #2c3e50);
-  min-height: calc(100vh - 64px); // Asumiendo un toolbar de 64px
+  min-height: calc(100vh - 64px);
   box-sizing: border-box;
 }
 
@@ -23,12 +18,11 @@
 
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #e0e0e0;
 
   h1 {
     margin: 0;
-    font-size: 2em; // Más grande
-    font-weight: 500; // Un poco de peso
+    font-size: 2em;
+    font-weight: 500;
   }
 
   button {
@@ -38,52 +32,14 @@
 
 .filter-card {
   margin-bottom: 28px;
-  background-color: var(
-    --sys-surface-container-low,
-    #ffffff
-  ); // Fondo de tarjeta temático
-  border: 1px solid var(--sys-outline-variant, transparent); // Opcional: borde sutil
-  border-radius: 8px; // Bordes redondeados para la tarjeta
-  // box-shadow: 0 1px 3px rgba(0,0,0,0.04); // Sombra muy sutil si no es 'outlined'
+  border: 1px solid var(--sys-outline-variant, transparent);
+  border-radius: 8px;
 
   mat-card-content {
-    padding: 16px 20px !important; // Ajustar padding si es necesario (Material a veces es específico)
+    padding: 16px 20px !important;
   }
 }
 
 .search-field {
-  // MatFormField con appearance="outline" debería tematizarse bien
   width: 100%;
-  // max-width: 500px; // Se controla con fxFlex o CSS Grid/Flexbox en el contenedor
-  // No necesita mucho margen si está dentro de filter-card con padding
-
-  // Ajustes finos para el input si es necesario
-  // ::ng-deep .mat-mdc-form-field-flex {
-  //   align-items: center; // Alinear mejor el icono de sufijo
-  // }
 }
-
-// La app-district-table ya tiene sus propios estilos.
-// Este componente de página solo se encarga del layout general.
-
-// Estilos para snackbars (si no los tienes globales)
-// Deben estar en un nivel global (styles.scss) para que ::ng-deep no sea necesario
-// o si los pones aquí, necesitarías ::ng-deep o configurar ViewEncapsulation.None (no recomendado).
-// Es mejor tenerlos en styles.scss:
-/*
-.success-snackbar {
-  background: var(--sys-primary-container, #c8e6c9);
-  color: var(--sys-on-primary-container, #1b5e20);
-  .mat-mdc-button.mat-mdc-button-base {
-    color: var(--sys-on-primary-container, #1b5e20) !important;
-  }
-}
-
-.error-snackbar {
-  background: var(--sys-error-container, #ffcdd2);
-  color: var(--sys-on-error-container, #b71c1c);
-   .mat-mdc-button.mat-mdc-button-base {
-    color: var(--sys-on-error-container, #b71c1c) !important;
-  }
-}
-*/

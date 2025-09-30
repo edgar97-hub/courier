@@ -14,9 +14,19 @@
         [checked]="showMyOrders"
         (change)="onToggleMyOrders($event)"
       >
-        Mostrar mis pedidos
+        Mis pedidos
       </mat-slide-toggle>
     </div>
+
+    <div class="my-orders-toggle">
+      <mat-slide-toggle
+        [checked]="isExpress"
+        (change)="onToggleIsExpress($event)"
+      >
+        Pedidos Express
+      </mat-slide-toggle>
+    </div>
+
     <div class="records-info"></div>
     <div class="actions-group">
       <button

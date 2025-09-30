@@ -377,7 +377,7 @@ export class OrdersService {
           orderToCreate.user = { id: idUser } as UsersEntity;
           orderToCreate.company = { id: orderDto.company_id } as UsersEntity;
           orderToCreate.tracking_code = await generateTrackingCode();
-          orderToCreate.isExpress = orderDto.isExpress;
+          orderToCreate.isExpress = orderDto.isExpress || false;
 
           const savedOrder = await queryRunner.manager.save(
             OrdersEntity,
@@ -642,6 +642,7 @@ export class OrdersService {
         }
 
         orderEntity.tracking_code = await generateTrackingCode();
+        orderEntity.isExpress = false;
         ordersToSave.push(orderEntity);
       }
     }

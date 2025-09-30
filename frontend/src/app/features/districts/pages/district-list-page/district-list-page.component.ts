@@ -19,13 +19,10 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-
 import { DistrictTableComponent } from '../../components/district-table/district-table.component';
 import { DistrictService } from '../../services/district.service';
 import { District } from '../../models/district.model';
-// Necesitarás un componente de diálogo de confirmación genérico o uno específico
-// import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { MatCardModule } from '@angular/material/card'; // Añadir si no está
+import { MatCardModule } from '@angular/material/card';
 
 interface TableLoadParams {
   pageIndex: number;
@@ -45,10 +42,10 @@ interface TableLoadParams {
     MatButtonModule,
     MatIconModule,
     MatSnackBarModule,
-    MatDialogModule, // Para el diálogo de confirmación
-    MatFormFieldModule, // Para el campo de búsqueda
-    MatInputModule, // Para el campo de búsqueda
-    MatCardModule, // Añadido
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatCardModule,
   ],
   templateUrl: './district-list-page.component.html',
   styleUrls: ['./district-list-page.component.scss'],
@@ -64,10 +61,9 @@ export class DistrictListPageComponent implements OnInit, OnDestroy {
   isLoading = false;
   private destroy$ = new Subject<void>();
 
-  // Para el control de la tabla y la API
   currentPageIndex = 0;
   currentPageSize = 10;
-  currentSortField = 'name'; // Campo por defecto para ordenar
+  currentSortField = 'name';
   currentSortDirection: 'asc' | 'desc' = 'asc';
   currentSearchTerm = '';
 
@@ -76,16 +72,11 @@ export class DistrictListPageComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadDistricts();
 
-    // Manejo de búsqueda con debounce
     this.searchSubject
-      .pipe(
-        debounceTime(500), // Espera 500ms después del último input
-        distinctUntilChanged(), // Solo emite si el valor cambió
-        takeUntil(this.destroy$)
-      )
+      .pipe(debounceTime(500), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe((searchTerm) => {
         this.currentSearchTerm = searchTerm;
-        this.currentPageIndex = 0; // Resetear a la primera página con nueva búsqueda
+        this.currentPageIndex = 0;
         this.loadDistricts();
       });
   }
@@ -127,8 +118,8 @@ export class DistrictListPageComponent implements OnInit, OnDestroy {
   }
 
   clearSearch(inputElement: HTMLInputElement): void {
-    inputElement.value = ''; // Limpia el input visualmente
-    this.searchSubject.next(''); // Emite un string vacío para resetear la búsqueda
+    inputElement.value = '';
+    this.searchSubject.next('');
   }
 
   onPageChanged(event: PageEvent): void {
@@ -140,7 +131,7 @@ export class DistrictListPageComponent implements OnInit, OnDestroy {
   onSortChanged(event: Sort): void {
     this.currentSortField = event.active;
     this.currentSortDirection = event.direction as 'asc' | 'desc';
-    this.currentPageIndex = 0; // Resetear a la primera página con nuevo ordenamiento
+    this.currentPageIndex = 0;
     this.loadDistricts();
   }
 
@@ -153,22 +144,6 @@ export class DistrictListPageComponent implements OnInit, OnDestroy {
   }
 
   confirmAndDeleteDistrict(district: District): void {
-    // const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-    //   width: '350px',
-    //   data: {
-    //     title: 'Confirmar Eliminación',
-    //     message: `¿Está seguro de que desea eliminar el distrito/tarifa "${district.name}" (Código: ${district.code || district.id})? Esta acción no se puede deshacer.`
-    //   } as ConfirmDialogData
-    // });
-
-    // dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(result => {
-    //   if (result === true) { // Si el usuario confirma
-    //     this.deleteDistrict(district);
-    //   }
-    // });
-
-    // --- SIMULACIÓN SIN DIÁLOGO DE CONFIRMACIÓN POR AHORA ---
-    // En producción, SIEMPRE usa un diálogo de confirmación.
     if (
       confirm(
         `¿Está seguro de que desea eliminar el distrito/tarifa "${
@@ -181,9 +156,9 @@ export class DistrictListPageComponent implements OnInit, OnDestroy {
   }
 
   private deleteDistrict(district: District): void {
-    this.isLoading = true; // O una bandera específica para la operación de borrado
+    this.isLoading = true;
     this.districtService
-      .deleteDistrict(district.id) // Asumiendo que 'id' es el identificador
+      .deleteDistrict(district.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
@@ -195,9 +170,8 @@ export class DistrictListPageComponent implements OnInit, OnDestroy {
               panelClass: ['success-snackbar'],
             }
           );
-          // Recargar la lista para reflejar la eliminación
-          // Podrías optimizar esto si tu API devuelve el total actualizado o si manejas el borrado localmente
-          this.currentPageIndex = 0; // Volver a la primera página podría ser necesario
+          this.currentPageIndex = 0;
+          this.isLoading = false;
           this.loadDistricts();
         },
         error: (err) => {
@@ -211,7 +185,6 @@ export class DistrictListPageComponent implements OnInit, OnDestroy {
             }
           );
         },
-        // complete: () => this.isLoading = false; // Se maneja en next y error
       });
   }
 

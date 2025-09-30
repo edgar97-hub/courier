@@ -6,6 +6,16 @@
   <h2 class="form-section-title">Registrar pedido</h2>
 
   <!-- Sección 1: Datos de Envío y Destinatario -->
+
+  <mat-checkbox
+    formControlName="isExpress"
+    color="primary"
+    class="standard-checkbox"
+    (click)="getCheckboxValue()"
+  >
+    Express
+  </mat-checkbox>
+
   <mat-form-field
     appearance="outline"
     class="full-width driver-search-field"
@@ -218,7 +228,7 @@
   <div class="shipping-cost-display">
     Costo de envío =
     <span class="cost-value"
-      >S/ {{ calculatedShippingCost() | number : "1.2-2" }}</span
+      >S/ {{ this.orderForm.get('shipping_cost')?.value | number : "1.2-2" }}</span
     >
     <mat-progress-spinner
       *ngIf="isCalculatingShipping()"
@@ -288,13 +298,13 @@
       ></textarea>
     </mat-form-field>
   </div>
-
+  <!-- || isCalculatingShipping() -->
   <div class="add-order-button-container">
     <button
       mat-flat-button
       class="btn-corp-primary"
       type="submit"
-      [disabled]="orderForm.invalid || isCalculatingShipping()"
+      [disabled]="orderForm.invalid"
     >
       <mat-icon>add_shopping_cart</mat-icon> AGREGAR PEDIDO AL LISTADO
       <mat-icon>arrow_downward</mat-icon>

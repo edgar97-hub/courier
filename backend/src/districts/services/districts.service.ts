@@ -152,6 +152,7 @@ export class DistrictsService {
           ...item,
         };
       });
+
       return districts;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);

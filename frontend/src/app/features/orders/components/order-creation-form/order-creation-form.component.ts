@@ -47,6 +47,8 @@ import {
 } from '@angular/material/autocomplete';
 import { User } from '../../../users/models/user.model';
 import { AppStore } from '../../../../app.store';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-order-creation-form',
@@ -65,6 +67,7 @@ import { AppStore } from '../../../../app.store';
     PackageCalculatorComponent,
     MatProgressSpinnerModule,
     MatAutocompleteModule,
+    MatCheckboxModule,
   ],
   templateUrl: './order-creation-form.component.html',
   styleUrls: ['./order-creation-form.component.scss'],
@@ -90,7 +93,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     'TRANSFERENCIA',
   ];
 
-  calculatedShippingCost: WritableSignal<number> = signal(0);
+  // calculatedShippingCost: WritableSignal<number> = signal(0);
   isCalculatingShipping: WritableSignal<boolean> = signal(false);
   appStore = inject(AppStore);
 
@@ -125,7 +128,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
 
     this.filteredDrivers$ = this.driverSearchCtrl.valueChanges.pipe(
       startWith(''),
-      debounceTime(300),
+      debounceTime(900),
       distinctUntilChanged(),
       switchMap((searchTerm) => {
         this.isLoadingDrivers = true;
@@ -143,22 +146,46 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
 
     this.filteredDistricts$ = this.districSearchCtrl.valueChanges.pipe(
       startWith(''),
-      debounceTime(300),
-      distinctUntilChanged(),
+      debounceTime(900),
       switchMap((searchTerm) => {
         this.isLoadingDistricts = true;
         console.log('searchTerm', searchTerm);
-        return this.orderService.getDistricts(searchTerm || '').pipe(
-          tap(() => (this.isLoadingDistricts = false)),
-          catchError(() => {
-            this.isLoadingDistricts = false;
-            return of([]);
-          })
-        );
+        return this.orderService
+          .getDistricts(
+            searchTerm || '',
+            this.orderForm.get('isExpress')?.value
+          )
+          .pipe(
+            tap(() => (this.isLoadingDistricts = false)),
+            catchError(() => {
+              this.isLoadingDistricts = false;
+              return of([]);
+            })
+          );
       }),
       takeUntil(this.destroy$)
     );
   }
+
+  getCheckboxValue(): void {
+    this.districSearchCtrl.setValue('', { emitEvent: true });
+    this.orderForm.markAllAsTouched();
+    this.orderForm
+      .get('delivery_district_id')
+      ?.setValue(null, { emitEvent: true });
+    this.packageDetailsFormGroup
+      .get('package_size_type')
+      ?.setValue('standard', { emitEvent: true });
+
+    this.orderService
+      .getDeliveryDistricts(this.orderForm.get('isExpress')?.value)
+      .subscribe((allDistricts) => {
+        this.districtsCache = allDistricts;
+      });
+    console.log('test');
+    console.log(this.getFormErrors(this.orderForm));
+  }
+
   isCompany(): boolean {
     const userRole = this.appStore.currentUser()?.role;
     return userRole === 'EMPRESA';
@@ -213,12 +240,16 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
               (item) => item.id === newDistrictId
             );
             if (districtStandard) {
-              this.calculatedShippingCost.set(
-                parseFloat(districtStandard.price)
-              );
+              // this.calculatedShippingCost.set(
+              //   parseFloat(districtStandard.price)
+              // );
+              this.orderForm
+                .get('shipping_cost')
+                ?.setValue(parseFloat(districtStandard.price));
             }
           } else {
-            this.calculatedShippingCost.set(0);
+            this.orderForm.get('shipping_cost')?.setValue(0);
+            // this.calculatedShippingCost.set(0);
           }
         }
       });
@@ -236,10 +267,14 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
             (item) => item.id === deliveryDistrictId
           );
           if (districtStandard) {
-            this.calculatedShippingCost.set(parseFloat(districtStandard.price));
+            // this.calculatedShippingCost.set(parseFloat(districtStandard.price));
+            this.orderForm
+              .get('shipping_cost')
+              ?.setValue(parseFloat(districtStandard.price));
           }
         } else {
-          this.calculatedShippingCost.set(0);
+          // this.calculatedShippingCost.set(0);
+          this.orderForm.get('shipping_cost')?.setValue(0);
         }
       });
   }
@@ -255,6 +290,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     }
 
     this.orderForm = this.fb.group({
+      isExpress: [false],
       shipment_type: [this.shipmentTypes[0], Validators.required],
       recipient_name: ['', Validators.required],
       recipient_phone: [
@@ -268,11 +304,12 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       delivery_date: [null, Validators.required], // String en formato YYYY-MM-DD
       package_details: this.fb.group({
         package_size_type: ['standard', Validators.required],
-        package_width_cm: [{ value: 0, disabled: true }],
-        package_length_cm: [{ value: 0, disabled: true }],
-        package_height_cm: [{ value: 0, disabled: true }],
-        package_weight_kg: [{ value: 0, disabled: true }],
+        package_width_cm: [0],
+        package_length_cm: [0],
+        package_height_cm: [0],
+        package_weight_kg: [0],
       }),
+      shipping_cost: [0],
       item_description: ['', Validators.required],
       amount_to_collect_at_delivery: [
         0,
@@ -288,11 +325,10 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
 
   // Método llamado por el evento del PackageCalculatorComponent
   onShippingCostCalculated(cost: number): void {
-    this.calculatedShippingCost.set(cost);
+    this.orderForm.get('shipping_cost')?.setValue(cost);
     console.log('Shipping cost updated in OrderCreationForm:', cost);
   }
 
-  // Método llamado por el evento del PackageCalculatorComponent
   onPackageCalculationLoading(isLoading: boolean): void {
     this.isCalculatingShipping.set(isLoading);
   }
@@ -305,7 +341,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.calculatedShippingCost() === 0) {
+    if (this.orderForm.get('shipping_cost')?.value === 0) {
       alert('El costo de envío no puede ser 0.');
       return;
     }
@@ -313,7 +349,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     const newOrderData: NewOrderData = {
       ...formValue, // Todos los campos del formulario principal
       ...formValue.package_details, // Desestructurar los detalles del paquete
-      shipping_cost: this.calculatedShippingCost(),
+      shipping_cost: this.orderForm.get('shipping_cost')?.value,
       delivery_district_name: this.selectedDistrictName(), // Añadir nombre del distrito
       temp_id: `temp-${Date.now()}-${Math.random()
         .toString(36)
@@ -338,14 +374,18 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     const defaultPaymentMethod = this.paymentMethodsForCollection[0];
 
     this.orderForm.reset({
+      isExpress: false,
       company_id: company_id,
       shipment_type: defaultShipmentType,
       delivery_date: null,
       package_details: { package_size_type: 'standard' },
+      shipping_cost: 0,
       amount_to_collect_at_delivery: 0,
       payment_method_for_collection: defaultPaymentMethod,
     });
-    this.calculatedShippingCost.set(0); // Resetear costo de envío
+    // this.orderForm.get('shipping_cost')?.setValue(0); // Update form control
+
+    // this.calculatedShippingCost.set(0); // Resetear costo de envío
     // Forzar la re-evaluación del estado de los controles de paquete
     this.packageDetailsFormGroup
       .get('package_size_type')

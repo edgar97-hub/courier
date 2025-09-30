@@ -20,7 +20,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatCheckboxModule } from '@angular/material/checkbox'; // Para isStandard
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { District } from '../../models/district.model';
 
 @Component({
@@ -56,9 +56,12 @@ export class DistrictTableComponent implements AfterViewInit, OnChanges {
   displayedColumns: string[] = [
     'code',
     'name',
-    'weight_range', 
+    'weight_range',
     'price',
     'isStandard',
+    'isExpress',
+    'surchargePercentage',
+    'montoConRecargo',
     'actions',
   ];
   dataSource: MatTableDataSource<District> = new MatTableDataSource<District>();

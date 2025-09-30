@@ -7,7 +7,7 @@
 </mat-toolbar>
 
 <mat-dialog-content class="mat-typography">
-  <app-order-edition-form
+  <app-order-edition-form *ngIf="order"
     #orderEditionForm
     [order]="order"
     (orderSubmit)="onOrderUpdated($event)"
