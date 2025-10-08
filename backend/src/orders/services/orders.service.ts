@@ -60,17 +60,18 @@ export class OrdersService {
   public async updateOrderStatus(body: any, idUser: string): Promise<any> {
     let log: OrderLogEntity;
     try {
-      const oldOrder = await this.orderRepository.findOne({
+      const currentOrder = await this.orderRepository.findOne({
         where: { id: body.payload.orderId },
       });
 
-      if (!oldOrder) throw new Error('Orden no encontrada');
+      if (!currentOrder) throw new Error('Orden no encontrada');
       if (body.payload.newStatus === STATES.ANNULLED) {
+        console.log('dejar pasar');
       } else {
         if (
           body.payload.action === 'CAMBIO DE ESTADO' &&
-          (oldOrder.status === STATES.DELIVERED ||
-            oldOrder.status === STATES.REJECTED)
+          (currentOrder.status === STATES.DELIVERED ||
+            currentOrder.status === STATES.REJECTED)
         )
           throw new Error('Orden ya fue modificada');
       }
@@ -88,7 +89,7 @@ export class OrdersService {
           order: { id: body.payload.orderId },
           performedBy: { id: idUser },
           action: body.payload.action,
-          previousValue: oldOrder.status,
+          previousValue: currentOrder.status,
           newValue: body.payload.newStatus,
           notes: body.payload.reason,
         });
@@ -103,7 +104,7 @@ export class OrdersService {
           order: { id: body.payload.orderId },
           performedBy: { id: idUser },
           action: body.payload.action,
-          previousValue: oldOrder.shipping_cost?.toString(),
+          previousValue: currentOrder.shipping_cost?.toString(),
           newValue: body.payload.newValue,
           notes: body.payload.notes,
         });
@@ -166,7 +167,7 @@ export class OrdersService {
           order: { id: body.payload.orderId },
           performedBy: { id: idUser },
           action: body.payload.action,
-          previousValue: oldOrder.amount_to_collect_at_delivery?.toString(),
+          previousValue: currentOrder.amount_to_collect_at_delivery?.toString(),
           newValue: body.payload.newValue,
           notes: body.payload.notes,
         });
@@ -239,7 +240,7 @@ export class OrdersService {
 
       const updatedOrder = await this.orderRepository.findOne({
         where: { id: body.payload.orderId },
-        relations: ['assigned_driver', 'user'],
+        relations: ['assigned_driver', 'user', 'company'],
       });
 
       if (
@@ -287,7 +288,7 @@ export class OrdersService {
           await this.cashManagementService.createAutomaticIncome(
             amount,
             paymentMethod,
-            updatedOrder.user.id,
+            updatedOrder.company.id,
             updatedOrder.id,
             updatedOrder.code,
             updatedOrder.delivery_date,

@@ -7,7 +7,7 @@
 .dialog-header {
   padding: 20px 24px 0px 24px; // Padding estándar de diálogo
   border-bottom: 1px solid var(--sys-outline-variant); // Separador sutil
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 
   h2.mat-mdc-dialog-title {
     // Estilo específico para el título de Material
@@ -20,25 +20,25 @@
 
 .order-code-chip {
   display: inline-block;
-  font-size: 0.85em;
-  color: var(--sys-on-surface-variant);
-  background-color: var(--sys-surface-container-low);
-  padding: 4px 10px;
-  border-radius: 16px; // Chip redondeado
-  margin-bottom: 16px; // Espacio después del chip
-  font-family: "Consolas", "Monaco", monospace; // Fuente monoespaciada para códigos
+  font-size: 1em;
+  // color: black;
+  // background-color:#555;// var(--sys-surface-container-low);
+  // padding: 4px 0px;
+  // border-radius: 16px; // Chip redondeado
+  // margin-bottom: 16px; // Espacio después del chip
+  // font-family: "Consolas", "Monaco", monospace; // Fuente monoespaciada para códigos
 }
 
 .dialog-content {
   padding: 0 24px 20px 24px; // Padding estándar
   overflow-y: auto; // Scroll si el contenido es muy largo
-  flex-grow: 1; // Para que ocupe el espacio disponible
+  // flex-grow: 1; // Para que ocupe el espacio disponible
 }
 
 .current-status-container {
   display: flex;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   font-size: 1em;
   color: var(--sys-on-surface-variant);
 

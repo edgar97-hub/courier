@@ -48,17 +48,18 @@ let OrdersService = class OrdersService {
     async updateOrderStatus(body, idUser) {
         let log;
         try {
-            const oldOrder = await this.orderRepository.findOne({
+            const currentOrder = await this.orderRepository.findOne({
                 where: { id: body.payload.orderId },
             });
-            if (!oldOrder)
+            if (!currentOrder)
                 throw new Error('Orden no encontrada');
             if (body.payload.newStatus === roles_1.STATES.ANNULLED) {
+                console.log('dejar pasar');
             }
             else {
                 if (body.payload.action === 'CAMBIO DE ESTADO' &&
-                    (oldOrder.status === roles_1.STATES.DELIVERED ||
-                        oldOrder.status === roles_1.STATES.REJECTED))
+                    (currentOrder.status === roles_1.STATES.DELIVERED ||
+                        currentOrder.status === roles_1.STATES.REJECTED))
                     throw new Error('Orden ya fue modificada');
             }
             if (body.payload.action === 'CAMBIO DE ESTADO') {
@@ -72,7 +73,7 @@ let OrdersService = class OrdersService {
                     order: { id: body.payload.orderId },
                     performedBy: { id: idUser },
                     action: body.payload.action,
-                    previousValue: oldOrder.status,
+                    previousValue: currentOrder.status,
                     newValue: body.payload.newStatus,
                     notes: body.payload.reason,
                 });
@@ -87,7 +88,7 @@ let OrdersService = class OrdersService {
                     order: { id: body.payload.orderId },
                     performedBy: { id: idUser },
                     action: body.payload.action,
-                    previousValue: oldOrder.shipping_cost?.toString(),
+                    previousValue: currentOrder.shipping_cost?.toString(),
                     newValue: body.payload.newValue,
                     notes: body.payload.notes,
                 });
@@ -127,7 +128,7 @@ let OrdersService = class OrdersService {
                     order: { id: body.payload.orderId },
                     performedBy: { id: idUser },
                     action: body.payload.action,
-                    previousValue: oldOrder.amount_to_collect_at_delivery?.toString(),
+                    previousValue: currentOrder.amount_to_collect_at_delivery?.toString(),
                     newValue: body.payload.newValue,
                     notes: body.payload.notes,
                 });
@@ -167,7 +168,7 @@ let OrdersService = class OrdersService {
             }
             const updatedOrder = await this.orderRepository.findOne({
                 where: { id: body.payload.orderId },
-                relations: ['assigned_driver', 'user'],
+                relations: ['assigned_driver', 'user', 'company'],
             });
             if (body.payload.newStatus === roles_1.STATES.DELIVERED ||
                 body.payload.newStatus === roles_1.STATES.REJECTED) {
@@ -193,7 +194,7 @@ let OrdersService = class OrdersService {
                     }
                     if (!updatedOrder.code || !updatedOrder.delivery_date)
                         return;
-                    await this.cashManagementService.createAutomaticIncome(amount, paymentMethod, updatedOrder.user.id, updatedOrder.id, updatedOrder.code, updatedOrder.delivery_date);
+                    await this.cashManagementService.createAutomaticIncome(amount, paymentMethod, updatedOrder.company.id, updatedOrder.id, updatedOrder.code, updatedOrder.delivery_date);
                 }
             }
             else if (body.payload.newStatus === roles_1.STATES.ANNULLED) {

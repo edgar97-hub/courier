@@ -1,13 +1,11 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   HttpStatus,
   NotFoundException,
   Param,
-  ParseIntPipe,
   ParseUUIDPipe,
   Post,
   Put,
@@ -17,21 +15,12 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiHeader,
-  ApiHeaders,
-  ApiParam,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-import { AccessLevel } from 'src/auth/decorators/access-level.decorator';
-import { AdminAccess } from 'src/auth/decorators/admin.decorator';
+import { ApiHeader, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PublicAccess } from 'src/auth/decorators/public.decorator';
-import { Roles } from 'src/auth/decorators/roles.decorator';
 import { AccessLevelGuard } from 'src/auth/guards/access-level.guard';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { OrderDTO, UpdateOrderRequestDto } from '../dto/order.dto';
+import { UpdateOrderRequestDto } from '../dto/order.dto';
 import { OrdersService } from '../services/orders.service';
 import { Response } from 'express';
 import { ImportResult } from '../dto/import-result.dto';
