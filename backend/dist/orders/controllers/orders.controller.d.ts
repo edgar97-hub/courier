@@ -36,7 +36,7 @@ export declare class OrdersController {
     assignDriverToOrder(id: string, body: any, req: any): Promise<any>;
     rescheduleOrder(id: string, body: any, req: any): Promise<any>;
     updateOrder(id: string, updateData: UpdateOrderRequestDto, req: any): Promise<import("../entities/orders.entity").OrdersEntity>;
-    getOrderPdfA4(orderId: string, req: Request, res: Response): Promise<void>;
+    getOrderPdfA4Rotulo(orderId: string, req: Request, res: Response): Promise<void>;
     getOrderPdfA4Landscape(orderId: string, req: Request, res: Response): Promise<void>;
     getOrderPdfTicket80mm(orderId: string, req: Request, res: Response): Promise<void>;
     getDashboardSummary(req: any): Promise<any>;

@@ -3,7 +3,7 @@ import { UserListPageComponent } from './pages/user-list-page/user-list-page.com
 import { UserCreatePageComponent } from './pages/user-create-page/user-create-page.component';
 import { UserEditPageComponent } from './pages/user-edit-page/user-edit-page.component';
 import { usersFeatureProviders } from './users.config'; // <--- IMPORTA LOS PROVIDERS
-import { UserDetailPageComponent } from './pages/user-detail-page/user-detail-page.component';
+import { UserDetailPageComponent } from './pages/user-detail-page-copy/user-detail-page.component';
 import { UserCompanyEditPageComponent } from './pages/user-edit-page-user-company/user-edit-page.component';
 
 export const USERS_ROUTES: Routes = [

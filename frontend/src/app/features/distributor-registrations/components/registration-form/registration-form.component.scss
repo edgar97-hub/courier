@@ -1,0 +1,22 @@
+.registration-form {
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px; // Espacio al inicio del formulario
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end; // Alinea los botones a la derecha
+  gap: 8px; // Espacio entre botones
+  margin-top: 24px; // Espacio encima de los botones
+}

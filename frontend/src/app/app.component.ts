@@ -18,6 +18,7 @@ import {
   menuItems as baseMenuItems,
 } from './shared/components/custom-sidenav/menu-items';
 import { DirectionsService } from './core/services/directions.service';
+import { UserRole } from './common/roles.enum';
 
 @Component({
   selector: 'app-root',
@@ -226,7 +227,7 @@ export class AppComponent implements OnInit {
 
     for (const item of baseMenuItems) {
       // Validar ítems principales
-      if (item.roles && item.roles.includes(userRole)) {
+      if (item.roles && item.roles.includes(userRole as UserRole)) {
         const cleanedItemRoute = item.route ? this.cleanRoute(item.route) : '';
 
         // Coincidencia exacta de la ruta
@@ -254,7 +255,7 @@ export class AppComponent implements OnInit {
       if (item.subItems) {
         for (const subItem of item.subItems) {
           // Un sub-item es accesible si el padre tiene el rol.
-          if (item.roles && item.roles.includes(userRole)) {
+          if (item.roles && item.roles.includes(userRole as UserRole)) {
             const cleanedSubItemRoute = subItem.route
               ? this.cleanRoute(subItem.route)
               : '';

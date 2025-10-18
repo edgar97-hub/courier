@@ -1,0 +1,93 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="registration-form">
+  <div class="form-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>Nombre de Cliente</mat-label>
+      <input
+        matInput
+        formControlName="clientName"
+        placeholder="Ej: Juan Pérez"
+        cdkFocusInitial
+      />
+      <mat-error *ngIf="form.get('clientName')?.hasError('required')"
+        >El nombre es requerido.</mat-error
+      >
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>DNI</mat-label>
+      <input
+        matInput
+        formControlName="clientDni"
+        type="number"
+        placeholder="8 dígitos"
+      />
+      <mat-error *ngIf="form.get('clientDni')?.hasError('required')"
+        >El DNI es requerido.</mat-error
+      >
+      <mat-error *ngIf="form.get('clientDni')?.hasError('pattern')"
+        >Debe contener 8 dígitos.</mat-error
+      >
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Teléfono</mat-label>
+      <input
+        matInput
+        formControlName="clientPhone"
+        type="tel"
+        placeholder="9 dígitos"
+      />
+      <mat-error *ngIf="form.get('clientPhone')?.hasError('required')"
+        >El teléfono es requerido.</mat-error
+      >
+      <mat-error *ngIf="form.get('clientPhone')?.hasError('pattern')"
+        >Debe contener 9 dígitos.</mat-error
+      >
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Destino (Dirección Completa)</mat-label>
+      <textarea
+        matInput
+        formControlName="destinationAddress"
+        placeholder="Ej: Av. Javier Prado 123, San Isidro, Lima"
+        rows="3"
+      ></textarea>
+      <mat-error *ngIf="form.get('destinationAddress')?.hasError('required')"
+        >El destino es requerido.</mat-error
+      >
+      <mat-error *ngIf="form.get('destinationAddress')?.hasError('minlength')"
+        >La dirección es muy corta.</mat-error
+      >
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Observación</mat-label>
+      <input matInput formControlName="observation" placeholder="" />
+    </mat-form-field>
+  </div>
+
+  <!-- ¡SECCIÓN DE BOTONES MEJORADA! -->
+  <div class="form-actions">
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="onCancelClick()"
+      class="btn-corp-secondary"
+      style="padding: 25px !important"
+    >
+      Cancelar
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      type="submit"
+      [disabled]="form.invalid"
+      class="btn-corp-primary"
+      style="padding: 25px !important"
+    >
+      <mat-icon>{{ isEditMode ? "save" : "add" }}</mat-icon>
+      {{ isEditMode ? "Guardar Cambios" : "Añadir Registro" }}
+    </button>
+  </div>
+</form>

@@ -21,6 +21,7 @@ const roles_guard_1 = require("../../auth/guards/roles.guard");
 const district_dto_1 = require("../dto/district.dto");
 const districts_service_1 = require("../services/districts.service");
 const roles_decorator_1 = require("../../auth/decorators/roles.decorator");
+const roles_1 = require("../../constants/roles");
 let DistrictsController = class DistrictsController {
     constructor(usersService) {
         this.usersService = usersService;
@@ -61,7 +62,7 @@ let DistrictsController = class DistrictsController {
 exports.DistrictsController = DistrictsController;
 __decorate([
     (0, admin_decorator_1.AdminAccess)(),
-    (0, roles_decorator_1.Roles)('RECEPTIONIST'),
+    (0, roles_decorator_1.Roles)(roles_1.ROLES.RECEPCIONISTA),
     (0, common_1.Post)('register'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -116,7 +117,7 @@ __decorate([
         name: 'id',
     }),
     (0, admin_decorator_1.AdminAccess)(),
-    (0, roles_decorator_1.Roles)('RECEPTIONIST'),
+    (0, roles_decorator_1.Roles)(roles_1.ROLES.RECEPCIONISTA),
     (0, common_1.Put)('edit/:id'),
     __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
     __param(1, (0, common_1.Body)()),
@@ -129,7 +130,7 @@ __decorate([
         name: 'id',
     }),
     (0, admin_decorator_1.AdminAccess)(),
-    (0, roles_decorator_1.Roles)('RECEPTIONIST'),
+    (0, roles_decorator_1.Roles)(roles_1.ROLES.RECEPCIONISTA),
     (0, common_1.Delete)('delete/:id'),
     __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
     __metadata("design:type", Function),

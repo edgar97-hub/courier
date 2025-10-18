@@ -20,6 +20,7 @@ const planning_event_entity_1 = require("../entities/planning-event.entity");
 const route_entity_1 = require("../entities/route.entity");
 const stop_entity_1 = require("../entities/stop.entity");
 const orders_entity_1 = require("../../orders/entities/orders.entity");
+const roles_1 = require("../../constants/roles");
 const users_entity_1 = require("../../users/entities/users.entity");
 let PlanningImportService = class PlanningImportService {
     constructor(planningEventRepository, routeRepository, stopRepository, orderRepository, connection) {
@@ -239,8 +240,15 @@ let PlanningImportService = class PlanningImportService {
                 endDate: end_date,
             });
         }
-        if (status) {
-            queryBuilder.andWhere('planningEvent.status = :status', { status });
+        if (status === planning_event_entity_1.PlanningEventStatus.COMPLETED) {
+            queryBuilder.andWhere('order.status IN (:...status)', {
+                status: [roles_1.STATES.ANNULLED, roles_1.STATES.DELIVERED, roles_1.STATES.REJECTED],
+            });
+        }
+        if (status === planning_event_entity_1.PlanningEventStatus.PENDING) {
+            queryBuilder.andWhere('order.status NOT IN (:...status)', {
+                status: [roles_1.STATES.ANNULLED, roles_1.STATES.DELIVERED, roles_1.STATES.REJECTED],
+            });
         }
         queryBuilder
             .orderBy(`planningEvent.id`, 'DESC')

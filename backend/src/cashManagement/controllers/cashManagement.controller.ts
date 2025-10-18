@@ -42,7 +42,7 @@ export class CashManagementController {
 
   @Post('manual-movement')
   @AdminAccess()
-  @Roles('RECEPTIONIST')
+  @Roles(ROLES.RECEPCIONISTA)
   @ApiBearerAuth()
   @ApiResponse({
     status: 201,
@@ -65,7 +65,7 @@ export class CashManagementController {
 
   @Put(':id')
   @AdminAccess()
-  @Roles('RECEPTIONIST')
+  @Roles(ROLES.RECEPCIONISTA)
   @ApiBearerAuth()
   @ApiParam({ name: 'id', description: 'ID del movimiento de caja' })
   @ApiResponse({
@@ -95,7 +95,7 @@ export class CashManagementController {
 
   @Delete(':id')
   @AdminAccess()
-  @Roles('RECEPTIONIST')
+  @Roles(ROLES.RECEPCIONISTA)
   @ApiBearerAuth()
   @ApiParam({ name: 'id', description: 'ID del movimiento de caja' })
   @ApiResponse({
@@ -113,7 +113,7 @@ export class CashManagementController {
 
   @Get('movements')
   @AdminAccess()
-  @Roles('RECEPTIONIST')
+  @Roles(ROLES.RECEPCIONISTA)
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Listado de movimientos de caja.' })
   @ApiResponse({ status: 403, description: 'Acceso denegado.' })
@@ -131,7 +131,7 @@ export class CashManagementController {
 
   @Get('summary')
   @AdminAccess()
-  @Roles('RECEPTIONIST')
+  @Roles(ROLES.RECEPCIONISTA)
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Resumen de saldos de caja.' })
   @ApiResponse({ status: 403, description: 'Acceso denegado.' })
@@ -141,7 +141,7 @@ export class CashManagementController {
 
   @Get('detailed-summary')
   @AdminAccess()
-  @Roles('RECEPTIONIST')
+  @Roles(ROLES.RECEPCIONISTA)
   @ApiBearerAuth()
   @ApiResponse({
     status: 200,
@@ -155,7 +155,7 @@ export class CashManagementController {
 
   @Get(':id/pdf')
   @AdminAccess()
-  @Roles('RECEPTIONIST')
+  @Roles(ROLES.RECEPCIONISTA)
   @ApiBearerAuth()
   @ApiParam({ name: 'id', description: 'ID del movimiento de caja' })
   @ApiResponse({

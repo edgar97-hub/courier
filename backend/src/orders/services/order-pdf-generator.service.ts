@@ -429,7 +429,7 @@ export class OrderPdfGeneratorService {
    * @param req
    * @param res
    */
-  async streamOrderPdfToResponse(
+  async streamOrderPdfRotuloToResponse(
     orderId: string,
     req: Request,
     res: Response,
@@ -482,7 +482,7 @@ export class OrderPdfGeneratorService {
       ) {
         return defaultValue;
       }
-      return value.toString().trim();
+      return value.toString().toUpperCase().trim();
     };
 
     const pageSizeInPoints = 140 * 2.83465;
@@ -559,7 +559,11 @@ export class OrderPdfGeneratorService {
     const LOGO_BASE64_STRING = await imageToBase64(setting?.logo_url);
 
     const documentDefinition: TDocumentDefinitions = {
-      pageSize: { width: pageSizeInPoints, height: pageSizeInPoints },
+      pageSize: {
+        width: pageSizeInPoints,
+        // height: pageSizeInPoints,
+        height: pageSizeInPoints,
+      },
       //  pageMargins: [30, 30, 30, 30],
       defaultStyle: {
         font: 'Roboto',
@@ -567,10 +571,10 @@ export class OrderPdfGeneratorService {
         lineHeight: 1.2,
         color: '#000000',
       },
-      pageMargins: [30, 45, 30, 30],
+      pageMargins: [30, 45, 30, 0],
 
       header: (currentPage: number, pageCount: number) => ({
-        margin: [24, -20, 0, 0], // Margen para todo el contenido del header
+        margin: [24, -17, 0, 0], // Margen para todo el contenido del header
         table: {
           widths: [90], // Ancho TOTAL para la celda del logo
           body: [
@@ -590,14 +594,14 @@ export class OrderPdfGeneratorService {
       }),
 
       content: [
-        {
-          text: setting.business_name,
-          style: 'orderTitleRef',
-          alignment: 'left',
-          margin: [0, 0, 0, 3],
-        },
         ...(order.isExpress
           ? [
+              // {
+              //   text: setting.business_name,
+              //   style: 'orderTitleRef',
+              //   alignment: 'left',
+              //   margin: [0, 0, 0, 3],
+              // },
               {
                 text: 'ENTREGA EXPRESS',
                 style: 'orderTitleRef',
@@ -605,7 +609,14 @@ export class OrderPdfGeneratorService {
                 margin: [0, 0, 0, 3],
               },
             ]
-          : []),
+          : [
+              // {
+              //   text: setting.business_name,
+              //   style: 'orderTitleRef',
+              //   alignment: 'left',
+              //   margin: [0, 5, 0, 10],
+              // },
+            ]),
         // --- Filas de Información usando Tablas para el Layout ---
         // Cada tabla representa una "fila" de campos de tu imagen
         {
@@ -633,7 +644,7 @@ export class OrderPdfGeneratorService {
             paddingLeft: () => 0,
             paddingRight: () => 0,
           },
-          margin: [0, 0, 0, 2], // Margen entre "filas" de campos
+          margin: [0, 0, 0, 10], // Margen entre "filas" de campos
         },
         {
           table: {
@@ -657,7 +668,7 @@ export class OrderPdfGeneratorService {
             paddingLeft: () => 0,
             paddingRight: () => 0,
           },
-          margin: [0, 5, 0, 2],
+          margin: [0, 5, 0, 10],
         },
         {
           table: {
@@ -682,7 +693,7 @@ export class OrderPdfGeneratorService {
             paddingLeft: () => 0,
             paddingRight: () => 0,
           },
-          margin: [0, 5, 0, 2],
+          margin: [0, 5, 0, 10],
         },
         {
           table: {
@@ -713,7 +724,7 @@ export class OrderPdfGeneratorService {
             paddingLeft: () => 0,
             paddingRight: () => 0,
           },
-          margin: [0, 5, 0, 2],
+          margin: [0, 5, 0, 10],
         },
         {
           table: {
@@ -744,7 +755,7 @@ export class OrderPdfGeneratorService {
             paddingLeft: () => 0,
             paddingRight: () => 0,
           },
-          margin: [0, 5, 0, 2],
+          margin: [0, 5, 0, 10],
         },
         {
           table: {
@@ -769,10 +780,10 @@ export class OrderPdfGeneratorService {
       ],
 
       styles: {
-        orderTitleRef: { fontSize: 10, bold: true, alignment: 'center' },
-        fieldLabelRef: { fontSize: 9, bold: true, margin: [0, 0, 0, 0.5] },
-        fieldValueRef: { fontSize: 9, margin: [0, 0.5, 0, 0] }, // Quitamos el margen superior aquí
-        sectionTitleRef: { fontSize: 9, bold: true },
+        orderTitleRef: { fontSize: 11, bold: true, alignment: 'center' },
+        fieldLabelRef: { fontSize: 11, bold: true, margin: [0, 0, 0, 0.5] },
+        fieldValueRef: { fontSize: 11, margin: [0, 0.5, 0, 0] }, // Quitamos el margen superior aquí
+        sectionTitleRef: { fontSize: 11, bold: true },
 
         tableHeaderRef: {
           bold: true,

@@ -96,7 +96,8 @@ export class PlanningEventsTableComponent implements AfterViewInit, OnChanges {
       return route.stops.every((stop: any) => {
         if (
           stop.order.status === OrderStatus.ENTREGADO ||
-          stop.order.status === OrderStatus.RECHAZADO // rechazado en punto tambien se considera entragado
+          stop.order.status === OrderStatus.RECHAZADO ||
+          stop.order.status === OrderStatus.ANULADO
         ) {
           return true;
         }
@@ -113,7 +114,8 @@ export class PlanningEventsTableComponent implements AfterViewInit, OnChanges {
       return route.stops.every((stop: any) => {
         if (
           stop.order.status === OrderStatus.ENTREGADO ||
-          stop.order.status === OrderStatus.RECHAZADO // rechazado en punto tambien se considera entregado
+          stop.order.status === OrderStatus.RECHAZADO ||
+          stop.order.status === OrderStatus.ANULADO
         ) {
           return true;
         }

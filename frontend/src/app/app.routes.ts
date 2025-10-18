@@ -128,6 +128,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'registros-distribuidor',
+        loadChildren: () =>
+          import(
+            './features/distributor-registrations/distributor-records.routes'
+          ).then((m) => m.DISTRIBUTOR_RECORDS_ROUTES),
+      },
+      {
         path: 'planning-events',
         loadChildren: () =>
           import('./features/planning-events/planning-events.routes').then(

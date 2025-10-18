@@ -8,7 +8,7 @@ export declare class OrderPdfGeneratorService {
     private printer;
     constructor(orderRepository: Repository<OrdersEntity>, settingRepository: Repository<SettingsEntity>);
     streamOrderPdfToResponseTest(orderId: string, res: Response): Promise<void>;
-    streamOrderPdfToResponse(orderId: string, req: Request, res: Response): Promise<void>;
+    streamOrderPdfRotuloToResponse(orderId: string, req: Request, res: Response): Promise<void>;
     streamOrderPdfLandscapeToResponse(orderId: string, req: Request, res: Response): Promise<void>;
     streamOrderPdf80mmToResponse(orderId: string, req: Request, res: Response): Promise<void>;
 }

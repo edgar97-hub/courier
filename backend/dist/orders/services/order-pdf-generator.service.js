@@ -379,7 +379,7 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
         pdfDoc.pipe(res);
         pdfDoc.end();
     }
-    async streamOrderPdfToResponse(orderId, req, res) {
+    async streamOrderPdfRotuloToResponse(orderId, req, res) {
         const order = await this.orderRepository.findOne({
             where: { id: orderId },
             relations: ['user', 'company'],
@@ -420,7 +420,7 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                 (typeof value === 'string' && value.trim() === '')) {
                 return defaultValue;
             }
-            return value.toString().trim();
+            return value.toString().toUpperCase().trim();
         };
         const pageSizeInPoints = 140 * 2.83465;
         const fieldBorders = [
@@ -477,16 +477,19 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
         }
         const LOGO_BASE64_STRING = await imageToBase64(setting?.logo_url);
         const documentDefinition = {
-            pageSize: { width: pageSizeInPoints, height: pageSizeInPoints },
+            pageSize: {
+                width: pageSizeInPoints,
+                height: pageSizeInPoints,
+            },
             defaultStyle: {
                 font: 'Roboto',
                 fontSize: 8,
                 lineHeight: 1.2,
                 color: '#000000',
             },
-            pageMargins: [30, 45, 30, 30],
+            pageMargins: [30, 45, 30, 0],
             header: (currentPage, pageCount) => ({
-                margin: [24, -20, 0, 0],
+                margin: [24, -17, 0, 0],
                 table: {
                     widths: [90],
                     body: [
@@ -502,12 +505,6 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                 layout: 'noBorders',
             }),
             content: [
-                {
-                    text: setting.business_name,
-                    style: 'orderTitleRef',
-                    alignment: 'left',
-                    margin: [0, 0, 0, 3],
-                },
                 ...(order.isExpress
                     ? [
                         {
@@ -539,7 +536,7 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                         paddingLeft: () => 0,
                         paddingRight: () => 0,
                     },
-                    margin: [0, 0, 0, 2],
+                    margin: [0, 0, 0, 10],
                 },
                 {
                     table: {
@@ -563,7 +560,7 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                         paddingLeft: () => 0,
                         paddingRight: () => 0,
                     },
-                    margin: [0, 5, 0, 2],
+                    margin: [0, 5, 0, 10],
                 },
                 {
                     table: {
@@ -585,7 +582,7 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                         paddingLeft: () => 0,
                         paddingRight: () => 0,
                     },
-                    margin: [0, 5, 0, 2],
+                    margin: [0, 5, 0, 10],
                 },
                 {
                     table: {
@@ -608,7 +605,7 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                         paddingLeft: () => 0,
                         paddingRight: () => 0,
                     },
-                    margin: [0, 5, 0, 2],
+                    margin: [0, 5, 0, 10],
                 },
                 {
                     table: {
@@ -633,7 +630,7 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                         paddingLeft: () => 0,
                         paddingRight: () => 0,
                     },
-                    margin: [0, 5, 0, 2],
+                    margin: [0, 5, 0, 10],
                 },
                 {
                     table: {
@@ -657,10 +654,10 @@ let OrderPdfGeneratorService = class OrderPdfGeneratorService {
                 },
             ],
             styles: {
-                orderTitleRef: { fontSize: 10, bold: true, alignment: 'center' },
-                fieldLabelRef: { fontSize: 9, bold: true, margin: [0, 0, 0, 0.5] },
-                fieldValueRef: { fontSize: 9, margin: [0, 0.5, 0, 0] },
-                sectionTitleRef: { fontSize: 9, bold: true },
+                orderTitleRef: { fontSize: 11, bold: true, alignment: 'center' },
+                fieldLabelRef: { fontSize: 11, bold: true, margin: [0, 0, 0, 0.5] },
+                fieldValueRef: { fontSize: 11, margin: [0, 0.5, 0, 0] },
+                sectionTitleRef: { fontSize: 11, bold: true },
                 tableHeaderRef: {
                     bold: true,
                     fontSize: 9,

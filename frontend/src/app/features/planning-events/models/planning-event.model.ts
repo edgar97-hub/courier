@@ -1,7 +1,6 @@
 export enum PlanningEventStatus {
   PENDING = 'PENDING',
   COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
 }
 
 export interface PlanningEvent {

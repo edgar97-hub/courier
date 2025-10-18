@@ -20,6 +20,7 @@ const cashManagement_dto_1 = require("../dto/cashManagement.dto");
 const auth_guard_1 = require("../../auth/guards/auth.guard");
 const roles_guard_1 = require("../../auth/guards/roles.guard");
 const roles_decorator_1 = require("../../auth/decorators/roles.decorator");
+const roles_1 = require("../../constants/roles");
 const cash_movement_pdf_generator_service_1 = require("../services/cash-movement-pdf-generator.service");
 const admin_decorator_1 = require("../../auth/decorators/admin.decorator");
 const public_decorator_1 = require("../../auth/decorators/public.decorator");
@@ -65,7 +66,7 @@ exports.CashManagementController = CashManagementController;
 __decorate([
     (0, common_1.Post)('manual-movement'),
     (0, admin_decorator_1.AdminAccess)(),
-    (0, roles_decorator_1.Roles)('RECEPTIONIST'),
+    (0, roles_decorator_1.Roles)(roles_1.ROLES.RECEPCIONISTA),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiResponse)({
         status: 201,
@@ -81,7 +82,7 @@ __decorate([
 __decorate([
     (0, common_1.Put)(':id'),
     (0, admin_decorator_1.AdminAccess)(),
-    (0, roles_decorator_1.Roles)('RECEPTIONIST'),
+    (0, roles_decorator_1.Roles)(roles_1.ROLES.RECEPCIONISTA),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del movimiento de caja' }),
     (0, swagger_1.ApiResponse)({
@@ -103,7 +104,7 @@ __decorate([
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, admin_decorator_1.AdminAccess)(),
-    (0, roles_decorator_1.Roles)('RECEPTIONIST'),
+    (0, roles_decorator_1.Roles)(roles_1.ROLES.RECEPCIONISTA),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del movimiento de caja' }),
     (0, swagger_1.ApiResponse)({
@@ -123,7 +124,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)('movements'),
     (0, admin_decorator_1.AdminAccess)(),
-    (0, roles_decorator_1.Roles)('RECEPTIONIST'),
+    (0, roles_decorator_1.Roles)(roles_1.ROLES.RECEPCIONISTA),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Listado de movimientos de caja.' }),
     (0, swagger_1.ApiResponse)({ status: 403, description: 'Acceso denegado.' }),
@@ -137,7 +138,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)('summary'),
     (0, admin_decorator_1.AdminAccess)(),
-    (0, roles_decorator_1.Roles)('RECEPTIONIST'),
+    (0, roles_decorator_1.Roles)(roles_1.ROLES.RECEPCIONISTA),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Resumen de saldos de caja.' }),
     (0, swagger_1.ApiResponse)({ status: 403, description: 'Acceso denegado.' }),
@@ -149,7 +150,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)('detailed-summary'),
     (0, admin_decorator_1.AdminAccess)(),
-    (0, roles_decorator_1.Roles)('RECEPTIONIST'),
+    (0, roles_decorator_1.Roles)(roles_1.ROLES.RECEPCIONISTA),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiResponse)({
         status: 200,
@@ -165,7 +166,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)(':id/pdf'),
     (0, admin_decorator_1.AdminAccess)(),
-    (0, roles_decorator_1.Roles)('RECEPTIONIST'),
+    (0, roles_decorator_1.Roles)(roles_1.ROLES.RECEPCIONISTA),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del movimiento de caja' }),
     (0, swagger_1.ApiResponse)({

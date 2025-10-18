@@ -37,7 +37,7 @@
         *ngFor="let status of planningEventStatuses"
         [value]="status"
       >
-        {{ status }}
+        {{ getStatusLabel(status) }}
       </mat-option>
     </mat-select>
   </mat-form-field>

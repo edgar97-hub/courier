@@ -17,7 +17,6 @@ import {
 } from '@nestjs/common';
 import { ApiHeader, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PublicAccess } from 'src/auth/decorators/public.decorator';
-import { AccessLevelGuard } from 'src/auth/guards/access-level.guard';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UpdateOrderRequestDto } from '../dto/order.dto';
@@ -28,7 +27,7 @@ import { OrderPdfGeneratorService } from '../services/order-pdf-generator.servic
 
 @ApiTags('Orders')
 @Controller('orders')
-@UseGuards(AuthGuard, RolesGuard, AccessLevelGuard)
+@UseGuards(AuthGuard, RolesGuard)
 export class OrdersController {
   constructor(
     private readonly ordersService: OrdersService,
@@ -193,14 +192,14 @@ export class OrdersController {
   }
 
   @PublicAccess()
-  @Get(':id/pdf-a4')
-  async getOrderPdfA4(
+  @Get(':id/pdf-rotulo')
+  async getOrderPdfA4Rotulo(
     @Param('id') orderId: string,
     @Req() req: Request,
     @Res() res: Response,
   ): Promise<void> {
     try {
-      await this.orderPdfGeneratorService.streamOrderPdfToResponse(
+      await this.orderPdfGeneratorService.streamOrderPdfRotuloToResponse(
         orderId,
         req,
         res,

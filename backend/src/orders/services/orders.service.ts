@@ -837,9 +837,9 @@ export class OrdersService {
         }
       }
 
-      if (role === ROLES.COMPANY) {
+      if (role === ROLES.EMPRESA || role === ROLES.EMPRESA_DISTRIBUIDOR) {
         query.andWhere('company.id = :idUser', { idUser });
-      } else if (role === ROLES.MOTORIZED && req.query.my_orders) {
+      } else if (role === ROLES.MOTORIZADO && req.query.my_orders) {
         query.andWhere('assigned_driver.id = :idUser', { idUser });
       }
 
@@ -993,7 +993,7 @@ export class OrdersService {
         }
       }
 
-      if (role === ROLES.COMPANY) {
+      if (role === ROLES.EMPRESA || role === ROLES.EMPRESA_DISTRIBUIDOR) {
         query.andWhere('company.id = :idUser', { idUser });
       }
 
@@ -1280,7 +1280,10 @@ export class OrdersService {
       );
 
       let user = {};
-      if (req.roleUser === ROLES.COMPANY) {
+      if (
+        req.roleUser === ROLES.EMPRESA ||
+        req.roleUser === ROLES.EMPRESA_DISTRIBUIDOR
+      ) {
         user = { company: { id: req.idUser } };
       }
 
@@ -1437,7 +1440,10 @@ export class OrdersService {
         });
       }
 
-      if (role === ROLES.COMPANY) {
+      if (
+        role === ROLES.EMPRESA ||
+        req.roleUser === ROLES.EMPRESA_DISTRIBUIDOR
+      ) {
         query.andWhere('company.id = :idUser', { idUser });
       }
 

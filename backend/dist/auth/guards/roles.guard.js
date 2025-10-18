@@ -39,7 +39,7 @@ let RolesGuard = class RolesGuard {
                 throw new common_1.UnauthorizedException('No tienes permisos para esta operacion');
             }
         }
-        if (roleUser === roles_1.ROLES.ADMIN) {
+        if (roleUser === roles_1.ROLES.ADMINISTRADOR) {
             return true;
         }
         const isAuth = roles.some((role) => roles_1.ROLES[role] === roleUser);

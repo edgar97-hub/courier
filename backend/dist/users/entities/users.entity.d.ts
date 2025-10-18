@@ -3,6 +3,7 @@ import { IUser } from '../../interfaces/user.interface';
 import { BaseEntity } from '../../config/base.entity';
 import { OrdersEntity } from '../../orders/entities/orders.entity';
 import { CashManagementEntity } from 'src/cashManagement/entities/cashManagement.entity';
+import { DistributorRecordEntity } from 'src/distributor-records/entities/distributor-record.entity';
 export declare class UsersEntity extends BaseEntity implements IUser {
     code: number;
     email: string;
@@ -32,4 +33,5 @@ export declare class UsersEntity extends BaseEntity implements IUser {
     assignedDriversIncludes: OrdersEntity[];
     companyOrdersIncludes: OrdersEntity[];
     cashManagementIncludes: CashManagementEntity[];
+    distributorRecords: DistributorRecordEntity[];
 }

@@ -1,0 +1,103 @@
+<div class="table-container mat-elevation-z4">
+  <table mat-table [dataSource]="dataSource">
+    <!-- Columna Nombre Cliente -->
+    <ng-container matColumnDef="code">
+      <th mat-header-cell *matHeaderCellDef>N°</th>
+      <td mat-cell *matCellDef="let element">{{ element.code }}</td>
+    </ng-container>
+
+    <!-- Columna Nombre Cliente -->
+    <ng-container matColumnDef="user">
+      <th mat-header-cell *matHeaderCellDef>Remitente</th>
+      <td mat-cell *matCellDef="let element">{{ element.user?.username }}</td>
+    </ng-container>
+
+    <!-- Columna Fecha de Registro -->
+    <ng-container matColumnDef="createdAt">
+      <th mat-header-cell *matHeaderCellDef>Fecha Registro</th>
+      <td mat-cell *matCellDef="let element">
+        {{ element.createdAt | date : "dd/MM/yyyy HH:mm" }}
+      </td>
+    </ng-container>
+
+    <!-- Columna Nombre Cliente -->
+    <ng-container matColumnDef="clientName">
+      <th mat-header-cell *matHeaderCellDef>Nombre Cliente</th>
+      <td mat-cell *matCellDef="let element">{{ element.clientName }}</td>
+    </ng-container>
+
+    <!-- Columna DNI -->
+    <ng-container matColumnDef="clientDni">
+      <th mat-header-cell *matHeaderCellDef>DNI</th>
+      <td mat-cell *matCellDef="let element">{{ element.clientDni }}</td>
+    </ng-container>
+
+    <!-- Columna Teléfono -->
+    <ng-container matColumnDef="clientPhone">
+      <th mat-header-cell *matHeaderCellDef>Teléfono</th>
+      <td mat-cell *matCellDef="let element">{{ element.clientPhone }}</td>
+    </ng-container>
+
+    <!-- Columna Destino -->
+    <ng-container matColumnDef="destinationAddress">
+      <th mat-header-cell *matHeaderCellDef>Destino</th>
+      <td mat-cell *matCellDef="let element">
+        {{ element.destinationAddress }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="observation">
+      <th mat-header-cell *matHeaderCellDef>Observación</th>
+      <td mat-cell *matCellDef="let element">
+        {{ element.observation }}
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+    <!-- Mensaje a mostrar cuando no hay datos -->
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+        Aún no has creado ningún registro.
+      </td>
+    </tr>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Acciones</th>
+      <td mat-cell *matCellDef="let element">
+        <div style="display: flex; gap: 10px !important">
+          <button
+            mat-icon-button
+            (click)="onEdit(element)"
+            matTooltip="Editar Registro"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            color="warn"
+            (click)="onDelete(element.id)"
+            matTooltip="Eliminar Registro"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            (click)="onPrint(element.id)"
+            matTooltip="Imprimir Rótulo"
+          >
+            <mat-icon>print</mat-icon>
+          </button>
+        </div>
+      </td>
+    </ng-container>
+  </table>
+
+  <mat-paginator
+    [length]="resultsLength"
+    [pageSizeOptions]="[5, 10, 20]"
+    aria-label="Seleccionar página de registros"
+  >
+  </mat-paginator>
+</div>

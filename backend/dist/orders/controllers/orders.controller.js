@@ -16,7 +16,6 @@ exports.OrdersController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const public_decorator_1 = require("../../auth/decorators/public.decorator");
-const access_level_guard_1 = require("../../auth/guards/access-level.guard");
 const auth_guard_1 = require("../../auth/guards/auth.guard");
 const roles_guard_1 = require("../../auth/guards/roles.guard");
 const order_dto_1 = require("../dto/order.dto");
@@ -95,9 +94,9 @@ let OrdersController = class OrdersController {
     async updateOrder(id, updateData, req) {
         return await this.ordersService.updateOrder(id, updateData, req.idUser);
     }
-    async getOrderPdfA4(orderId, req, res) {
+    async getOrderPdfA4Rotulo(orderId, req, res) {
         try {
-            await this.orderPdfGeneratorService.streamOrderPdfToResponse(orderId, req, res);
+            await this.orderPdfGeneratorService.streamOrderPdfRotuloToResponse(orderId, req, res);
         }
         catch (error) {
             console.error('Error in PDF streaming controller:', error);
@@ -274,14 +273,14 @@ __decorate([
 ], OrdersController.prototype, "updateOrder", null);
 __decorate([
     (0, public_decorator_1.PublicAccess)(),
-    (0, common_1.Get)(':id/pdf-a4'),
+    (0, common_1.Get)(':id/pdf-rotulo'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Req)()),
     __param(2, (0, common_1.Res)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", Promise)
-], OrdersController.prototype, "getOrderPdfA4", null);
+], OrdersController.prototype, "getOrderPdfA4Rotulo", null);
 __decorate([
     (0, public_decorator_1.PublicAccess)(),
     (0, common_1.Get)(':id/pdf-a4-landscape'),
@@ -312,7 +311,7 @@ __decorate([
 exports.OrdersController = OrdersController = __decorate([
     (0, swagger_1.ApiTags)('Orders'),
     (0, common_1.Controller)('orders'),
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard, roles_guard_1.RolesGuard, access_level_guard_1.AccessLevelGuard),
+    (0, common_1.UseGuards)(auth_guard_1.AuthGuard, roles_guard_1.RolesGuard),
     __metadata("design:paramtypes", [orders_service_1.OrdersService,
         order_pdf_generator_service_1.OrderPdfGeneratorService])
 ], OrdersController);

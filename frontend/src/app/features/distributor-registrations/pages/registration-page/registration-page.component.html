@@ -1,0 +1,57 @@
+<div class="page-container">
+  <div class="header">
+    <h1 class="page-title">
+      {{
+        isAdminOrReceptionist()
+          ? "Gestión de Registros de Envio"
+          : "Mis Registros de Distribuidor"
+      }}
+    </h1>
+    <!-- Los botones de acción ahora están en su propio contenedor -->
+    <div class="header-actions">
+      <button
+        mat-stroked-button
+        (click)="openMassiveImportDialog()"
+        class="btn-corp-secondary"
+      >
+        <mat-icon>upload_file</mat-icon>
+        <span>Importar desde Excel</span>
+      </button>
+      <button
+        mat-raised-button
+        color="primary"
+        class="btn-corp-primary"
+        (click)="openManualRegistrationDialog()"
+      >
+        <mat-icon>add</mat-icon>
+        <span>Nuevo Registro</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="history-section">
+    <!-- El filtro y el botón de refresco también tienen su contenedor -->
+    <div class="filter-controls">
+      <app-filter-toolbar
+        (searchChanged)="onSearchChanged($event)"
+      ></app-filter-toolbar>
+      <button
+        mat-icon-button
+        (click)="onRefreshTable()"
+        matTooltip="Actualizar la lista"
+        class="refresh-button btn-corp-primary"
+      >
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+
+    <app-registrations-table
+      #registrationsTable
+      [searchTerm]="searchTerm()"
+      (edit)="handleEdit($event)"
+      (delete)="handleDelete($event)"
+      (print)="handlePrint($event)"
+    >
+    </app-registrations-table>
+  </div>
+</div>

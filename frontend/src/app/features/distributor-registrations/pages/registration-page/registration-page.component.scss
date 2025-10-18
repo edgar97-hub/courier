@@ -1,0 +1,72 @@
+// --- ESTILOS BASE (ESCRITORIO) ---
+
+.page-container {
+  padding: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap; // Permite que los elementos se envuelvan si no hay espacio
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 16px;
+  flex-shrink: 0; // Evita que los botones se encojan
+}
+
+.history-section {
+  margin-top: 24px;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 16px;
+  // align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+
+  app-filter-toolbar {
+    flex-grow: 1; // Hace que la barra de búsqueda ocupe el espacio disponible
+  }
+}
+
+// --- ESTILOS PARA MÓVILES (PANTALLAS PEQUEÑAS) ---
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 16px; // Menos padding en móviles
+  }
+
+  .header {
+    flex-direction: column; // Apila el título y los botones
+    align-items: flex-start; // Alinea todo a la izquierda
+  }
+
+  .header-actions {
+    width: 100%; // Ocupa todo el ancho
+    flex-direction: column; // Apila los botones
+
+    button {
+      width: 100%; // Botones de ancho completo
+    }
+  }
+
+  // Ocultar el texto de los botones en pantallas muy pequeñas para ahorrar espacio
+  @media (max-width: 480px) {
+    .header-actions button span {
+      display: none;
+    }
+    .header-actions button mat-icon {
+      margin-right: 0; // Quitar margen si el texto se oculta
+    }
+  }
+}

@@ -67,8 +67,6 @@ export class Route {
   @Column({ nullable: true })
   breakDuration: string;
 
-  // --- NUEVAS COLUMNAS PARA SEGUIMIENTO EN TIEMPO REAL ---
-
   @Column({ type: 'decimal', precision: 10, scale: 8, nullable: true })
   currentLatitude: number;
 

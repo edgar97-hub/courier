@@ -22,6 +22,7 @@ import { SettingsService } from '../../../features/settings/services/settings.se
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import SidenavHeaderComponent from './sidenav-header/sidenav-header.component';
+import { UserRole } from '../../../common/roles.enum';
 
 @Component({
   selector: 'app-custom-sidenav',
@@ -71,8 +72,8 @@ import SidenavHeaderComponent from './sidenav-header/sidenav-header.component';
   ],
 })
 export class CustomSidenavComponent implements OnInit, OnDestroy {
-  isMobile = input.required<boolean>(); // <--- NUEVO INPUT
-  sidenavParentRef = input<MatSidenav | null>(null); // Este es InputSignal<MatSidenav | null>
+  isMobile = input.required<boolean>();
+  sidenavParentRef = input<MatSidenav | null>(null);
 
   collapsed = input<boolean>(false);
 
@@ -121,7 +122,7 @@ export class CustomSidenavComponent implements OnInit, OnDestroy {
       .filter((item) => {
         if (!isAuthenticated) return false;
         if (!item.roles || item.roles.length === 0) return true;
-        return userRole && item.roles.includes(userRole);
+        return userRole && item.roles.includes(userRole as UserRole);
       })
       .map((item) =>
         this.filterSubItemsRecursively(item, userRole, isAuthenticated)
@@ -138,7 +139,7 @@ export class CustomSidenavComponent implements OnInit, OnDestroy {
         .filter((child) => {
           if (!isAuthenticated) return false;
           if (!child.roles || child.roles.length === 0) return true;
-          return userRole && child.roles.includes(userRole);
+          return userRole && child.roles.includes(userRole as UserRole);
         })
         .map((child) =>
           this.filterSubItemsRecursively(child, userRole, isAuthenticated)

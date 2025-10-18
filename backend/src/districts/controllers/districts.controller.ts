@@ -19,7 +19,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AdminAccess } from 'src/auth/decorators/admin.decorator';
-import { AccessLevelGuard } from 'src/auth/guards/access-level.guard';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { DistrictDTO, DistrictUpdateDTO } from '../dto/district.dto';
@@ -34,7 +33,7 @@ export class DistrictsController {
   constructor(private readonly usersService: DistrictsService) {}
 
   @AdminAccess()
-  @Roles('RECEPTIONIST')
+  @Roles(ROLES.RECEPCIONISTA)
   @Post('register')
   public async registerUser(@Body() body: DistrictDTO) {
     return await this.usersService.createUser(body);
@@ -94,7 +93,7 @@ export class DistrictsController {
     name: 'id',
   })
   @AdminAccess()
-  @Roles('RECEPTIONIST')
+  @Roles(ROLES.RECEPCIONISTA)
   @Put('edit/:id')
   public async updateUser(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -107,7 +106,7 @@ export class DistrictsController {
     name: 'id',
   })
   @AdminAccess()
-  @Roles('RECEPTIONIST')
+  @Roles(ROLES.RECEPCIONISTA)
   @Delete('delete/:id')
   public async deleteUser(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.usersService.deleteUser(id);

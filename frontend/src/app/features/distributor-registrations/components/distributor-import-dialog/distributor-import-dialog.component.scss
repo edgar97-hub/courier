@@ -1,0 +1,55 @@
+.dialog-actions {
+  display: flex;
+  gap: 16px;
+  margin: 24px 0;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.file-info {
+  text-align: center;
+  font-style: italic;
+  color: #3f51b5;
+  margin-top: 16px;
+  font-weight: 500;
+}
+
+.upload-progress-container {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.import-results {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 4px;
+  
+  & .success-message {
+    color: #2e7d32; // Green
+    background-color: #e8f5e9;
+    padding: 8px;
+    border-radius: 4px;
+  }
+
+  & .error-message {
+    color: #c62828; // Red
+    background-color: #ffebee;
+    padding: 8px;
+    border-radius: 4px;
+  }
+}
+
+.error-details {
+  margin-top: 16px;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ffcdd2;
+  padding: 8px;
+}
+
+.error-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9em;
+}

@@ -49,6 +49,7 @@ import { User } from '../../../users/models/user.model';
 import { AppStore } from '../../../../app.store';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatCheckboxChange } from '@angular/material/checkbox';
+import { UserRole } from '../../../../common/roles.enum';
 
 @Component({
   selector: 'app-order-creation-form',
@@ -188,7 +189,10 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
 
   isCompany(): boolean {
     const userRole = this.appStore.currentUser()?.role;
-    return userRole === 'EMPRESA';
+    return (
+      userRole === UserRole.EMPRESA_DISTRIBUIDOR ||
+      userRole === UserRole.COMPANY
+    );
   }
   displayDriverName(driver: User | null): string {
     return driver && driver.username ? driver.username : '';

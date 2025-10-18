@@ -549,10 +549,10 @@ let OrdersService = class OrdersService {
                     });
                 }
             }
-            if (role === roles_1.ROLES.COMPANY) {
+            if (role === roles_1.ROLES.EMPRESA || role === roles_1.ROLES.EMPRESA_DISTRIBUIDOR) {
                 query.andWhere('company.id = :idUser', { idUser });
             }
-            else if (role === roles_1.ROLES.MOTORIZED && req.query.my_orders) {
+            else if (role === roles_1.ROLES.MOTORIZADO && req.query.my_orders) {
                 query.andWhere('assigned_driver.id = :idUser', { idUser });
             }
             if (req.query.isExpress) {
@@ -624,7 +624,7 @@ let OrdersService = class OrdersService {
                     });
                 }
             }
-            if (role === roles_1.ROLES.COMPANY) {
+            if (role === roles_1.ROLES.EMPRESA || role === roles_1.ROLES.EMPRESA_DISTRIBUIDOR) {
                 query.andWhere('company.id = :idUser', { idUser });
             }
             if (status) {
@@ -826,7 +826,8 @@ let OrdersService = class OrdersService {
             const endUTC = (0, date_fns_tz_1.fromZonedTime)(endOfPeriodInLima, timeZone);
             let delivery_date = (0, date_fns_tz_1.formatInTimeZone)(new Date().toISOString(), timeZone, 'yyyy-MM-dd');
             let user = {};
-            if (req.roleUser === roles_1.ROLES.COMPANY) {
+            if (req.roleUser === roles_1.ROLES.EMPRESA ||
+                req.roleUser === roles_1.ROLES.EMPRESA_DISTRIBUIDOR) {
                 user = { company: { id: req.idUser } };
             }
             const totalOrdersToday = await this.orderRepository.count({
@@ -891,7 +892,8 @@ let OrdersService = class OrdersService {
                     createdAt: (0, typeorm_2.Between)(startUTC, endUTC),
                 });
             }
-            if (role === roles_1.ROLES.COMPANY) {
+            if (role === roles_1.ROLES.EMPRESA ||
+                req.roleUser === roles_1.ROLES.EMPRESA_DISTRIBUIDOR) {
                 query.andWhere('company.id = :idUser', { idUser });
             }
             if (status) {

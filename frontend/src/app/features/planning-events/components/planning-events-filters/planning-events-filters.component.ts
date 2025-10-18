@@ -51,6 +51,15 @@ export class PlanningEventsFiltersComponent implements OnInit, OnDestroy {
   private datePipe = inject(DatePipe);
   private destroy$ = new Subject<void>();
 
+  private statusLabelMap: Record<string, string> = {
+    [PlanningEventStatus.PENDING]: 'Pendiente',
+    [PlanningEventStatus.COMPLETED]: 'Completado',
+  };
+
+  getStatusLabel(status: string): string {
+    return this.statusLabelMap[status] ?? status;
+  }
+
   constructor() {
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);

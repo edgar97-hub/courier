@@ -6,6 +6,7 @@ import { BaseEntity } from '../../config/base.entity';
 import { OrdersEntity } from '../../orders/entities/orders.entity';
 import { CashManagementEntity } from 'src/cashManagement/entities/cashManagement.entity';
 import { Route } from 'src/planningEvents/entities/route.entity';
+import { DistributorRecordEntity } from 'src/distributor-records/entities/distributor-record.entity';
 
 @Entity({ name: 'users' })
 export class UsersEntity extends BaseEntity implements IUser {
@@ -97,4 +98,7 @@ export class UsersEntity extends BaseEntity implements IUser {
     (cashManagement) => cashManagement.user,
   )
   cashManagementIncludes: CashManagementEntity[];
+
+  @OneToMany(() => DistributorRecordEntity, (item) => item.user)
+  distributorRecords: DistributorRecordEntity[];
 }

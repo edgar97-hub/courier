@@ -36,7 +36,7 @@ let UsersService = class UsersService {
     async registerCompany(body) {
         try {
             body.password = await bcrypt.hash(body.password, Number(process.env.HASH_SALT));
-            body.role = roles_1.ROLES.COMPANY;
+            body.role = roles_1.ROLES.EMPRESA;
             const savedUser = await this.userRepository.save(body);
             return savedUser;
         }

@@ -40,7 +40,7 @@ export class UsersService {
         body.password,
         Number(process.env.HASH_SALT),
       );
-      body.role = ROLES.COMPANY;
+      body.role = ROLES.EMPRESA;
 
       const savedUser = await this.userRepository.save(body);
       return savedUser;

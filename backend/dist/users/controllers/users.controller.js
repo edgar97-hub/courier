@@ -16,13 +16,13 @@ exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const admin_decorator_1 = require("../../auth/decorators/admin.decorator");
-const access_level_guard_1 = require("../../auth/guards/access-level.guard");
 const auth_guard_1 = require("../../auth/guards/auth.guard");
 const roles_guard_1 = require("../../auth/guards/roles.guard");
 const user_dto_1 = require("../dto/user.dto");
 const users_service_1 = require("../services/users.service");
 const public_decorator_1 = require("../../auth/decorators/public.decorator");
 const roles_decorator_1 = require("../../auth/decorators/roles.decorator");
+const roles_1 = require("../../constants/roles");
 let UsersController = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
@@ -66,7 +66,7 @@ let UsersController = class UsersController {
 exports.UsersController = UsersController;
 __decorate([
     (0, admin_decorator_1.AdminAccess)(),
-    (0, roles_decorator_1.Roles)('RECEPTIONIST'),
+    (0, roles_decorator_1.Roles)(roles_1.ROLES.RECEPCIONISTA),
     (0, admin_decorator_1.AdminAccess)(),
     (0, common_1.Post)('register'),
     __param(0, (0, common_1.Body)()),
@@ -126,7 +126,7 @@ __decorate([
         name: 'id',
     }),
     (0, admin_decorator_1.AdminAccess)(),
-    (0, roles_decorator_1.Roles)('RECEPTIONIST'),
+    (0, roles_decorator_1.Roles)(roles_1.ROLES.RECEPCIONISTA),
     (0, common_1.Put)('edit/:id'),
     __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
     __param(1, (0, common_1.Body)()),
@@ -169,7 +169,7 @@ __decorate([
 exports.UsersController = UsersController = __decorate([
     (0, swagger_1.ApiTags)('Users'),
     (0, common_1.Controller)('users'),
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard, roles_guard_1.RolesGuard, access_level_guard_1.AccessLevelGuard),
+    (0, common_1.UseGuards)(auth_guard_1.AuthGuard, roles_guard_1.RolesGuard),
     __metadata("design:paramtypes", [users_service_1.UsersService])
 ], UsersController);
 //# sourceMappingURL=users.controller.js.map

@@ -14,7 +14,6 @@ import {
 } from '@nestjs/common';
 import { ApiHeader, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AdminAccess } from 'src/auth/decorators/admin.decorator';
-import { AccessLevelGuard } from 'src/auth/guards/access-level.guard';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import {
@@ -27,15 +26,16 @@ import {
 import { UsersService } from '../services/users.service';
 import { PublicAccess } from 'src/auth/decorators/public.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
+import { ROLES } from 'src/constants/roles';
 
 @ApiTags('Users')
 @Controller('users')
-@UseGuards(AuthGuard, RolesGuard, AccessLevelGuard)
+@UseGuards(AuthGuard, RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @AdminAccess()
-  @Roles('RECEPTIONIST')
+  @Roles(ROLES.RECEPCIONISTA)
   @AdminAccess()
   @Post('register')
   public async registerUser(@Body() body: UserDTO) {
@@ -92,7 +92,7 @@ export class UsersController {
     name: 'id',
   })
   @AdminAccess()
-  @Roles('RECEPTIONIST')
+  @Roles(ROLES.RECEPCIONISTA)
   @Put('edit/:id')
   public async updateUser(
     @Param('id', new ParseUUIDPipe()) id: string,

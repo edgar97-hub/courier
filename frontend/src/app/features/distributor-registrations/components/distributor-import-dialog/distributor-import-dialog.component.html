@@ -1,0 +1,97 @@
+<h2 mat-dialog-title>Importación Masiva de Registros</h2>
+
+<mat-dialog-content class="mat-typography">
+  <p>Sigue estos pasos para importar tus registros desde un archivo Excel:</p>
+  <ol>
+    <li>
+      Descarga nuestra plantilla para asegurar que las columnas tengan el
+      formato correcto.
+    </li>
+    <li>Llena la plantilla con los datos de tus registros.</li>
+    <li>Guarda el archivo y súbelo usando el botón "Seleccionar Archivo".</li>
+  </ol>
+
+  <div class="dialog-actions">
+    <button
+      mat-stroked-button
+      (click)="onDownloadTemplate()"
+      class="btn-corp-secondary"
+    >
+      <mat-icon>download</mat-icon>
+      Descargar Plantilla
+    </button>
+    <button
+      mat-stroked-button
+      (click)="fileInput.click()"
+      [disabled]="isProcessing()"
+      class="btn-corp-primary"
+    >
+      <mat-icon>attach_file</mat-icon>
+      Seleccionar Archivo
+    </button>
+    <input
+      hidden
+      (change)="onFileSelected($event)"
+      #fileInput
+      type="file"
+      accept=".xlsx, .xls, .csv"
+    />
+  </div>
+
+  <div *ngIf="selectedFile() && !isProcessing()" class="file-info">
+    <span
+      >Archivo listo para importar:
+      <strong>{{ selectedFile()?.name }}</strong></span
+    >
+  </div>
+
+  <!-- Feedback durante y después de la importación -->
+  <div *ngIf="isProcessing()" class="upload-progress-container">
+    <p>Procesando archivo, por favor espera...</p>
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  </div>
+
+  <div *ngIf="importResult()" class="import-results">
+    <h3
+      [ngClass]="{
+        'success-message': importResult()?.success,
+        'error-message': !importResult()?.success
+      }"
+    >
+      {{ importResult()?.message }}
+    </h3>
+    <div
+      *ngIf="importResult()?.errors && importResult()?.errors?.length! > 0"
+      class="error-details"
+    >
+      <h4>Detalles de Errores:</h4>
+      <mat-list dense>
+        <div *ngFor="let error of importResult()?.errors" class="error-item">
+          <mat-icon matListItemIcon color="warn">error_outline</mat-icon>
+          <span>Fila {{ error.row }}: {{ error.message }}</span>
+        </div>
+      </mat-list>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="center" style="gap: 10px;">
+  <button
+    mat-button
+    [mat-dialog-close]="false"
+    [disabled]="isProcessing()"
+    class="btn-corp-secondary"
+  >
+    {{ importResult()?.success ? "Cerrar" : "Cancelar" }}
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="processImport()"
+    [disabled]="!selectedFile() || isProcessing()"
+    class="btn-corp-primary"
+  >
+    <mat-icon>upload</mat-icon>
+    {{ isProcessing() ? "Importando..." : "Confirmar Importación" }}
+  </button>
+</mat-dialog-actions>

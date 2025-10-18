@@ -19,7 +19,9 @@ import { AppStore } from '../../../../app.store';
         <h2 class="username">
           {{ appStore.currentUser()?.username ?? 'User' }}
         </h2>
-        <p class="user-role">{{ appStore.currentUser()?.role }}</p>
+        <p class="user-role">
+          {{ appStore.currentUser()?.role?.replace('_', ' y ') }}
+        </p>
       </div>
     </div>
   `,

@@ -11,9 +11,6 @@ import { District } from '../models/district.model';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
 
-// REEMPLAZA CON LA URL BASE DE TU API DE DISTRITOS
-const API_BASE_URL = 'URL_DE_TU_API/districts'; // Ejemplo: http://localhost:3000/api/districts
-
 @Injectable({
   providedIn: 'root', // O proveerlo en las rutas de districts si es específico
 })

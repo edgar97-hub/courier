@@ -27,8 +27,6 @@ export class PlanningImportService {
     private connection: Connection,
   ) {}
 
- 
-
   async importPlanning(excelRows: any[]): Promise<ImportResult> {
     if (!excelRows || excelRows.length === 0) {
       return { success: false, message: 'No data provided in the Excel file.' };
@@ -271,8 +269,15 @@ export class PlanningImportService {
         endDate: end_date,
       });
     }
-    if (status) {
-      queryBuilder.andWhere('planningEvent.status = :status', { status });
+    if (status === PlanningEventStatus.COMPLETED) {
+      queryBuilder.andWhere('order.status IN (:...status)', {
+        status: [STATES.ANNULLED, STATES.DELIVERED, STATES.REJECTED],
+      });
+    }
+    if (status === PlanningEventStatus.PENDING) {
+      queryBuilder.andWhere('order.status NOT IN (:...status)', {
+        status: [STATES.ANNULLED, STATES.DELIVERED, STATES.REJECTED],
+      });
     }
 
     queryBuilder

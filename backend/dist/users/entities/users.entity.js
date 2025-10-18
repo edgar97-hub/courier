@@ -16,6 +16,7 @@ const roles_1 = require("../../constants/roles");
 const base_entity_1 = require("../../config/base.entity");
 const orders_entity_1 = require("../../orders/entities/orders.entity");
 const cashManagement_entity_1 = require("../../cashManagement/entities/cashManagement.entity");
+const distributor_record_entity_1 = require("../../distributor-records/entities/distributor-record.entity");
 let UsersEntity = class UsersEntity extends base_entity_1.BaseEntity {
 };
 exports.UsersEntity = UsersEntity;
@@ -133,6 +134,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => cashManagement_entity_1.CashManagementEntity, (cashManagement) => cashManagement.user),
     __metadata("design:type", Array)
 ], UsersEntity.prototype, "cashManagementIncludes", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => distributor_record_entity_1.DistributorRecordEntity, (item) => item.user),
+    __metadata("design:type", Array)
+], UsersEntity.prototype, "distributorRecords", void 0);
 exports.UsersEntity = UsersEntity = __decorate([
     (0, typeorm_1.Entity)({ name: 'users' })
 ], UsersEntity);

@@ -172,7 +172,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   ngAfterViewInit(): void {}
 
   onViewPdfA4(order: Order_): void {
-    const pdfUrl = environment.apiUrl + '/orders/' + order.id + '/pdf-a4';
+    const pdfUrl = environment.apiUrl + '/orders/' + order.id + '/pdf-rotulo';
     window.open(pdfUrl, '_blank');
   }
 

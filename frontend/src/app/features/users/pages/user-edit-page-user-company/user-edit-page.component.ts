@@ -10,7 +10,7 @@ import { Subject, BehaviorSubject, of } from 'rxjs';
 import { switchMap, takeUntil, catchError, tap, filter } from 'rxjs/operators';
 
 import { UserCardComponent } from '../../components/user-card/user-card.component';
-import { UserFormComponent } from '../../components/user-form-user-company/user-form.component';
+import { UserFormComponent } from '../../components/user-form-user-company-distribuidor/user-form.component';
 import { UserService } from '../../services/user.service';
 import { User } from '../../models/user.model';
 import { AppStore } from '../../../../app.store';

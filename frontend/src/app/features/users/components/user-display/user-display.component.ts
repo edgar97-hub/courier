@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common'; // Para *ngIf, etc.
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
+import { UserRole } from '../../../../common/roles.enum';
 // Asume que tienes un modelo User similar a la estructura de tu userForm
 // Si no, puedes usar 'any' para el tipo del input, pero es mejor tener un modelo.
 export interface UserFormData {
@@ -42,7 +43,10 @@ export class UserDisplayComponent {
 
   // Para la lógica condicional de secciones basada en el rol del usuario mostrado
   get isCompanyRole(): boolean {
-    return this.userData?.role === 'EMPRESA';
+    return (
+      this.userData?.role === UserRole.COMPANY ||
+      this.userData?.role === UserRole.EMPRESA_DISTRIBUIDOR
+    );
   }
 
   // Helper para mostrar 'Sí' o 'No' para booleanos

@@ -22,7 +22,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AdminAccess } from 'src/auth/decorators/admin.decorator';
-import { AccessLevelGuard } from 'src/auth/guards/access-level.guard';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { SettingDTO, SettingUpdateDTO } from '../dto/setting.dto';
@@ -31,15 +30,16 @@ import { PublicAccess } from 'src/auth/decorators/public.decorator';
 import { Response } from 'express';
 import { PromotionalSetItem } from '../entities/settings.entity';
 import { Roles } from 'src/auth/decorators/roles.decorator';
+import { ROLES } from 'src/constants/roles';
 
 @ApiTags('Settings')
 @Controller('settings')
-@UseGuards(AuthGuard, RolesGuard, AccessLevelGuard)
+@UseGuards(AuthGuard, RolesGuard)
 export class SettingsController {
   constructor(private readonly usersService: SettingsService) {}
 
   @AdminAccess()
-  @Roles('RECEPTIONIST')
+  @Roles(ROLES.RECEPCIONISTA)
   @Post('register')
   public async registerUser(@Body() body: SettingDTO) {
     return await this.usersService.createUser(body);
@@ -74,7 +74,7 @@ export class SettingsController {
     name: 'id',
   })
   @AdminAccess()
-  @Roles('RECEPTIONIST')
+  @Roles(ROLES.RECEPCIONISTA)
   @Put('edit/:id')
   public async updateUser(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -87,7 +87,7 @@ export class SettingsController {
     name: 'id',
   })
   @AdminAccess()
-  @Roles('RECEPTIONIST')
+  @Roles(ROLES.RECEPCIONISTA)
   @Delete('delete/:id')
   public async deleteUser(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.usersService.deleteUser(id);

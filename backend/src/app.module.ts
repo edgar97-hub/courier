@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
+import { DistributorRecordsModule } from './distributor-records/distributor-records.module';
 import { DistrictsModule } from './districts/districts.module';
 
 import { ConfigModule } from '@nestjs/config';
@@ -27,6 +28,7 @@ import { PlanningEventModule } from './planningEvents/planning-events.module';
     OrdersModule,
     CashManagementModule,
     PlanningEventModule,
+    DistributorRecordsModule,
   ],
 })
 export class AppModule {}

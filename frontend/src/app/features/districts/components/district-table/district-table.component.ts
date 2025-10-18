@@ -73,8 +73,6 @@ export class DistrictTableComponent implements AfterViewInit, OnChanges {
     if (changes['districts'] && this.districts) {
       this.dataSource.data = this.districts;
     }
-    // No es necesario actualizar el paginador aquí si totalCount, pageSize, pageIndex
-    // ya están bindeados en el HTML del paginador.
   }
 
   ngAfterViewInit(): void {
