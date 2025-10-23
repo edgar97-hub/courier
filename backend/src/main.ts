@@ -13,17 +13,17 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 async function bootstrap() {
-  const certPath = '/etc/letsencrypt/live/app.jncourier.com/';
+  // const certPath = '/etc/letsencrypt/live/app.jncourier.com/';
 
-  const httpsOptions = {
-    key: fs.readFileSync(path.resolve(certPath, 'privkey.pem')),
-    cert: fs.readFileSync(path.resolve(certPath, 'fullchain.pem')),
-  };
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    httpsOptions,
-  });
-  // const app = await NestFactory.create<NestExpressApplication>(AppModule);
-
+  // const httpsOptions = {
+  //   key: fs.readFileSync(path.resolve(certPath, 'privkey.pem')),
+  //   cert: fs.readFileSync(path.resolve(certPath, 'fullchain.pem')),
+  // };
+  // const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+  //   httpsOptions,
+  // });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.set('trust proxy', 1);
   app.use(morgan('dev'));
   app.useGlobalPipes(
     new ValidationPipe({
