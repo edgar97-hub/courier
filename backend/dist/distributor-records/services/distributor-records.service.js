@@ -129,7 +129,6 @@ let DistributorRecordsService = class DistributorRecordsService {
             const record = await this.findDistributorRecordById(id);
             this.distributorRecordRepository.merge(record, {
                 ...body,
-                user: user,
             });
             return await this.distributorRecordRepository.save(record);
         }
