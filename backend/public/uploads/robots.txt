@@ -1,4 +1,4 @@
-# robots.txt para el dominio [app.jncourier.com o catalogo.nikelioficina.com]
+# robots.txt para el dominio app.jncourier.com
 # Este archivo permite el acceso completo a todos los robots de búsqueda.
 
 User-agent: *

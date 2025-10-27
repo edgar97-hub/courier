@@ -23,6 +23,8 @@ export declare class DistributorRecordsService {
         sortField: string;
         sortOrder: 'ASC' | 'DESC';
         search: string;
+        startDate: any;
+        endDate: any;
     }): Promise<PaginatedRegistrations>;
     createDistributorRecord(body: DistributorRecordDTO, userId: string): Promise<DistributorRecordEntity>;
     findDistributorRecordById(id: string): Promise<DistributorRecordEntity>;

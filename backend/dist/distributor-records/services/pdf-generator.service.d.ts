@@ -8,5 +8,6 @@ export declare class PdfGeneratorService {
     private printer;
     constructor(distributorRecordRepository: Repository<DistributorRecordEntity>, settingRepository: Repository<SettingsEntity>);
     streamDistributorRecordPdfToResponseq(recordId: string, res: Response): Promise<void>;
+    streamDistributorRecordPdfToResponse2(recordId: string, res: Response): Promise<void>;
     streamDistributorRecordPdfToResponse(recordId: string, res: Response): Promise<void>;
 }

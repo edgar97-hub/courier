@@ -31,7 +31,7 @@ let DistributorRecordsService = class DistributorRecordsService {
     async findAllPaginated(req, options) {
         const idUser = req.idUser;
         const role = req.roleUser;
-        const { page, limit, sortField, sortOrder, search } = options;
+        const { page, limit, sortField, sortOrder, search, startDate, endDate } = options;
         const skip = (page - 1) * limit;
         const queryBuilder = this.distributorRecordRepository.createQueryBuilder('record');
         queryBuilder.leftJoinAndSelect('record.user', 'user');
@@ -47,8 +47,20 @@ let DistributorRecordsService = class DistributorRecordsService {
                     .orWhere('record.destinationAddress ILIKE :search', {
                     search: `%${search}%`,
                 })
+                    .orWhere('record.observation ILIKE :search', {
+                    search: `%${search}%`,
+                })
+                    .orWhere('record.clientPhone ILIKE :search', {
+                    search: `%${search}%`,
+                })
                     .orWhere('user.username ILIKE :search', { search: `%${search}%` });
             }));
+        }
+        if (startDate && endDate) {
+            queryBuilder.andWhere('record.updatedAt BETWEEN :start AND :end', {
+                start: startDate,
+                end: endDate,
+            });
         }
         queryBuilder
             .orderBy(`record.${sortField}`, sortOrder)

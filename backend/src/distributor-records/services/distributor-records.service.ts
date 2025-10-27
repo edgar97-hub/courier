@@ -40,11 +40,14 @@ export class DistributorRecordsService {
       sortField: string;
       sortOrder: 'ASC' | 'DESC';
       search: string;
+      startDate;
+      endDate;
     },
   ): Promise<PaginatedRegistrations> {
     const idUser = req.idUser;
     const role = req.roleUser;
-    const { page, limit, sortField, sortOrder, search } = options;
+    const { page, limit, sortField, sortOrder, search, startDate, endDate } =
+      options;
     const skip = (page - 1) * limit;
 
     // 1. Iniciar el QueryBuilder
@@ -65,9 +68,6 @@ export class DistributorRecordsService {
 
     // 4. Aplicar el filtro de búsqueda con lógica 'OR'
     if (search) {
-      // Usamos 'ILIKE' para una búsqueda insensible a mayúsculas/minúsculas
-      // Usamos 'Brackets' para agrupar las condiciones 'OR' correctamente:
-      // ... AND (clientName ILIKE ... OR clientDni ILIKE ... OR ...)
       queryBuilder.andWhere(
         new Brackets((qb) => {
           qb.where('record.clientName ILIKE :search', { search: `%${search}%` })
@@ -77,9 +77,25 @@ export class DistributorRecordsService {
             .orWhere('record.destinationAddress ILIKE :search', {
               search: `%${search}%`,
             })
+            .orWhere('record.observation ILIKE :search', {
+              search: `%${search}%`,
+            })
+            .orWhere('record.clientPhone ILIKE :search', {
+              search: `%${search}%`,
+            })
             .orWhere('user.username ILIKE :search', { search: `%${search}%` });
         }),
       );
+    }
+
+    // --- LÓGICA NUEVA PARA FILTRAR POR FECHAS ---
+    if (startDate && endDate) {
+      // Usamos 'BETWEEN' para filtrar el campo 'createdAt'
+      // Aseguramos que las fechas se interpreten correctamente por la base de datos
+      queryBuilder.andWhere('record.updatedAt BETWEEN :start AND :end', {
+        start: startDate,
+        end: endDate,
+      });
     }
 
     // 5. Aplicar ordenamiento, paginación y ejecutar la consulta

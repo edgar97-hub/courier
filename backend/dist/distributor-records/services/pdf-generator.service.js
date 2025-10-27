@@ -124,7 +124,7 @@ let PdfGeneratorService = class PdfGeneratorService {
             throw new common_1.InternalServerErrorException('No se pudo generar el rótulo en PDF.');
         }
     }
-    async streamDistributorRecordPdfToResponse(recordId, res) {
+    async streamDistributorRecordPdfToResponse2(recordId, res) {
         const record = await this.distributorRecordRepository.findOne({
             where: { id: recordId },
             relations: ['user'],
@@ -172,7 +172,6 @@ let PdfGeneratorService = class PdfGeneratorService {
                             ['NOMBRE:', getValue(record.clientName)],
                             ['DNI:', getValue(record.clientDni)],
                             ['TELEFONO:', getValue(record.clientPhone)],
-                            ['OBSERVACIÓN:', getValue(record.observation)],
                             [
                                 { text: 'DESTINO:', style: 'destinationValue' },
                                 {
@@ -180,6 +179,7 @@ let PdfGeneratorService = class PdfGeneratorService {
                                     style: 'destinationValue',
                                 },
                             ],
+                            ['Agencia / Oberservación:', getValue(record.observation)],
                         ],
                     },
                     layout: {
@@ -201,6 +201,83 @@ let PdfGeneratorService = class PdfGeneratorService {
                 destinationValue: {
                     fontSize: 22,
                     bold: true,
+                },
+            },
+        };
+        try {
+            const pdfDoc = this.printer.createPdfKitDocument(docDefinition);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `inline; filename="rotulo_${record.code}.pdf"`);
+            pdfDoc.pipe(res);
+            pdfDoc.end();
+        }
+        catch (error) {
+            console.error('Error generando PDF:', error);
+            throw new common_1.InternalServerErrorException('No se pudo generar el rótulo en PDF.');
+        }
+    }
+    async streamDistributorRecordPdfToResponse(recordId, res) {
+        const record = await this.distributorRecordRepository.findOne({
+            where: { id: recordId },
+            relations: ['user'],
+        });
+        if (!record) {
+            throw new common_1.NotFoundException(`Registro con ID ${recordId} no encontrado.`);
+        }
+        const getValue = (value, defaultValue = '---') => (value || defaultValue).toString().trim().toUpperCase();
+        const createFieldBox = (label, value) => {
+            return {
+                table: {
+                    widths: ['*'],
+                    body: [
+                        [
+                            {
+                                text: [
+                                    { text: `${label}\n`, style: 'label' },
+                                    { text: value, style: 'value' },
+                                ],
+                                borderColor: ['#000000', '#000000', '#000000', '#000000'],
+                                border: [true, true, true, true],
+                                padding: [8, 5, 8, 5],
+                            },
+                        ],
+                    ],
+                },
+                layout: { defaultBorder: false },
+                margin: [0, 0, 0, 10],
+            };
+        };
+        const docDefinition = {
+            pageSize: { width: 400, height: 'auto' },
+            pageMargins: [20, 20, 20, 20],
+            defaultStyle: {
+                font: 'Roboto',
+                fontSize: 16,
+                bold: true,
+                color: '#000000',
+            },
+            content: [
+                {
+                    text: `DATOS DE ENVÍO #${getValue(record.code)}`,
+                    style: 'title',
+                    alignment: 'center',
+                    margin: [0, 0, 0, 15],
+                },
+                createFieldBox('REMITENTE', getValue(record.user?.username)),
+                createFieldBox('NOMBRE', getValue(record.clientName)),
+                createFieldBox('DNI', getValue(record.clientDni)),
+                createFieldBox('TELEFONO', getValue(record.clientPhone)),
+                createFieldBox('DESTINO', getValue(record.destinationAddress)),
+                createFieldBox('AGENCIA / OBSERVACIÓN', getValue(record.observation)),
+            ],
+            styles: {
+                title: {
+                    fontSize: 18,
+                    decoration: 'underline',
+                },
+                label: {},
+                value: {
+                    bold: false,
                 },
             },
         };

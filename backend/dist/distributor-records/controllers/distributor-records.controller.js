@@ -28,13 +28,15 @@ let DistributorRecordsController = class DistributorRecordsController {
         this.distributorRecordsService = distributorRecordsService;
         this.pdfGeneratorService = pdfGeneratorService;
     }
-    async getRegistrations(req, page = 1, limit = 10, sortField = 'createdAt', sortOrder = 'DESC', search = '') {
+    async getRegistrations(req, page = 1, limit = 10, sortField = 'createdAt', sortOrder = 'DESC', search = '', startDate, endDate) {
         return this.distributorRecordsService.findAllPaginated(req, {
             page,
             limit,
             sortField,
             sortOrder,
             search,
+            startDate,
+            endDate,
         });
     }
     async createDistributorRecord(body, req) {
@@ -75,8 +77,10 @@ __decorate([
     __param(3, (0, common_1.Query)('sortField')),
     __param(4, (0, common_1.Query)('sortOrder')),
     __param(5, (0, common_1.Query)('search')),
+    __param(6, (0, common_1.Query)('startDate')),
+    __param(7, (0, common_1.Query)('endDate')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Number, Number, String, String, String]),
+    __metadata("design:paramtypes", [Object, Number, Number, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], DistributorRecordsController.prototype, "getRegistrations", null);
 __decorate([

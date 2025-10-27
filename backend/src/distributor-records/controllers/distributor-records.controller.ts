@@ -47,6 +47,8 @@ export class DistributorRecordsController {
     @Query('sortField') sortField: string = 'createdAt',
     @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'DESC',
     @Query('search') search: string = '',
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
   ) {
     return this.distributorRecordsService.findAllPaginated(req, {
       page,
@@ -54,6 +56,8 @@ export class DistributorRecordsController {
       sortField,
       sortOrder,
       search,
+      startDate,
+      endDate,
     });
   }
 
