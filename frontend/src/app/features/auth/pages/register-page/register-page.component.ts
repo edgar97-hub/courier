@@ -85,7 +85,7 @@ import { environment } from '../../../../../environments/environment';
                 >Formato de correo electrónico no válido</mat-error
               >
             </mat-form-field>
-            <mat-form-field appearance="outline" class="full-width">
+            <!-- <mat-form-field appearance="outline" class="full-width">
               <mat-label>Password</mat-label>
               <input
                 matInput
@@ -100,17 +100,26 @@ import { environment } from '../../../../../environments/environment';
               <mat-error *ngIf="password?.hasError('minlength')"
                 >La contraseña debe tener al menos 6 caracteres</mat-error
               >
-            </mat-form-field>
-            <button
+            </mat-form-field> -->
+            <!-- <button
               mat-flat-button
               class="full-width btn-corp-primary"
               type="submit"
               [disabled]="isLoading || registerForm.invalid"
             >
               {{ isLoading ? 'Registrarse...' : 'Registrarse' }}
+            </button> -->
+            <button
+              mat-flat-button
+              class="full-width btn-corp-primary"
+              class="btn-corp-primary"
+              (click)="this.openWhatsAppRegistration(registerForm)"
+            >
+              Solicitar Registro por WhatsApp
             </button>
           </form>
         </mat-card-content>
+
         <mat-card-actions class="auth-card-actions">
           <p>
             ¿Ya tienes una cuenta?<a style="color: #012147" routerLink="/login">
@@ -154,6 +163,25 @@ export class RegisterPageComponent {
   }
   get password() {
     return this.registerForm.get('userPass');
+  }
+
+  openWhatsAppRegistration(loginForm: any): void {
+    const { username, owner_phone_number, userEmail, userPass } =
+      this.registerForm.value;
+
+    if (!username || !owner_phone_number || !userEmail) {
+      alert('Completa los campos');
+      return;
+    }
+    const phoneNumber = '51912018197';
+    const encodedText = encodeURIComponent(
+      `Hola, me gustaría solicitar el registro. Mi correo es: ${userEmail}. 
+      Mis datos de registro son: ${username}, ${owner_phone_number}.`
+    );
+
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodedText}`;
+
+    window.open(whatsappUrl, '_blank');
   }
 
   onSubmit(): void {

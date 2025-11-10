@@ -1,5 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpHeaders,
+  HttpParams,
+} from '@angular/common/http';
 import { catchError, Observable, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { DistributorRegistration } from '../models/distributor-registration.model';
@@ -52,7 +57,9 @@ export class DistributorRegistrationService {
     limit: number,
     sortField: string,
     sortOrder: string,
-    search: string
+    search: string,
+    startDate: Date | null,
+    endDate: Date | null
   ): Observable<PaginatedRegistrations> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
@@ -63,7 +70,9 @@ export class DistributorRegistrationService {
       .set('page', page?.toString())
       .set('limit', limit?.toString())
       .set('sortField', sortField)
-      .set('sortOrder', sortOrder);
+      .set('sortOrder', sortOrder)
+      .set('startDate', startDate?.toISOString() ?? '')
+      .set('endDate', endDate?.toISOString() ?? '');
 
     if (search) {
       params = params.set('search', search);

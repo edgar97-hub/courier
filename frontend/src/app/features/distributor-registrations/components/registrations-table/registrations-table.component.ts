@@ -45,10 +45,23 @@ export class RegistrationsTableComponent implements AfterViewInit, OnDestroy {
   private registrationService = inject(DistributorRegistrationService);
   private appStore = inject(AppStore);
 
+  // --- ENTRADAS (INPUTS) ---
+  @Input() dataSource: DistributorRegistration[] = [];
+  @Input() resultsLength = 0;
+  @Input() isLoadingResults = true;
+  @Input() showActions = false;
+
+  // --- SALIDAS (OUTPUTS) ---
+  @Output() paramsChanged = new EventEmitter<{
+    page: number;
+    pageSize: number;
+    sort: string;
+    sortDirection: string;
+  }>();
   @Output() edit = new EventEmitter<DistributorRegistration>();
   @Output() delete = new EventEmitter<string>();
   @Output() print = new EventEmitter<string>();
-  showActions: boolean = false;
+
   private destroy$ = new Subject<void>();
   displayedColumns: string[] = [
     'code',
@@ -60,10 +73,6 @@ export class RegistrationsTableComponent implements AfterViewInit, OnDestroy {
     'destinationAddress',
     'observation',
   ];
-  dataSource = new MatTableDataSource<DistributorRegistration>();
-
-  resultsLength = 0;
-  isLoadingResults = true;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -76,9 +85,7 @@ export class RegistrationsTableComponent implements AfterViewInit, OnDestroy {
     if (this.paginator) {
       this.paginator.pageIndex = 0;
       console.log(this._searchTerm);
-
       this.search$.next();
-      this.fetchData();
     }
   }
   private _searchTerm: string = '';
@@ -94,16 +101,40 @@ export class RegistrationsTableComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    if (!this.sort || !this.paginator) return;
+    // Envolvemos toda la lógica en un setTimeout para asegurar que
+    // this.sort y this.paginator hayan sido inicializados por Angular.
+    setTimeout(() => {
+      if (!this.sort || !this.paginator) {
+        console.error('ERROR: MatSort o MatPaginator no se encontraron.');
+        return;
+      }
 
-    // Cuando el usuario ordena, siempre volvemos a la primera página.
-    this.sort.sortChange.subscribe(() => (this.paginator.pageIndex = 0));
-    this.fetchData();
+      // A partir de aquí, es seguro asumir que this.sort y this.paginator existen.
 
-    // El 'merge' ahora solo se encarga de DISPARAR la llamada a la API.
-    merge(this.sort.sortChange, this.paginator.page, this.search$)
-      .pipe(startWith({}), takeUntil(this.destroy$))
-      .subscribe(() => this.fetchData());
+      // Cuando el usuario ordena, siempre volvemos a la primera página.
+      this.sort.sortChange.subscribe(() => {
+        if (this.paginator) {
+          this.paginator.pageIndex = 0;
+        }
+      });
+
+      // Unimos los eventos del paginador y el sort en un solo stream de salida
+      merge(this.sort.sortChange, this.paginator.page)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(() => {
+          console.log('Evento de tabla detectado! Emitiendo params...');
+          this.emitParams();
+        });
+    });
+  }
+
+  emitParams(): void {
+    this.paramsChanged.emit({
+      page: this.paginator.pageIndex + 1,
+      pageSize: this.paginator.pageSize,
+      sort: this.sort.active || 'createdAt',
+      sortDirection: this.sort.direction.toUpperCase() || 'DESC',
+    });
   }
 
   onEdit(registration: DistributorRegistration): void {
@@ -118,40 +149,38 @@ export class RegistrationsTableComponent implements AfterViewInit, OnDestroy {
     this.print.emit(id);
   }
 
-  private fetchData(): void {
-    this.isLoadingResults = true;
-    this.registrationService
-      .getMyRegistrationsPaginated(
-        this.paginator.pageIndex + 1,
-        this.paginator.pageSize,
-        this.sort?.active || 'createdAt',
-        this.sort?.direction.toUpperCase() || 'DESC',
-        this._searchTerm
-      )
-      .pipe(
-        catchError(() => {
-          this.isLoadingResults = false;
-          return of(null);
-        })
-      )
-      .subscribe((data) => {
-        this.isLoadingResults = false;
-        if (data) {
-          this.resultsLength = data.total;
-          this.dataSource.data = data.data;
-        } else {
-          this.dataSource.data = [];
-          this.resultsLength = 0;
-        }
-      });
-  }
+  // private fetchData(): void {
+  //   this.isLoadingResults = true;
+  //   this.registrationService
+  //     .getMyRegistrationsPaginated(
+  //       this.paginator?.pageIndex + 1 || 1, // Usar 1 si el paginador no está listo
+  //       this.paginator?.pageSize || 10, // Usar 10 por defecto
+  //       this.sort?.active || 'createdAt',
+  //       this.sort?.direction.toUpperCase() || 'DESC',
+  //       this._searchTerm
+  //     )
+  //     .pipe(
+  //       takeUntil(this.destroy$), // Asegurarse de cancelar si el componente se destruye
+  //       catchError(() => {
+  //         this.isLoadingResults = false;
+  //         return of(null);
+  //       })
+  //     )
+  //     .subscribe((data) => {
+  //       this.isLoadingResults = false;
+  //       if (data) {
+  //         this.resultsLength = data.total;
+  //         this.dataSource = data.data; // Asignación a nuestro array simple
+  //       } else {
+  //         this.dataSource = [];
+  //         this.resultsLength = 0;
+  //       }
+  //     });
+  // }
 
-  public reloadData(): void {
-    if (this.paginator) {
-      this.paginator.pageIndex = 0;
-    }
-    this.fetchData();
-  }
+  // public reloadData(): void {
+  //   this.fetchData();
+  // }
 
   ngOnDestroy(): void {
     this.destroy$.next();

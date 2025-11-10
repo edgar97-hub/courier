@@ -18,11 +18,15 @@ import { FilterToolbarComponent } from '../../components/filter-toolbar/filter-t
 import { RegistrationsTableComponent } from '../../components/registrations-table/registrations-table.component';
 import { RegistrationFormDialogComponent } from '../../components/registration-form-dialog/registration-form-dialog.component';
 import { DistributorImportDialogComponent } from '../../components/distributor-import-dialog/distributor-import-dialog.component';
-import { Subject } from 'rxjs';
+import { catchError, of, Subject, tap } from 'rxjs';
 import { DistributorRegistration } from '../../models/distributor-registration.model';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { UserRole } from '../../../../common/roles.enum';
 import { environment } from '../../../../../environments/environment';
+import {
+  DateRangeFilterComponent,
+  DateRange,
+} from '../../components/date-range-filter/date-range-filter.component'; // <-- Importa el nuevo componente
 
 @Component({
   selector: 'app-registration-page',
@@ -38,6 +42,7 @@ import { environment } from '../../../../../environments/environment';
     // Componentes hijos
     FilterToolbarComponent,
     RegistrationsTableComponent,
+    DateRangeFilterComponent,
   ],
   templateUrl: './registration-page.component.html',
   styleUrls: ['./registration-page.component.scss'],
@@ -48,35 +53,106 @@ export class RegistrationPageComponent {
   private dialog = inject(MatDialog);
   public appStore = inject(AppStore);
 
-  @ViewChild(RegistrationsTableComponent)
-  private registrationsTable!: RegistrationsTableComponent;
-
-  searchTerm = signal<string>('');
-  isUploading = signal<boolean>(false);
-
   isAdminOrReceptionist = signal<boolean>(false);
 
-  onRefreshTable(): void {
-    this.snackBar.open('Actualizando lista de registros...', '', {
-      duration: 2000,
-    });
-    if (this.registrationsTable) {
-      this.registrationsTable.reloadData();
-    }
-  }
+  // --- ESTADO DE LA PÁGINA ---
+  registrations = signal<DistributorRegistration[]>([]);
+  resultsLength = signal(0);
+  isLoading = signal(true);
 
-  ngAfterViewInit(): void {
-    this.onRefreshTable();
+  // --- PARÁMETROS DE LA CONSULTA ---
+  private currentPage = 1;
+  private pageSize = 10; // O el valor inicial que prefieras
+  private sort = 'createdAt';
+  private sortDirection = 'DESC';
+  private searchTerm = '';
+  private startDate: Date | null = null; // <-- Nueva propiedad
+  private endDate: Date | null = null; // <-- Nueva propiedad
 
+  ngOnInit(): void {
     const userRole = this.appStore.currentUser()?.role;
     if (userRole === UserRole.ADMIN || userRole === UserRole.RECEPTIONIST) {
       this.isAdminOrReceptionist.set(true);
     }
+    const today = new Date();
+    this.startDate = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+      0,
+      0,
+      0
+    );
+    this.endDate = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+      23,
+      59,
+      59
+    );
+    this.fetchData(); // Carga inicial
+  }
+
+  onDateRangeChanged(range: DateRange): void {
+    console.log('Fechas recibidas del hijo:', range);
+    this.startDate = range.start;
+    this.endDate = range.end;
+    this.currentPage = 1;
+    this.fetchData();
   }
 
   onSearchChanged(term: string): void {
-    console.log('term', term);
-    this.searchTerm.set(term);
+    this.searchTerm = term;
+    this.currentPage = 1; // Volver a la primera página en cada búsqueda
+    this.fetchData();
+  }
+
+  onTableParamsChanged(params: {
+    page: number;
+    pageSize: number;
+    sort: string;
+    sortDirection: string;
+  }): void {
+    this.currentPage = params.page;
+    this.pageSize = params.pageSize;
+    this.sort = params.sort;
+    this.sortDirection = params.sortDirection;
+    this.fetchData();
+  }
+
+  fetchData(): void {
+    this.isLoading.set(true);
+    this.registrationService
+      .getMyRegistrationsPaginated(
+        this.currentPage,
+        this.pageSize,
+        this.sort,
+        this.sortDirection,
+        this.searchTerm,
+        this.startDate,
+        this.endDate
+      )
+      .pipe(
+        tap((data) => {
+          this.isLoading.set(false);
+          if (data) {
+            this.registrations.set(data.data);
+            this.resultsLength.set(data.total);
+          } else {
+            this.registrations.set([]);
+            this.resultsLength.set(0);
+          }
+        }),
+        catchError(() => {
+          this.isLoading.set(false);
+          this.registrations.set([]);
+          this.resultsLength.set(0);
+          this.snackBar.open('Error al cargar los registros.', 'Cerrar');
+          return of(null);
+        })
+      )
+      .subscribe();
   }
 
   openManualRegistrationDialog(): void {
@@ -93,9 +169,7 @@ export class RegistrationPageComponent {
               duration: 3000,
             });
             // Le decimos a la tabla que se recargue para mostrar el nuevo registro
-            if (this.registrationsTable) {
-              this.registrationsTable.reloadData();
-            }
+            this.fetchData();
           },
           error: (err) =>
             this.snackBar.open(
@@ -122,7 +196,7 @@ export class RegistrationPageComponent {
               this.snackBar.open('Registro actualizado con éxito.', 'OK', {
                 duration: 3000,
               });
-              this.registrationsTable.reloadData();
+              this.fetchData();
             },
             error: (err: any) =>
               this.snackBar.open(
@@ -154,7 +228,7 @@ export class RegistrationPageComponent {
             this.snackBar.open('Registro eliminado con éxito.', 'OK', {
               duration: 3000,
             });
-            this.registrationsTable.reloadData();
+            this.fetchData();
           },
           error: (err: any) =>
             this.snackBar.open(`Error al eliminar: ${err.message}`, 'Cerrar'),
@@ -176,7 +250,7 @@ export class RegistrationPageComponent {
 
     dialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
-        this.onRefreshTable();
+        this.fetchData();
       }
     });
   }

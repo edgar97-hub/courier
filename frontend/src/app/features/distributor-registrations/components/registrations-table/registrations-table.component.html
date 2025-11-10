@@ -1,20 +1,20 @@
 <div class="table-container mat-elevation-z4">
-  <table mat-table [dataSource]="dataSource">
+  <table mat-table [dataSource]="dataSource" matSort>
     <!-- Columna Nombre Cliente -->
     <ng-container matColumnDef="code">
-      <th mat-header-cell *matHeaderCellDef>N°</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>N°</th>
       <td mat-cell *matCellDef="let element">{{ element.code }}</td>
     </ng-container>
 
-    <!-- Columna Nombre Cliente -->
+    <!-- Columna Remitente -->
     <ng-container matColumnDef="user">
-      <th mat-header-cell *matHeaderCellDef>Remitente</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Remitente</th>
       <td mat-cell *matCellDef="let element">{{ element.user?.username }}</td>
     </ng-container>
 
     <!-- Columna Fecha de Registro -->
     <ng-container matColumnDef="createdAt">
-      <th mat-header-cell *matHeaderCellDef>Fecha Registro</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha Registro</th>
       <td mat-cell *matCellDef="let element">
         {{ element.createdAt | date : "dd/MM/yyyy HH:mm" }}
       </td>
@@ -22,32 +22,32 @@
 
     <!-- Columna Nombre Cliente -->
     <ng-container matColumnDef="clientName">
-      <th mat-header-cell *matHeaderCellDef>Nombre Cliente</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre Cliente</th>
       <td mat-cell *matCellDef="let element">{{ element.clientName }}</td>
     </ng-container>
 
     <!-- Columna DNI -->
     <ng-container matColumnDef="clientDni">
-      <th mat-header-cell *matHeaderCellDef>DNI</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>DNI</th>
       <td mat-cell *matCellDef="let element">{{ element.clientDni }}</td>
     </ng-container>
 
     <!-- Columna Teléfono -->
     <ng-container matColumnDef="clientPhone">
-      <th mat-header-cell *matHeaderCellDef>Teléfono</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Teléfono</th>
       <td mat-cell *matCellDef="let element">{{ element.clientPhone }}</td>
     </ng-container>
 
     <!-- Columna Destino -->
     <ng-container matColumnDef="destinationAddress">
-      <th mat-header-cell *matHeaderCellDef>Destino</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Destino</th>
       <td mat-cell *matCellDef="let element">
         {{ element.destinationAddress }}
       </td>
     </ng-container>
 
     <ng-container matColumnDef="observation">
-      <th mat-header-cell *matHeaderCellDef>Observación</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Observación</th>
       <td mat-cell *matCellDef="let element">
         {{ element.observation }}
       </td>
@@ -96,7 +96,7 @@
 
   <mat-paginator
     [length]="resultsLength"
-    [pageSizeOptions]="[5, 10, 20]"
+    [pageSizeOptions]="[10, 20, 30]"
     aria-label="Seleccionar página de registros"
   >
   </mat-paginator>

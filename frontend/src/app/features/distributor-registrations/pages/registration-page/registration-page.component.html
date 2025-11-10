@@ -7,7 +7,6 @@
           : "Mis Registros de Distribuidor"
       }}
     </h1>
-    <!-- Los botones de acción ahora están en su propio contenedor -->
     <div class="header-actions">
       <button
         mat-stroked-button
@@ -30,24 +29,29 @@
   </div>
 
   <div class="history-section">
-    <!-- El filtro y el botón de refresco también tienen su contenedor -->
     <div class="filter-controls">
       <app-filter-toolbar
         (searchChanged)="onSearchChanged($event)"
       ></app-filter-toolbar>
       <button
         mat-icon-button
-        (click)="onRefreshTable()"
+        (click)="fetchData()"
         matTooltip="Actualizar la lista"
         class="refresh-button btn-corp-primary"
       >
         <mat-icon>refresh</mat-icon>
       </button>
+      <app-date-range-filter
+        (dateRangeChanged)="onDateRangeChanged($event)"
+      ></app-date-range-filter>
     </div>
 
     <app-registrations-table
-      #registrationsTable
-      [searchTerm]="searchTerm()"
+      [dataSource]="registrations()"
+      [resultsLength]="resultsLength()"
+      [isLoadingResults]="isLoading()"
+      [showActions]="isAdminOrReceptionist()"
+      (paramsChanged)="onTableParamsChanged($event)"
       (edit)="handleEdit($event)"
       (delete)="handleDelete($event)"
       (print)="handlePrint($event)"

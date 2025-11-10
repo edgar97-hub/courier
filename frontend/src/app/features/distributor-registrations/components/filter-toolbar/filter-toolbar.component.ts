@@ -22,13 +22,8 @@ import { MatInputModule } from '@angular/material/input';
     MatInputModule,
   ],
   template: `
-    <div
-      class="filter-containers"
-    >
-      <mat-form-field
-        appearance="outline"
-        class="search-fields"
-      >
+    <div class="filter-container">
+      <mat-form-field appearance="outline" class="search-fields">
         <mat-label>Buscar...</mat-label>
         <input
           matInput
@@ -39,6 +34,14 @@ import { MatInputModule } from '@angular/material/input';
       </mat-form-field>
     </div>
   `,
+  styles: [
+    `
+      .filter-container {
+        // width: 500px !important;
+        // min-width: 100px;
+      }
+    `,
+  ],
 })
 export class FilterToolbarComponent implements OnInit, OnDestroy {
   @Output() searchChanged = new EventEmitter<string>();
@@ -50,19 +53,13 @@ export class FilterToolbarComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.searchControl.valueChanges
-      .pipe(
-        debounceTime(400),
-        distinctUntilChanged(), // <-- Es buena práctica mantenerlo para evitar emisiones duplicadas
-        takeUntil(this.destroy$) // <-- Se desuscribe automáticamente cuando el componente se destruye
-      )
+      .pipe(debounceTime(400), distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe((value) => {
-        console.log('FilterToolbar: Search term changed to ->', value); // <-- AÑADE ESTE LOG PARA DEPURAR
         this.searchChanged.emit(value || '');
       });
   }
 
   ngOnDestroy(): void {
-    // Cuando el componente se destruye, completamos el Subject.
     this.destroy$.next();
     this.destroy$.complete();
   }
