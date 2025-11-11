@@ -85,7 +85,9 @@ export class UsersService {
       }
 
       if (role) {
-        queryBuilder.andWhere('user.role = :role', { role });
+        queryBuilder.andWhere('user.role IN (:...role)', {
+          role: role.split(','),
+        });
       }
 
       const users: UsersEntity[] = await queryBuilder.getMany();

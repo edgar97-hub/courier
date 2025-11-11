@@ -53,6 +53,19 @@
 }
 // (Añade más @font-face para otros pesos/estilos de Montserrat si los tienes y los vas a usar)
 
+html,
+body {
+  /* Aseguramos que la página ocupe todo el viewport */
+  width: 100%;
+  height: 100%;
+  /* MUY IMPORTANTE: Evita barras de desplazamiento horizontales al escalar */
+  overflow-x: hidden;
+  /* Aplicamos el factor de escalado al contenedor principal también,
+     para que el espacio total de la página se ajuste al contenido escalado. */
+  width: 95%; /* 100% * 0.95 = 95% del ancho disponible */
+  height: 95%;
+}
+
 // ----- 4. CONFIGURACIÓN GLOBAL DE TIPOGRAFÍA Y BASE -----
 body {
   font-family: "Montserrat", sans-serif; // Fuente por defecto para el cuerpo
@@ -61,6 +74,36 @@ body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  // font-size: 95%;
+  // zoom: 0.95;
+  // -moz-transform: scale(0.95);
+  // -moz-transform-origin: 0 0 0 0;
+  // border: 1px solid black;
+  // width: 100% !important;
+  // overflow-x: hidden;
+}
+html {
+  /* Aplicar el escalado al 95% (simula el zoom out) */
+  transform: scale(0.92);
+  /* Asegura que el escalado inicie desde la esquina superior izquierda
+     para evitar el margen a la derecha y barras de desplazamiento. */
+  transform-origin: top left;
+  /* Es importante que sea un elemento de bloque */
+  display: block;
+  /* Aseguramos la compatibilidad con navegadores Firefox */
+  -moz-transform: scale(0.92);
+  -moz-transform-origin: top left;
+
+  /* CLAVE: Ajustar el ancho del contenedor HTML al factor de escalado (0.95)
+     para que el área escalada llene el contenedor correctamente sin margen extra. */
+  width: calc(100% / 0.92); /* Esto es 105.26% */
+  height: calc(100% / 0.92); /* Para evitar barras verticales si las hay */
+}
+
+body {
+  width: 100%;
+  height: 100%;
 }
 
 // Si definiste "Avantt" como itálica en @font-face:
@@ -99,7 +142,7 @@ h6,
   &.mat-focused .mdc-floating-label {
     color: corp.$border-input-active !important; // Naranja #F97C06
     font-weight: 700 !important; // Regular
-    font-size: 1.1em !important;
+    font-size: 1.1.5em !important;
   }
   &.mat-focused .mdc-notched-outline__leading,
   &.mat-focused .mdc-notched-outline__notch,

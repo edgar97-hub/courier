@@ -66,7 +66,9 @@ let UsersService = class UsersService {
                 });
             }
             if (role) {
-                queryBuilder.andWhere('user.role = :role', { role });
+                queryBuilder.andWhere('user.role IN (:...role)', {
+                    role: role.split(','),
+                });
             }
             const users = await queryBuilder.getMany();
             return users;

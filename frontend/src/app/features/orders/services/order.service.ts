@@ -488,7 +488,7 @@ export class OrderService {
     }
     let params = new HttpParams()
       .set('search_term', searchTerm)
-      .set('role', 'EMPRESA');
+      .set('role', 'EMPRESA,EMPRESA_DISTRIBUIDOR');
 
     return this.http
       .get<any>(`${this.apiUrlUsers}/filtered`, { params, headers })
