@@ -1,15 +1,15 @@
 :host {
-  display: block; // Asegura que el componente ocupe espacio
+  display: block;
 }
 
+// Layout and container styles
 .table-wrapper {
   position: relative;
   overflow: auto;
-  // border-radius: 12px; // Bordes más redondeados
   background-color: var(--sys-surface);
   color: var(--sys-on-surface);
   margin-top: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); // Sombra más suave y moderna
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: box-shadow 0.3s ease-in-out;
 
   &:hover {
@@ -23,273 +23,369 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(var(--sys-surface), 0.85); // Más opaco
+  background-color: rgba(var(--sys-surface), 0.85);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 100; // Asegurar que esté por encima de la tabla
-  border-radius: 12px; // Consistente con el wrapper
+  z-index: 100;
+  border-radius: 12px;
 }
 
+// Table structure
 .orders-table {
   width: 100%;
-  border-collapse: collapse; // Evita doble borde
+  border-collapse: collapse;
 }
 
-th.mat-header-cell {
-  font-weight: 600; // Más peso para cabeceras
-  color: var(--sys-on-surface-variant); // Un gris azulado oscuro
-  background-color: var(
-    --sys-surface-container-low
-  ); // Fondo muy claro, casi blanco
-  padding: 14px 18px; // Más padding
-  border-bottom: 1px solid var(--sys-outline-variant); // Línea divisoria estándar
-  text-transform: uppercase; // Opcional, para un look más formal
-  font-size: 0.8rem; // Un poco más pequeño
-  letter-spacing: 0.5px;
+.compact-table-header {
+  font-weight: 600;
+  color: var(--sys-on-surface-variant);
+  background-color: var(--sys-surface-container-low);
+  padding: 0px 0px !important;
+  border-bottom: 1px solid var(--sys-outline-variant);
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  line-height: 1.1;
 }
 
-td.mat-cell {
-  padding: 12px 18px;
-  border-bottom: 1px solid var(--sys-outline-variant); // Líneas de fila muy sutiles
-  color: var(--sys-on-surface-variant); // Color de texto principal
-  font-size: 0.9rem;
+.compact-table-cell {
+  padding: 0px 0px !important;
+  border-bottom: 1px solid var(--sys-outline-variant);
+  color: var(--sys-on-surface-variant);
+  font-size: 0.75rem;
+  line-height: 1.1;
+  border-right: 1px solid #f5f5f5;
+  font-weight: 700;
+  &:last-child {
+    border-right: none;
+  }
 }
 
 .header-row-sticky {
   position: sticky;
   top: 0;
-  z-index: 10; // Para que la cabecera se mantenga por encima al hacer scroll
-  background-color: var(
-    --sys-surface-container-low
-  ); // El mismo que th.mat-header-cell
+  z-index: 10;
+  background-color: var(--sys-surface-container-low);
+}
+
+.data-row {
+  position: relative;
+  transition: background-color 0.15s ease-in-out;
+
+  &:hover:not(.row-cancelled-strikethrough) {
+    background-color: #f8f9fa;
+  }
+
+  &.row-cancelled-strikethrough {
+    color: #9e9e9e;
+    opacity: 0.75;
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      top: 50%;
+      height: 1.5px;
+      background-color: #d32f2f;
+      transform: translateY(-50%);
+      z-index: 1;
+      pointer-events: none;
+    }
+  }
 }
 
 .highlight-row {
-  // Si quieres resaltar una fila seleccionada
-  background-color: var(--sys-primary-container) !important; // Un azul claro
+  background-color: var(--sys-primary-container) !important;
   font-weight: 500;
 }
 
-.align-right {
-  text-align: right;
-  justify-content: flex-end;
-}
-.amount-cell {
-  font-weight: 500; // Resaltar montos
-}
-
+// Action buttons and icons
 .actions-column-header {
   text-align: center !important;
 }
+
 .actions-cell {
   text-align: center;
   white-space: nowrap;
+
   button.mat-icon-button {
-    margin: 0 2px; // Espacio mínimo
-    color: var(--sys-on-surface-variant); // Color base para iconos de acción
+    margin: 0 2px;
+    color: var(--sys-on-surface-variant);
     transition: color 0.2s ease;
+
     &:hover {
-      color: var(
-        --sys-primary
-      ); // Color primario al hacer hover (o el color específico)
+      color: var(--sys-primary);
     }
   }
 }
 
 .action-icon-delivered {
-  // Para el ícono de entregado
-  color: #4caf50; // Verde - TODO: Add to theme
+  color: #4caf50;
+
   &:hover {
-    color: #388e3c; // TODO: Add to theme
+    color: #388e3c;
   }
 }
+
 .action-icon-neutral {
-  // Para PDF, more_vert
   color: var(--sys-on-surface-variant);
+
   &:hover {
     color: var(--sys-on-surface);
   }
 }
-// Mat-icon-button color="primary" ya usa el color primario del tema.
-// Mat-icon-button color="warn" ya usa el color de advertencia.
+
+.compact-action-button {
+  transform: scale(0.8);
+  margin: 0 !important;
+}
+
+.compact-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  line-height: 18px !important;
+}
+
+// Status badges
+.status-badge {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.status-registrado {
+  background-color: #6610f2;
+  color: #fff;
+}
+
+.status-recogido {
+  background-color: #fd7e14;
+  color: #fff;
+}
+
+.status-en-almacen {
+  background-color: #0d6efd;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.status-en-transito {
+  background-color: #0c1a77;
+  color: #d0c8c8;
+  white-space: nowrap;
+}
+
+.status-entregado {
+  background-color: #198754;
+  color: #fff;
+}
+
+.status-anulado {
+  background-color: #dc3545;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.status-cancelado {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+.status-rechazado-en-punto {
+  background-color: #ff6b6b;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.status-reprogramado {
+  background-color: #adb5bd;
+  color: #212529;
+}
+
+.status-desconocido {
+  background-color: #9e9e9e;
+  color: white;
+}
+
+.express-badge {
+  background-color: #f97c06;
+  color: white;
+  border-radius: 6px;
+  margin-left: 4px;
+  padding: 1px 4px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  display: inline-block;
+  line-height: 1;
+}
+
+// Utility classes
+.align-right {
+  text-align: right;
+  justify-content: flex-end;
+}
+
+.amount-cell {
+  font-weight: 500;
+}
 
 .no-data-cell {
   text-align: center;
-  padding: 50px;
+  padding: 0px;
   font-style: italic;
-  color: var(--sys-on-surface-variant); // Un gris más oscuro
+  color: var(--sys-on-surface-variant);
   font-size: 1rem;
 }
 
+.truncate-text {
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.truncate-texts {
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.code-cell a {
+  color: #3f51b5;
+  text-decoration: none;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.date-cell {
+  white-space: nowrap;
+}
+
+// Compact table grid styles
+.compact-table-grid {
+  border-collapse: separate;
+  border-spacing: 0;
+
+  .compact-table-header,
+  .compact-table-cell {
+    border-right: 1px solid var(--sys-outline-variant);
+  }
+
+  .compact-table-header:last-child,
+  .compact-table-cell:last-child {
+    border-right: none;
+  }
+}
+
+.compact-cell {
+  padding: 0px 0px !important;
+  font-size: 0.75rem !important;
+  line-height: 1.1;
+}
+
+// Column width optimizations for compact grid
+.orders-table.compact-table-grid {
+  .compact-table-header,
+  .compact-table-cell {
+    min-width: 0;
+  }
+
+  .column-code {
+    width: 55px;
+  }
+
+  .column-company {
+    width: 90px;
+  }
+  .column-recipient_name {
+    width: 120px !important;
+  }
+
+  .column-shipment_type {
+    width: 50px;
+    max-width: 0px;
+  }
+  .column-status {
+    width: 70px;
+  }
+
+  .column-recipient_phone {
+    width: 85px;
+  }
+
+  .column-delivery_district_name {
+    width: 90px;
+  }
+
+  .column-delivery_address {
+    width: 150px;
+  }
+
+  .column-delivery_date {
+    width: 90px;
+  }
+
+  .column-motorizado {
+    width: 90px;
+  }
+
+  .column-amount_to_collect_at_delivery {
+    width: 75px;
+  }
+
+  .column-tracking_code {
+    width: 110px;
+  }
+
+  .column-actions {
+    width: 35px;
+  }
+}
+
+// Paginator
 .mat-mdc-paginator {
   background-color: var(--sys-surface-container-low);
   border-bottom-left-radius: 12px;
   border-bottom-right-radius: 12px;
   color: var(--sys-on-surface-variant);
   border-top: 1px solid var(--sys-outline-variant);
-  padding: 8px 0; // Un poco de padding vertical
+  padding: 8px 0;
 }
 
-.truncate-text {
-  max-width: 180px; // Un poco más de espacio
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: inline-block; // Necesario para que text-overflow funcione bien
-  vertical-align: middle; // Alinear mejor con otros elementos si los hubiera
-}
-
-.code-cell a {
-  // Estilo para el código de pedido clickeable
-  color: #3f51b5; // Color primario
-  text-decoration: none;
-  font-weight: 500;
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
-// Estilos mejorados para los badges de estado
-.status-badge {
-  padding: 5px 12px; // Más padding horizontal
-  border-radius: 16px; // Totalmente redondeado
-  font-size: 0.75rem; // Ligeramente más pequeño
-  font-weight: 600; // Más peso
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  display: inline-flex; // Para alinear ícono y texto si añades íconos
-  align-items: center;
-  line-height: 1; // Ajustar línea de altura
-  // mat-icon { // Si añades íconos a los badges
-  //   font-size: 1rem;
-  //   margin-right: 4px;
-  // }
-}
-
-// Colores de estado más modernos y consistentes (ejemplos)
-// .status-pendiente {
-//   background-color: #ffc107;
-//   color: #212529;
-// }
-// .status-confirmado {
-//   background-color: #0dcaf0;
-//   color: #fff;
-// } // Cyan con texto blanco
-// .status-en-preparacion {
-//   background-color: #6610f2;
-//   color: #fff;
-// } // Índigo con texto blanco
-
-// Clases de status-badge (colores hexadecimales directos)
-.status-registrado {
-  background-color: #6610f2;
-  color: #fff;
-} // Índigo con texto blanco
-.status-recogido {
-  background-color: #fd7e14;
-  color: #fff;
-} // Naranja con texto blanco
-.status-en-almacen {
-  background-color: #0d6efd;
-  color: #fff;
-  white-space: nowrap;
-} // Azul primario con texto blanco
-.status-en-transito {
-  background-color: #0c1a77;
-  color: #d0c8c8;
-  white-space: nowrap;
-}
-.status-entregado {
-  background-color: #198754;
-  color: #fff;
-} // Verde éxito con texto blanco
-.status-anulado {
-  background-color: #dc3545;
-  color: #fff;
-  white-space: nowrap;
-} // Rojo peligro con texto blanco
-.status-cancelado {
-  background-color: #6c757d;
-  color: #fff;
-} // Gris secundario con texto blanco
-.status-rechazado-en-punto {
-  background-color: #ff6b6b;
-  color: #fff;
-  white-space: nowrap;
-}
-.status-reprogramado {
-  background-color: #adb5bd;
-  color: #212529;
-}
-
-// Badge genérico por si el estado no coincide con ninguno de los anteriores
-.status-desconocido {
-  background-color: #9e9e9e; // Gris neutro
-  color: white;
-}
-
+// Responsive styles
 @media (max-width: 768px) {
-  th.mat-header-cell,
-  td.mat-cell {
-    padding: 8px 12px;
-    font-size: 0.75rem;
-  }
-}
-
-// .data-row {
-//   // transition: background-color 0.2s ease-in-out;
-// }
-
-td.mat-cell {
-  // Estilos para todas las celdas de datos
-  padding: 10px 16px !important; // Mantén tu padding
-  color: black !important; // Color de texto
-  font-family: "Montserrat", sans-serif !important;
-  border-bottom: 1px solid #c11616 !important; // Borde inferior explícito para cada celda (color gris claro)
-  border-right: 1px solid #f0f0f0 !important; // Borde derecho muy sutil (opcional, para separar columnas)
-  &:last-child {
-    border-right: none; // Sin borde derecho en la última celda
-  }
-}
-
-.data-row {
-  position: relative; // Necesario para el ::after
-  transition: background-color 0.15s ease-in-out; // Transición más rápida para hover
-
-  &:hover:not(.row-cancelled-strikethrough) {
-    background-color: #eef2f7; // Color de hover (ej. un azul muy claro)
-    // Las celdas td mantendrán sus propios bordes definidos arriba.
+  .compact-table-header,
+  .compact-table-cell {
+    padding: 3px 4px;
+    font-size: 0.6rem;
   }
 
-  &.row-cancelled-strikethrough {
-    color: #9e9e9e;
-    opacity: 0.75; // Ligeramente más opaco que antes
+  .status-badge {
+    padding: 2px 4px;
+    font-size: 0.55rem;
+  }
 
-    // El texto dentro de las celdas ya no se tacha individualmente
-    // si la línea ::after funciona bien visualmente.
-    // Si la línea ::after tapa el texto, vuelve a text-decoration en el td.
-    // td {
-    //   text-decoration: line-through;
-    //   text-decoration-color: #d32f2f;
-    //   text-decoration-thickness: 1.5px;
-    // }
-
-    &::after {
-      content: "";
-      position: absolute;
-      left: 8px; // Pequeño padding desde la izquierda de la fila
-      right: 8px; // Pequeño padding desde la derecha de la fila
-      top: 50%;
-      height: 1.5px;
-      background-color: #d32f2f; // Rojo para la línea de tachado
-      transform: translateY(-50%);
-      z-index: 1; // Puede necesitar ser > 0 si el contenido de la celda tiene su propio fondo
-      pointer-events: none;
-    }
-
-    // &:hover {
-    //   background-color: transparent; // O un color de "cancelado hover" si lo deseas
-    // }
+  .compact-cell {
+    padding: 3px 4px !important;
+    font-size: 0.6rem !important;
   }
 }
