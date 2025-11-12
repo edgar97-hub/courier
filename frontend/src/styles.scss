@@ -85,20 +85,20 @@ body {
 }
 html {
   /* Aplicar el escalado al 95% (simula el zoom out) */
-  transform: scale(0.90);
+  transform: scale(0.95);
   /* Asegura que el escalado inicie desde la esquina superior izquierda
      para evitar el margen a la derecha y barras de desplazamiento. */
   transform-origin: top left;
   /* Es importante que sea un elemento de bloque */
   display: block;
   /* Aseguramos la compatibilidad con navegadores Firefox */
-  -moz-transform: scale(0.90);
+  -moz-transform: scale(0.95);
   -moz-transform-origin: top left;
 
   /* CLAVE: Ajustar el ancho del contenedor HTML al factor de escalado (0.95)
      para que el área escalada llene el contenedor correctamente sin margen extra. */
-  width: calc(100% / 0.90); /* Esto es 105.26% */
-  height: calc(100% / 0.90); /* Para evitar barras verticales si las hay */
+  width: calc(100% / 0.95); /* Esto es 105.26% */
+  height: calc(100% / 0.95); /* Para evitar barras verticales si las hay */
 }
 
 body {
