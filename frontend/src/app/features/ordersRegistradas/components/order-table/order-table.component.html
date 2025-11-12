@@ -47,7 +47,6 @@
         mat-cell
         *matCellDef="let order"
         class="compact-table-cell column-company"
-        [matTooltip]="order.company?.username"
       >
         {{ order.company?.username }}
       </td>
@@ -67,7 +66,6 @@
         mat-cell
         *matCellDef="let order"
         class="compact-table-cell compact-cell column-shipment_type"
-        [matTooltip]="order.shipment_type"
       >
         {{ order.shipment_type }}
       </td>
@@ -87,7 +85,6 @@
         mat-cell
         *matCellDef="let order"
         class="compact-table-cell column-recipient_name"
-        [matTooltip]="order.recipient_name"
       >
         {{ order.recipient_name }}
       </td>
@@ -180,7 +177,7 @@
         mat-sort-header
         class="compact-table-header column-delivery_date"
       >
-        F. Entrega
+        F. Registro
       </th>
       <td
         mat-cell

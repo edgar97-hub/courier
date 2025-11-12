@@ -304,10 +304,10 @@ font-weight: 700;
 
 // Column width optimizations for compact grid
 .orders-table.compact-table-grid {
-  .compact-table-header,
-  .compact-table-cell {
-    min-width: 0;
-  }
+  // .compact-table-header,
+  // .compact-table-cell {
+  //   min-width: 0;
+  // }
 
   .column-code {
     width: 55px;
@@ -322,7 +322,6 @@ font-weight: 700;
 
   .column-shipment_type {
     width: 50px;
-    max-width: 0px;
   }
   .column-status {
     width: 70px;

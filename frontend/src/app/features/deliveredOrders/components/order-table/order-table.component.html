@@ -108,26 +108,6 @@
       </td>
     </ng-container>
 
-    <!-- <ng-container matColumnDef="observation_shipping_cost_modification">
-      <th
-        mat-header-cell
-        *matHeaderCellDef
-        mat-sort-header
-        class="align-center"
-      >
-        Motivo del ajuste del costo envio
-      </th>
-      <td
-        mat-cell
-        *matCellDef="let order"
-        class="truncate-texts"
-        [matTooltip]="order.observation_shipping_cost_modification"
-        style="min-width: 145px; border: 0px solid black"
-      >
-        {{ order.observation_shipping_cost_modification }}
-      </td>
-    </ng-container> -->
-
     <!-- Actions Column -->
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef class="actions-column-header">
@@ -159,15 +139,6 @@
             <mat-icon>download</mat-icon>
             <span>Descargar evidencia</span>
           </button>
-
-          <!-- <button
-            mat-menu-item
-            (click)="openEditShippingCostModal(order)"
-            *ngIf="hasPermissionEdit()"
-          >
-            <mat-icon>price_change</mat-icon>
-            <span>Modificar Costo Envío</span>
-          </button> -->
         </mat-menu>
       </td>
     </ng-container>
@@ -177,13 +148,7 @@
       *matHeaderRowDef="displayedColumns; sticky: true"
       class="header-row-sticky"
     ></tr>
-    <!-- <tr
-      mat-row
-      *matRowDef="let row; columns: displayedColumns"
-      class="data-row"
-      (click)="onViewOrderDetails(row)"
-      [ngClass]="{ 'highlight-row': false }"
-    ></tr> -->
+
     <tr
       mat-row
       *matRowDef="let row; columns: displayedColumns"

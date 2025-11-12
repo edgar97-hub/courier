@@ -156,40 +156,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     }
   }
 
-  ngAfterViewInit(): void {
-    // El sort y paginator ya están configurados para emitir eventos al padre
-    // No es necesario configurar dataSource.sort y dataSource.paginator aquí
-    // si el padre maneja la paginación y el ordenamiento del lado del servidor.
-    // Si es del lado del cliente, SÍ debes configurarlos:
-    // this.dataSource.sort = this.sort;
-    // this.dataSource.paginator = this.paginator;
-  }
-
-  // --- Funciones de ayuda para la lógica de acciones ---
-  // canMarkAs(order: Order, targetStatus: OrderStatus): boolean {
-  //   // Lógica simplificada, necesitarás adaptarla a tu flujo exacto de estados
-  //   // y roles de usuario (que obtendrías de tu AppStore o AuthService)
-  //   const currentStatus = order.status;
-  //   // const userRole = this.appStore.currentUser()?.role;
-
-  //   // if (userRole === 'MOTORIZADO' || userRole === 'ADMINISTRADOR') {
-  //   // switch (targetStatus) {
-  //   //   case OrderStatus.EN_TRANSITO:
-  //   //     return (
-  //   //       currentStatus === OrderStatus.LISTO_PARA_RECOGER ||
-  //   //       currentStatus === OrderStatus.EN_PREPARACION
-  //   //     );
-  //   //   case OrderStatus.ENTREGADO:
-  //   //     return currentStatus === OrderStatus.EN_TRANSITO;
-  //   //   case OrderStatus.NO_ENTREGADO: // O INCIDENCIA
-  //   //     return currentStatus === OrderStatus.EN_TRANSITO;
-  //   //   // Añade más casos según tu lógica
-  //   //   default:
-  //   //     return false;
-  //   // }
-  //   // }
-  //   return false;
-  // }
+  ngAfterViewInit(): void {}
 
   onViewPdfA4(order: Order_): void {
     const pdfUrl = environment.apiUrl + '/orders/' + order.id + '/pdf-rotulo';
