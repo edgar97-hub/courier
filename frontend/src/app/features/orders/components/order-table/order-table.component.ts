@@ -61,6 +61,7 @@ import {
   OrderEditionDialogComponent,
   OrderEditionDialogData,
 } from '../order-edition-dialog/order-edition-dialog.component';
+import { UserRole } from '../../../../common/roles.enum';
 
 @Component({
   selector: 'app-order-table',
@@ -103,6 +104,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     proofOfDeliveryImageUrl?: string | null;
     shippingCostPaymentMethod?: string | null;
     collectionPaymentMethod?: string | null;
+    updatedAt?: string;
   }>();
   @Output() motorizedChanged = new EventEmitter<{
     orderId: number | string;
@@ -221,14 +223,13 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
       { order: Order_; availableStatuses: OrderStatus[] },
       ChangeStatusDialogResult
     >(ChangeStatusDialogComponent, {
-      width: '450px', // Ajusta el ancho según necesites
+      width: '450px',
       data: { order: order, availableStatuses: availableStatuses },
-      disableClose: true, // Evita que se cierre al hacer clic fuera
+      disableClose: true,
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result && result.newStatus) {
-        console.log('Dialog result:', result);
         const updatePayload: any = {
           newStatus: result.newStatus,
           reason: result.reason || '',
@@ -250,10 +251,10 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
               result.collectionPaymentMethod;
           }
         }
-        console.log('updatePayload', updatePayload);
         this.statusChanged.emit({
           orderId: order.id,
           ...updatePayload,
+          updatedAt: order.updatedAt,
         });
       } else {
         console.log('Cambio de estado cancelado o sin selección.');
@@ -262,27 +263,14 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   }
 
   getAvailableStatuses(order: Order_): OrderStatus[] {
-    const userRole = this.appStore.currentUser()?.role;
-    order.status === OrderStatus.REGISTRADO;
+    const rol = this.appStore.currentUser()?.role;
 
     let almacen = [OrderStatus.EN_ALMACEN];
-    if (userRole === 'MOTORIZADO' && OrderStatus.REGISTRADO) {
+    if (rol === 'MOTORIZADO' && OrderStatus.REGISTRADO) {
       almacen = [];
     }
 
-    let anulado: any = [];
-    if (userRole === 'ADMINISTRADOR') {
-      // anulado = [OrderStatus.ANULADO];
-      // return [
-      //   OrderStatus.REGISTRADO,
-      //   OrderStatus.RECOGIDO,
-      //   OrderStatus.EN_ALMACEN,
-      //   OrderStatus.EN_TRANSITO,
-      //   OrderStatus.ENTREGADO,
-      //   OrderStatus.RECHAZADO,
-      //   OrderStatus.ANULADO,
-      //   OrderStatus.REPROGRAMADO,
-      // ];
+    if (rol === UserRole.ADMIN) {
       switch (order.status) {
         case OrderStatus.ENTREGADO:
           return [OrderStatus.ANULADO];
@@ -297,27 +285,26 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
             OrderStatus.ENTREGADO,
             OrderStatus.RECHAZADO,
             OrderStatus.REPROGRAMADO,
+            OrderStatus.ANULADO,
           ];
       }
     }
 
     switch (order.status) {
       case OrderStatus.REGISTRADO:
-        return [OrderStatus.RECOGIDO, ...almacen, ...anulado];
+        return [OrderStatus.RECOGIDO, ...almacen];
       case OrderStatus.RECOGIDO:
-        return [OrderStatus.EN_ALMACEN, ...anulado];
+        return [OrderStatus.EN_ALMACEN];
       case OrderStatus.EN_ALMACEN:
-        return [OrderStatus.EN_TRANSITO, ...anulado];
+        return [OrderStatus.EN_TRANSITO];
       case OrderStatus.EN_TRANSITO:
         return [
           OrderStatus.ENTREGADO,
-          // OrderStatus.CANCELADO,
           OrderStatus.RECHAZADO,
           OrderStatus.REPROGRAMADO,
-          ...anulado,
         ];
       case OrderStatus.REPROGRAMADO:
-        return [OrderStatus.EN_TRANSITO, ...anulado];
+        return [OrderStatus.EN_TRANSITO];
       default:
         return [];
     }

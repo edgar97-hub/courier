@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { ErrorManager } from 'src/utils/error.manager';
 import {
@@ -63,8 +63,21 @@ export class OrdersService {
       const currentOrder = await this.orderRepository.findOne({
         where: { id: body.payload.orderId },
       });
-
       if (!currentOrder) throw new Error('Orden no encontrada');
+
+      // console.log(body.payload.updatedAt);
+      // console.log(currentOrder?.updatedAt.toISOString());
+
+      if (
+        body.payload.updatedAt &&
+        body.payload.updatedAt !== currentOrder?.updatedAt.toISOString()
+      ) {
+        throw new Error(
+          'ERROR DE CONCURRENCIA: Este registro ya fue modificado por otro usuario. ' +
+            'Por favor, actualice la tabla y obtenga el registro actualizado antes de realizar cambios.',
+        );
+      }
+
       if (body.payload.newStatus === STATES.ANNULLED) {
         console.log('dejar pasar');
       } else {
@@ -73,7 +86,7 @@ export class OrdersService {
           (currentOrder.status === STATES.DELIVERED ||
             currentOrder.status === STATES.REJECTED)
         )
-          throw new Error('Orden ya fue modificada');
+          throw new Error('El estado del pedido ya aparece como entregado.');
       }
 
       if (body.payload.action === 'CAMBIO DE ESTADO') {
@@ -301,7 +314,8 @@ export class OrdersService {
       }
       return updatedOrder;
     } catch (error) {
-      throw ErrorManager.createSignatureError(error.message);
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      // throw ErrorManager.createSignatureError(error.message);
     }
   }
 

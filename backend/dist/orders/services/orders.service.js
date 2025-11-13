@@ -53,6 +53,11 @@ let OrdersService = class OrdersService {
             });
             if (!currentOrder)
                 throw new Error('Orden no encontrada');
+            if (body.payload.updatedAt &&
+                body.payload.updatedAt !== currentOrder?.updatedAt.toISOString()) {
+                throw new Error('ERROR DE CONCURRENCIA: Este registro ya fue modificado por otro usuario. ' +
+                    'Por favor, actualice la tabla y obtenga el registro actualizado antes de realizar cambios.');
+            }
             if (body.payload.newStatus === roles_1.STATES.ANNULLED) {
                 console.log('dejar pasar');
             }
@@ -60,7 +65,7 @@ let OrdersService = class OrdersService {
                 if (body.payload.action === 'CAMBIO DE ESTADO' &&
                     (currentOrder.status === roles_1.STATES.DELIVERED ||
                         currentOrder.status === roles_1.STATES.REJECTED))
-                    throw new Error('Orden ya fue modificada');
+                    throw new Error('El estado del pedido ya aparece como entregado.');
             }
             if (body.payload.action === 'CAMBIO DE ESTADO') {
                 await this.orderRepository.update(body.payload.orderId, {
@@ -203,7 +208,7 @@ let OrdersService = class OrdersService {
             return updatedOrder;
         }
         catch (error) {
-            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+            throw new common_1.HttpException(error.message, common_1.HttpStatus.BAD_REQUEST);
         }
     }
     async batchCreateOrders(payload, idUser) {

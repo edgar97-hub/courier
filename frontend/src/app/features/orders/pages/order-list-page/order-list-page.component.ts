@@ -352,6 +352,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
     proofOfDeliveryImageUrl?: string | null;
     shippingCostPaymentMethod?: string | null;
     collectionPaymentMethod?: string | null;
+    updatedAt?: string;
   }): void {
     this.isLoading = true; // O una bandera de carga específica para la actualización
     console.log('OrderListPage: Status change requested', event);
@@ -363,7 +364,8 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
         event.reason || '',
         event.proofOfDeliveryImageUrl,
         event.shippingCostPaymentMethod,
-        event.collectionPaymentMethod
+        event.collectionPaymentMethod,
+        event.updatedAt
       )
       .subscribe({
         next: (updatedOrder) => {
@@ -375,11 +377,11 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
           this.fetchOrders();
         },
         error: (err) => {
-          this.snackBar.open(
-            `Error al actualizar estado: ${err.message || 'Intente de nuevo'}`,
-            'Cerrar',
-            { duration: 5000, panelClass: ['error-snackbar'] }
-          );
+          console.log('err', err.message);
+          this.snackBar.open(`${err.message || 'Intente de nuevo'}`, 'Cerrar', {
+            duration: 7000,
+            panelClass: ['error-snackbar'],
+          });
           this.isLoading = false;
         },
         complete: () => {

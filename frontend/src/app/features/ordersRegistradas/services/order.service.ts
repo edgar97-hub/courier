@@ -130,7 +130,10 @@ export class OrderService {
       return throwError(() => new Error('Not authenticated to fetch users.'));
     }
     return this.http
-      .get<PaginatedOrdersResponse>(this.apiUrlOrders + '/registered-orders', { params, headers })
+      .get<PaginatedOrdersResponse>(this.apiUrlOrders + '/registered-orders', {
+        params,
+        headers,
+      })
       .pipe(
         map((response) => {
           return response;
@@ -236,6 +239,7 @@ export class OrderService {
     if (payment_method_for_collection) {
       payload.payment_method_for_collection = payment_method_for_collection;
     }
+
     return this.http
       .post<{ success: boolean; message: string; batchId?: string }>(
         `${this.apiUrlOrders}/update-order-status`,

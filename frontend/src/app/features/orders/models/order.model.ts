@@ -23,15 +23,15 @@ export interface PaginatedOrdersResponse {
 }
 
 export interface NewOrderData {
-  // id?: string | number; // El ID lo asigna el backend, o un ID temporal en frontend
+  // id?: string | number; 
   isExpress?: boolean;
   shipment_type: string;
   recipient_name: string;
   recipient_phone: string;
   delivery_district_id: string | number;
   delivery_address: string;
-  delivery_coordinates?: string; // Formato "lat,lng"
-  delivery_date: string; // Formato YYYY-MM-DD
+  delivery_coordinates?: string;
+  delivery_date: string; 
 
   package_size_type: 'standard' | 'custom';
   package_width_cm?: number | null;
@@ -42,7 +42,7 @@ export interface NewOrderData {
 
   item_description: string;
   amount_to_collect_at_delivery: number;
-  payment_method_for_collection: string; // ej: 'NO_COBRAR', 'EFECTIVO'
+  payment_method_for_collection: string;
   observations?: string;
 
   // Para mostrar en la tabla temporal
@@ -53,8 +53,8 @@ export interface NewOrderData {
 
 // Para el payload final que se envía al backend con el lote de pedidos
 export interface CreateBatchOrderPayload {
-  orders: Omit<NewOrderData, 'delivery_district_name' | 'temp_id'>[]; // Array de los pedidos sin los campos temporales de UI
-  pickup_option: string; // ej: 'RECOGER_DOMICILIO'
+  orders: Omit<NewOrderData, 'delivery_district_name' | 'temp_id'>[];
+  pickup_option: string;
   terms_accepted: boolean;
 }
 
@@ -99,63 +99,62 @@ export enum OrderStatus {
   EN_ALMACEN = 'EN ALMACEN',
   EN_TRANSITO = 'EN TRANSITO',
   ENTREGADO = 'ENTREGADO',
-  // CANCELADO = 'CANCELADO',
   RECHAZADO = 'RECHAZADO EN PUNTO',
   ANULADO = 'ANULADO',
   REPROGRAMADO = 'REPROGRAMADO',
 }
 
 export interface Order_importacion {
-  id?: string; // Opcional, el backend lo asigna
+  id?: string;
   recipient_name?: string;
   recipient_phone: string;
-  delivery_district_name: string; // Este será el que el usuario selecciona de la lista
+  delivery_district_name: string;
   delivery_address: string;
-  delivery_coordinates?: string; // Lat,Lng (opcional, podrías obtenerlo de la dirección)
-  delivery_date: string; // Formato "YYYY-MM-DD" o "DD/MM/YYYY" (consistencia es clave)
+  delivery_coordinates?: string;
+  delivery_date: string;
   // package_size_type: string; // No está directamente en tu Excel, se infiere o calcula?
-  package_width_cm?: number; // Estos podrían no estar en tu Excel de importación masiva
-  package_length_cm?: number; // o estar agrupados en 'DETALLE DEL PRODUCTO'
+  package_width_cm?: number;
+  package_length_cm?: number;
   package_height_cm?: number;
   package_weight_kg?: number;
-  shipping_cost?: number; // ¿Se calcula o se ingresa?
-  item_description: string; // Corresponde a "DETALLE DEL PRODUCTO"
-  amount_to_collect_at_delivery?: number; // Corresponde a "MONTO A COBRAR"
-  payment_method_for_collection?: string; // Corresponde a "FORMA DE PAGO"
+  shipping_cost?: number;
+  item_description: string;
+  amount_to_collect_at_delivery?: number;
+  payment_method_for_collection?: string;
   observations?: string;
-  type_order_transfer_to_warehouse: string; // Corresponde a "TIPO DE ENVIO"
-  status?: STATES; // El estado inicial podría ser "Pending"
+  type_order_transfer_to_warehouse: string;
+  status?: STATES;
 }
 
 export interface Order_ {
-  id: string | number; // Asumo que tienes un ID primario que no está en la lista, pero es esencial
-  code?: number; // Este podría ser un ID secundario o número de orden visible
+  id: string | number;
+  code?: number;
   shipment_type?: string;
   recipient_name?: string;
   recipient_phone?: string;
   delivery_district_name?: string;
   delivery_address?: string;
-  delivery_coordinates?: string; // Formato "lat,lng"
-  delivery_date?: string; // Considera usar Date si la API devuelve un formato ISO
+  delivery_coordinates?: string;
+  delivery_date?: string;
   package_size_type?: string;
   package_width_cm?: number;
   package_length_cm?: number;
   package_height_cm?: number;
   package_weight_kg?: number;
-  item_description?: string; // Descripción del contenido
+  item_description?: string;
   shipping_cost?: number;
   payment_method_for_shipping_cost?: string;
   amount_to_collect_at_delivery?: number;
   payment_method_for_collection?: string;
-  observations?: string; // Notas del cliente o internas
+  observations?: string;
   type_order_transfer_to_warehouse?: string;
-  status: OrderStatus; // Usando el enum
-  user?: User; // Información básica del usuario que creó la orden
+  status: OrderStatus;
+  user?: User;
   company?: User;
   assigned_driver?: User;
-  createdAt?: string | Date; // Fecha de creación
-  updatedAt?: string | Date; // Fecha de última actualización
-  delivered_at?: string | Date; // Fecha real de entrega (si la tienes)
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+  delivered_at?: string | Date;
   product_delivery_photo_url?: string;
   observation_shipping_cost_modification?: string;
   isExpress?: boolean;

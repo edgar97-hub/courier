@@ -184,7 +184,8 @@ export class OrderService {
     reason?: string,
     product_delivery_photo_url?: string | null,
     payment_method_for_shipping_cost?: string | null,
-    payment_method_for_collection?: string | null
+    payment_method_for_collection?: string | null,
+    updatedAt?: string
   ): Observable<any> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
@@ -196,6 +197,7 @@ export class OrderService {
       reason,
       newStatus,
       action: 'CAMBIO DE ESTADO',
+      updatedAt,
     };
     if (product_delivery_photo_url) {
       payload.product_delivery_photo_url = product_delivery_photo_url;
@@ -634,14 +636,14 @@ export class OrderService {
 
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'An unknown error occurred!';
+    console.log('error', error);
+
     if (error.error instanceof ErrorEvent) {
       // Error del lado del cliente
       errorMessage = `Error: ${error.error.message}`;
     } else {
       // El backend devolvió un código de error
-      errorMessage = `Error Code: ${error.status}\nMessage: ${
-        error.message || error.error?.message || 'Server error'
-      }`;
+      errorMessage = `${error.error?.message || error.message}`;
       if (error.status === 0) {
         errorMessage =
           'Could not connect to the server. Please check your network or if the server is running.';
