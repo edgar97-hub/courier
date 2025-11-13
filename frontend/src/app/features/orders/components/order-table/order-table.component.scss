@@ -155,7 +155,7 @@
   padding: 3px 8px;
   border-radius: 12px;
   font-size: 0.65rem;
-  font-weight: 600;
+  font-weight: 700 !important;
   text-transform: uppercase;
   letter-spacing: 0.3px;
   display: inline-flex;
@@ -166,29 +166,30 @@
 
 .status-registrado {
   background-color: #6610f2;
-  color: #fff;
+  color: #ffffff;
 }
 
 .status-recogido {
   background-color: #fd7e14;
-  color: #fff;
+  color: #ffffff;
 }
 
 .status-en-almacen {
   background-color: #0d6efd;
-  color: #fff;
+  color: #ffffff;
   white-space: nowrap;
 }
 
 .status-en-transito {
   background-color: #0c1a77;
-  color: #d0c8c8;
+  color: #ffffff;
   white-space: nowrap;
+  font-weight: 900 !important;
 }
 
 .status-entregado {
   background-color: #198754;
-  color: #fff;
+  color: #ffffff;
 }
 
 .status-anulado {
@@ -199,7 +200,7 @@
 
 .status-cancelado {
   background-color: #6c757d;
-  color: #fff;
+  color: #ffffff;
 }
 
 .status-rechazado-en-punto {
