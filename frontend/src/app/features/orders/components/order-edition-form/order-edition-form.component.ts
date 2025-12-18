@@ -8,15 +8,19 @@ import {
   signal,
   WritableSignal,
   computed,
-  Input, // Import Input
+  Input,
+  effect,
 } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import {
+  FormArray,
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators,
+  AbstractControl,
+  ValidationErrors,
 } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -26,7 +30,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { Subject, Observable, Subscription, of } from 'rxjs';
+import { Subject, Observable, Subscription, of, merge } from 'rxjs';
 import {
   takeUntil,
   tap,
@@ -36,16 +40,17 @@ import {
   debounceTime,
   switchMap,
   catchError,
-  skip, // Import skip
+  skip,
+  take,
 } from 'rxjs/operators';
-
-import { PackageCalculatorComponent } from '../package-calculator/package-calculator.component';
 import { OrderService } from '../../services/order.service';
 import {
   DistrictOption,
   NewOrderData,
   Order,
   Order_,
+  OrderItem,
+  PackageType,
   UpdateOrderRequestDto,
 } from '../../models/order.model';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -56,6 +61,30 @@ import {
 import { User } from '../../../users/models/user.model';
 import { AppStore } from '../../../../app.store';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { SettingsService } from '../../../settings/services/settings.service';
+import { AutoSelectDirective } from '../../../../shared/directives/auto-select.directive';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatTableModule } from '@angular/material/table';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { UserRole } from '../../../../common/roles.enum';
+
+interface CustomPackageData {
+  delivery_district_id: string | number;
+  package_length_cm: number;
+  package_width_cm: number;
+  package_height_cm: number;
+  package_weight_kg: number;
+}
+
+interface Tariff extends DistrictOption {
+  weight_from: number;
+  weight_to: number;
+}
+
+interface FormErrors {
+  [key: string]: ValidationErrors | FormErrors;
+}
 
 @Component({
   selector: 'app-order-edition-form',
@@ -71,15 +100,20 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     MatButtonModule,
     MatIconModule,
     MatDividerModule,
-    PackageCalculatorComponent,
     MatProgressSpinnerModule,
     MatAutocompleteModule,
     MatCheckboxModule,
+    MatRadioModule,
+    MatTableModule,
+    AutoSelectDirective,
+    MatSnackBarModule,
   ],
   templateUrl: './order-edition-form.component.html',
   styleUrls: ['./order-edition-form.component.scss'],
 })
 export class OrderEditionFormComponent implements OnInit, OnDestroy {
+  itemsDataSource = new MatTableDataSource<AbstractControl>();
+
   @Input() order: Order_ | null = null;
   @Output() orderSubmit = new EventEmitter<Order_>();
   @Output() formValidityChanged = new EventEmitter<boolean>();
@@ -111,7 +145,37 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
   districSearchCtrl = new FormControl();
   filteredDistricts$: Observable<DistrictOption[]>;
 
+  newItemForm!: FormGroup;
+  itemsDisplayedColumns: string[] = [
+    'description',
+    'medidas',
+    'basePrice',
+    'tipo',
+    'finalPrice',
+    'eliminar',
+  ];
+  private settingsService = inject(SettingsService);
+  multiPackageDiscountPercentage: WritableSignal<number> = signal(0);
+  standardPackageLabel: WritableSignal<string> = signal('');
+  volumetricFactor: WritableSignal<number> = signal(0);
+  shippingCostPackage: WritableSignal<number> = signal(0);
+  maxDimensionsInfo: WritableSignal<string> = signal('');
+
+  private snackBar = inject(MatSnackBar);
+
   constructor() {
+    this.orderService.getMaxPackageDimensions().subscribe((dims) => {
+      if (
+        dims.standard_package_info &&
+        dims.volumetric_factor &&
+        dims.info_text
+      ) {
+        this.standardPackageLabel.set(dims.standard_package_info);
+        this.volumetricFactor.set(dims.volumetric_factor);
+        this.maxDimensionsInfo.set(dims.info_text);
+      }
+    });
+
     this.buildForm();
     this.minDeliveryDate = new Date();
 
@@ -152,6 +216,13 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
       }),
       takeUntil(this.destroy$)
     );
+
+    effect(() => {
+      this.multiPackageDiscountPercentage();
+      if (this.newItemForm.get('package_type')?.value === PackageType.CUSTOM) {
+        this.recalculateTotalCost(this.itemsFormArray.value);
+      }
+    });
   }
 
   getCheckboxValue(): void {
@@ -160,11 +231,6 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
     this.orderForm
       .get('delivery_district_id')
       ?.setValue(null, { emitEvent: true });
-    this.packageDetailsFormGroup
-      .get('package_size_type')
-      ?.setValue('standard', { emitEvent: true });
-
-    console.log('test', this.orderForm.get('isExpress')?.value);
     this.orderService
       .getDeliveryDistricts(this.orderForm.get('isExpress')?.value)
       .subscribe((allDistricts) => {
@@ -172,17 +238,47 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
       });
   }
 
+  isCompany(): boolean {
+    const userRole = this.appStore.currentUser()?.role;
+    return (
+      userRole === UserRole.EMPRESA_DISTRIBUIDOR ||
+      userRole === UserRole.COMPANY
+    );
+  }
+
+  hasPermissionToEditPercentage(): boolean {
+    const userRole = this.appStore.currentUser()?.role;
+    return userRole === UserRole.RECEPTIONIST || userRole === UserRole.ADMIN;
+  }
+
+  get itemsFormArray(): FormArray {
+    return this.orderForm.get('items') as FormArray;
+  }
+
+  loadSettings() {
+    this.settingsService
+      .loadSettings()
+      .pipe(take(1))
+      .subscribe((settings: unknown) => {
+        const currentSettings = Array.isArray(settings)
+          ? settings[0]
+          : settings;
+        const discount =
+          this.orderService.getEffectiveDiscount(currentSettings);
+        this.multiPackageDiscountPercentage.set(discount);
+      });
+  }
+
   ngOnInit(): void {
-    console.log(this.order);
+    this.loadSettings();
+    this.itemsDataSource.data = this.itemsFormArray.controls;
     if (this.order) {
-      console.log(this.order);
       this.orderService
         .getDeliveryDistricts(this.order?.isExpress)
         .subscribe((allDistricts) => {
           this.districtsCache = allDistricts;
           if (this.order) {
             this.populateForm(this.order, this.districtsCache);
-            console.log(this.districtsCache);
           }
         });
     }
@@ -198,56 +294,22 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
       .get('delivery_district_id')
       ?.valueChanges.pipe(takeUntil(this.destroy$), distinctUntilChanged())
       .subscribe((newDistrictId) => {
+        this.itemsFormArray.clear();
+        this.itemsDataSource.data = this.itemsFormArray.controls;
+        this.orderForm.get('shipping_cost')?.setValue(0);
+
         if (newDistrictId) {
-          let isStandard =
-            this.packageDetailsFormGroup.get('package_size_type')?.value ===
-            'standard';
-          if (isStandard) {
-            let districtStandard = this.districtsCache.find(
-              (item) => item.id === newDistrictId
-            );
-            if (districtStandard) {
-              this.orderForm
-                .get('shipping_cost')
-                ?.setValue(parseFloat(districtStandard.price));
-            }
-          } else {
-            this.orderForm.get('shipping_cost')?.setValue(0);
+          if (
+            this.newItemForm.get('package_type')?.value === PackageType.STANDARD
+          ) {
+            const price = this.getDistrictPrice(newDistrictId);
+            this.orderForm.get('shipping_cost')?.setValue(price);
           }
-          this.checkShippingCostDifference();
-        }
-      });
-
-    this.packageDetailsFormGroup
-      .get('package_size_type')
-      ?.valueChanges.pipe(takeUntil(this.destroy$), distinctUntilChanged())
-      .subscribe((type) => {
-        console.log('type', type);
-        let deliveryDistrictId = this.orderForm.get(
-          'delivery_district_id'
-        )?.value;
-        if (deliveryDistrictId && type === 'standard') {
-          let districtStandard = this.districtsCache.find(
-            (item) => item.id === deliveryDistrictId
-          );
-          if (districtStandard) {
-            this.orderForm
-              .get('shipping_cost')
-              ?.setValue(parseFloat(districtStandard.price));
-          }
-        } else {
-          this.orderForm.get('shipping_cost')?.setValue(0);
-        }
-        if (this.originalShippingCost !== -1) {
           this.checkShippingCostDifference();
         }
       });
   }
 
-  isCompany(): boolean {
-    const userRole = this.appStore.currentUser()?.role;
-    return userRole === 'EMPRESA';
-  }
   displayDriverName(driver: User | null): string {
     return driver && driver.username ? driver.username : '';
   }
@@ -276,11 +338,51 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
     this.orderForm.get('delivery_district_id')?.setValue(null);
   }
 
-  get packageDetailsFormGroup(): FormGroup {
-    return this.orderForm.get('package_details') as FormGroup;
-  }
-
   private buildForm(): void {
+    this.newItemForm = this.fb.group({
+      package_type: [PackageType.STANDARD],
+      description: [''],
+      length_cm: [0, [Validators.required, Validators.min(1)]],
+      width_cm: [0, [Validators.required, Validators.min(1)]],
+      height_cm: [0, [Validators.required, Validators.min(1)]],
+      weight_kg: [0, [Validators.required, Validators.min(0.1)]],
+    });
+
+    this.newItemForm
+      .get('package_type')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe((type) => {
+        const deliveryDistrictId = this.orderForm.get(
+          'delivery_district_id'
+        )?.value;
+        if (!deliveryDistrictId) {
+          this.itemsFormArray.clear();
+          this.itemsDataSource.data = this.itemsFormArray.controls;
+          this.orderForm.get('shipping_cost')?.setValue(0);
+        }
+        if (type === PackageType.STANDARD) {
+          this.itemsFormArray.clear();
+          this.itemsDataSource.data = this.itemsFormArray.controls;
+          const price = this.getDistrictPrice(deliveryDistrictId);
+          this.orderForm.get('shipping_cost')?.setValue(price);
+        } else {
+          this.recalculateTotalCost(this.itemsFormArray.value);
+          const fields = ['length_cm', 'width_cm', 'height_cm', 'weight_kg'];
+          if (type === PackageType.CUSTOM) {
+            fields.forEach((field) =>
+              this.newItemForm
+                .get(field)
+                ?.setValidators([Validators.required, Validators.min(0.1)])
+            );
+          } else {
+            fields.forEach((field) =>
+              this.newItemForm.get(field)?.clearValidators()
+            );
+          }
+          this.newItemForm.updateValueAndValidity();
+        }
+      });
+
     this.orderForm = this.fb.group({
       isExpress: [false],
       recipient_name: ['', Validators.required],
@@ -291,112 +393,38 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
       company_id: [null, Validators.required],
       delivery_district_id: [null, Validators.required],
       delivery_address: ['', [Validators.required, Validators.minLength(6)]],
-      package_details: this.fb.group({
-        package_size_type: ['standard'],
-        package_width_cm: [0],
-        package_length_cm: [0],
-        package_height_cm: [0],
-        package_weight_kg: [0],
-      }),
-      item_description: ['', Validators.required],
+      items: this.fb.array([]),
+      item_description: [''],
       observations: [''],
       shipping_cost: [this.originalShippingCost],
-      observation_shipping_cost_modification: [{ value: '', disabled: true }], // Initially disabled
+      observation_shipping_cost_modification: [{ value: '', disabled: true }],
     });
-  }
 
-  // Método llamado por el evento del PackageCalculatorComponent
-  onShippingCostCalculated(cost: number): void {
-    this.orderForm.get('shipping_cost')?.setValue(cost);
-    this.checkShippingCostDifference();
-  }
-
-  // Método llamado por el evento del PackageCalculatorComponent
-  onPackageCalculationLoading(isLoading: boolean): void {
-    this.isCalculatingShipping.set(isLoading);
-  }
-
-  onSubmit(): void {
-    if (this.orderForm.invalid) {
-      this.orderForm.markAllAsTouched();
-      console.log('Order form is invalid:', this.getFormErrors(this.orderForm));
-      alert('Por favor complete todos los campos requeridos.');
-      return;
-    }
-
-    if (!this.order) {
-      console.error('No order to update.');
-      return;
-    }
-
-    if (this.orderForm.get('shipping_cost')?.value === 0) {
-      alert('El costo de envío no puede ser 0.');
-      return;
-    }
-
-    const formValue = this.orderForm.getRawValue();
-    const updatedOrderData: UpdateOrderRequestDto = {
-      isExpress: formValue.isExpress || false,
-      recipient_name: formValue.recipient_name,
-      recipient_phone: formValue.recipient_phone,
-      delivery_district_name: this.selectedDistrictName(),
-      delivery_address: formValue.delivery_address,
-      package_size_type: formValue.package_details.package_size_type,
-      package_width_cm: formValue.package_details.package_width_cm,
-      package_length_cm: formValue.package_details.package_length_cm,
-      package_height_cm: formValue.package_details.package_height_cm,
-      package_weight_kg: formValue.package_details.package_weight_kg,
-      shipping_cost: formValue.shipping_cost,
-      item_description: formValue.item_description,
-      observations: formValue.observations,
-      company_id: formValue.company_id,
-      observation_shipping_cost_modification:
-        formValue.observation_shipping_cost_modification,
-    };
-
-    console.log('Submitting Updated Order Data:', updatedOrderData);
-
-    this.orderService
-      .updateOrder(this.order.id, updatedOrderData)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          console.log('Order updated successfully', response);
-          this.orderSubmit.emit(response);
-        },
-        error: (error) => {
-          console.error('Error updating order', error);
-          alert('Error al actualizar el pedido.');
-        },
+    merge(
+      this.newItemForm.valueChanges,
+      this.orderForm.get('delivery_district_id')!.valueChanges
+    )
+      .pipe(debounceTime(300), takeUntil(this.destroy$))
+      .subscribe(() => {
+        const newItemValues = this.newItemForm.getRawValue();
+        if (newItemValues.package_type === PackageType.CUSTOM) {
+          if (this.newItemForm.invalid) {
+            this.shippingCostPackage.set(0);
+            return;
+          }
+          const newItemData = this.newItemForm.getRawValue();
+          const customData = {
+            delivery_district_id: this.orderForm.get('delivery_district_id')
+              ?.value,
+            package_length_cm: newItemData.length_cm,
+            package_width_cm: newItemData.width_cm,
+            package_height_cm: newItemData.height_cm,
+            package_weight_kg: newItemData.weight_kg,
+          };
+          const price = this.calculateBasePrice(customData);
+          this.shippingCostPackage.set(price);
+        }
       });
-  }
-
-  resetFormForNextOrder(): void {
-    this.companySearchCtrl.setValue('');
-    this.districSearchCtrl.setValue('');
-
-    let company_id = null;
-    if (this.isCompany()) {
-      company_id = this.orderForm.get('company_id')?.value;
-    }
-
-    this.orderForm.reset({
-      company_id: company_id,
-      delivery_date: null,
-      package_details: { package_size_type: 'standard' },
-    });
-    this.orderForm.get('shipping_cost')?.setValue(0); // Update form control
-
-    // Forzar la re-evaluación del estado de los controles de paquete
-    this.packageDetailsFormGroup
-      .get('package_size_type')
-      ?.setValue('standard', { emitEvent: true });
-    this.formValidityChanged.emit(this.orderForm.valid); // Emitir nuevo estado de validez
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   private populateForm(order: Order_, districts: DistrictOption[]): void {
@@ -417,6 +445,7 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
         observations: order.observations,
         shipping_cost: order.shipping_cost,
         observation_shipping_cost_modification: '',
+        items: [],
       },
       { emitEvent: false }
     );
@@ -427,27 +456,46 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
       this.originalDistrict = district.name;
     }
     this.originalShippingCost = order.shipping_cost || -1; // Store original shipping cost
-    this.packageDetailsFormGroup.patchValue(
-      {
-        package_size_type: order.package_size_type,
-        package_width_cm: order.package_width_cm,
-        package_length_cm: order.package_length_cm,
-        package_height_cm: order.package_height_cm,
-        package_weight_kg: order.package_weight_kg,
-      },
-      { emitEvent: false }
-    );
 
-    if (order.company && order.company) {
-      this.companySearchCtrl.setValue(order.company);
+    if (order.company) {
+      this.companySearchCtrl.setValue({ ...order.company });
     }
     if (district) {
       this.districSearchCtrl.setValue({
         ...district,
       });
     }
-
-    this.orderForm.get('shipping_cost')?.setValue(order.shipping_cost); // Update form control
+    console.log('order', order, this.orderForm.value);
+    const items = this.orderForm.get('items') as FormArray;
+    order.items.forEach((newItemData: any) => {
+      items.push(
+        this.fb.group({
+          package_type: [newItemData.package_type],
+          description: [newItemData.description],
+          length_cm: [newItemData.length_cm],
+          width_cm: [newItemData.width_cm],
+          height_cm: [newItemData.height_cm],
+          weight_kg: [newItemData.weight_kg],
+          basePrice: [newItemData.basePrice],
+          finalPrice: [newItemData.finalPrice],
+          isPrincipal: [newItemData.isPrincipal],
+        })
+      );
+    });
+    this.newItemForm
+      .get('package_type')
+      ?.setValue(
+        order.items.some(
+          (item: OrderItem) => item.package_type === PackageType.STANDARD
+        )
+          ? PackageType.STANDARD
+          : PackageType.CUSTOM
+      );
+    if (this.newItemForm.get('package_type')?.value === PackageType.CUSTOM) {
+      this.recalculateTotalCost(this.itemsFormArray.value);
+    }
+    this.itemsDataSource.data = this.itemsFormArray.controls;
+    // this.orderForm.get('shipping_cost')?.setValue(order.shipping_cost);
   }
 
   // Utilidad para depurar errores de formulario
@@ -489,5 +537,339 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
       observationControl?.setValue('');
     }
     observationControl?.updateValueAndValidity();
+  }
+
+  private calculateBasePrice(customData: CustomPackageData): number {
+    if (!customData.delivery_district_id) {
+      this.snackBar.open(
+        'Por favor, seleccione un distrito de entrega primero.',
+        'Cerrar',
+        {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+        }
+      );
+      return 0;
+    }
+
+    if (this.newItemForm.get('package_type')?.value === PackageType.CUSTOM) {
+      let customDimensionsValid = true;
+      const customControls = [
+        'length_cm',
+        'width_cm',
+        'height_cm',
+        'weight_kg',
+      ];
+
+      customControls.forEach((name) => {
+        const control = this.newItemForm.get(name);
+        control?.markAsTouched();
+        if (control?.invalid) {
+          customDimensionsValid = false;
+        }
+      });
+
+      if (!customDimensionsValid) {
+        console.log('Custom dimensions form is invalid');
+        return 0;
+      }
+    }
+
+    if (
+      !customData.package_width_cm ||
+      !customData.package_length_cm ||
+      !customData.package_height_cm ||
+      !customData.package_weight_kg ||
+      !this.volumetricFactor()
+    ) {
+      this.snackBar.open('Las entradas no son válidas', 'Cerrar', {
+        duration: 3000,
+        panelClass: ['error-snackbar'],
+      });
+      return 0;
+    }
+
+    const pesoVolumetrico =
+      (customData.package_length_cm *
+        customData.package_width_cm *
+        customData.package_height_cm) /
+      this.volumetricFactor();
+
+    const pesoCobrado =
+      pesoVolumetrico > customData.package_weight_kg
+        ? pesoVolumetrico
+        : customData.package_weight_kg;
+
+    const districtFound = this.districtsCache.find(
+      (item) => item.id === customData.delivery_district_id
+    );
+    if (!districtFound) {
+      this.shippingCostPackage.set(0);
+      return 0;
+    }
+
+    const filtrados = this.districtsCache.filter(
+      (item) => item.name === districtFound.name
+    );
+    const tarifa = this.findTariffForWeight(pesoCobrado, filtrados);
+    const precio = tarifa?.price ? parseFloat(tarifa.price) : 0;
+
+    if (precio === 0) {
+      this.snackBar.open(
+        `No hay ninguna tarifa asociada con el peso (${pesoCobrado}) del distrito seleccionado.`,
+        'Cerrar',
+        { duration: 3000, panelClass: ['error-snackbar'] }
+      );
+    }
+    this.shippingCostPackage.set(precio);
+    return precio;
+  }
+
+  private findTariffForWeight(
+    weight: number,
+    tariffs: DistrictOption[]
+  ): DistrictOption | undefined {
+    const tariffList = tariffs as any[];
+    for (const tariff of tariffList) {
+      if (
+        tariff.weight_from !== undefined &&
+        tariff.weight_to !== undefined &&
+        weight >= tariff.weight_from &&
+        weight <= tariff.weight_to
+      ) {
+        return tariff as DistrictOption;
+      }
+    }
+    return undefined;
+  }
+
+  private getDistrictPrice(districtId: string | number): number {
+    const district = this.districtsCache.find((d) => d.id === districtId);
+    return district ? parseFloat(district.price) : 0;
+  }
+
+  addItemToList(): void {
+    if (this.newItemForm.invalid) {
+      this.newItemForm.markAllAsTouched();
+      return;
+    }
+    const districtId = this.orderForm.get('delivery_district_id')?.value;
+    if (!districtId) {
+      this.snackBar.open(
+        'Por favor, seleccione un distrito de entrega primero.',
+        'Cerrar',
+        {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+        }
+      );
+      return;
+    }
+
+    const newItemData = this.newItemForm.getRawValue();
+    if (!newItemData.description) {
+      alert('Complete el campo de descripción del paquete');
+      return;
+    }
+    const customData = {
+      delivery_district_id: this.orderForm.get('delivery_district_id')?.value,
+      package_length_cm: newItemData.length_cm,
+      package_width_cm: newItemData.width_cm,
+      package_height_cm: newItemData.height_cm,
+      package_weight_kg: newItemData.weight_kg,
+    };
+    // Simulación del cálculo de precio base (debes ajustarlo a tu lógica real)
+    const basePrice = this.calculateBasePrice(customData);
+    if (basePrice === 0) {
+      this.snackBar.open(
+        'No se pudo calcular una tarifa para el paquete. Verifique el distrito y las medidas.',
+        'Cerrar',
+        { duration: 3000, panelClass: ['error-snackbar'] }
+      );
+      return;
+    }
+
+    const items = this.orderForm.get('items') as FormArray;
+
+    items.push(
+      this.fb.group({
+        package_type: [newItemData.package_type],
+        description: [newItemData.description],
+        length_cm: [newItemData.length_cm],
+        width_cm: [newItemData.width_cm],
+        height_cm: [newItemData.height_cm],
+        weight_kg: [newItemData.weight_kg],
+        basePrice: [basePrice],
+        finalPrice: [0],
+        isPrincipal: [false],
+      })
+    );
+    this.recalculateTotalCost(this.itemsFormArray.value);
+
+    this.itemsDataSource.data = this.itemsFormArray.controls;
+    this.newItemForm.reset({
+      package_type: this.newItemForm.get('package_type')?.value,
+      description: '',
+      length_cm: 0,
+      width_cm: 0,
+      height_cm: 0,
+      weight_kg: 0,
+    });
+  }
+
+  private recalculateTotalCost(items: OrderItem[]): void {
+    if (items.length === 0) {
+      this.orderForm.get('shipping_cost')?.setValue(0);
+      return;
+    }
+
+    // Encontrar el principal
+    const principalItem = items.reduce(
+      (max, item) => (item.basePrice > max.basePrice ? item : max),
+      items[0]
+    );
+
+    let totalCost = 0;
+    const updatedItems = items.map((item) => {
+      const isPrincipal = item === principalItem;
+      let finalPrice = item.basePrice;
+
+      if (!isPrincipal) {
+        finalPrice =
+          item.basePrice * (1 - this.multiPackageDiscountPercentage() / 100);
+      }
+
+      totalCost += finalPrice;
+
+      return { ...item, finalPrice, isPrincipal };
+    });
+
+    this.itemsFormArray.patchValue(updatedItems, { emitEvent: false });
+    this.orderForm.get('shipping_cost')?.setValue(totalCost);
+  }
+
+  removeItem(index: number): void {
+    this.itemsFormArray.removeAt(index);
+    this.itemsDataSource.data = this.itemsFormArray.controls;
+    this.recalculateTotalCost(this.itemsFormArray.value);
+  }
+
+  onSubmit(): void {
+    if (this.orderForm.invalid) {
+      this.orderForm.markAllAsTouched();
+      console.log('Order form is invalid:', this.getFormErrors(this.orderForm));
+      alert('Por favor complete todos los campos requeridos.');
+      return;
+    }
+
+    if (!this.order) {
+      console.error('No order to update.');
+      return;
+    }
+
+    const formValue = this.orderForm.getRawValue();
+    const packageType = this.newItemForm.get('package_type')?.value;
+    if (packageType === PackageType.STANDARD) {
+      const districtId = this.orderForm.get('delivery_district_id')?.value;
+      if (!districtId) {
+        this.snackBar.open('Por favor, seleccione un distrito.', 'Cerrar', {
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+        });
+        return;
+      }
+
+      const price = this.getDistrictPrice(districtId);
+      this.orderForm.get('shipping_cost')?.setValue(price);
+
+      const standardItem: OrderItem = {
+        package_type: PackageType.STANDARD,
+        description: 'Paquete Estándar',
+        length_cm: 0,
+        width_cm: 0,
+        height_cm: 0,
+        weight_kg: 0,
+        basePrice: this.orderForm.get('shipping_cost')?.value,
+        finalPrice: this.orderForm.get('shipping_cost')?.value,
+        isPrincipal: true,
+      };
+
+      formValue.items.push(standardItem);
+      formValue.shipping_cost = this.orderForm.get('shipping_cost')?.value;
+    }
+
+    if (formValue.items.length === 0) {
+      this.snackBar.open('Debe agregar al menos un paquete.', 'Cerrar', {
+        duration: 3000,
+        panelClass: ['error-snackbar'],
+      });
+      return;
+    }
+
+    if (formValue.shipping_cost === 0) {
+      this.snackBar.open('El costo de envío no puede ser 0.', 'Cerrar', {
+        duration: 3000,
+        panelClass: ['error-snackbar'],
+      });
+      return;
+    }
+    formValue.item_description =
+      (formValue.items.length === 1
+        ? '1 Bulto: '
+        : formValue.items.length + ' Bultos: ') +
+      formValue.items.map((item: OrderItem) => item.description).join(', ');
+
+    const updatedOrderData: UpdateOrderRequestDto = {
+      isExpress: formValue.isExpress || false,
+      recipient_name: formValue.recipient_name,
+      recipient_phone: formValue.recipient_phone,
+      delivery_district_name: this.selectedDistrictName(),
+      delivery_address: formValue.delivery_address,
+      shipping_cost: formValue.shipping_cost,
+      item_description: formValue.item_description,
+      observations: formValue.observations,
+      company_id: formValue.company_id,
+      observation_shipping_cost_modification:
+        formValue.observation_shipping_cost_modification,
+      items: formValue.items,
+    };
+
+    console.log('Submitting Updated Order Data:', updatedOrderData);
+
+    this.orderService
+      .updateOrder(this.order.id, updatedOrderData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          console.log('Order updated successfully', response);
+          this.orderSubmit.emit(response);
+        },
+        error: (error) => {
+          console.error('Error updating order', error);
+          alert('Error al actualizar el pedido.');
+        },
+      });
+  }
+
+  resetFormForNextOrder(): void {
+    this.companySearchCtrl.setValue('');
+    this.districSearchCtrl.setValue('');
+
+    let company_id = null;
+    if (this.isCompany()) {
+      company_id = this.orderForm.get('company_id')?.value;
+    }
+
+    this.orderForm.reset({
+      company_id: company_id,
+      delivery_date: null,
+    });
+    this.orderForm.get('shipping_cost')?.setValue(0);
+    this.formValidityChanged.emit(this.orderForm.valid);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

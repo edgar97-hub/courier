@@ -92,7 +92,7 @@ export class SettingService {
     );
   }
 
-  remove(id: string, user: any) {
+  remove(id: string) {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
     }

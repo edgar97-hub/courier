@@ -64,7 +64,6 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
     this.maxDimensions$ = this.orderService.getMaxPackageDimensions().pipe(
       tap((dims) => {
         if (dims.standard_package_info && dims.volumetric_factor) {
-          console.log(dims.standard_package_info);
           this.standardPackageLabel.set(dims.standard_package_info);
           this.volumetric_factor.set(dims.volumetric_factor);
         }
@@ -79,46 +78,6 @@ export class PackageCalculatorComponent implements OnInit, OnDestroy {
       );
       return;
     }
-
-    // Escuchar cambios en el tipo de paquete para habilitar/deshabilitar campos
-    this.packageFormGroup
-      .get('package_size_type')
-      ?.valueChanges.pipe(
-        takeUntil(this.destroy$),
-        startWith(this.packageFormGroup.get('package_size_type')?.value)
-      )
-      .subscribe((type) => {
-        this.toggleCustomDimensionControls(type === 'custom');
-      });
-  }
-
-  private toggleCustomDimensionControls(enable: boolean): void {
-    const controls = [
-      'package_width_cm',
-      'package_length_cm',
-      'package_height_cm',
-      'package_weight_kg',
-    ];
-    controls.forEach((controlName) => {
-      const control = this.packageFormGroup.get(controlName);
-      if (control) {
-        if (enable) {
-          // control.enable();
-          // control.setValidators([
-          //   // Validators.required,
-          //   Validators.min(0.1),
-          //   Validators.max(999),
-          // ]);
-        } else {
-          // control.disable();
-          // control.clearValidators();
-          // // control.setValue(0, { emitEvent: false }); // Usar setValue para establecerlo en 0
-          // control.updateValueAndValidity({ emitEvent: false }); // Evitar re-trigger innecesario de valueChanges si no es necesario
-          // // control.reset(); // Limpiar valores si se cambia a estándar
-        }
-        // control.updateValueAndValidity();
-      }
-    });
   }
 
   onCalculateCustomCost(): void {

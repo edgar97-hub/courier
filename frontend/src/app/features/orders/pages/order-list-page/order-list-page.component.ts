@@ -44,6 +44,7 @@ import { ExcelExportService } from '../../services/excel-export.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { AppStore } from '../../../../app.store';
+import { UserRole } from '../../../../common/roles.enum';
 
 @Component({
   selector: 'app-order-list-page',
@@ -105,9 +106,14 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
   }
 
   isDriver(): boolean {
-    return this.appStore.currentUser()?.role === 'MOTORIZADO';
+    return this.appStore.currentUser()?.role === UserRole.MOTORIZED;
   }
-
+  hasPermissionToExportRoutePlanningExcel(): boolean {
+    return (
+      this.appStore.currentUser()?.role === UserRole.RECEPTIONIST ||
+      this.appStore.currentUser()?.role === UserRole.ADMIN
+    );
+  }
   onToggleMyOrders(event: any): void {
     this.showMyOrders = event.checked;
     const currentFilters = this.filterCriteriaSubject.value;

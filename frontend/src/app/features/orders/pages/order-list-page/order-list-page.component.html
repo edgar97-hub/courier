@@ -40,8 +40,12 @@
         <button mat-menu-item (click)="exportDataToExcel()">
           Exportar a Excel
         </button>
-        <button mat-menu-item (click)="exportDataToExcel2()">
-          Exportar para el sistema de planificación rutas
+        <button
+          mat-menu-item
+          (click)="exportDataToExcel2()"
+          *ngIf="hasPermissionToExportRoutePlanningExcel()"
+        >
+          Exportar para planificación de rutas
         </button>
         <button mat-menu-item (click)="openImportModal()">
           Importar desde Excel

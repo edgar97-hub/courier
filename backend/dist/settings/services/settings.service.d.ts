@@ -1,20 +1,20 @@
 import { DeleteResult, Repository } from 'typeorm';
+import { Response } from 'express';
 import { SettingDTO, SettingUpdateDTO } from '../dto/setting.dto';
 import { PromotionalSetItem, SettingsEntity } from '../entities/settings.entity';
-import { Response } from 'express';
 export declare class SettingsService {
-    private readonly userRepository;
-    constructor(userRepository: Repository<SettingsEntity>);
-    createUser(body: SettingDTO): Promise<SettingsEntity>;
-    findUsers(): Promise<SettingsEntity[]>;
-    findUserById(id: string): Promise<SettingsEntity | null>;
-    findBy({ key, value }: {
+    private readonly settingsRepository;
+    constructor(settingsRepository: Repository<SettingsEntity>);
+    createSettings(body: SettingDTO): Promise<SettingsEntity>;
+    findAllSettings(): Promise<SettingsEntity[]>;
+    findSettingsById(id: string): Promise<SettingsEntity | null>;
+    findBy({ key, value, }: {
         key: keyof SettingDTO;
         value: any;
     }): Promise<SettingsEntity>;
     getPromotionalSets(): Promise<PromotionalSetItem[] | []>;
-    updateUser(body: SettingUpdateDTO, id: string): Promise<any | undefined>;
-    deleteUser(id: string): Promise<DeleteResult | undefined>;
+    updateSettings(body: SettingUpdateDTO, id: string): Promise<SettingsEntity>;
+    deleteSettings(id: string): Promise<DeleteResult>;
     uploadLogo(logoFile: Express.Multer.File, req: Request): Promise<{
         logo_url: string;
     }>;

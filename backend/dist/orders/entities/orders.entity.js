@@ -17,6 +17,7 @@ const roles_1 = require("../../constants/roles");
 const orderLog_entity_1 = require("./orderLog.entity");
 const cashManagement_entity_1 = require("../../cashManagement/entities/cashManagement.entity");
 const stop_entity_1 = require("../../planningEvents/entities/stop.entity");
+const order_item_entity_1 = require("./order-item.entity");
 let OrdersEntity = class OrdersEntity extends base_entity_1.BaseEntity {
 };
 exports.OrdersEntity = OrdersEntity;
@@ -82,7 +83,7 @@ __decorate([
     __metadata("design:type", String)
 ], OrdersEntity.prototype, "payment_method_for_shipping_cost", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], OrdersEntity.prototype, "item_description", void 0);
 __decorate([
@@ -155,6 +156,13 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'bool', default: false }),
     __metadata("design:type", Boolean)
 ], OrdersEntity.prototype, "isExpress", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => order_item_entity_1.OrderItemEntity, (item) => item.order, {
+        cascade: true,
+        eager: true,
+    }),
+    __metadata("design:type", Array)
+], OrdersEntity.prototype, "items", void 0);
 exports.OrdersEntity = OrdersEntity = __decorate([
     (0, typeorm_1.Entity)({ name: 'orders' })
 ], OrdersEntity);

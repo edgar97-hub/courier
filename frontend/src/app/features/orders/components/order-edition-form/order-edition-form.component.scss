@@ -2,7 +2,6 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 10px 20px 20px 20px;
 }
 
 .form-section-title {
@@ -11,28 +10,24 @@
   color: #333;
   margin-bottom: 10px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #eee;
 }
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(280px, 1fr)
-  ); // Grid responsivo
-  gap: 20px 24px; // Espacio entre filas y columnas
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px 24px;
 
   @media (max-width: 600px) {
-    grid-template-columns: 1fr; // Stack form fields on smaller screens
+    grid-template-columns: 1fr;
   }
 }
 
 .full-span-column {
-  grid-column: 1 / -1; // Ocupar todo el ancho del grid
+  grid-column: 1 / -1;
 }
 
 mat-form-field {
-  width: 100%; // Para que ocupen el espacio de la celda del grid
+  width: 100%;
 }
 
 .section-divider {
@@ -42,31 +37,22 @@ mat-form-field {
 .shipping-cost-display {
   font-size: 1.3em;
   font-weight: bold;
-  // margin: 10px 0;
-  // border: 1px solid black;
   text-align: right;
   color: #d32f2f;
   display: flex;
 
   @media (max-width: 600px) {
-    text-align: left; // Align left on smaller screens
+    text-align: left;
     justify-content: flex-start;
   }
   align-items: center;
-  justify-content: flex-end; // Alinea a la derecha
+  justify-content: flex-end;
   gap: 8px;
-
-  .cost-value {
-    // Estilos adicionales si es necesario
-  }
-  .cost-spinner {
-    // Ya tiene estilos por defecto, pero puedes ajustar
-  }
 }
 
 .add-order-button-container {
   margin-top: 24px;
-  text-align: center; // Centrar el botón de agregar
+  text-align: center;
 
   button {
     padding: 12px 24px;
@@ -75,8 +61,129 @@ mat-form-field {
   }
 }
 
-// Reutilizar estilos para el hint como en el ejemplo
 mat-hint[align="end"] {
   font-size: 0.75em;
   opacity: 0.7;
+}
+
+.standard-checkbox {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.package-calculator-container {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+.section-subtitle {
+  font-size: 1.1em;
+  font-weight: 500;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+mat-radio-group {
+  margin-bottom: 20px;
+}
+
+.custom-dimensions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.add-item-button-container {
+  margin-top: 20px;
+}
+
+.package-list-container {
+  margin-top: 24px;
+}
+
+.items-table {
+  width: 100%;
+}
+
+.discount-field {
+  max-width: 250px;
+  margin-bottom: 16px;
+}
+
+.principal-item {
+  font-weight: bold;
+  color: #1e88e5; // Un azul para destacarlo
+  background-color: #e3f2fd;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.additional-item {
+  color: #43a047; // Un verde
+  background-color: #e8f5e9;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.discounted-price {
+  display: flex;
+  flex-direction: column; // Pone un precio encima del otro
+  align-items: flex-start; // Alinea a la izquierda (o 'flex-end' si prefieres a la derecha)
+
+  .original-price {
+    text-decoration: line-through; // ¡La línea que tacha!
+    color: #e03131; // Un color gris para que no destaque
+    font-size: 0.8em; // Más pequeño
+  }
+
+  .final-price {
+    font-weight: bold; // El precio final en negrita
+  }
+}
+.shipping-cost-display-package {
+  font-size: 1.1em;
+  font-weight: 500;
+  margin-top: 16px;
+  text-align: right;
+  color: #1e88e5; // Un color azul para diferenciarlo del costo total
+}
+.info-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.info-icon {
+  font-size: 1.5rem;
+}
+.info-box {
+  background: #e4eef8;
+  border: 1px solid #d0d3d6;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+  opacity: 1;
+  transform: translateY(0);
+}
+.warning-paquete-size {
+  font-size: 17px;
+  font-weight: bold;
+  margin: 0;
+  text-align: left;
+  color: #d32f2f;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.max-dimensions-info {
+  margin-top: 0px !important;
+  font-size: 16px;
+  color: #3d3636;
+  text-align: center;
+  padding: 8px;
+  background-color: #e4eef8;
+  border-radius: 4px;
 }

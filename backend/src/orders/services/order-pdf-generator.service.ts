@@ -416,9 +416,6 @@ export class OrderPdfGeneratorService {
       'Content-Disposition',
       `inline; filename="orden_${order.code || order.id}.pdf"`,
     );
-    // Para descarga en lugar de visualización:
-    // res.setHeader('Content-Disposition', `attachment; filename="orden_${order.code || order.id}.pdf"`);
-
     pdfDoc.pipe(res);
     pdfDoc.end();
   }
@@ -1284,15 +1281,14 @@ export class OrderPdfGeneratorService {
   /**
    * pdf formato ticketera 80mm
    */
-
   async streamOrderPdf80mmToResponse(
-    orderId: string, // Asumo que el ID es string (UUID)
+    orderId: string,
     req: Request,
     res: Response,
   ): Promise<void> {
     const order = await this.orderRepository.findOne({
       where: { id: orderId },
-      relations: ['user', 'company'], // Cargar la relación con el usuario para obtener el nombre
+      relations: ['user', 'company'],
     });
 
     if (!order) {

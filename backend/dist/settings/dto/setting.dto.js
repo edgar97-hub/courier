@@ -13,6 +13,7 @@ exports.SettingUpdateDTO = exports.SettingDTO = exports.PromotionalSetItemDto = 
 const swagger_1 = require("@nestjs/swagger");
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
+const class_validator_2 = require("class-validator");
 class PromotionalSetItemDto {
 }
 exports.PromotionalSetItemDto = PromotionalSetItemDto;
@@ -225,4 +226,19 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], SettingUpdateDTO.prototype, "googleMapsApiKey", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], SettingUpdateDTO.prototype, "multiPackageDiscountPercentage", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_2.IsDateString)(),
+    __metadata("design:type", Object)
+], SettingUpdateDTO.prototype, "multiPackageDiscountStartDate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_2.IsDateString)(),
+    __metadata("design:type", Object)
+], SettingUpdateDTO.prototype, "multiPackageDiscountEndDate", void 0);
 //# sourceMappingURL=setting.dto.js.map

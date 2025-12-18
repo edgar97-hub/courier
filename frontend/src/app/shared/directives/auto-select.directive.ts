@@ -19,8 +19,6 @@ export class AutoSelectDirective {
     if (!this.alreadySelected) {
       this.selectText();
       this.alreadySelected = true;
-
-      // Reinicia la bandera después de un breve tiempo
       setTimeout(() => (this.alreadySelected = false), 1000);
     }
   }

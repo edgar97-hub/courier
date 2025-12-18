@@ -2,8 +2,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 16px;
-  min-height: 56px; /* Standard toolbar height */
 }
 
 .spacer {
@@ -11,13 +9,12 @@
 }
 
 .mat-dialog-content {
-  padding: 20px 24px;
-  overflow-y: auto; /* Enable scrolling for content if needed */
+  height: 100vh;
+  min-height: 85vh;
 }
 
 .mat-dialog-actions {
-  padding: 8px 24px 20px;
   display: flex;
   justify-content: flex-end;
-  gap: 8px; /* Space between buttons */
+  gap: 8px;
 }

@@ -5,7 +5,6 @@ import {
   OneToMany,
   ManyToOne,
   JoinColumn,
-  BeforeInsert,
 } from 'typeorm';
 import { BaseEntity } from '../../config/base.entity';
 import { UsersEntity } from '../../users/entities/users.entity';
@@ -13,6 +12,7 @@ import { STATES } from '../../constants/roles';
 import { OrderLogEntity } from './orderLog.entity';
 import { CashManagementEntity } from 'src/cashManagement/entities/cashManagement.entity';
 import { Stop } from 'src/planningEvents/entities/stop.entity';
+import { OrderItemEntity } from './order-item.entity';
 
 @Entity({ name: 'orders' })
 export class OrdersEntity extends BaseEntity {
@@ -62,7 +62,7 @@ export class OrdersEntity extends BaseEntity {
   @Column({ nullable: true, default: '' })
   payment_method_for_shipping_cost?: string;
 
-  @Column()
+  @Column({ nullable: true })
   item_description?: string;
 
   @Column({ nullable: true, type: 'float', default: 0.0 })
@@ -122,4 +122,10 @@ export class OrdersEntity extends BaseEntity {
 
   @Column({ type: 'bool', default: false })
   isExpress: boolean;
+
+  @OneToMany(() => OrderItemEntity, (item) => item.order, {
+    cascade: true,
+    eager: true,
+  })
+  items: OrderItemEntity[];
 }

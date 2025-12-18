@@ -107,6 +107,34 @@ __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], SettingsEntity.prototype, "googleMapsApiKey", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        name: 'multi_package_discount_percentage',
+        type: 'float',
+        nullable: false,
+        default: 0,
+        comment: 'Porcentaje de descuento para paquetes adicionales (ej. 50 para 50%)',
+    }),
+    __metadata("design:type", Number)
+], SettingsEntity.prototype, "multiPackageDiscountPercentage", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        name: 'multi_package_discount_start_date',
+        type: 'timestamptz',
+        nullable: true,
+        comment: 'Fecha de inicio de la vigencia del descuento',
+    }),
+    __metadata("design:type", Object)
+], SettingsEntity.prototype, "multiPackageDiscountStartDate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        name: 'multi_package_discount_end_date',
+        type: 'timestamptz',
+        nullable: true,
+        comment: 'Fecha de fin de la vigencia del descuento',
+    }),
+    __metadata("design:type", Object)
+], SettingsEntity.prototype, "multiPackageDiscountEndDate", void 0);
 exports.SettingsEntity = SettingsEntity = __decorate([
     (0, typeorm_1.Entity)({ name: 'settings' })
 ], SettingsEntity);

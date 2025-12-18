@@ -25,6 +25,8 @@ const orderLog_entity_1 = require("../entities/orderLog.entity");
 const date_fns_tz_1 = require("date-fns-tz");
 const date_fns_1 = require("date-fns");
 const cashManagement_service_1 = require("../../cashManagement/services/cashManagement.service");
+const settings_entity_1 = require("../../settings/entities/settings.entity");
+const order_item_entity_1 = require("../entities/order-item.entity");
 const EXCEL_HEADER_TO_ENTITY_KEY_MAP = {
     'TIPO DE ENVIO': 'shipment_type',
     'NOMBRE DEL DESTINATARIO': 'recipient_name',
@@ -38,9 +40,10 @@ const EXCEL_HEADER_TO_ENTITY_KEY_MAP = {
     OBSERVACION: 'observations',
 };
 let OrdersService = class OrdersService {
-    constructor(orderRepository, orderLogRepository, districtsRepository, cashManagementService, entityManager) {
+    constructor(orderRepository, orderLogRepository, settingsRepository, districtsRepository, cashManagementService, entityManager) {
         this.orderRepository = orderRepository;
         this.orderLogRepository = orderLogRepository;
+        this.settingsRepository = settingsRepository;
         this.districtsRepository = districtsRepository;
         this.cashManagementService = cashManagementService;
         this.entityManager = entityManager;
@@ -216,6 +219,10 @@ let OrdersService = class OrdersService {
         if (!orderDTOs || orderDTOs.length === 0) {
             throw error_manager_1.ErrorManager.createSignatureError('No orders provided in the batch.');
         }
+        const settings = await this.settingsRepository.findOne({ where: {} });
+        if (!settings) {
+            throw new error_manager_1.ErrorManager.createSignatureError('La configuración del sistema no fue encontrada.');
+        }
         const queryRunner = this.orderRepository.manager.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -229,6 +236,46 @@ let OrdersService = class OrdersService {
         try {
             for (const orderDto of orderDTOs) {
                 try {
+                    if (!orderDto.items || orderDto.items.length === 0) {
+                        throw new Error('El pedido no contiene paquetes (items).');
+                    }
+                    const now = new Date();
+                    let isDiscountActive = false;
+                    if (settings.multiPackageDiscountStartDate &&
+                        settings.multiPackageDiscountEndDate) {
+                        isDiscountActive =
+                            now >= new Date(settings.multiPackageDiscountStartDate) &&
+                                now <= new Date(settings.multiPackageDiscountEndDate);
+                    }
+                    else {
+                        isDiscountActive = settings.multiPackageDiscountPercentage > 0;
+                    }
+                    const principalItem = orderDto.items.reduce((max, item) => (item.basePrice > max.basePrice ? item : max), orderDto.items[0]);
+                    let totalShippingCost = 0;
+                    const orderItems = [];
+                    for (const itemDto of orderDto.items) {
+                        const newItem = new order_item_entity_1.OrderItemEntity();
+                        newItem.package_type = itemDto.package_type;
+                        newItem.description = itemDto.description;
+                        newItem.width_cm = itemDto.width_cm;
+                        newItem.length_cm = itemDto.length_cm;
+                        newItem.height_cm = itemDto.height_cm;
+                        newItem.weight_kg = itemDto.weight_kg;
+                        newItem.basePrice = itemDto.basePrice;
+                        newItem.isPrincipal = itemDto === principalItem;
+                        if (isDiscountActive &&
+                            !newItem.isPrincipal &&
+                            settings.multiPackageDiscountPercentage > 0) {
+                            newItem.finalPrice =
+                                newItem.basePrice *
+                                    (1 - settings.multiPackageDiscountPercentage / 100);
+                        }
+                        else {
+                            newItem.finalPrice = newItem.basePrice;
+                        }
+                        totalShippingCost += newItem.finalPrice;
+                        orderItems.push(newItem);
+                    }
                     const orderToCreate = new orders_entity_1.OrdersEntity();
                     orderToCreate.shipment_type = orderDto.shipment_type;
                     orderToCreate.recipient_name = orderDto.recipient_name;
@@ -242,12 +289,7 @@ let OrdersService = class OrdersService {
                         const timeZone = 'America/Lima';
                         orderToCreate.delivery_date = (0, date_fns_tz_1.formatInTimeZone)(inputDateUTC, timeZone, 'yyyy-MM-dd');
                     }
-                    orderToCreate.package_size_type = orderDto.package_size_type;
-                    orderToCreate.package_width_cm = orderDto.package_width_cm || 0;
-                    orderToCreate.package_length_cm = orderDto.package_length_cm || 0;
-                    orderToCreate.package_height_cm = orderDto.package_height_cm || 0;
-                    orderToCreate.package_weight_kg = orderDto.package_weight_kg || 0;
-                    orderToCreate.shipping_cost = orderDto.shipping_cost;
+                    orderToCreate.shipping_cost = totalShippingCost;
                     orderToCreate.item_description = orderDto.item_description;
                     orderToCreate.amount_to_collect_at_delivery =
                         orderDto.amount_to_collect_at_delivery;
@@ -260,6 +302,7 @@ let OrdersService = class OrdersService {
                     orderToCreate.company = { id: orderDto.company_id };
                     orderToCreate.tracking_code = await generateTrackingCode();
                     orderToCreate.isExpress = orderDto.isExpress || false;
+                    orderToCreate.items = orderItems;
                     const savedOrder = await queryRunner.manager.save(orders_entity_1.OrdersEntity, orderToCreate);
                     createdOrders.push(savedOrder);
                 }
@@ -273,14 +316,14 @@ let OrdersService = class OrdersService {
             }
             if (operationErrors.length > 0 &&
                 operationErrors.length === orderDTOs.length) {
-                throw new Error('All orders in the batch failed to save.');
+                throw new Error('Todos los pedidos en el lote fallaron al guardarse.');
             }
             await queryRunner.commitTransaction();
             console.log('Batch orders created successfully (or partially, if errors occurred and were handled).');
             return {
                 success: true,
                 message: operationErrors.length > 0
-                    ? `Batch processed with ${operationErrors.length} errors.`
+                    ? `Lote procesado con ${operationErrors.length} errores.`
                     : 'Todos los pedidos creados con éxito.',
                 createdOrders: createdOrders,
                 errors: operationErrors.length > 0 ? operationErrors : undefined,
@@ -291,7 +334,7 @@ let OrdersService = class OrdersService {
             console.error('Error during batch order creation, transaction rolled back:', error);
             return {
                 success: false,
-                message: `Batch creation failed: ${error.message}`,
+                message: `La creación en lote falló: ${error.message}`,
                 errors: [
                     { generalError: error.message, individualErrors: operationErrors },
                 ],
@@ -952,9 +995,11 @@ exports.OrdersService = OrdersService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(orders_entity_1.OrdersEntity)),
     __param(1, (0, typeorm_1.InjectRepository)(orderLog_entity_1.OrderLogEntity)),
-    __param(2, (0, typeorm_1.InjectRepository)(districts_entity_1.DistrictsEntity)),
-    __param(4, (0, typeorm_1.InjectEntityManager)()),
+    __param(2, (0, typeorm_1.InjectRepository)(settings_entity_1.SettingsEntity)),
+    __param(3, (0, typeorm_1.InjectRepository)(districts_entity_1.DistrictsEntity)),
+    __param(5, (0, typeorm_1.InjectEntityManager)()),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         cashManagement_service_1.CashManagementService,

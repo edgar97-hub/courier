@@ -306,6 +306,96 @@
             placeholder="Pega tu API Key aquí..."
           />
         </mat-form-field>
+
+        <!-- ============================================================= -->
+        <!-- === NUEVA SECCIÓN: CONFIGURACIÓN DE DESCUENTO MULTI-PAQUETE === -->
+        <!-- ============================================================= -->
+        <mat-divider class="section-divider"></mat-divider>
+        <h2 class="discount-section-title">
+          Promoción para Múltiples Paquetes
+        </h2>
+     
+        <div class="form-row">
+          <!-- CAMPO PORCENTAJE -->
+          <mat-form-field appearance="outline" class="flex-field">
+            <mat-label>Porcentaje de Descuento (%)</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="multiPackageDiscountPercentage"
+              placeholder="Ej: 50"
+              min="0"
+              max="100"
+            />
+            <mat-icon matSuffix>percent</mat-icon>
+            <mat-hint
+              >El descuento que se aplicará a los paquetes adicionales en un
+              mismo pedido.</mat-hint
+            >
+            <mat-error
+              *ngIf="
+                settingsForm
+                  .get('multiPackageDiscountPercentage')
+                  ?.hasError('required')
+              "
+            >
+              El porcentaje es requerido.
+            </mat-error>
+            <mat-error
+              *ngIf="
+                settingsForm
+                  .get('multiPackageDiscountPercentage')
+                  ?.hasError('min') ||
+                settingsForm
+                  .get('multiPackageDiscountPercentage')
+                  ?.hasError('max')
+              "
+            >
+              Debe ser un valor entre 0 y 100.
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="form-row" >
+          <!-- CAMPO FECHA DE INICIO -->
+          <mat-form-field appearance="outline" class="flex-field">
+            <mat-label>Fecha de Inicio del Descuento</mat-label>
+            <input
+              matInput
+              [matDatepicker]="startDatePicker"
+              formControlName="multiPackageDiscountStartDate"
+              placeholder="dd/mm/aaaa"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="startDatePicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #startDatePicker></mat-datepicker>
+            <mat-hint
+              >Opcional. Si se deja en blanco, el descuento es válido desde
+              siempre.</mat-hint
+            >
+          </mat-form-field>
+
+          <!-- CAMPO FECHA DE FIN -->
+          <mat-form-field appearance="outline" class="flex-field">
+            <mat-label>Fecha de Fin del Descuento</mat-label>
+            <input
+              matInput
+              [matDatepicker]="endDatePicker"
+              formControlName="multiPackageDiscountEndDate"
+              placeholder="dd/mm/aaaa"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="endDatePicker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #endDatePicker></mat-datepicker>
+            <mat-hint
+              >Opcional. Si se deja en blanco, el descuento no tiene fecha de
+              caducidad.</mat-hint
+            >
+          </mat-form-field>
+        </div>
         <!-- =============================================== -->
         <!-- === NUEVA SECCIÓN: CONJUNTOS PROMOCIONALES === -->
         <!-- =============================================== -->

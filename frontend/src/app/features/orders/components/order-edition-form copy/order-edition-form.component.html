@@ -1,0 +1,259 @@
+<form
+  [formGroup]="orderForm"
+  (ngSubmit)="onSubmit()"
+  class="order-creation-form"
+>
+  <!-- <h2 class="form-section-title">Editar pedido</h2> -->
+
+  <!-- Sección 1: Datos de Envío y Destinatario -->
+
+  <mat-checkbox
+    formControlName="isExpress"
+    color="primary"
+    class="standard-checkbox"
+    (click)="getCheckboxValue()"
+  >
+    Express
+  </mat-checkbox>
+
+  <mat-form-field appearance="outline" class="full-width driver-search-field">
+    <mat-label>Buscar y Seleccionar empresa</mat-label>
+    <input
+      type="text"
+      placeholder="Escriba el nombre del la empresa..."
+      aria-label="cliente"
+      matInput
+      [formControl]="companySearchCtrl"
+      [matAutocomplete]="autoDriver"
+    />
+    <button
+      *ngIf="companySearchCtrl.value && !isLoadingCompanies"
+      matSuffix
+      mat-icon-button
+      aria-label="Limpiar"
+      (click)="clearDriverSelection()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+    <mat-icon matSuffix *ngIf="!companySearchCtrl.value && !isLoadingCompanies"
+      >person_search</mat-icon
+    >
+    <mat-progress-spinner
+      *ngIf="isLoadingCompanies"
+      matSuffix
+      mode="indeterminate"
+      diameter="20"
+    ></mat-progress-spinner>
+
+    <mat-autocomplete
+      #autoDriver="matAutocomplete"
+      [displayWith]="displayDriverName"
+      (optionSelected)="onDriverSelected($event)"
+    >
+      @for (driver of filteredCompanies$ | async; track driver.id) {
+      <mat-option [value]="driver">
+        <div class="driver-option">
+          <span>{{ driver.username }}</span>
+        </div>
+      </mat-option>
+      } @if ((filteredCompanies$ | async)?.length === 0 && !isLoadingCompanies
+      && companySearchCtrl.value) {
+      <mat-option disabled>No se encontraron motorizados.</mat-option>
+      }
+    </mat-autocomplete>
+
+    <mat-error *ngIf="orderForm.get('company_id')?.hasError('required')"
+      >Requerido</mat-error
+    >
+  </mat-form-field>
+
+  <div class="form-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>Nombre del destinatario</mat-label>
+      <input
+        matInput
+        formControlName="recipient_name"
+        placeholder="Nombre completo"
+      />
+      <mat-icon matSuffix>person_outline</mat-icon>
+      <mat-error *ngIf="orderForm.get('recipient_name')?.hasError('required')"
+        >Requerido</mat-error
+      >
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Teléfono del destinatario</mat-label>
+      <input
+        matInput
+        formControlName="recipient_phone"
+        type="tel"
+        placeholder=""
+      />
+      <mat-icon matSuffix>phone_outline</mat-icon>
+      <mat-hint align="end">No se debe agregar el +51</mat-hint>
+      <mat-error *ngIf="orderForm.get('recipient_phone')?.hasError('required')"
+        >Requerido</mat-error
+      >
+      <mat-error *ngIf="orderForm.get('recipient_phone')?.hasError('pattern')"
+        >Teléfono inválido</mat-error
+      >
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="driver-search-field">
+      <mat-label>Buscar y Seleccionar distrito</mat-label>
+      <input
+        type="text"
+        placeholder="Escriba el nombre del distrito..."
+        aria-label="distrito"
+        matInput
+        [formControl]="districSearchCtrl"
+        [matAutocomplete]="autoDistric"
+      />
+      <button
+        *ngIf="districSearchCtrl.value && !isLoadingDistricts"
+        matSuffix
+        mat-icon-button
+        aria-label="Limpiar"
+        (click)="clearDistrictSelection()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-icon
+        matSuffix
+        *ngIf="!districSearchCtrl.value && !isLoadingDistricts"
+        >person_search</mat-icon
+      >
+      <mat-progress-spinner
+        *ngIf="isLoadingDistricts"
+        matSuffix
+        mode="indeterminate"
+        diameter="20"
+      ></mat-progress-spinner>
+
+      <mat-autocomplete
+        #autoDistric="matAutocomplete"
+        [displayWith]="displayDistricName"
+        (optionSelected)="onDistrictSelected($event)"
+      >
+        @for (district of filteredDistricts$ | async; track district.id) {
+        <mat-option [value]="district">
+          <div class="driver-option">
+            <span>{{ district.name_and_price }}</span>
+          </div>
+        </mat-option>
+        } @if ((filteredDistricts$ | async)?.length === 0 && !isLoadingDistricts
+        && districSearchCtrl.value) {
+        <mat-option disabled>No se encontraron distritos.</mat-option>
+        }
+      </mat-autocomplete>
+
+      <mat-error
+        *ngIf="orderForm.get('delivery_district_id')?.hasError('required')"
+        >Requerido</mat-error
+      >
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-span-column">
+      <mat-label>Dirección de entrega</mat-label>
+      <input
+        matInput
+        formControlName="delivery_address"
+        placeholder="Ingresar lugar de entrega (Mínimo 6 caracteres)"
+      />
+
+      <mat-error *ngIf="orderForm.get('delivery_address')?.hasError('required')"
+        >Requerido</mat-error
+      >
+      <mat-error
+        *ngIf="orderForm.get('delivery_address')?.hasError('minlength')"
+        >Mínimo 6 caracteres</mat-error
+      >
+    </mat-form-field>
+  </div>
+
+  <mat-divider class="section-divider"></mat-divider>
+
+  <!-- Sección 2: Tamaño del Paquete y Costo -->
+  <app-package-calculator
+    [packageFormGroup]="packageDetailsFormGroup"
+    [districtsCache]="districtsCache"
+    [deliveryDistrictId]="orderForm.get('delivery_district_id')?.value"
+    (shippingCostCalculated)="onShippingCostCalculated($event)"
+    (calculationLoading)="onPackageCalculationLoading($event)"
+  >
+  </app-package-calculator>
+
+  <div class="shipping-cost-display">
+    Costo de envío =
+    <span class="cost-value"
+      >S/ {{ orderForm.get("shipping_cost")?.value | number : "1.2-2" }}</span
+    >
+    <mat-progress-spinner
+      *ngIf="isCalculatingShipping()"
+      mode="indeterminate"
+      diameter="20"
+      class="cost-spinner"
+    ></mat-progress-spinner>
+  </div>
+
+  <mat-divider class="section-divider"></mat-divider>
+
+  <!-- Sección 3: Detalles del Envío y Pago -->
+  <div class="form-grid">
+    <mat-form-field appearance="outline" class="full-span-column">
+      <mat-label>¿Qué envía?</mat-label>
+      <input
+        matInput
+        formControlName="item_description"
+        placeholder="Detalle del pedido"
+      />
+      <mat-icon matSuffix>inventory_2_outline</mat-icon>
+      <mat-error *ngIf="orderForm.get('item_description')?.hasError('required')"
+        >Requerido</mat-error
+      >
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-span-column">
+      <mat-label>Observaciones (Opcional)</mat-label>
+      <textarea
+        matInput
+        formControlName="observations"
+        placeholder="¿Qué envías?..."
+        rows="3"
+      ></textarea>
+    </mat-form-field>
+
+    <mat-form-field
+      appearance="outline"
+      class="full-span-column"
+      *ngIf="orderForm.get('observation_shipping_cost_modification')?.enabled"
+    >
+      <mat-label>Observación de modificación de costo de envío</mat-label>
+      <textarea
+        matInput
+        formControlName="observation_shipping_cost_modification"
+        placeholder="Ingrese la razón de la modificación del costo de envío"
+        rows="3"
+      ></textarea>
+      <mat-error
+        *ngIf="
+          orderForm
+            .get('observation_shipping_cost_modification')
+            ?.hasError('required')
+        "
+        >Requerido</mat-error
+      >
+    </mat-form-field>
+  </div>
+
+  <!-- <div class="add-order-button-container">
+    <button
+      mat-flat-button
+      class="btn-corp-primary"
+      type="submit"
+      [disabled]="orderForm.invalid || isCalculatingShipping()"
+    >
+      <mat-icon>save</mat-icon> Guardar Cambios
+    </button>
+  </div> -->
+</form>

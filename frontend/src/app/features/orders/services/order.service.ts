@@ -12,15 +12,14 @@ import {
   PaginatedOrdersResponse,
   DistrictOption,
   MaxPackageDimensions,
-  ShippingCostResponse,
   CreateBatchOrderPayload,
   Order,
-  Order_,
   UpdateOrderRequestDto,
 } from '../models/order.model';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
 import { ImportResult } from '../components/order-import-modal/order-import-modal.component';
+import { AppSettings } from '../../settings/models/app-settings.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -41,7 +40,6 @@ export class OrderService {
     if (token) {
       return new HttpHeaders({
         'Content-Type': 'application/json',
-        // 'Authorization': `Bearer ${token}`
         codrr_token: token,
       });
     }
@@ -91,12 +89,6 @@ export class OrderService {
       .get<PaginatedOrdersResponse>(this.apiUrlOrders, { params, headers })
       .pipe(
         map((response) => {
-          // Si necesitas transformar las fechas de string a Date object aquí:
-          // response.items = response.items.map(order => ({
-          //   ...order,
-          //   registration_date: new Date(order.registration_date),
-          //   delivery_date: order.delivery_date ? new Date(order.delivery_date) : null,
-          // }));
           return response;
         }),
         catchError(this.handleError)
@@ -138,12 +130,6 @@ export class OrderService {
       })
       .pipe(
         map((response: any) => {
-          // Si necesitas transformar las fechas de string a Date object aquí:
-          // response.items = response.items.map(order => ({
-          //   ...order,
-          //   registration_date: new Date(order.registration_date),
-          //   delivery_date: order.delivery_date ? new Date(order.delivery_date) : null,
-          // }));
           return response.items;
         }),
         catchError(this.handleError)
@@ -238,15 +224,14 @@ export class OrderService {
           console.log('apiResponse', apiResponse);
           if (apiResponse.length) {
             let standard_package_info =
-              'Estándar : ' +
               apiResponse[0].standard_measurements_length +
-              'cmx' +
+              'cm x' +
               apiResponse[0].standard_measurements_width +
-              'cmx' +
+              'cm x' +
               apiResponse[0].standard_measurements_height +
-              'cm ' +
+              'cm (' +
               apiResponse[0].standard_measurements_weight +
-              'kg';
+              'kg)';
 
             let info_text =
               'Las entregas en motorizado permiten paquetes de hasta ' +
@@ -607,6 +592,23 @@ export class OrderService {
         { headers }
       )
       .pipe(catchError(this.handleError));
+  }
+
+  getEffectiveDiscount(settings: AppSettings): number {
+    const now = new Date();
+
+    if (
+      settings.multiPackageDiscountStartDate &&
+      settings.multiPackageDiscountEndDate
+    ) {
+      const start = new Date(settings.multiPackageDiscountStartDate);
+      const end = new Date(settings.multiPackageDiscountEndDate);
+      if (now < start || now > end) {
+        return 0;
+      }
+    }
+
+    return settings.multiPackageDiscountPercentage || 0;
   }
 
   private handleImportError(error: HttpErrorResponse): Observable<never> {

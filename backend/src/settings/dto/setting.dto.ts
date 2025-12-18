@@ -14,19 +14,18 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator';
+import { IsDateString } from 'class-validator';
 
 export class PromotionalSetItemDto {
   @IsUUID()
-  @IsNotEmpty() // Asumimos que el ID se genera en el frontend para cada item del array
+  @IsNotEmpty()
   id: string;
 
   @IsOptional()
-  // @IsUrl({}, { message: 'La URL de la imagen no es válida.' })
   @MaxLength(1024)
   imageUrl: string | null;
 
   @IsOptional()
-  // @IsUrl({}, { message: 'El enlace URL no es válido.' })
   @MaxLength(1024)
   linkUrl: string | null;
 
@@ -178,4 +177,16 @@ export class SettingUpdateDTO {
 
   @ApiProperty()
   googleMapsApiKey: string;
+
+  @IsOptional()
+  @IsNumber()
+  multiPackageDiscountPercentage?: number;
+
+  @IsOptional()
+  @IsDateString()
+  multiPackageDiscountStartDate?: Date | null;
+
+  @IsOptional()
+  @IsDateString()
+  multiPackageDiscountEndDate?: Date | null;
 }

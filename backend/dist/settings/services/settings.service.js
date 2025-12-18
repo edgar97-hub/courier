@@ -15,35 +15,34 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SettingsService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
-const error_manager_1 = require("../../utils/error.manager");
 const typeorm_2 = require("typeorm");
-const settings_entity_1 = require("../entities/settings.entity");
 const path = require("path");
 const fs = require("fs");
+const error_manager_1 = require("../../utils/error.manager");
+const settings_entity_1 = require("../entities/settings.entity");
 let SettingsService = class SettingsService {
-    constructor(userRepository) {
-        this.userRepository = userRepository;
+    constructor(settingsRepository) {
+        this.settingsRepository = settingsRepository;
     }
-    async createUser(body) {
+    async createSettings(body) {
         try {
-            return await this.userRepository.save(body);
+            return await this.settingsRepository.save(body);
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
-    async findUsers() {
+    async findAllSettings() {
         try {
-            const users = await this.userRepository.find();
-            return users;
+            return await this.settingsRepository.find();
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
-    async findUserById(id) {
+    async findSettingsById(id) {
         try {
-            const configurations = await this.userRepository.find({ take: 1 });
+            const configurations = await this.settingsRepository.find({ take: 1 });
             if (!configurations || configurations.length === 0) {
                 return null;
             }
@@ -53,21 +52,21 @@ let SettingsService = class SettingsService {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
-    async findBy({ key, value }) {
+    async findBy({ key, value, }) {
         try {
-            const user = (await this.userRepository
-                .createQueryBuilder('user')
-                .addSelect('user.password')
+            const settings = (await this.settingsRepository
+                .createQueryBuilder('settings')
+                .addSelect('settings.password')
                 .where({ [key]: value })
                 .getOne());
-            return user;
+            return settings;
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
     async getPromotionalSets() {
-        const config = await this.userRepository.find({ take: 1 });
+        const config = await this.settingsRepository.find({ take: 1 });
         if (!config || config.length === 0) {
             return [];
         }
@@ -75,7 +74,7 @@ let SettingsService = class SettingsService {
             ?.filter((set) => set.isActive !== false)
             .sort((a, b) => (a.order || 0) - (b.order || 0)) || []);
     }
-    async updateUser(body, id) {
+    async updateSettings(body, id) {
         try {
             if (body.promotional_sets !== undefined) {
                 body.promotional_sets = body.promotional_sets.map((set) => ({
@@ -83,38 +82,38 @@ let SettingsService = class SettingsService {
                     id: set.id || Date.now().toString(),
                 }));
             }
-            const user = await this.userRepository.update(id, body);
-            if (user.affected === 0) {
+            const updateResult = await this.settingsRepository.update(id, body);
+            if (updateResult.affected === 0) {
                 throw new error_manager_1.ErrorManager({
                     type: 'BAD_REQUEST',
                     message: 'No se pudo actualizar',
                 });
             }
-            const updatedUser = await this.userRepository.findOneBy({
+            const updatedSettings = await this.settingsRepository.findOneBy({
                 id: id,
             });
-            if (!updatedUser) {
+            if (!updatedSettings) {
                 throw new error_manager_1.ErrorManager({
                     type: 'INTERNAL_SERVER_ERROR',
-                    message: 'El usuario fue actualizado pero no se pudo recuperar.',
+                    message: 'Los ajustes fueron actualizados pero no se pudieron recuperar.',
                 });
             }
-            return updatedUser;
+            return updatedSettings;
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
-    async deleteUser(id) {
+    async deleteSettings(id) {
         try {
-            const user = await this.userRepository.delete(id);
-            if (user.affected === 0) {
+            const deleteResult = await this.settingsRepository.delete(id);
+            if (deleteResult.affected === 0) {
                 throw new error_manager_1.ErrorManager({
                     type: 'BAD_REQUEST',
                     message: 'No se pudo borrar',
                 });
             }
-            return user;
+            return deleteResult;
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
@@ -167,7 +166,7 @@ let SettingsService = class SettingsService {
             if (!file) {
                 throw new error_manager_1.ErrorManager({
                     type: 'BAD_REQUEST',
-                    message: 'No terms PDF file provided',
+                    message: 'No file provided',
                 });
             }
             const fileName = `${Date.now()}-${file.originalname}`;
@@ -185,20 +184,26 @@ let SettingsService = class SettingsService {
     }
     async getBackgroundImage(res) {
         try {
-            const setting = await this.userRepository.findOne({ where: {} });
-            let imageResponse;
-            if (setting?.background_image_url) {
-                imageResponse = await fetch(setting.background_image_url);
+            const setting = await this.settingsRepository.findOne({ where: {} });
+            if (!setting?.background_image_url) {
+                throw new error_manager_1.ErrorManager({
+                    type: 'NOT_FOUND',
+                    message: 'Background image URL not found in settings',
+                });
             }
-            if (setting?.background_image_url) {
-                console.log(`Fetching logo from: ${setting.background_image_url}`);
-                const imageResponse = await fetch(setting.background_image_url);
-                if (imageResponse.ok && imageResponse.body) {
-                    const contentType = imageResponse.headers.get('content-type');
-                    res.setHeader('Content-Type', contentType || 'image/png');
-                    const { pipeline } = await Promise.resolve().then(() => require('stream/promises'));
-                    await pipeline(imageResponse.body, res);
-                }
+            console.log(`Fetching background image from: ${setting.background_image_url}`);
+            const imageResponse = await fetch(setting.background_image_url);
+            if (imageResponse.ok && imageResponse.body) {
+                const contentType = imageResponse.headers.get('content-type');
+                res.setHeader('Content-Type', contentType || 'image/png');
+                const { pipeline } = await Promise.resolve().then(() => require('stream/promises'));
+                await pipeline(imageResponse.body, res);
+            }
+            else {
+                throw new error_manager_1.ErrorManager({
+                    type: 'BAD_GATEWAY',
+                    message: 'Failed to fetch background image',
+                });
             }
         }
         catch (error) {
@@ -207,20 +212,26 @@ let SettingsService = class SettingsService {
     }
     async getLogoImage(res) {
         try {
-            const setting = await this.userRepository.findOne({ where: {} });
-            let imageResponse;
-            if (setting?.logo_url) {
-                imageResponse = await fetch(setting.logo_url);
+            const setting = await this.settingsRepository.findOne({ where: {} });
+            if (!setting?.logo_url) {
+                throw new error_manager_1.ErrorManager({
+                    type: 'NOT_FOUND',
+                    message: 'Logo URL not found in settings',
+                });
             }
-            if (setting?.logo_url) {
-                console.log(`Fetching logo from: ${setting.logo_url}`);
-                const imageResponse = await fetch(setting.logo_url);
-                if (imageResponse.ok && imageResponse.body) {
-                    const contentType = imageResponse.headers.get('content-type');
-                    res.setHeader('Content-Type', contentType || 'image/png');
-                    const { pipeline } = await Promise.resolve().then(() => require('stream/promises'));
-                    await pipeline(imageResponse.body, res);
-                }
+            console.log(`Fetching logo from: ${setting.logo_url}`);
+            const imageResponse = await fetch(setting.logo_url);
+            if (imageResponse.ok && imageResponse.body) {
+                const contentType = imageResponse.headers.get('content-type');
+                res.setHeader('Content-Type', contentType || 'image/png');
+                const { pipeline } = await Promise.resolve().then(() => require('stream/promises'));
+                await pipeline(imageResponse.body, res);
+            }
+            else {
+                throw new error_manager_1.ErrorManager({
+                    type: 'BAD_GATEWAY',
+                    message: 'Failed to fetch logo',
+                });
             }
         }
         catch (error) {
@@ -229,19 +240,26 @@ let SettingsService = class SettingsService {
     }
     async getGlobalNoticeImage(res) {
         try {
-            const setting = await this.userRepository.findOne({ where: {} });
-            if (setting?.global_notice_image_url) {
-                console.log(`Fetching logo from: ${setting.global_notice_image_url}`);
-                const imageResponse = await fetch(setting.global_notice_image_url);
-                if (imageResponse.ok && imageResponse.body) {
-                    const contentType = imageResponse.headers.get('content-type');
-                    res.setHeader('Content-Type', contentType || 'image/png');
-                    const { pipeline } = await Promise.resolve().then(() => require('stream/promises'));
-                    await pipeline(imageResponse.body, res);
-                }
+            const setting = await this.settingsRepository.findOne({ where: {} });
+            if (!setting?.global_notice_image_url) {
+                throw new error_manager_1.ErrorManager({
+                    type: 'NOT_FOUND',
+                    message: 'Global notice image URL not found in settings',
+                });
+            }
+            console.log(`Fetching global notice image from: ${setting.global_notice_image_url}`);
+            const imageResponse = await fetch(setting.global_notice_image_url);
+            if (imageResponse.ok && imageResponse.body) {
+                const contentType = imageResponse.headers.get('content-type');
+                res.setHeader('Content-Type', contentType || 'image/png');
+                const { pipeline } = await Promise.resolve().then(() => require('stream/promises'));
+                await pipeline(imageResponse.body, res);
             }
             else {
-                throw error_manager_1.ErrorManager.createSignatureError('no existe imagen');
+                throw new error_manager_1.ErrorManager({
+                    type: 'BAD_GATEWAY',
+                    message: 'Failed to fetch global notice image',
+                });
             }
         }
         catch (error) {

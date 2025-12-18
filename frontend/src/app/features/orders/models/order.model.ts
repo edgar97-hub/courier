@@ -23,7 +23,7 @@ export interface PaginatedOrdersResponse {
 }
 
 export interface NewOrderData {
-  // id?: string | number; 
+  // id?: string | number;
   isExpress?: boolean;
   shipment_type: string;
   recipient_name: string;
@@ -31,13 +31,14 @@ export interface NewOrderData {
   delivery_district_id: string | number;
   delivery_address: string;
   delivery_coordinates?: string;
-  delivery_date: string; 
+  delivery_date: string;
+  items: OrderItem[];
 
-  package_size_type: 'standard' | 'custom';
-  package_width_cm?: number | null;
-  package_length_cm?: number | null;
-  package_height_cm?: number | null;
-  package_weight_kg?: number | null;
+  // package_size_type: 'standard' | 'custom';
+  // package_width_cm?: number | null;
+  // package_length_cm?: number | null;
+  // package_height_cm?: number | null;
+  // package_weight_kg?: number | null;
   shipping_cost: number;
 
   item_description: string;
@@ -103,7 +104,21 @@ export enum OrderStatus {
   ANULADO = 'ANULADO',
   REPROGRAMADO = 'REPROGRAMADO',
 }
-
+export enum PackageType {
+  STANDARD = 'STANDARD',
+  CUSTOM = 'CUSTOM',
+}
+export interface OrderItem {
+  package_type: PackageType;
+  description: string;
+  length_cm: number;
+  width_cm: number;
+  height_cm: number;
+  weight_kg: number;
+  basePrice: number;
+  finalPrice: number;
+  isPrincipal: boolean;
+}
 export interface Order_importacion {
   id?: string;
   recipient_name?: string;
@@ -158,6 +173,7 @@ export interface Order_ {
   product_delivery_photo_url?: string;
   observation_shipping_cost_modification?: string;
   isExpress?: boolean;
+  items: OrderItem[];
 }
 
 export interface Motorized {
@@ -182,4 +198,5 @@ export interface UpdateOrderRequestDto {
   observations?: string;
   company_id?: string;
   observation_shipping_cost_modification?: string;
+  items: OrderItem[];
 }

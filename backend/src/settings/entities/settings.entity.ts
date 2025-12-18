@@ -1,12 +1,12 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../config/base.entity';
 export interface PromotionalSetItem {
-  id: string; // Para identificar cada set, ej. un UUID generado en el frontend
+  id: string;
   imageUrl: string | null;
   linkUrl: string | null;
   buttonText: string | null;
-  isActive?: boolean; // Opcional: para activar/desactivar un set
-  order?: number; // Opcional: para el orden de visualización
+  isActive?: boolean;
+  order?: number;
 }
 
 @Entity({ name: 'settings' })
@@ -80,4 +80,30 @@ export class SettingsEntity extends BaseEntity {
 
   @Column({ nullable: true })
   googleMapsApiKey: string;
+
+  @Column({
+    name: 'multi_package_discount_percentage',
+    type: 'float',
+    nullable: false,
+    default: 0,
+    comment:
+      'Porcentaje de descuento para paquetes adicionales (ej. 50 para 50%)',
+  })
+  multiPackageDiscountPercentage: number;
+
+  @Column({
+    name: 'multi_package_discount_start_date',
+    type: 'timestamptz',
+    nullable: true,
+    comment: 'Fecha de inicio de la vigencia del descuento',
+  })
+  multiPackageDiscountStartDate: Date | null;
+
+  @Column({
+    name: 'multi_package_discount_end_date',
+    type: 'timestamptz',
+    nullable: true,
+    comment: 'Fecha de fin de la vigencia del descuento',
+  })
+  multiPackageDiscountEndDate: Date | null;
 }

@@ -16,8 +16,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
 import { Subject } from 'rxjs';
 import { takeUntil, tap, filter, finalize, first } from 'rxjs/operators';
-import { environment } from '../../../../../environments/environment';
-
 import { SettingsService } from '../../services/settings.service';
 import {
   AppSettings,
@@ -28,6 +26,8 @@ import {
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { v4 as uuidv4 } from 'uuid';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 @Component({
   selector: 'app-settings-page',
@@ -44,6 +44,8 @@ import { v4 as uuidv4 } from 'uuid';
     MatProgressSpinnerModule,
     MatDividerModule,
     MatSlideToggleModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
   templateUrl: './settings-page.component.html',
   styleUrls: ['./settings-page.component.scss'],
@@ -111,6 +113,17 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
           this.createPromotionalSetGroup(set)
         )
       ),
+
+      multiPackageDiscountPercentage: [
+        settings.multiPackageDiscountPercentage || 0,
+        [Validators.required, Validators.min(0), Validators.max(100)],
+      ],
+      multiPackageDiscountStartDate: [
+        settings.multiPackageDiscountStartDate || null,
+      ],
+      multiPackageDiscountEndDate: [
+        settings.multiPackageDiscountEndDate || null,
+      ],
     });
     this.currentLogoUrl = settings.logo_url;
     this.logoPreviewUrl = settings.logo_url;
@@ -136,7 +149,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
           'imagePreviewUrl',
           this.fb.control(set.imageUrl)
         );
-        (control as FormGroup).addControl('imageFile', this.fb.control(null)); // Para el archivo a subir
+        (control as FormGroup).addControl('imageFile', this.fb.control(null));
       }
     });
   }
@@ -153,10 +166,6 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
         next: (response: any) => {
           const loadedSettings =
             response && response.length > 0 ? response[0] : initialAppSettings;
-          // Limpiar el FormArray antes de poblarlo para evitar duplicados
-          // while (this.promotionalSetsFormArray.length !== 0) {
-          //   this.promotionalSetsFormArray.removeAt(0);
-          // }
           this.promotionalSetsFormArray.clear();
           // Añadir los FormGroups para los sets cargados
           (loadedSettings.promotional_sets || []).forEach(
@@ -272,7 +281,6 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
       reader.readAsDataURL(file);
       this.settingsForm.markAsDirty();
     } else {
-      // Si se cancela la selección, podrías revertir al imageUrl original o limpiar
       setGroup.patchValue({
         imageFile: null,
         imagePreviewUrl: setGroup.get('imageUrl')?.value || null,
@@ -335,7 +343,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     const fileList: FileList | null = element.files;
     if (fileList && fileList.length > 0) {
       this.selectedExcelImportTemplateFile = fileList[0];
-      this.settingsForm.get('terms_conditions_url')?.markAsDirty(); // Indicar cambio
+      this.settingsForm.get('terms_conditions_url')?.markAsDirty();
     } else {
       this.selectedExcelImportTemplateFile = null;
     }
@@ -360,9 +368,9 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
 
   removeGlobalNoticeImage(): void {
     this.selectedGlobalNoticeImageFile = null;
-    this.globalNoticeImagePreviewUrl = 'assets/images/placeholder-image.png'; // Or a default placeholder
-    this.settingsForm.get('global_notice_image_url')?.setValue(null); // Clear the form control value
-    this.settingsForm.get('global_notice_image_url')?.markAsDirty(); // Mark as dirty to ensure save
+    this.globalNoticeImagePreviewUrl = 'assets/images/placeholder-image.png';
+    this.settingsForm.get('global_notice_image_url')?.setValue(null);
+    this.settingsForm.get('global_notice_image_url')?.markAsDirty();
   }
 
   onTermsFileSelected(event: Event): void {
@@ -370,7 +378,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     const fileList: FileList | null = element.files;
     if (fileList && fileList.length > 0) {
       this.selectedTermsFile = fileList[0];
-      this.settingsForm.get('terms_conditions_url')?.markAsDirty(); // Indicar cambio
+      this.settingsForm.get('terms_conditions_url')?.markAsDirty();
       console.log('Terms PDF selected:', this.selectedTermsFile.name);
     } else {
       this.selectedTermsFile = null;
@@ -393,22 +401,20 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
 
     this.isSaving = true;
     let formValues = { ...this.settingsForm.value } as AppSettings;
-    console.log(formValues);
 
     // Subir imágenes de los promotional_sets una por una
     const promotionalSetsData: PromotionalSetItem[] = [];
     for (let i = 0; i < this.promotionalSetsFormArray.length; i++) {
       const setGroup = this.promotionalSetsFormArray.at(i) as FormGroup;
-      const setData = { ...setGroup.value }; // Copia los valores del form group
+      const setData = { ...setGroup.value };
 
       if (setData.imageFile) {
-        // Si se seleccionó un nuevo archivo de imagen para este set
         try {
           const uploadResponse = await this.settingsService
-            .uploadFile(setData.imageFile) // Asume que uploadFile devuelve { file_url: string }
+            .uploadFile(setData.imageFile)
             .pipe(first(), takeUntil(this.destroy$))
             .toPromise();
-          setData.imageUrl = uploadResponse?.file_url || setData.imageUrl; // Actualiza con la nueva URL o mantiene la anterior si falla
+          setData.imageUrl = uploadResponse?.file_url || setData.imageUrl;
         } catch (error) {
           console.error(
             `Error uploading promotional set image ${i + 1}:`,
@@ -423,7 +429,6 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
               panelClass: ['error-snackbar'],
             }
           );
-          // Considera si quieres detener el guardado o continuar sin esta imagen
         }
       }
       // Eliminar las propiedades temporales del frontend antes de enviar al backend
@@ -611,7 +616,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
             verticalPosition: 'top',
             panelClass: ['success-snackbar'],
           });
-          this.buildForm(savedSettings); // Reconstruye el form con los datos guardados (incluye promotional_sets)
+          this.buildForm(savedSettings);
           this.settingsForm.markAsPristine();
           this.selectedLogoFile = null;
           this.selectedBackgroundImageFile = null;
@@ -636,9 +641,6 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
 
   onDiscardChanges(): void {
     this.loadCurrentSettings();
-    // this.selectedLogoFile = null;
-    // this.selectedTermsFile = null;
-    // this.settingsForm.markAsPristine();
     this.snackBar.open('Cambios descartados.', 'OK', {
       duration: 2000,
       verticalPosition: 'top',

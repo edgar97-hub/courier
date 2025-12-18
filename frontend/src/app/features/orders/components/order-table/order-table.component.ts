@@ -7,7 +7,7 @@ import {
   AfterViewInit,
   OnChanges,
   SimpleChanges,
-  inject, // Para inyectar MatDialog y MatSnackBar
+  inject,
 } from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -21,36 +21,33 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatMenuModule } from '@angular/material/menu'; // <--- AÑADIR MatMenuModule
-import { MatDialog, MatDialogModule } from '@angular/material/dialog'; // <--- AÑADIR MatDialog
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar'; // <--- AÑADIR MatSnackBar
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import {
   Order,
   Order_,
   OrderStatus,
   UpdateOrderRequestDto,
-} from '../../models/order.model'; // Asegúrate que OrderStatus esté aquí
-// Necesitarás crear estos componentes de diálogo más adelante
+} from '../../models/order.model';
 import {
   ChangeStatusDialogComponent,
   ChangeStatusDialogResult,
 } from '../change-status-dialog/change-status-dialog.component';
-// import { ReportIssueDialogComponent } from '../report-issue-dialog/report-issue-dialog.component';
 import { OrderDetailDialogComponent } from '../order-detail-dialog/order-detail-dialog.component'; //
 import { environment } from '../../../../../environments/environment';
 import {
   AssignDriverDialogComponent,
   AssignDriverDialogResult,
-} from '../assign-driver-dialog/assign-driver-dialog.component'; // <--- IMPORTA EL DIÁLOGO
-import { User } from '../../../../shared/models/user';
+} from '../assign-driver-dialog/assign-driver-dialog.component';
 import { RescheduleOrderDialogComponent } from '../reschedule-order-dialog/reschedule-order-dialog.component';
 import { AppStore } from '../../../../app.store';
 import {
   EditAmountCollectDialogComponent,
   EditAmountCollectDialogResult,
   EditAmountCollectDialogData,
-} from '../edit-amount-collect-dialog/edit-amount-collect-dialog-component'; // <--- IMPORTA EL NUEVO DIÁLOGO
+} from '../edit-amount-collect-dialog/edit-amount-collect-dialog-component';
 import {
   EditShippingCostDialogComponent,
   EditShippingCostDialogResult,
@@ -87,7 +84,6 @@ import { UserRole } from '../../../../common/roles.enum';
 })
 export class OrderTableComponent implements AfterViewInit, OnChanges {
   appStore = inject(AppStore);
-  private router = inject(Router);
 
   @Input() orders: Order_[] | null = [];
   @Input() isLoading: boolean = false;
@@ -161,7 +157,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
 
-  readonly OrderStatus = OrderStatus; // Para usar la enum en la plantilla
+  readonly OrderStatus = OrderStatus;
 
   constructor() {}
 
@@ -401,7 +397,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   hasPermision(order: Order_): boolean {
     const userRole = this.appStore.currentUser()?.role;
 
-    if (userRole === 'MOTORIZADO') {
+    if (userRole === UserRole.MOTORIZED) {
       if (order.status === OrderStatus.REGISTRADO) {
         return true;
       }
@@ -410,7 +406,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
         return true;
       }
     }
-    if (userRole === 'ADMINISTRADOR' || userRole === 'RECEPCIONISTA') {
+    if (userRole === UserRole.ADMIN || userRole === UserRole.RECEPTIONIST) {
       return true;
     }
     return false;
@@ -418,12 +414,12 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
 
   isAdminOrReceptionist(): boolean {
     const userRole = this.appStore.currentUser()?.role;
-    return userRole === 'ADMINISTRADOR' || userRole === 'RECEPCIONISTA';
+    return userRole === UserRole.ADMIN || userRole === UserRole.RECEPTIONIST;
   }
 
   isAdmin(): boolean {
     const userRole = this.appStore.currentUser()?.role;
-    return userRole === 'ADMINISTRADOR';
+    return userRole === UserRole.ADMIN;
   }
 
   editOrder(order: Order_): void {
@@ -444,7 +440,10 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
       OrderEditionDialogData,
       any
     >(OrderEditionDialogComponent, {
-      width: '800px', // Adjust width as needed
+      width: '100vw', // Sets the width to 100% of the viewport width
+      height: '100vh', // Sets the height to 100% of the viewport height
+      maxWidth: '100vw', // Overrides the default max-width constraint
+      maxHeight: '100vh', // Overrides the default max-height constraint
       data: { orderId: order.id.toString() },
       disableClose: true,
     });

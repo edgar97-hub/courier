@@ -109,6 +109,9 @@ h2:first-of-type {
 }
 
 .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
   margin-top: 32px;
   padding-top: 24px;
   border-top: 1px solid rgba(0, 0, 0, 0.12); // Separador
@@ -265,4 +268,25 @@ h2:first-of-type {
   font-style: italic;
   color: #555;
   font-size: 0.8em;
+}
+
+.form-row {
+  // Estos estilos ya los tienes, pero confirmamos que funcionen bien para los datepickers.
+  display: flex;
+  gap: 20px;
+  margin-bottom: 10px;
+
+  @media (max-width: 600px) {
+    // En móviles, los campos de fecha se apilan uno sobre otro.
+    flex-direction: column;
+    gap: 20px; // Quitamos el gap para que el margin-bottom del full-width controle el espacio.
+  }
+
+  .flex-field {
+    .mat-hint {
+      font-size: 0.8em;
+      color: #616161; // Un gris suave para que no distraiga.
+    }
+    padding-bottom: 40px;
+  }
 }

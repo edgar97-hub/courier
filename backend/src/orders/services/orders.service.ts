@@ -15,17 +15,15 @@ import { DistrictsService } from 'src/districts/services/districts.service';
 import { DistrictsEntity } from 'src/districts/entities/districts.entity';
 import { ImportResult } from '../dto/import-result.dto';
 import { ROLES, STATES } from 'src/constants/roles';
-import { EntityManager, Connection, DataSource } from 'typeorm'; // Importa Connection o DataSource
+import { EntityManager, Connection, DataSource } from 'typeorm';
 import { UsersEntity } from 'src/users/entities/users.entity';
 import { OrderLogEntity } from '../entities/orderLog.entity';
 import { startOfDay, endOfDay, parseISO } from 'date-fns';
 import { fromZonedTime, formatInTimeZone } from 'date-fns-tz';
 import { parse, format } from 'date-fns';
-import { CashManagementEntity } from 'src/cashManagement/entities/cashManagement.entity';
 import { CashManagementService } from 'src/cashManagement/services/cashManagement.service';
-
-// import { customAlphabet } from 'nanoid';
-// const _nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 10);
+import { SettingsEntity } from 'src/settings/entities/settings.entity';
+import { OrderItemEntity } from '../entities/order-item.entity';
 
 const EXCEL_HEADER_TO_ENTITY_KEY_MAP: {
   [key: string]: keyof OrderDTO | string;
@@ -50,6 +48,8 @@ export class OrdersService {
     private readonly orderRepository: Repository<OrdersEntity>,
     @InjectRepository(OrderLogEntity)
     private readonly orderLogRepository: Repository<OrderLogEntity>,
+    @InjectRepository(SettingsEntity)
+    private readonly settingsRepository: Repository<SettingsEntity>,
     @InjectRepository(DistrictsEntity)
     private districtsRepository: Repository<DistrictsEntity>,
     private readonly cashManagementService: CashManagementService,
@@ -315,7 +315,6 @@ export class OrdersService {
       return updatedOrder;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-      // throw ErrorManager.createSignatureError(error.message);
     }
   }
 
@@ -336,6 +335,13 @@ export class OrdersService {
       );
     }
 
+    const settings = await this.settingsRepository.findOne({ where: {} });
+    if (!settings) {
+      throw new ErrorManager.createSignatureError(
+        'La configuración del sistema no fue encontrada.',
+      );
+    }
+
     const queryRunner =
       this.orderRepository.manager.connection.createQueryRunner();
 
@@ -347,11 +353,70 @@ export class OrdersService {
     async function generateTrackingCode() {
       const { customAlphabet } = await import('nanoid');
       const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 10);
-      return nanoid(); //`PKG-${nanoid()}`;
+      return nanoid();
     }
     try {
       for (const orderDto of orderDTOs) {
         try {
+          if (!orderDto.items || orderDto.items.length === 0) {
+            throw new Error('El pedido no contiene paquetes (items).');
+          }
+
+          // Validar si la promoción está activa
+          const now = new Date();
+          let isDiscountActive = false;
+          if (
+            settings.multiPackageDiscountStartDate &&
+            settings.multiPackageDiscountEndDate
+          ) {
+            isDiscountActive =
+              now >= new Date(settings.multiPackageDiscountStartDate) &&
+              now <= new Date(settings.multiPackageDiscountEndDate);
+          } else {
+            // Si las fechas son nulas, se asume que está siempre activo (si hay un porcentaje)
+            isDiscountActive = settings.multiPackageDiscountPercentage > 0;
+          }
+
+          // Encontrar el paquete principal (el de mayor precio base)
+          const principalItem = orderDto.items.reduce(
+            (max, item) => (item.basePrice > max.basePrice ? item : max),
+            orderDto.items[0],
+          );
+
+          let totalShippingCost = 0;
+          const orderItems: OrderItemEntity[] = [];
+
+          for (const itemDto of orderDto.items) {
+            const newItem = new OrderItemEntity();
+
+            newItem.package_type = itemDto.package_type;
+            newItem.description = itemDto.description;
+            newItem.width_cm = itemDto.width_cm;
+            newItem.length_cm = itemDto.length_cm;
+            newItem.height_cm = itemDto.height_cm;
+            newItem.weight_kg = itemDto.weight_kg;
+            newItem.basePrice = itemDto.basePrice;
+
+            // Determinar si es el principal
+            newItem.isPrincipal = itemDto === principalItem;
+
+            // Aplicar descuento si corresponde
+            if (
+              isDiscountActive &&
+              !newItem.isPrincipal &&
+              settings.multiPackageDiscountPercentage > 0
+            ) {
+              newItem.finalPrice =
+                newItem.basePrice *
+                (1 - settings.multiPackageDiscountPercentage / 100);
+            } else {
+              newItem.finalPrice = newItem.basePrice;
+            }
+
+            totalShippingCost += newItem.finalPrice;
+            orderItems.push(newItem);
+          }
+
           const orderToCreate = new OrdersEntity();
           orderToCreate.shipment_type = orderDto.shipment_type;
           orderToCreate.recipient_name = orderDto.recipient_name;
@@ -367,20 +432,23 @@ export class OrdersService {
             // 1. Usa `formatInTimeZone` para hacer todo en un solo paso.
             // Esta función toma el timestamp UTC, lo convierte a la zona horaria de Perú,
             // y lo formatea al formato 'yyyy-MM-dd' en esa misma zona horaria.
-            // Es la función perfecta para este caso de uso.
             orderToCreate.delivery_date = formatInTimeZone(
               inputDateUTC,
               timeZone,
               'yyyy-MM-dd',
             );
           }
-          // orderToCreate.delivery_date = orderDto.delivery_date;
-          orderToCreate.package_size_type = orderDto.package_size_type;
-          orderToCreate.package_width_cm = orderDto.package_width_cm || 0;
-          orderToCreate.package_length_cm = orderDto.package_length_cm || 0;
-          orderToCreate.package_height_cm = orderDto.package_height_cm || 0;
-          orderToCreate.package_weight_kg = orderDto.package_weight_kg || 0;
-          orderToCreate.shipping_cost = orderDto.shipping_cost;
+          // orderToCreate.package_size_type = orderDto.package_size_type;
+          // orderToCreate.package_width_cm = orderDto.package_width_cm || 0;
+          // orderToCreate.package_length_cm = orderDto.package_length_cm || 0;
+          // orderToCreate.package_height_cm = orderDto.package_height_cm || 0;
+          // orderToCreate.package_weight_kg = orderDto.package_weight_kg || 0;
+          // orderToCreate.shipping_cost = orderDto.shipping_cost;
+          orderToCreate.shipping_cost = totalShippingCost;
+          // orderToCreate.item_description = orderItems
+          //   .map((item) => item.description)
+          //   .join(', ');
+
           orderToCreate.item_description = orderDto.item_description;
           orderToCreate.amount_to_collect_at_delivery =
             orderDto.amount_to_collect_at_delivery;
@@ -393,6 +461,7 @@ export class OrdersService {
           orderToCreate.company = { id: orderDto.company_id } as UsersEntity;
           orderToCreate.tracking_code = await generateTrackingCode();
           orderToCreate.isExpress = orderDto.isExpress || false;
+          orderToCreate.items = orderItems;
 
           const savedOrder = await queryRunner.manager.save(
             OrdersEntity,
@@ -417,7 +486,7 @@ export class OrdersService {
         operationErrors.length > 0 &&
         operationErrors.length === orderDTOs.length
       ) {
-        throw new Error('All orders in the batch failed to save.');
+        throw new Error('Todos los pedidos en el lote fallaron al guardarse.');
       }
 
       await queryRunner.commitTransaction();
@@ -428,7 +497,7 @@ export class OrdersService {
         success: true,
         message:
           operationErrors.length > 0
-            ? `Batch processed with ${operationErrors.length} errors.`
+            ? `Lote procesado con ${operationErrors.length} errores.`
             : 'Todos los pedidos creados con éxito.',
         createdOrders: createdOrders,
         errors: operationErrors.length > 0 ? operationErrors : undefined,
@@ -442,7 +511,7 @@ export class OrdersService {
 
       return {
         success: false,
-        message: `Batch creation failed: ${error.message}`,
+        message: `La creación en lote falló: ${error.message}`,
         errors: [
           { generalError: error.message, individualErrors: operationErrors },
         ],
@@ -488,7 +557,7 @@ export class OrdersService {
           if (entityKey) {
             (orderEntity as any)[entityKey] = String(
               excelRowData[excelHeader],
-            ).trim(); // Convertir todo a string y trim inicialmente
+            ).trim();
           }
         }
       }
@@ -575,27 +644,14 @@ export class OrdersService {
             });
             rowHasErrors = true;
           } else {
-            // orderEntity.delivery_date = parsedDate; // Guardar como objeto Date o string YYYY-MM-DD
-            // orderEntity.delivery_date = new Date(
-            //   day + '-' + month + '-' + year,
-            // ); // Guardar como objeto Date o string YYYY-MM-DD
-            // const dateObject = new Date(orderData.deliveryDate);
-            // orderEntity.delivery_date = format(dateObject, 'yyyy-MM-dd');
-            // orderEntity.delivery_date = year + '-' + month + '-' + day;
-
             const inputFormat = 'dd/MM/yyyy';
-
-            // 1. Parsear el string de entrada con un formato explícito.
-            // Esto crea un objeto Date correcto sin ambigüedades de zona horaria.
             const parsedDate = parse(
               orderEntity.delivery_date,
               inputFormat,
               new Date(),
             );
 
-            // 2. Formatear el objeto Date al formato de salida deseado (YYYY-MM-DD).
             orderEntity.delivery_date = format(parsedDate, 'yyyy-MM-dd');
-            // Guardar como objeto Date o string YYYY-MM-DD
           }
         } else {
           errors.push({
@@ -653,7 +709,7 @@ export class OrdersService {
             '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
             10,
           );
-          return nanoid(); //`PKG-${nanoid()}`;
+          return nanoid();
         }
 
         orderEntity.tracking_code = await generateTrackingCode();
@@ -1219,7 +1275,7 @@ export class OrdersService {
 
           /**
            * Cuando el monto a cobrar sea en efectivo,
-           * el registro del coste del servicio en la caja debe ser efectivo.
+           * el registro del coste de envio en la caja debe ser efectivo.
            */
           if (
             updatedOrder.payment_method_for_collection?.toLowerCase() ===

@@ -23,18 +23,14 @@ export class SettingsService {
   private settingsSubject = new BehaviorSubject<AppSettings | null>(null);
   public settings$ = this.settingsSubject.asObservable();
 
-  constructor() {
-    // No cargamos aquí para evitar múltiples llamadas si varios componentes se suscriben.
-    // La carga se hará explícitamente desde el componente o un resolver.
-  }
+  constructor() {}
 
   private getAuthHeaders(): HttpHeaders {
     const token = this.authService.getAccessToken();
     if (token) {
       return new HttpHeaders({
         'Content-Type': 'application/json',
-        // 'Authorization': `Bearer ${token}` // ESTÁNDAR
-        codrr_token: token, // Como lo tenías
+        codrr_token: token,
       });
     }
     return new HttpHeaders({ 'Content-Type': 'application/json' });

@@ -1,17 +1,16 @@
 export interface PromotionalSetItem {
-  id: string; // UUID generado en el frontend para identificarlo y para el trackBy
+  id: string; 
   imageUrl: string | null;
   linkUrl: string | null;
   buttonText: string | null;
   isActive?: boolean;
   order?: number;
-  // Propiedad temporal para manejar el archivo seleccionado en el frontend
   imageFile?: File | null;
   imagePreviewUrl?: string | null;
 }
 
 export interface AppSettings {
-  id?: string; // Opcional, si tu backend devuelve un ID para el registro de configuración
+  id?: string; 
   business_name: string | null;
   ruc: string | null;
   address: string | null;
@@ -25,9 +24,11 @@ export interface AppSettings {
   global_notice_image_url: string | null;
   promotional_sets: PromotionalSetItem[];
   googleMapsApiKey?: string;
+  multiPackageDiscountPercentage: number;
+  multiPackageDiscountStartDate: number | null;
+  multiPackageDiscountEndDate: number | null;
 }
 
-// Valor inicial para el formulario, útil si la API no devuelve nada la primera vez
 export const initialAppSettings: AppSettings = {
   business_name: null,
   ruc: null,
@@ -41,4 +42,8 @@ export const initialAppSettings: AppSettings = {
   coverage_map_url: null,
   global_notice_image_url: null,
   promotional_sets: [],
+
+  multiPackageDiscountPercentage: 0,
+  multiPackageDiscountStartDate: null,
+  multiPackageDiscountEndDate: null,
 };

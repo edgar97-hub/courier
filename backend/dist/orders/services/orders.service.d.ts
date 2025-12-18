@@ -6,13 +6,15 @@ import { ImportResult } from '../dto/import-result.dto';
 import { EntityManager } from 'typeorm';
 import { OrderLogEntity } from '../entities/orderLog.entity';
 import { CashManagementService } from 'src/cashManagement/services/cashManagement.service';
+import { SettingsEntity } from 'src/settings/entities/settings.entity';
 export declare class OrdersService {
     private readonly orderRepository;
     private readonly orderLogRepository;
+    private readonly settingsRepository;
     private districtsRepository;
     private readonly cashManagementService;
     private entityManager;
-    constructor(orderRepository: Repository<OrdersEntity>, orderLogRepository: Repository<OrderLogEntity>, districtsRepository: Repository<DistrictsEntity>, cashManagementService: CashManagementService, entityManager: EntityManager);
+    constructor(orderRepository: Repository<OrdersEntity>, orderLogRepository: Repository<OrderLogEntity>, settingsRepository: Repository<SettingsEntity>, districtsRepository: Repository<DistrictsEntity>, cashManagementService: CashManagementService, entityManager: EntityManager);
     updateOrderStatus(body: any, idUser: string): Promise<any>;
     batchCreateOrders(payload: any, idUser: any): Promise<{
         success: boolean;

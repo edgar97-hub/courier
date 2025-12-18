@@ -4,6 +4,7 @@ import { STATES } from '../../constants/roles';
 import { OrderLogEntity } from './orderLog.entity';
 import { CashManagementEntity } from 'src/cashManagement/entities/cashManagement.entity';
 import { Stop } from 'src/planningEvents/entities/stop.entity';
+import { OrderItemEntity } from './order-item.entity';
 export declare class OrdersEntity extends BaseEntity {
     code?: number;
     shipment_type?: string;
@@ -36,4 +37,5 @@ export declare class OrdersEntity extends BaseEntity {
     cashManagementIncludes: CashManagementEntity[];
     stops: Stop[];
     isExpress: boolean;
+    items: OrderItemEntity[];
 }
