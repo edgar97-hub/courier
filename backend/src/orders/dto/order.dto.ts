@@ -156,21 +156,6 @@ export class OrderDTO {
 }
 
 export class UpdateOrderRequestDto extends PartialType(OrderDTO) {
-  // recipient_name?: string;
-  // recipient_phone?: string;
-  // delivery_district_name?: string;
-  // delivery_address?: string;
-  // package_size_type?: string;
-  // package_width_cm?: number;
-  // package_length_cm?: number;
-  // package_height_cm?: number;
-  // package_weight_kg?: number;
-  // shipping_cost?: number;
-  // item_description?: string;
-  // observations?: string;
-  // company_id?: string;
-  // observation_shipping_cost_modification?: string;
-
   @ApiPropertyOptional()
   @IsOptional()
   company_id?: string;

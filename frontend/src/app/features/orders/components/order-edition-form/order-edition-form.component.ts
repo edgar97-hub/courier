@@ -161,18 +161,33 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
   shippingCostPackage: WritableSignal<number> = signal(0);
   maxDimensionsInfo: WritableSignal<string> = signal('');
 
+  staLengthCm: WritableSignal<number> = signal(0);
+  staWidthCm: WritableSignal<number> = signal(0);
+  staHeightCm: WritableSignal<number> = signal(0);
+  staWeightKg: WritableSignal<number> = signal(0);
+
   private snackBar = inject(MatSnackBar);
 
   constructor() {
     this.orderService.getMaxPackageDimensions().subscribe((dims) => {
       if (
+        dims &&
         dims.standard_package_info &&
         dims.volumetric_factor &&
-        dims.info_text
+        dims.info_text &&
+        dims.sta_length_cm &&
+        dims.sta_width_cm &&
+        dims.sta_height_cm &&
+        dims.sta_weight_kg
       ) {
         this.standardPackageLabel.set(dims.standard_package_info);
         this.volumetricFactor.set(dims.volumetric_factor);
         this.maxDimensionsInfo.set(dims.info_text);
+
+        this.staLengthCm.set(dims.sta_length_cm);
+        this.staWidthCm.set(dims.sta_width_cm);
+        this.staHeightCm.set(dims.sta_height_cm);
+        this.staWeightKg.set(dims.sta_weight_kg);
       }
     });
 
@@ -785,10 +800,10 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
       const standardItem: OrderItem = {
         package_type: PackageType.STANDARD,
         description: 'Paquete Estándar',
-        length_cm: 0,
-        width_cm: 0,
-        height_cm: 0,
-        weight_kg: 0,
+        length_cm: this.staLengthCm(),
+        width_cm: this.staWidthCm(),
+        height_cm: this.staHeightCm(),
+        weight_kg: this.staWeightKg(),
         basePrice: this.orderForm.get('shipping_cost')?.value,
         finalPrice: this.orderForm.get('shipping_cost')?.value,
         isPrincipal: true,

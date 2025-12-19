@@ -445,9 +445,6 @@ export class OrdersService {
           // orderToCreate.package_weight_kg = orderDto.package_weight_kg || 0;
           // orderToCreate.shipping_cost = orderDto.shipping_cost;
           orderToCreate.shipping_cost = totalShippingCost;
-          // orderToCreate.item_description = orderItems
-          //   .map((item) => item.description)
-          //   .join(', ');
 
           orderToCreate.item_description = orderDto.item_description;
           orderToCreate.amount_to_collect_at_delivery =
@@ -1312,7 +1309,6 @@ export class OrdersService {
         delete orderToUpdate.observation_shipping_cost_modification;
         updatedOrder = await this.orderRepository.save(orderToUpdate);
       }
-
       return updatedOrder;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);

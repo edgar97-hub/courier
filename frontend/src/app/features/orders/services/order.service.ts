@@ -225,9 +225,9 @@ export class OrderService {
           if (apiResponse.length) {
             let standard_package_info =
               apiResponse[0].standard_measurements_length +
-              'cm x' +
+              'cm x ' +
               apiResponse[0].standard_measurements_width +
-              'cm x' +
+              'cm x ' +
               apiResponse[0].standard_measurements_height +
               'cm (' +
               apiResponse[0].standard_measurements_weight +
