@@ -1,15 +1,17 @@
 .import-modal-container {
   width: 100%;
-  max-width: 650px; // Ancho máximo para el modal en desktop
+  // max-width: 650px; // Ancho máximo para el modal en desktop
 }
-
+.mat-mdc-dialog-content {
+  // max-height: 100vh;
+}
 mat-dialog-content {
   padding-top: 0; // Quitar padding superior si el título ya tiene
   line-height: 1.6;
   font-size: 0.95em;
 
   // Hacer el contenido scrollable si es muy largo en móviles
-  max-height: 70vh;
+  // max-height: 90vh !important;
   overflow-y: auto;
 }
 
@@ -114,8 +116,6 @@ ol {
   }
 }
 
-
-
 .error-data-preview {
   font-size: 0.8em;
   color: #757575;
@@ -134,8 +134,9 @@ mat-dialog-actions {
   }
 }
 
-ol li { // Ajustar el margen de los items de la lista principal si es necesario
-  margin-bottom: 10px; 
+ol li {
+  // Ajustar el margen de los items de la lista principal si es necesario
+  margin-bottom: 10px;
 }
 
 .column-descriptions {
@@ -156,7 +157,8 @@ ol li { // Ajustar el margen de los items de la lista principal si es necesario
       color: #3f51b5; // Color primario de Material para los nombres de columna
     }
 
-    code { // Para resaltar valores de ejemplo
+    code {
+      // Para resaltar valores de ejemplo
       background-color: #e0e0e0;
       padding: 1px 4px;
       border-radius: 3px;

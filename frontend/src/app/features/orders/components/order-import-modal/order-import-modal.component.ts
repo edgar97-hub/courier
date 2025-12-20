@@ -17,7 +17,7 @@ const EXCEL_COLUMN_MAP: { [key: string]: keyof Order_importacion | null } = {
   'TIPO DE ENVIO': 'type_order_transfer_to_warehouse',
   'NOMBRE DEL DESTINATARIO': 'recipient_name',
   'TELEFONO DESTINATARIO 9 DIGITOS': 'recipient_phone',
-  DISTRITO: 'delivery_district_name', // Asumimos que el usuario selecciona de una lista validada
+  DISTRITO: 'delivery_district_name',
   'DIRECCION DE ENTREGA': 'delivery_address',
   'FECHA DE ENTREGA (DIA/MES/AÑO)': 'delivery_date',
   'DETALLE DEL PRODUCTO': 'item_description',
@@ -124,7 +124,9 @@ export class OrderImportModalComponent implements OnInit {
       let jsonData: any[] = await this.readFileAndParseToJson(
         this.selectedFile
       );
-      jsonData = jsonData.filter((item) => item.CARGA === 'CARGAR');
+      jsonData = jsonData.filter(
+        (item) => item['DISTRITO (SELECCIONE SOLO DEL LISTADO)']
+      );
       console.log('Parsed Excel to JSON:', jsonData);
       if (jsonData.length === 0) {
         throw new Error(
@@ -206,7 +208,7 @@ export class OrderImportModalComponent implements OnInit {
           const bstr: string = e.target.result;
           const wb: XLSX.WorkBook = XLSX.read(bstr, {
             type: 'binary',
-            cellDates: true,
+            cellDates: false,
           }); // cellDates para intentar parsear fechas
           const wsname: string = wb.SheetNames[0];
           if (!wsname) {
@@ -216,12 +218,21 @@ export class OrderImportModalComponent implements OnInit {
           const ws: XLSX.WorkSheet = wb.Sheets[wsname];
           const jsonData: any[] = XLSX.utils.sheet_to_json(ws, {
             raw: false,
-            defval: null,
+            // // defval: null,
+            defval: '',
+            blankrows: false,
           });
+          console.log(
+            // jsonData.filter((row) =>
+            //   Object.values(row).some((val) => val !== null && val !== '')
+            // ),
+            jsonData
+          );
           resolve(
-            jsonData.filter((row) =>
-              Object.values(row).some((val) => val !== null && val !== '')
-            )
+            jsonData
+            // jsonData.filter((row) =>
+            //   Object.values(row).some((val) => val !== null && val !== '')
+            // )
           ); // Filtrar filas completamente vacías
         } catch (readError) {
           console.error(

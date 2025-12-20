@@ -332,6 +332,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
       width: '90%', // Hacerlo más ancho por defecto, el componente interno puede tener max-width
       maxWidth: '700px', // Máximo ancho para desktop
       autoFocus: false, // Evitar que el primer botón tome foco automáticamente
+      disableClose: true,
     });
 
     dialogRef.componentInstance.importCompleted.subscribe(

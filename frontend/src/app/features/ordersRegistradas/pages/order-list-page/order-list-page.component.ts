@@ -38,12 +38,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
-import { OrderImportModalComponent } from '../../components/order-import-modal/order-import-modal.component';
-import { Order_importacion, STATES } from '../../models/order.model';
 import { ExcelExportService } from '../../services/excel-export.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { AppStore } from '../../../../app.store';
+import { OrderImportModalComponent } from '../../../orders/components/order-import-modal/order-import-modal.component';
 
 @Component({
   selector: 'app-order-list-page',
@@ -248,7 +247,10 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
       width: '90%', // Hacerlo más ancho por defecto, el componente interno puede tener max-width
       maxWidth: '700px', // Máximo ancho para desktop
       autoFocus: false, // Evitar que el primer botón tome foco automáticamente
-      // disableClose: true, // Si quieres que solo se cierre con botones
+      // height: '100%', // Sets the height to 100% of the viewport height
+      // maxHeight: '100%', // Overrides the default max-height constraint
+      // minHeight:"100%",
+      disableClose: true,
     });
 
     dialogRef.componentInstance.importCompleted.subscribe(

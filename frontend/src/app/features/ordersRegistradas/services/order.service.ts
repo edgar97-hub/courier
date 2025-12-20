@@ -18,7 +18,6 @@ import {
 } from '../models/order.model';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
-import { ImportResult } from '../components/order-import-modal/order-import-modal.component';
 
 @Injectable({
   providedIn: 'root',
@@ -388,7 +387,7 @@ export class OrderService {
       .pipe(catchError(this.handleError));
   }
 
-  importOrdersFromParsedJson(parsedOrders: any[]): Observable<ImportResult> {
+  importOrdersFromParsedJson(parsedOrders: any[]): Observable<any> {
     console.log(
       'OrderService: Sending parsed JSON to backend for import',
       parsedOrders
@@ -400,7 +399,7 @@ export class OrderService {
     }
 
     return this.http
-      .post<ImportResult>(
+      .post<any>(
         `${this.apiUrlOrders}/import-batch-json`,
         parsedOrders,
         { headers }
@@ -599,7 +598,7 @@ export class OrderService {
 
   private handleImportError(error: HttpErrorResponse): Observable<never> {
     console.error('API Import Error:', error);
-    let result: ImportResult = {
+    let result: any = {
       success: false,
       message: 'Error de comunicación con el servidor durante la importación.',
       errors: [

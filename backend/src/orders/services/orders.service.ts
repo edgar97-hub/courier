@@ -667,6 +667,7 @@ export class OrdersService {
         rowHasErrors = true;
       }
 
+      console.log('VALIDAR DISTRITO CONTRA BASE DE DATOS');
       // VALIDAR DISTRITO CONTRA BASE DE DATOS
       if (orderEntity.delivery_district_name) {
         const district = await this.districtsRepository
@@ -695,7 +696,7 @@ export class OrdersService {
         });
         rowHasErrors = true;
       }
-
+      console.log('rowHasErrors');
       if (!rowHasErrors) {
         orderEntity.status = STATES.REGISTERED;
         orderEntity.user = { id: idUser } as UsersEntity;
@@ -714,6 +715,7 @@ export class OrdersService {
         ordersToSave.push(orderEntity);
       }
     }
+    console.log('ordersToSave.length', ordersToSave.length);
     if (ordersToSave.length > 0 && errors.length === 0) {
       const queryRunner =
         this.orderRepository.manager.connection.createQueryRunner();
@@ -721,46 +723,45 @@ export class OrdersService {
       await queryRunner.connect();
       await queryRunner.startTransaction();
 
-      await this.entityManager
-        .transaction(async (transactionalEntityManager) => {
-          try {
-            console.log(
-              `Iniciando transacción para guardar ${ordersToSave.length} pedidos.`,
-            );
+      try {
+        console.log(
+          `Iniciando transacción para guardar ${ordersToSave.length} pedidos.`,
+        );
 
-            const entitiesToSave = ordersToSave.map((orderData) =>
-              transactionalEntityManager.create(
-                OrdersEntity,
-                orderData as DeepPartial<OrdersEntity>,
-              ),
-            );
-
-            await transactionalEntityManager.save(OrdersEntity, entitiesToSave);
-
-            importedCount = ordersToSave.length;
-            console.log(
-              `${importedCount} pedidos guardados exitosamente dentro de la transacción.`,
-            );
-          } catch (dbError) {
-            console.error(
-              'Error DENTRO de la transacción de base de datos, iniciando rollback:',
-              dbError,
-            );
-            importedCount = 0;
-            throw dbError;
-          }
-        })
-        .catch((transactionError) => {
-          console.error(
-            'La transacción de guardado de pedidos falló y se revirtió (rollback):',
-            transactionError,
-          );
-          errors.push({
-            rowExcel: 0,
-            message: `Error crítico al guardar los pedidos en la base de datos. Ningún pedido fue importado. Detalles: ${transactionError.message || 'Error desconocido de base de datos.'}`,
-          });
-          importedCount = 0;
+        const entitiesToSave = ordersToSave.map((orderData) =>
+          queryRunner.manager.create(
+            OrdersEntity,
+            orderData as DeepPartial<OrdersEntity>,
+          ),
+        );
+        await queryRunner.manager.save(OrdersEntity, entitiesToSave, {
+          chunk: 100,
         });
+        await queryRunner.commitTransaction();
+
+        importedCount = ordersToSave.length;
+        console.log(
+          `${importedCount} pedidos guardados exitosamente dentro de la transacción.`,
+        );
+        return {
+          success: true,
+          message: `¡Importación exitosa! ${importedCount} pedidos fueron importados correctamente.`,
+          importedCount: importedCount,
+          errors: [],
+        };
+      } catch (dbError) {
+        console.error('Error en transacción, haciendo Rollback:', dbError);
+        await queryRunner.rollbackTransaction();
+        importedCount = 0;
+        errors.push({
+          rowExcel: 0,
+          message: `Error crítico al guardar los pedidos en la base de datos. Ningún pedido fue importado. Detalles: ${dbError?.message || 'Error desconocido de base de datos.'}`,
+        });
+      } finally {
+        if (!queryRunner.isReleased) {
+          await queryRunner.release();
+        }
+      }
     } else if (
       ordersToSave.length === 0 &&
       errors.length === 0 &&
