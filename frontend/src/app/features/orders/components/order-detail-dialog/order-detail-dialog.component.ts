@@ -18,7 +18,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatTooltipModule } from '@angular/material/tooltip'; // Para tooltips
 import { Order, Order_, OrderStatus } from '../../models/order.model';
-import { DefaultPipe } from '../../../../shared/pipes/default.pipe'; // <--- IMPORTA TU PIPE
+import { DefaultPipe } from '../../../../shared/pipes/default.pipe';  
 
 export interface OrderDetailDialogData {
   order: Order_;

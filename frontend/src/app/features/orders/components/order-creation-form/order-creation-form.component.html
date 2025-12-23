@@ -358,7 +358,6 @@
         <mat-label>% Descuento Adicional</mat-label>
         <input
           matInput
-          type="number"
           [value]="multiPackageDiscountPercentage()"
           (input)="
             multiPackageDiscountPercentage.set(+$any($event.target).value)

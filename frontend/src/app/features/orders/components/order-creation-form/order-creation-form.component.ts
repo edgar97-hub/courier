@@ -757,7 +757,23 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       (formValue.items.length === 1
         ? '1 Bulto: '
         : formValue.items.length + ' Bultos: ') +
-      formValue.items.map((item: OrderItem) => item.description).join(', ') +
+      formValue.items
+        .map((item: OrderItem) => {
+          let str =
+            item.description +
+            ' Medidas L:' +
+            item.length_cm +
+            ' x An:' +
+            item.width_cm +
+            ' x Al:  ' +
+            item.height_cm +
+            ' (' +
+            item.weight_kg +
+            'kg)';
+
+          return str;
+        })
+        .join(', ') +
       (formValue.item_description ? ' | ' + formValue.item_description : '');
 
     const newOrderData: NewOrderData = {
