@@ -420,6 +420,7 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
     if (!this.selectedRoute) return false;
     const firstPendingStop = this.selectedRoute.stops.find(
       (s) =>
+        s.id === stop.id &&
         s.order.status !== OrderStatus.ENTREGADO &&
         s.order.status !== OrderStatus.RECHAZADO &&
         s.order.status !== OrderStatus.ANULADO
@@ -437,7 +438,6 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
   startPolling(): void {
     this.stopPolling();
     this.pollingInterval = setInterval(() => this.loadRoutesForDate(), 20000);
-    // this.pollingInterval = setInterval(() => this.loadRoutesForDate(), 2000);
   }
 
   stopPolling(): void {
