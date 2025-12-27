@@ -274,13 +274,7 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
       console.error('Índice de parada inválido');
       return;
     }
-    // let origin: string;
-    // if (stopIndex === 0) {
-    //   origin = `${this.selectedRoute.latitudeStartPoint},${this.selectedRoute.longitudeStartPoint}`;
-    // } else {
-    //   const previousStop = sortedStops[stopIndex - 1];
-    //   origin = `${previousStop.latitude},${previousStop.longitude}`;
-    // }
+
     const currentStop = sortedStops[stopIndex];
     const destination = `${currentStop.latitude},${currentStop.longitude}`;
     const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving&dir_action=navigate`;
@@ -428,8 +422,7 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
       (s) =>
         s.order.status !== OrderStatus.ENTREGADO &&
         s.order.status !== OrderStatus.RECHAZADO &&
-        s.order.status !== OrderStatus.ANULADO &&
-        s.order.status !== OrderStatus.REPROGRAMADO
+        s.order.status !== OrderStatus.ANULADO
     );
     return firstPendingStop ? firstPendingStop.id === stop.id : false;
   }
