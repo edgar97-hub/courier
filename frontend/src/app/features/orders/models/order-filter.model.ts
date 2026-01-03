@@ -1,8 +1,9 @@
 export interface OrderFilterCriteria {
-  start_date?: string | null; // Formato YYYY-MM-DD esperado por la API
-  end_date?: string | null; // Formato YYYY-MM-DD esperado por la API
+  start_date?: string | null; 
+  end_date?: string | null;  
   status?: string | null;
   search_term?: string | null;
   myOrders?: boolean;
   isExpress?: boolean;
+  districts?: string[];
 }

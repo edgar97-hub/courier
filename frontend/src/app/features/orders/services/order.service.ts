@@ -45,6 +45,21 @@ export class OrderService {
     }
     return new HttpHeaders({ 'Content-Type': 'application/json' });
   }
+  getActiveDistricts(startDate: string, endDate: string): Observable<string[]> {
+    let params = new HttpParams();
+    if (startDate) params = params.set('startDate', startDate);
+    if (endDate) params = params.set('endDate', endDate);
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(() => new Error('Not authenticated to fetch users.'));
+    }
+    return this.http
+      .get<{ success: boolean; data: string[] }>(
+        `${this.apiUrlOrders}/active-districts`,
+        { params, headers }
+      )
+      .pipe(map((response) => response.data || []));
+  }
 
   getOrders(
     filters?: OrderFilterCriteria,
@@ -75,9 +90,11 @@ export class OrderService {
       if (filters.myOrders) {
         params = params.set('my_orders', 'true');
       }
-
       if (filters.isExpress) {
         params = params.set('isExpress', 'true');
+      }
+      if (filters.districts) {
+        params = params.set('districts', filters.districts.join('|'));
       }
     }
 
@@ -116,6 +133,9 @@ export class OrderService {
       }
       if (filters.search_term && filters.search_term.trim() !== '') {
         params = params.set('search_term', filters.search_term.trim());
+      }
+      if (filters.districts) {
+        params = params.set('districts', filters.districts.join('|'));
       }
     }
 

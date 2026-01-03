@@ -556,8 +556,8 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
   onSortChanged(sort: Sort): void {
     console.log('OrderListPage: Sort changed', sort);
     this.currentSortField = sort.active;
-    this.currentSortDirection = sort.direction as 'asc' | 'desc'; // El tipo SortDirection puede ser '', pero nuestro servicio espera 'asc' o 'desc'
-    this.currentPageIndex = 0; // Resetear a la primera página al cambiar el orden
+    this.currentSortDirection = sort.direction as 'asc' | 'desc';
+    this.currentPageIndex = 0;
     this.fetchOrders();
   }
 

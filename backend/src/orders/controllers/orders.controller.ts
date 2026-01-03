@@ -56,6 +56,25 @@ export class OrdersController {
     );
   }
 
+  @Get('active-districts')
+  async getActiveDistricts(
+    @Req() req: any,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+    @Query('status') status?: string,
+  ) {
+    const districts = await this.ordersService.getActiveDistrictsByDateRange(
+      req,
+      startDate,
+      endDate,
+      status,
+    );
+    return {
+      success: true,
+      data: districts,
+    };
+  }
+
   @Get('')
   public async findAllOrders(
     @Request() req,
@@ -68,6 +87,7 @@ export class OrdersController {
     @Query('status') status?: string,
     @Query('search_term') search_term?: string,
     @Query('delivery_date') delivery_date?: string,
+    @Query('districts') districts?: string,
   ) {
     const queryParams = {
       pageNumber,
@@ -79,6 +99,7 @@ export class OrdersController {
       status,
       search_term,
       delivery_date,
+      districts,
     };
     return await this.ordersService.findOrders(queryParams, req);
   }
@@ -95,6 +116,7 @@ export class OrdersController {
     @Query('status') status?: string,
     @Query('search_term') search_term?: string,
     @Query('delivery_date') delivery_date?: string,
+    @Query('districts') districts?: string,
   ) {
     const queryParams = {
       pageNumber,
@@ -106,6 +128,7 @@ export class OrdersController {
       status,
       search_term,
       delivery_date,
+      districts,
     };
     return await this.ordersService.getFilteredOrders(queryParams, req);
   }

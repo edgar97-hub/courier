@@ -810,6 +810,62 @@ export class OrdersService {
     };
   }
 
+  public async getActiveDistrictsByDateRange(
+    req: any,
+    startDate: string,
+    endDate: string,
+    status?: string,
+  ): Promise<string[]> {
+    const idUser = req.idUser;
+    const role = req.roleUser;
+
+    try {
+      const query = this.orderRepository
+        .createQueryBuilder('order')
+        .select('DISTINCT(order.delivery_district_name)', 'name')
+        .leftJoin('order.company', 'company');
+
+      if (startDate && endDate) {
+        query.andWhere('order.delivery_date BETWEEN :startDate AND :endDate', {
+          startDate,
+          endDate,
+        });
+      }
+
+      if (role === ROLES.EMPRESA || role === ROLES.EMPRESA_DISTRIBUIDOR) {
+        query.andWhere('company.id = :idUser', { idUser });
+      } else if (role === ROLES.MOTORIZADO && req.query.my_orders) {
+        query.andWhere('assigned_driver.id = :idUser', { idUser });
+      }
+
+      if (req.query.isExpress) {
+        query.andWhere('order.isExpress = :isExpress', { isExpress: true });
+      }
+
+      if (status) {
+        let states = [status];
+        if (status === STATES.DELIVERED) {
+          states.push(STATES.REJECTED);
+        }
+        query.andWhere('order.status IN (:...states)', {
+          states: states,
+        });
+      }
+
+      // 4. Limpieza y Orden
+      query.andWhere('order.delivery_district_name IS NOT NULL');
+      query.andWhere("order.delivery_district_name != ''");
+      query.orderBy('order.delivery_district_name', 'ASC');
+
+      const result = await query.getRawMany();
+
+      // Retornamos un array simple de strings: ['Comas', 'Los Olivos', ...]
+      return result.map((r) => r.name);
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
   public async findOrders(
     {
       pageNumber = 0,
@@ -821,6 +877,7 @@ export class OrdersService {
       status = '',
       search_term = '',
       delivery_date = '',
+      districts = '',
     }: {
       pageNumber?: number;
       pageSize?: number;
@@ -831,6 +888,7 @@ export class OrdersService {
       status?: string;
       search_term?: string;
       delivery_date?: string;
+      districts?: string;
     },
     req,
   ): Promise<{
@@ -850,55 +908,18 @@ export class OrdersService {
         .leftJoinAndSelect('order.assigned_driver', 'assigned_driver')
         .leftJoinAndSelect('order.company', 'company');
 
+      if (districts && districts.length > 0) {
+        query.andWhere('order.delivery_district_name IN (:...districts)', {
+          districts: districts.split('|'),
+        });
+      }
+
       if (delivery_date) {
-        // const timeZone = 'America/Lima';
-
-        // const startLocalString = `${delivery_date} 00:00:00.000`;
-        // const endLocalString = `${delivery_date} 23:59:59.999`;
-
-        // const refDate = new Date();
-        // const startOfPeriodInLima = parse(
-        //   startLocalString,
-        //   'yyyy-MM-dd HH:mm:ss.SSS',
-        //   refDate,
-        // );
-        // const endOfPeriodInLima = parse(
-        //   endLocalString,
-        //   'yyyy-MM-dd HH:mm:ss.SSS',
-        //   refDate,
-        // );
-
-        // const startUTC = fromZonedTime(startOfPeriodInLima, timeZone);
-        // const endUTC = fromZonedTime(endOfPeriodInLima, timeZone);
-
-        // query.andWhere({
-        //   delivery_date: Between(startUTC, endUTC),
-        // });
         query.andWhere({
           delivery_date: delivery_date,
         });
       } else {
         if (startDate && endDate) {
-          // const timeZone = 'America/Lima';
-
-          // const startLocalString = `${startDate} 00:00:00.000`;
-          // const endLocalString = `${endDate} 23:59:59.999`;
-
-          // const refDate = new Date();
-          // const startOfPeriodInLima = parse(
-          //   startLocalString,
-          //   'yyyy-MM-dd HH:mm:ss.SSS',
-          //   refDate,
-          // );
-          // const endOfPeriodInLima = parse(
-          //   endLocalString,
-          //   'yyyy-MM-dd HH:mm:ss.SSS',
-          //   refDate,
-          // );
-
-          // const startUTC = fromZonedTime(startOfPeriodInLima, timeZone);
-          // const endUTC = fromZonedTime(endOfPeriodInLima, timeZone);
-
           query.andWhere({
             delivery_date: Between(startDate, endDate),
           });
@@ -971,8 +992,6 @@ export class OrdersService {
 
   public async getFilteredOrders(
     {
-      pageNumber = 0,
-      pageSize = 0,
       sortField = '',
       sortDirection = '',
       startDate,
@@ -980,9 +999,8 @@ export class OrdersService {
       status = '',
       search_term = '',
       delivery_date = '',
+      districts = '',
     }: {
-      pageNumber?: number;
-      pageSize?: number;
       sortField?: string;
       sortDirection?: string;
       startDate?: string;
@@ -990,6 +1008,7 @@ export class OrdersService {
       status?: string;
       search_term?: string;
       delivery_date?: string;
+      districts?: string;
     },
     req,
   ): Promise<{
@@ -1006,55 +1025,18 @@ export class OrdersService {
         .leftJoinAndSelect('order.assigned_driver', 'assigned_driver')
         .leftJoinAndSelect('order.company', 'company');
 
+      if (districts && districts.length > 0) {
+        query.andWhere('order.delivery_district_name IN (:...districts)', {
+          districts: districts.split('|'),
+        });
+      }
+
       if (delivery_date) {
-        // const timeZone = 'America/Lima';
-
-        // const startLocalString = `${delivery_date} 00:00:00.000`;
-        // const endLocalString = `${delivery_date} 23:59:59.999`;
-
-        // const refDate = new Date();
-        // const startOfPeriodInLima = parse(
-        //   startLocalString,
-        //   'yyyy-MM-dd HH:mm:ss.SSS',
-        //   refDate,
-        // );
-        // const endOfPeriodInLima = parse(
-        //   endLocalString,
-        //   'yyyy-MM-dd HH:mm:ss.SSS',
-        //   refDate,
-        // );
-
-        // const startUTC = fromZonedTime(startOfPeriodInLima, timeZone);
-        // const endUTC = fromZonedTime(endOfPeriodInLima, timeZone);
-
-        // query.andWhere({
-        //   delivery_date: Between(startUTC, endUTC),
-        // });
         query.andWhere({
           delivery_date: delivery_date,
         });
       } else {
         if (startDate && endDate) {
-          // const timeZone = 'America/Lima';
-
-          // const startLocalString = `${startDate} 00:00:00.000`;
-          // const endLocalString = `${endDate} 23:59:59.999`;
-
-          // const refDate = new Date();
-          // const startOfPeriodInLima = parse(
-          //   startLocalString,
-          //   'yyyy-MM-dd HH:mm:ss.SSS',
-          //   refDate,
-          // );
-          // const endOfPeriodInLima = parse(
-          //   endLocalString,
-          //   'yyyy-MM-dd HH:mm:ss.SSS',
-          //   refDate,
-          // );
-
-          // const startUTC = fromZonedTime(startOfPeriodInLima, timeZone);
-          // const endUTC = fromZonedTime(endOfPeriodInLima, timeZone);
-
           query.andWhere({
             delivery_date: Between(startDate, endDate),
           });

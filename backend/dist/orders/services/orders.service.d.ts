@@ -23,7 +23,8 @@ export declare class OrdersService {
         errors?: any[];
     }>;
     importOrdersFromExcelData(excelRows: any[], idUser: string): Promise<ImportResult | undefined>;
-    findOrders({ pageNumber, pageSize, sortField, sortDirection, startDate, endDate, status, search_term, delivery_date, }: {
+    getActiveDistrictsByDateRange(req: any, startDate: string, endDate: string, status?: string): Promise<string[]>;
+    findOrders({ pageNumber, pageSize, sortField, sortDirection, startDate, endDate, status, search_term, delivery_date, districts, }: {
         pageNumber?: number;
         pageSize?: number;
         sortField?: string;
@@ -33,15 +34,14 @@ export declare class OrdersService {
         status?: string;
         search_term?: string;
         delivery_date?: string;
+        districts?: string;
     }, req: any): Promise<{
         items: any;
         total_count: number;
         page_number: number;
         page_size: number;
     }>;
-    getFilteredOrders({ pageNumber, pageSize, sortField, sortDirection, startDate, endDate, status, search_term, delivery_date, }: {
-        pageNumber?: number;
-        pageSize?: number;
+    getFilteredOrders({ sortField, sortDirection, startDate, endDate, status, search_term, delivery_date, districts, }: {
         sortField?: string;
         sortDirection?: string;
         startDate?: string;
@@ -49,6 +49,7 @@ export declare class OrdersService {
         status?: string;
         search_term?: string;
         delivery_date?: string;
+        districts?: string;
     }, req: any): Promise<{
         items: any;
         total_count: number;

@@ -6,7 +6,7 @@ import {
   OnDestroy,
   inject,
 } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common'; // DatePipe para formatear fechas
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -14,11 +14,11 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import {
   MatNativeDateModule,
   provideNativeDateAdapter,
-} from '@angular/material/core'; // MatNativeDateModule para datepicker
+} from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Subject, Observable } from 'rxjs';
+import { Subject, Observable, of } from 'rxjs';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { OrderFilterCriteria } from '../../models/order-filter.model';
 import { OrderService } from '../../services/order.service';
@@ -26,10 +26,7 @@ import { OrderService } from '../../services/order.service';
 @Component({
   selector: 'app-order-filters',
   standalone: true,
-  providers: [
-    provideNativeDateAdapter(), // Necesario para MatDatepicker
-    DatePipe, // Para formatear la fecha al enviar
-  ],
+  providers: [provideNativeDateAdapter(), DatePipe],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -54,6 +51,8 @@ export class OrderFiltersComponent implements OnInit, OnDestroy {
   private datePipe = inject(DatePipe);
   private destroy$ = new Subject<void>();
 
+  activeDistricts$: Observable<string[]> = of([]);
+
   constructor() {
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -63,22 +62,51 @@ export class OrderFiltersComponent implements OnInit, OnDestroy {
       end_date: [lastDay],
       status: [null],
       search_term: [''],
+      districts: [[]],
     });
     this.orderStatuses$ = this.orderService.getOrderStatuses();
   }
 
   ngOnInit(): void {
+    this.loadActiveDistricts();
+
     this.filterForm.valueChanges
       .pipe(
         takeUntil(this.destroy$),
-        debounceTime(400), // Espera 400ms después del último cambio
+        debounceTime(400),
         distinctUntilChanged(
           (prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)
-        ) // Solo emite si los valores realmente cambiaron
+        )
       )
       .subscribe(() => {
         this.applyFilters();
       });
+
+    this.filterForm
+      .get('start_date')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.loadActiveDistricts());
+    this.filterForm
+      .get('end_date')
+      ?.valueChanges.pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.loadActiveDistricts());
+  }
+
+  loadActiveDistricts(): void {
+    const start = this.filterForm.get('start_date')?.value;
+    const end = this.filterForm.get('end_date')?.value;
+
+    if (start && end) {
+      const formattedStart = this.datePipe.transform(start, 'yyyy-MM-dd') || '';
+      const formattedEnd = this.datePipe.transform(end, 'yyyy-MM-dd') || '';
+      this.filterForm.get('districts')?.setValue([]);
+      this.activeDistricts$ = this.orderService.getActiveDistricts(
+        formattedStart,
+        formattedEnd
+      );
+    } else {
+      this.activeDistricts$ = of([]);
+    }
   }
 
   applyFilters(): void {
@@ -92,6 +120,7 @@ export class OrderFiltersComponent implements OnInit, OnDestroy {
         : null,
       status: formValues.status || null,
       search_term: formValues.search_term?.trim() || null,
+      districts: formValues.districts || [],
     };
     console.log('OrderFiltersComponent: Emitting filters', filters);
     this.filtersChanged.emit(filters);
@@ -103,7 +132,9 @@ export class OrderFiltersComponent implements OnInit, OnDestroy {
       end_date: null,
       status: null,
       search_term: '',
+      districts: [],
     });
+    this.loadActiveDistricts();
   }
 
   ngOnDestroy(): void {

@@ -35,7 +35,14 @@ let OrdersController = class OrdersController {
     async importOrders(ordersData, req) {
         return await this.ordersService.importOrdersFromExcelData(ordersData, req.idUser);
     }
-    async findAllOrders(req, pageNumber = 0, pageSize = 0, sortField = 'created_at', sortDirection = 'asc', startDate, endDate, status, search_term, delivery_date) {
+    async getActiveDistricts(req, startDate, endDate, status) {
+        const districts = await this.ordersService.getActiveDistrictsByDateRange(req, startDate, endDate, status);
+        return {
+            success: true,
+            data: districts,
+        };
+    }
+    async findAllOrders(req, pageNumber = 0, pageSize = 0, sortField = 'created_at', sortDirection = 'asc', startDate, endDate, status, search_term, delivery_date, districts) {
         const queryParams = {
             pageNumber,
             pageSize,
@@ -46,10 +53,11 @@ let OrdersController = class OrdersController {
             status,
             search_term,
             delivery_date,
+            districts,
         };
         return await this.ordersService.findOrders(queryParams, req);
     }
-    async getFilteredOrders(req, pageNumber = 0, pageSize = 0, sortField = 'created_at', sortDirection = 'asc', startDate, endDate, status, search_term, delivery_date) {
+    async getFilteredOrders(req, pageNumber = 0, pageSize = 0, sortField = 'created_at', sortDirection = 'asc', startDate, endDate, status, search_term, delivery_date, districts) {
         const queryParams = {
             pageNumber,
             pageSize,
@@ -60,6 +68,7 @@ let OrdersController = class OrdersController {
             status,
             search_term,
             delivery_date,
+            districts,
         };
         return await this.ordersService.getFilteredOrders(queryParams, req);
     }
@@ -172,6 +181,16 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "importOrders", null);
 __decorate([
+    (0, common_1.Get)('active-districts'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('startDate')),
+    __param(2, (0, common_1.Query)('endDate')),
+    __param(3, (0, common_1.Query)('status')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String, String]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "getActiveDistricts", null);
+__decorate([
     (0, common_1.Get)(''),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)('page_number')),
@@ -183,8 +202,9 @@ __decorate([
     __param(7, (0, common_1.Query)('status')),
     __param(8, (0, common_1.Query)('search_term')),
     __param(9, (0, common_1.Query)('delivery_date')),
+    __param(10, (0, common_1.Query)('districts')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "findAllOrders", null);
 __decorate([
@@ -199,8 +219,9 @@ __decorate([
     __param(7, (0, common_1.Query)('status')),
     __param(8, (0, common_1.Query)('search_term')),
     __param(9, (0, common_1.Query)('delivery_date')),
+    __param(10, (0, common_1.Query)('districts')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "getFilteredOrders", null);
 __decorate([

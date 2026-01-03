@@ -585,7 +585,49 @@ let OrdersService = class OrdersService {
             errors: errors,
         };
     }
-    async findOrders({ pageNumber = 0, pageSize = 0, sortField = '', sortDirection = '', startDate, endDate, status = '', search_term = '', delivery_date = '', }, req) {
+    async getActiveDistrictsByDateRange(req, startDate, endDate, status) {
+        const idUser = req.idUser;
+        const role = req.roleUser;
+        try {
+            const query = this.orderRepository
+                .createQueryBuilder('order')
+                .select('DISTINCT(order.delivery_district_name)', 'name')
+                .leftJoin('order.company', 'company');
+            if (startDate && endDate) {
+                query.andWhere('order.delivery_date BETWEEN :startDate AND :endDate', {
+                    startDate,
+                    endDate,
+                });
+            }
+            if (role === roles_1.ROLES.EMPRESA || role === roles_1.ROLES.EMPRESA_DISTRIBUIDOR) {
+                query.andWhere('company.id = :idUser', { idUser });
+            }
+            else if (role === roles_1.ROLES.MOTORIZADO && req.query.my_orders) {
+                query.andWhere('assigned_driver.id = :idUser', { idUser });
+            }
+            if (req.query.isExpress) {
+                query.andWhere('order.isExpress = :isExpress', { isExpress: true });
+            }
+            if (status) {
+                let states = [status];
+                if (status === roles_1.STATES.DELIVERED) {
+                    states.push(roles_1.STATES.REJECTED);
+                }
+                query.andWhere('order.status IN (:...states)', {
+                    states: states,
+                });
+            }
+            query.andWhere('order.delivery_district_name IS NOT NULL');
+            query.andWhere("order.delivery_district_name != ''");
+            query.orderBy('order.delivery_district_name', 'ASC');
+            const result = await query.getRawMany();
+            return result.map((r) => r.name);
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
+    async findOrders({ pageNumber = 0, pageSize = 0, sortField = '', sortDirection = '', startDate, endDate, status = '', search_term = '', delivery_date = '', districts = '', }, req) {
         let idUser = req.idUser;
         let role = req.roleUser;
         try {
@@ -595,6 +637,11 @@ let OrdersService = class OrdersService {
                 .leftJoinAndSelect('order.user', 'user')
                 .leftJoinAndSelect('order.assigned_driver', 'assigned_driver')
                 .leftJoinAndSelect('order.company', 'company');
+            if (districts && districts.length > 0) {
+                query.andWhere('order.delivery_district_name IN (:...districts)', {
+                    districts: districts.split('|'),
+                });
+            }
             if (delivery_date) {
                 query.andWhere({
                     delivery_date: delivery_date,
@@ -661,7 +708,7 @@ let OrdersService = class OrdersService {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
-    async getFilteredOrders({ pageNumber = 0, pageSize = 0, sortField = '', sortDirection = '', startDate, endDate, status = '', search_term = '', delivery_date = '', }, req) {
+    async getFilteredOrders({ sortField = '', sortDirection = '', startDate, endDate, status = '', search_term = '', delivery_date = '', districts = '', }, req) {
         let idUser = req.idUser;
         let role = req.roleUser;
         try {
@@ -670,6 +717,11 @@ let OrdersService = class OrdersService {
                 .leftJoinAndSelect('order.user', 'user')
                 .leftJoinAndSelect('order.assigned_driver', 'assigned_driver')
                 .leftJoinAndSelect('order.company', 'company');
+            if (districts && districts.length > 0) {
+                query.andWhere('order.delivery_district_name IN (:...districts)', {
+                    districts: districts.split('|'),
+                });
+            }
             if (delivery_date) {
                 query.andWhere({
                     delivery_date: delivery_date,

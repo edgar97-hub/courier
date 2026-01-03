@@ -42,6 +42,33 @@
     </mat-select>
   </mat-form-field>
 
+  <mat-form-field appearance="outline">
+    <mat-label>Distritos (Activos)</mat-label>
+    <mat-select
+      formControlName="districts"
+      multiple
+      placeholder="Filtrar por zona..."
+    >
+      <!-- Opción para limpiar selección dentro del combo -->
+      <mat-select-trigger>
+        {{ (filterForm.get('districts')?.value?.length || 0) > 0 ? 
+           (filterForm.get('districts')?.value?.[0] || '') + 
+           ((filterForm.get('districts')?.value?.length || 0) > 1 ? ' (+ ' + ((filterForm.get('districts')?.value?.length || 0) - 1) + ' otros)' : '') : '' }}
+      </mat-select-trigger>
+
+      <mat-option
+        *ngFor="let district of activeDistricts$ | async"
+        [value]="district"
+      >
+        {{ district }}
+      </mat-option>
+
+      <mat-option *ngIf="(activeDistricts$ | async)?.length === 0" disabled>
+        Sin pedidos en estas fechas
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
   <div class="filter-actions">
     <mat-form-field appearance="outline" style="margin-top: 15px">
       <mat-label>Buscar</mat-label>
@@ -55,7 +82,12 @@
     >
       <mat-icon>search</mat-icon> Buscar
     </button>
-    <button mat-stroked-button class="btn-corp-secondary" type="button" (click)="clearFilters()">
+    <button
+      mat-stroked-button
+      class="btn-corp-secondary"
+      type="button"
+      (click)="clearFilters()"
+    >
       <mat-icon>clear_all</mat-icon> Limpiar
     </button>
   </div>

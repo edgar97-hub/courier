@@ -15,13 +15,17 @@ export declare class OrdersController {
     }>;
     findOrderById(id: string): Promise<any>;
     importOrders(ordersData: any[], req: any): Promise<ImportResult | undefined>;
-    findAllOrders(req: any, pageNumber?: number, pageSize?: number, sortField?: string, sortDirection?: string, startDate?: string, endDate?: string, status?: string, search_term?: string, delivery_date?: string): Promise<{
+    getActiveDistricts(req: any, startDate: string, endDate: string, status?: string): Promise<{
+        success: boolean;
+        data: string[];
+    }>;
+    findAllOrders(req: any, pageNumber?: number, pageSize?: number, sortField?: string, sortDirection?: string, startDate?: string, endDate?: string, status?: string, search_term?: string, delivery_date?: string, districts?: string): Promise<{
         items: any;
         total_count: number;
         page_number: number;
         page_size: number;
     }>;
-    getFilteredOrders(req: any, pageNumber?: number, pageSize?: number, sortField?: string, sortDirection?: string, startDate?: string, endDate?: string, status?: string, search_term?: string, delivery_date?: string): Promise<{
+    getFilteredOrders(req: any, pageNumber?: number, pageSize?: number, sortField?: string, sortDirection?: string, startDate?: string, endDate?: string, status?: string, search_term?: string, delivery_date?: string, districts?: string): Promise<{
         items: any;
         total_count: number;
     }>;
