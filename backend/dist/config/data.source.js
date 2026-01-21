@@ -4,7 +4,9 @@ exports.DataSourceConfig = void 0;
 const config_1 = require("@nestjs/config");
 const typeorm_1 = require("typeorm");
 const typeorm_naming_strategies_1 = require("typeorm-naming-strategies");
-config_1.ConfigModule.forRoot({});
+config_1.ConfigModule.forRoot({
+    envFilePath: `.env`,
+});
 const configService = new config_1.ConfigService();
 exports.DataSourceConfig = {
     type: 'postgres',

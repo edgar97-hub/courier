@@ -16,7 +16,7 @@ import { Subscription, filter } from 'rxjs';
 import { NavigationEnd } from '@angular/router';
 import { AppStore } from '../../../../app.store';
 import { RouteService } from '../../services/route.service';
-import { GeolocationTrackingService } from '../../../../core/services/geolocation-tracking.service'; // Importa el nuevo servicio
+import { GeolocationTrackingService } from '../../../../core/services/geolocation-tracking.service';
 import {
   Route,
   Stop,
@@ -31,6 +31,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { OrderService } from '../../../orders/services/order.service';
 import { GoogleMap, GoogleMapsModule } from '@angular/google-maps';
 import { DirectionsService } from '../../../../core/services/directions.service';
+import { UserRole } from '../../../../common/roles.enum';
 
 @Component({
   selector: 'app-my-route-page',
@@ -62,7 +63,7 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
   public appStore = inject(AppStore);
   private dialog = inject(MatDialog);
   private orderService = inject(OrderService);
-  public geolocationTrackingService = inject(GeolocationTrackingService); // Inyecta el servicio
+  public geolocationTrackingService = inject(GeolocationTrackingService);
 
   private pollingInterval: any;
   private navigationSubscription: Subscription;
@@ -87,8 +88,8 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
       .pipe(
         filter(
           (event) =>
-            event instanceof NavigationEnd && event.url.includes('/my-route')
-        )
+            event instanceof NavigationEnd && event.url.includes('/my-route'),
+        ),
       )
       .subscribe(() => this.loadRoutesForDate());
   }
@@ -106,7 +107,6 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
       day: '2-digit',
     });
     this.isLoading = true;
-    // this.selectedRoute = null;
 
     this.routeService.getMyRoutesByDate(dateString).subscribe({
       next: (data: any[]) => {
@@ -114,12 +114,12 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
         if (data && data.length > 0) {
           this.selectedRoute =
             data.find((r: any) =>
-              r.stops.some((s: any) => s.status === 'PENDIENTE')
+              r.stops.some((s: any) => s.status === 'PENDIENTE'),
             ) || data[0];
           this.updateMapDisplay();
           this.startGeolocationTracking();
         } else {
-          this.updateMapDisplay(); // Limpia el mapa si no hay rutas
+          this.updateMapDisplay();
           this.geolocationTrackingService.stopTracking();
         }
         this.isLoading = false;
@@ -128,7 +128,7 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
         this.snackBar.open(
           'Error al cargar las rutas: ' + err.message,
           'Cerrar',
-          { duration: 3000 }
+          { duration: 3000 },
         );
         this.isLoading = false;
       },
@@ -152,7 +152,7 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
 
     if (this.selectedRoute && this.selectedRoute.id) {
       const hasPendingStops = this.selectedRoute.stops.some(
-        (s) => s.status === StopStatus.PENDING
+        (s) => s.status === StopStatus.PENDING,
       );
       if (hasPendingStops) {
         this.geolocationTrackingService.startTracking(this.selectedRoute.id);
@@ -257,7 +257,7 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
         this.snackBar.open(
           'No se pudo dibujar el trazado de la ruta.',
           'Cerrar',
-          { duration: 3000 }
+          { duration: 3000 },
         );
       });
   }
@@ -302,10 +302,9 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
 
   getAvailableStatuses(order: Order_): OrderStatus[] {
     const userRole = this.appStore.currentUser()?.role;
-    order.status === OrderStatus.REGISTRADO;
 
     let almacen = [OrderStatus.EN_ALMACEN];
-    if (userRole === 'MOTORIZADO' && OrderStatus.REGISTRADO) {
+    if (userRole === UserRole.MOTORIZED && OrderStatus.REGISTRADO) {
       almacen = [];
     }
 
@@ -337,7 +336,7 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
       this.snackBar.open(
         'No hay cambios de estado disponibles para este pedido.',
         'OK',
-        { duration: 3000 }
+        { duration: 3000 },
       );
       return;
     }
@@ -359,14 +358,14 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
         const updatePayload: any = {
           newStatus: result.newStatus,
           reason: result.reason || '',
-          proofOfDeliveryImageUrl: '',
+          proofOfDeliveryImageUrls: [],
           shippingCostPaymentMethod: '',
           collectionPaymentMethod: '',
         };
         if (result.newStatus === OrderStatus.ENTREGADO) {
-          if (result.proofOfDeliveryImageUrl) {
-            updatePayload.proofOfDeliveryImageUrl =
-              result.proofOfDeliveryImageUrl;
+          if (result.proofOfDeliveryImageUrls) {
+            updatePayload.proofOfDeliveryImageUrls =
+              result.proofOfDeliveryImageUrls;
           }
           if (result.shippingCostPaymentMethod) {
             updatePayload.shippingCostPaymentMethod =
@@ -382,16 +381,16 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
             order.id,
             result.newStatus,
             result.reason || '',
-            result.proofOfDeliveryImageUrl,
+            result.proofOfDeliveryImageUrls,
             result.shippingCostPaymentMethod,
-            result.collectionPaymentMethod
+            result.collectionPaymentMethod,
           )
           .subscribe({
             next: (updatedOrder) => {
               this.snackBar.open(
                 `Estado del pedido ${updatedOrder.code} actualizado a ${result.newStatus}.`,
                 'OK',
-                { duration: 3000, panelClass: ['success-snackbar'] }
+                { duration: 3000, panelClass: ['success-snackbar'] },
               );
               this.loadRoutesForDate();
             },
@@ -401,7 +400,7 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
                   err.message || 'Intente de nuevo'
                 }`,
                 'Cerrar',
-                { duration: 5000, panelClass: ['error-snackbar'] }
+                { duration: 5000, panelClass: ['error-snackbar'] },
               );
               this.isLoading = false;
             },
@@ -423,7 +422,7 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
         s.id === stop.id &&
         s.order.status !== OrderStatus.ENTREGADO &&
         s.order.status !== OrderStatus.RECHAZADO &&
-        s.order.status !== OrderStatus.ANULADO
+        s.order.status !== OrderStatus.ANULADO,
     );
     return firstPendingStop ? firstPendingStop.id === stop.id : false;
   }

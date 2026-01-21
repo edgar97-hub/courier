@@ -54,10 +54,10 @@ export class OrderService {
       return throwError(() => new Error('Not authenticated to fetch users.'));
     }
     return this.http
-      .get<{ success: boolean; data: string[] }>(
-        `${this.apiUrlOrders}/active-districts`,
-        { params, headers }
-      )
+      .get<{
+        success: boolean;
+        data: string[];
+      }>(`${this.apiUrlOrders}/active-districts`, { params, headers })
       .pipe(map((response) => response.data || []));
   }
 
@@ -66,7 +66,7 @@ export class OrderService {
     page: number = 1,
     pageSize: number = 10,
     sortField: string = 'id',
-    sortDirection: 'asc' | 'desc' = 'desc'
+    sortDirection: 'asc' | 'desc' = 'desc',
   ): Observable<PaginatedOrdersResponse> {
     let params = new HttpParams()
       .set('page_number', page.toString())
@@ -108,14 +108,14 @@ export class OrderService {
         map((response) => {
           return response;
         }),
-        catchError(this.handleError)
+        catchError(this.handleError),
       );
   }
 
   getOrders2(
     filters?: OrderFilterCriteria,
     sortField: string = 'id',
-    sortDirection: 'asc' | 'desc' = 'desc'
+    sortDirection: 'asc' | 'desc' = 'desc',
   ): Observable<Order[]> {
     let params = new HttpParams()
       .set('sort_field', sortField)
@@ -152,7 +152,7 @@ export class OrderService {
         map((response: any) => {
           return response.items;
         }),
-        catchError(this.handleError)
+        catchError(this.handleError),
       );
   }
 
@@ -187,11 +187,11 @@ export class OrderService {
   updateOrderStatus(
     orderId: number | string,
     newStatus: string,
-    reason?: string,
-    product_delivery_photo_url?: string | null,
+    reason: string | undefined,
+    product_delivery_photo_urls: string[] | null | undefined,
     payment_method_for_shipping_cost?: string | null,
     payment_method_for_collection?: string | null,
-    updatedAt?: string
+    updatedAt?: string,
   ): Observable<any> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
@@ -205,8 +205,8 @@ export class OrderService {
       action: 'CAMBIO DE ESTADO',
       updatedAt,
     };
-    if (product_delivery_photo_url) {
-      payload.product_delivery_photo_url = product_delivery_photo_url;
+    if (product_delivery_photo_urls) {
+      payload.product_delivery_photo_urls = product_delivery_photo_urls;
     }
     if (payment_method_for_shipping_cost) {
       payload.payment_method_for_shipping_cost =
@@ -221,7 +221,7 @@ export class OrderService {
         {
           payload,
         },
-        { headers }
+        { headers },
       )
       .pipe(catchError(this.handleError));
   }
@@ -237,8 +237,8 @@ export class OrderService {
         tap((apiResponse) =>
           console.log(
             'OrderService: API response for max dimensions:',
-            apiResponse
-          )
+            apiResponse,
+          ),
         ),
         map((apiResponse: any): MaxPackageDimensions => {
           console.log('apiResponse', apiResponse);
@@ -299,7 +299,7 @@ export class OrderService {
         catchError((error: HttpErrorResponse) => {
           console.error(
             'OrderService: API error fetching max package dimensions. Details:',
-            error.message
+            error.message,
           );
 
           return of({
@@ -311,7 +311,7 @@ export class OrderService {
             info_text:
               'Las entregas en motorizado permiten paquetes de hasta 25 cm x 30 cm x 45 cm y 5 kg. Si se exceden estas medidas o peso, se cobrará una tarifa distinta porque la entrega será en una van.',
           }).pipe(delay(200));
-        })
+        }),
       );
   }
 
@@ -326,8 +326,8 @@ export class OrderService {
         tap((apiResponse) =>
           console.log(
             'OrderService: API response for max dimensions:',
-            apiResponse
-          )
+            apiResponse,
+          ),
         ),
         map((apiResponse: any): MaxPackageDimensions => {
           console.log('apiResponse', apiResponse);
@@ -389,7 +389,7 @@ export class OrderService {
         catchError((error: HttpErrorResponse) => {
           console.error(
             'OrderService: API error fetching max package dimensions. Details:',
-            error.message
+            error.message,
           );
 
           return of({
@@ -401,12 +401,12 @@ export class OrderService {
             info_text:
               'Las entregas en motorizado permiten paquetes de hasta 25 cm x 30 cm x 45 cm y 5 kg. Si se exceden estas medidas o peso, se cobrará una tarifa distinta porque la entrega será en una van.',
           }).pipe(delay(200));
-        })
+        }),
       );
   }
 
   createBatchOrders(
-    payload: CreateBatchOrderPayload
+    payload: CreateBatchOrderPayload,
   ): Observable<{ success: boolean; message: string; batchId?: string }> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
@@ -414,17 +414,17 @@ export class OrderService {
     }
 
     return this.http
-      .post<{ success: boolean; message: string; batchId?: string }>(
-        `${this.apiUrlOrders}/batch-create`,
-        payload,
-        { headers }
-      )
+      .post<{
+        success: boolean;
+        message: string;
+        batchId?: string;
+      }>(`${this.apiUrlOrders}/batch-create`, payload, { headers })
       .pipe(catchError(this.handleError));
   }
 
   updateOrder(
     orderId: string | number,
-    order: UpdateOrderRequestDto
+    order: UpdateOrderRequestDto,
   ): Observable<any> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
@@ -432,11 +432,10 @@ export class OrderService {
     }
 
     return this.http
-      .put<{ success: boolean; message: string }>(
-        `${this.apiUrlOrders}/update-order/` + orderId,
-        order,
-        { headers }
-      )
+      .put<{
+        success: boolean;
+        message: string;
+      }>(`${this.apiUrlOrders}/update-order/` + orderId, order, { headers })
       .pipe(catchError(this.handleError));
   }
 
@@ -447,17 +446,17 @@ export class OrderService {
     }
 
     return this.http
-      .get<{ success: boolean; message: string }>(
-        `${this.apiUrlOrders}/order/` + orderId,
-        { headers }
-      )
+      .get<{
+        success: boolean;
+        message: string;
+      }>(`${this.apiUrlOrders}/order/` + orderId, { headers })
       .pipe(catchError(this.handleError));
   }
 
   importOrdersFromParsedJson(parsedOrders: any[]): Observable<ImportResult> {
     console.log(
       'OrderService: Sending parsed JSON to backend for import',
-      parsedOrders
+      parsedOrders,
     );
 
     const headers = this.getAuthHeaders();
@@ -469,7 +468,7 @@ export class OrderService {
       .post<ImportResult>(
         `${this.apiUrlOrders}/import-batch-json`,
         parsedOrders,
-        { headers }
+        { headers },
       )
       .pipe(catchError(this.handleImportError));
   }
@@ -518,7 +517,7 @@ export class OrderService {
 
   assignDriverToOrder(
     orderId: string | number,
-    motorizedId: string
+    motorizedId: string,
   ): Observable<any> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
@@ -531,7 +530,7 @@ export class OrderService {
         {
           motorizedId,
         },
-        { headers }
+        { headers },
       )
       .pipe(catchError(this.handleError));
   }
@@ -539,7 +538,7 @@ export class OrderService {
   rescheduleOrder(
     orderId: number | string,
     newDate: string,
-    reason?: string
+    reason?: string,
   ): Observable<any> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
@@ -553,7 +552,7 @@ export class OrderService {
           newDate,
           reason,
         },
-        { headers }
+        { headers },
       )
       .pipe(catchError(this.handleError));
   }
@@ -561,7 +560,7 @@ export class OrderService {
   updateOrderAmountToCollect(
     orderId: number | string,
     newValue: number,
-    notes?: string
+    notes?: string,
   ): Observable<any> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
@@ -581,7 +580,7 @@ export class OrderService {
         {
           payload,
         },
-        { headers }
+        { headers },
       )
       .pipe(catchError(this.handleError));
   }
@@ -589,7 +588,7 @@ export class OrderService {
   updateOrderShippingCost(
     orderId: number | string,
     newValue: number,
-    notes?: string
+    notes?: string,
   ): Observable<any> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
@@ -609,7 +608,7 @@ export class OrderService {
         {
           payload,
         },
-        { headers }
+        { headers },
       )
       .pipe(catchError(this.handleError));
   }

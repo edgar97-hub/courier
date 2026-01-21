@@ -19,8 +19,8 @@ async function bootstrap() {
         },
     }));
     app.useGlobalInterceptors(new common_1.ClassSerializerInterceptor(app.get(core_1.Reflector)));
-    app.use(bodyParser.json({ limit: '50mb' }));
-    app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+    app.use(bodyParser.json({ limit: '200mb' }));
+    app.use(bodyParser.urlencoded({ limit: '200mb', extended: true }));
     const configservice = app.get(config_1.ConfigService);
     app.enableCors(constants_1.CORS);
     app.setGlobalPrefix('api');

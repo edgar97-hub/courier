@@ -229,14 +229,14 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
         const updatePayload: any = {
           newStatus: result.newStatus,
           reason: result.reason || '',
-          proofOfDeliveryImageUrl: '',
+          proofOfDeliveryImageUrls: [],
           shippingCostPaymentMethod: '',
           collectionPaymentMethod: '',
         };
         if (result.newStatus === OrderStatus.ENTREGADO) {
-          if (result.proofOfDeliveryImageUrl) {
-            updatePayload.proofOfDeliveryImageUrl =
-              result.proofOfDeliveryImageUrl;
+          if (result.proofOfDeliveryImageUrls) {
+            updatePayload.proofOfDeliveryImageUrls =
+              result.proofOfDeliveryImageUrls;
           }
           if (result.shippingCostPaymentMethod) {
             updatePayload.shippingCostPaymentMethod =

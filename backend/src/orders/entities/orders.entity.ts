@@ -18,19 +18,19 @@ import { OrderItemEntity } from './order-item.entity';
 export class OrdersEntity extends BaseEntity {
   @Column({ unique: true })
   @Generated('increment')
-  code?: number;
+  code: number;
 
   @Column()
-  shipment_type?: string;
+  shipment_type: string;
 
   @Column()
-  recipient_name?: string;
+  recipient_name: string;
 
   @Column()
   recipient_phone?: string;
 
   @Column()
-  delivery_district_name?: string;
+  delivery_district_name: string;
 
   @Column()
   delivery_address?: string;
@@ -39,7 +39,7 @@ export class OrdersEntity extends BaseEntity {
   delivery_coordinates?: string;
 
   @Column({ nullable: true, type: 'date' })
-  delivery_date?: string;
+  delivery_date: string;
 
   @Column({ nullable: true })
   package_size_type?: string;
@@ -106,7 +106,14 @@ export class OrdersEntity extends BaseEntity {
   tracking_code: string;
 
   @Column({ nullable: true })
-  product_delivery_photo_url?: string;
+  product_delivery_photo_url: string;
+
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    default: [],
+  })
+  evidence_photos: string[];
 
   @Column({ nullable: true })
   observation_shipping_cost_modification?: string;

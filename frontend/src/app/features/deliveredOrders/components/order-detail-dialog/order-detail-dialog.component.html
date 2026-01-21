@@ -1,36 +1,78 @@
 <div class="dialog-container">
+  <!-- HEADER: Limpio y organizado -->
   <div class="dialog-header dialog-header-draggable">
-    <h2 mat-dialog-title class="dialog-title">Foto del Pedido</h2>
-    <button
-      mat-icon-button
-      class="close-button"
-      (click)="onClose()"
-      aria-label="Cerrar diálogo"
-      matTooltip="Cerrar"
-    >
-      <mat-icon>close</mat-icon>
-    </button>
-  </div>
+    <h2 mat-dialog-title class="dialog-title">Evidencia de Entrega</h2>
+    
+    <div class="header-controls">
+      <!-- Contador tipo "Badge" -->
+      <span class="photo-counter" *ngIf="photos.length > 1">
+          {{ currentIndex() + 1 }} / {{ photos.length }}
+      </span>
 
-  <mat-dialog-content class="evidence-dialog-content">
-    <div class="image-wrapper">
-      <img
-        [src]="data.order.product_delivery_photo_url"
-        alt="Foto del Pedido"
-        class="evidence-image"
-      />
-      <div
-        *ngIf="!data.order.product_delivery_photo_url || imageLoadFailed()"
-        class="placeholder-container"
-      >
-        <mat-icon class="placeholder-icon">broken_image</mat-icon>
-        <p class="placeholder-text">
-          No hay imagen de evidencia disponible o no se pudo cargar.
-        </p>
+      <div class="header-actions">
+          <button mat-icon-button (click)="downloadCurrentPhoto()" matTooltip="Descargar imagen actual" [disabled]="isLoadingImage() || imageLoadFailed()">
+              <mat-icon>download</mat-icon>
+          </button>
+          
+          <button mat-icon-button (click)="onClose()" matTooltip="Cerrar">
+              <mat-icon>close</mat-icon>
+          </button>
       </div>
     </div>
+  </div>
+
+  <!-- CONTENIDO: Fondo oscuro tipo galería -->
+  <mat-dialog-content class="evidence-dialog-content">
+    
+    <div class="carousel-container">
+        
+        <!-- Botón Anterior (Grande y Flotante) -->
+        <button mat-icon-button class="nav-btn prev" 
+                (click)="prevPhoto()" 
+                [disabled]="currentIndex() === 0"
+                *ngIf="photos.length > 1">
+            <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <!-- Área de Imagen -->
+        <div class="image-wrapper">
+            
+            <!-- Spinner -->
+            <div class="spinner-overlay" *ngIf="isLoadingImage()">
+                <mat-progress-spinner mode="indeterminate" diameter="50" color="accent"></mat-progress-spinner>
+            </div>
+
+            <!-- Imagen -->
+            <img
+                *ngIf="displayImageUrl && !imageLoadFailed()"
+                [src]="displayImageUrl"
+                alt="Evidencia de entrega"
+                class="evidence-image"
+                (load)="onImageLoadSuccess()"
+                (error)="onImageLoadError()"
+                [style.display]="isLoadingImage() ? 'none' : 'block'"
+            />
+
+            <!-- Error -->
+            <div *ngIf="imageLoadFailed() || photos.length === 0" class="placeholder-container">
+                <mat-icon class="placeholder-icon">broken_image</mat-icon>
+                <p class="placeholder-text">No se pudo cargar la imagen.</p>
+            </div>
+        </div>
+
+        <!-- Botón Siguiente (Grande y Flotante) -->
+        <button mat-icon-button class="nav-btn next" 
+                (click)="nextPhoto()" 
+                [disabled]="currentIndex() === photos.length - 1"
+                *ngIf="photos.length > 1">
+            <mat-icon>chevron_right</mat-icon>
+        </button>
+
+    </div>
+
   </mat-dialog-content>
 
+  <!-- FOOTER: Botón de cierre principal -->
   <mat-dialog-actions align="end" class="dialog-actions">
     <button mat-flat-button class="btn-corp-primary" (click)="onClose()">
       Cerrar

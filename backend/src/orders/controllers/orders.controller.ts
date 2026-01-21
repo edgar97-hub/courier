@@ -15,7 +15,6 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiHeader, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PublicAccess } from 'src/auth/decorators/public.decorator';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -25,7 +24,6 @@ import { Response } from 'express';
 import { ImportResult } from '../dto/import-result.dto';
 import { OrderPdfGeneratorService } from '../services/order-pdf-generator.service';
 
-@ApiTags('Orders')
 @Controller('orders')
 @UseGuards(AuthGuard, RolesGuard)
 export class OrdersController {
@@ -172,16 +170,6 @@ export class OrdersController {
     );
   }
 
-  @ApiParam({
-    name: 'id',
-  })
-  @ApiHeader({
-    name: 'codrr_token',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'No se encontro resultado',
-  })
   @Post('update-order-status')
   public async updateOrderStatus(@Body() body: any, @Request() req) {
     return await this.ordersService.updateOrderStatus(body, req.idUser);

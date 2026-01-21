@@ -98,7 +98,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
     this.filterCriteriaSubject
       .pipe(
         takeUntil(this.destroy$),
-        tap(() => (this.currentPageIndex = 0))
+        tap(() => (this.currentPageIndex = 0)),
       )
       .subscribe(() => {
         this.fetchOrders();
@@ -140,9 +140,9 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
           .getOrders2(
             currentFilters,
             this.currentSortField,
-            this.currentSortDirection
+            this.currentSortDirection,
           )
-          .pipe(takeUntil(this.destroy$))
+          .pipe(takeUntil(this.destroy$)),
       );
 
       return allOrders || [];
@@ -161,7 +161,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
     this.snackBar.open(
       'Preparando la exportación a Excel, esto puede tardar un momento...',
       '',
-      { duration: 0 }
+      { duration: 0 },
     );
 
     try {
@@ -187,7 +187,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
         this.excelExportService.exportAsExcelFile(
           dataForSheet,
           'Listado_Pedidos_Filtrados',
-          'Pedidos'
+          'Pedidos',
         );
         this.snackBar.dismiss();
         this.snackBar.open('¡Archivo Excel exportado exitosamente!', 'OK', {
@@ -199,7 +199,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
         this.snackBar.open(
           'No hay datos disponibles para exportar con los filtros actuales.',
           'OK',
-          { duration: 3000 }
+          { duration: 3000 },
         );
       }
     } catch (error) {
@@ -219,12 +219,12 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
     this.snackBar.open(
       'Preparando la exportación a Excel, esto puede tardar un momento...',
       '',
-      { duration: 0 }
+      { duration: 0 },
     );
     const standardPackageMeasurement = await firstValueFrom(
       this.orderService
         .getStandardPackageMeasurements()
-        .pipe(takeUntil(this.destroy$))
+        .pipe(takeUntil(this.destroy$)),
     );
     try {
       const allFilteredOrders = await this.getAllFilteredOrdersForExport();
@@ -256,7 +256,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
         this.excelExportService.exportAsExcelFile(
           dataForSheet,
           'Listado_Pedidos_Filtrados',
-          'Pedidos'
+          'Pedidos',
         );
         this.snackBar.dismiss();
         this.snackBar.open('¡Archivo Excel exportado exitosamente!', 'OK', {
@@ -268,7 +268,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
         this.snackBar.open(
           'No hay datos disponibles para exportar con los filtros actuales.',
           'OK',
-          { duration: 3000 }
+          { duration: 3000 },
         );
       }
     } catch (error) {
@@ -305,7 +305,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
         this.currentPageIndex + 1,
         this.currentPageSize,
         this.currentSortField,
-        this.currentSortDirection
+        this.currentSortDirection,
       )
       .pipe(
         takeUntil(this.destroy$),
@@ -313,11 +313,11 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
           this.snackBar.open(
             error.message || 'Failed to load orders.',
             'Close',
-            { duration: 5000, panelClass: ['error-snackbar'] }
+            { duration: 5000, panelClass: ['error-snackbar'] },
           );
           this.isLoading = false;
           return [];
-        })
+        }),
       )
       .subscribe((response: PaginatedOrdersResponse) => {
         this.orders = response.items;
@@ -341,7 +341,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
           console.log('Import completed, reloading orders...');
           this.fetchOrders(); // Recargar la lista de pedidos si la importación fue exitosa
         }
-      }
+      },
     );
 
     dialogRef.afterClosed().subscribe((result) => {
@@ -356,7 +356,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
     orderId: number | string;
     newStatus: OrderStatus;
     reason?: string | null;
-    proofOfDeliveryImageUrl?: string | null;
+    proofOfDeliveryImageUrls?: string[] | null;
     shippingCostPaymentMethod?: string | null;
     collectionPaymentMethod?: string | null;
     updatedAt?: string;
@@ -369,17 +369,17 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
         event.orderId,
         event.newStatus,
         event.reason || '',
-        event.proofOfDeliveryImageUrl,
+        event.proofOfDeliveryImageUrls,
         event.shippingCostPaymentMethod,
         event.collectionPaymentMethod,
-        event.updatedAt
+        event.updatedAt,
       )
       .subscribe({
         next: (updatedOrder) => {
           this.snackBar.open(
             `Estado del pedido ${updatedOrder.code} actualizado a ${event.newStatus}.`,
             'OK',
-            { duration: 3000, panelClass: ['success-snackbar'] }
+            { duration: 3000, panelClass: ['success-snackbar'] },
           );
           this.fetchOrders();
         },
@@ -413,7 +413,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
             {
               duration: 3000,
               panelClass: ['success-snackbar'],
-            }
+            },
           );
           this.fetchOrders();
         },
@@ -424,7 +424,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
             {
               duration: 5000,
               panelClass: ['error-snackbar'],
-            }
+            },
           );
         },
       });
@@ -445,13 +445,13 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
               updatedOrder.code
             } reprogramado para ${this.datePipe.transform(
               updatedOrder.delivery_date,
-              'dd/MM/yyyy'
+              'dd/MM/yyyy',
             )}.`,
             'OK',
             {
               duration: 3500,
               panelClass: ['success-snackbar'],
-            }
+            },
           );
           this.fetchOrders();
         },
@@ -462,7 +462,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
             {
               duration: 5000,
               panelClass: ['error-snackbar'],
-            }
+            },
           );
         },
       });
@@ -480,14 +480,14 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
       .updateOrderAmountToCollect(
         event.orderId,
         event.newAmount,
-        event.observation
+        event.observation,
       )
       .subscribe({
         next: (updatedOrder) => {
           this.snackBar.open(
             `Monto a cobrar del pedido ${updatedOrder.code} actualizado.`,
             'OK',
-            { duration: 3000, panelClass: ['success-snackbar'] }
+            { duration: 3000, panelClass: ['success-snackbar'] },
           );
           this.fetchOrders();
         },
@@ -495,7 +495,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
           this.snackBar.open(
             `Error al actualizar costo: ${err.message || 'Intente de nuevo'}`,
             'Cerrar',
-            { duration: 5000, panelClass: ['error-snackbar'] }
+            { duration: 5000, panelClass: ['error-snackbar'] },
           );
           this.isLoading = false;
         },
@@ -516,14 +516,14 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
       .updateOrderShippingCost(
         event.orderId,
         event.newShippingCost,
-        event.observation
+        event.observation,
       )
       .subscribe({
         next: (updatedOrder) => {
           this.snackBar.open(
             `Costo de envío del pedido ${updatedOrder.code} actualizado.`,
             'OK',
-            { duration: 3000, panelClass: ['success-snackbar'] }
+            { duration: 3000, panelClass: ['success-snackbar'] },
           );
           this.fetchOrders();
         },
@@ -531,7 +531,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
           this.snackBar.open(
             `Error al actualizar costo: ${err.message || 'Intente de nuevo'}`,
             'Cerrar',
-            { duration: 5000, panelClass: ['error-snackbar'] }
+            { duration: 5000, panelClass: ['error-snackbar'] },
           );
           this.isLoading = false;
         },

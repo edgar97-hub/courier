@@ -3,7 +3,7 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 ConfigModule.forRoot({
-  // envFilePath: `.env`,
+  envFilePath: `.env`,
 });
 
 const configService = new ConfigService();

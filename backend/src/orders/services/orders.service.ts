@@ -65,9 +65,6 @@ export class OrdersService {
       });
       if (!currentOrder) throw new Error('Orden no encontrada');
 
-      // console.log(body.payload.updatedAt);
-      // console.log(currentOrder?.updatedAt.toISOString());
-
       if (
         body.payload.updatedAt &&
         body.payload.updatedAt !== currentOrder?.updatedAt.toISOString()
@@ -92,7 +89,7 @@ export class OrdersService {
       if (body.payload.action === 'CAMBIO DE ESTADO') {
         await this.orderRepository.update(body.payload.orderId, {
           status: body.payload.newStatus,
-          product_delivery_photo_url: body.payload.product_delivery_photo_url,
+          evidence_photos: body.payload.product_delivery_photo_urls,
           payment_method_for_collection:
             body.payload.payment_method_for_collection,
           payment_method_for_shipping_cost:

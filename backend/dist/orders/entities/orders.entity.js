@@ -141,6 +141,14 @@ __decorate([
     __metadata("design:type", String)
 ], OrdersEntity.prototype, "product_delivery_photo_url", void 0);
 __decorate([
+    (0, typeorm_1.Column)({
+        type: 'jsonb',
+        nullable: true,
+        default: [],
+    }),
+    __metadata("design:type", Array)
+], OrdersEntity.prototype, "evidence_photos", void 0);
+__decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], OrdersEntity.prototype, "observation_shipping_cost_modification", void 0);

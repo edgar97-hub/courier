@@ -40,7 +40,6 @@ import { PromotionalSetItem } from '../entities/settings.entity';
  * Controller for managing application settings.
  * Provides endpoints for CRUD operations on settings, file uploads, and retrieving promotional sets.
  */
-@ApiTags('Settings')
 @Controller('settings')
 @UseGuards(AuthGuard, RolesGuard)
 export class SettingsController {
@@ -50,7 +49,6 @@ export class SettingsController {
    * Create new settings entry.
    * Restricted to admin and recepcionista roles.
    */
-  @ApiOperation({ summary: 'Create settings' })
   @AdminAccess()
   @Roles(ROLES.RECEPCIONISTA)
   @Post('register')
@@ -61,7 +59,6 @@ export class SettingsController {
   /**
    * Retrieve all settings entries.
    */
-  @ApiOperation({ summary: 'Get all settings' })
   @Get('all')
   public async findAllSettings() {
     return await this.settingsService.findAllSettings();
@@ -70,7 +67,6 @@ export class SettingsController {
   /**
    * Get active promotional sets.
    */
-  @ApiOperation({ summary: 'Get promotional sets' })
   @Get('promotional-sets')
   async getPromotionalSets(): Promise<PromotionalSetItem[]> {
     return this.settingsService.getPromotionalSets();
@@ -79,10 +75,6 @@ export class SettingsController {
   /**
    * Get settings by ID.
    */
-  @ApiOperation({ summary: 'Get settings by ID' })
-  @ApiParam({ name: 'id', description: 'Settings UUID' })
-  @ApiHeader({ name: 'codrr_token' })
-  @ApiResponse({ status: 400, description: 'No se encontro resultado' })
   @Get(':id')
   public async findSettingsById(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.settingsService.findSettingsById(id);
@@ -92,8 +84,6 @@ export class SettingsController {
    * Update settings by ID.
    * Restricted to admin and recepcionista roles.
    */
-  @ApiOperation({ summary: 'Update settings' })
-  @ApiParam({ name: 'id', description: 'Settings UUID' })
   @AdminAccess()
   @Roles(ROLES.RECEPCIONISTA)
   @Put('edit/:id')
@@ -108,8 +98,6 @@ export class SettingsController {
    * Delete settings by ID.
    * Restricted to admin and recepcionista roles.
    */
-  @ApiOperation({ summary: 'Delete settings' })
-  @ApiParam({ name: 'id', description: 'Settings UUID' })
   @AdminAccess()
   @Roles(ROLES.RECEPCIONISTA)
   @Delete('delete/:id')
@@ -120,8 +108,6 @@ export class SettingsController {
   /**
    * Upload company logo.
    */
-  @ApiOperation({ summary: 'Upload logo' })
-  @ApiConsumes('multipart/form-data')
   @Post('upload-logo')
   @UseInterceptors(FileInterceptor('logoFile'))
   public async uploadLogo(
@@ -134,8 +120,6 @@ export class SettingsController {
   /**
    * Upload terms and conditions PDF.
    */
-  @ApiOperation({ summary: 'Upload terms PDF' })
-  @ApiConsumes('multipart/form-data')
   @Post('upload-terms-pdf')
   @UseInterceptors(FileInterceptor('termsPdfFile'))
   public async uploadTermsPdf(
@@ -148,8 +132,6 @@ export class SettingsController {
   /**
    * Upload generic file.
    */
-  @ApiOperation({ summary: 'Upload generic file' })
-  @ApiConsumes('multipart/form-data')
   @Post('upload-file')
   @UseInterceptors(FileInterceptor('file'))
   public async uploadFile(
@@ -162,7 +144,6 @@ export class SettingsController {
   /**
    * Get company background image (public).
    */
-  @ApiOperation({ summary: 'Get background image' })
   @PublicAccess()
   @Get('company/background-image')
   public async getBackgroundImage(@Res() res: Response): Promise<void> {
@@ -172,7 +153,6 @@ export class SettingsController {
   /**
    * Get company logo image (public).
    */
-  @ApiOperation({ summary: 'Get logo image' })
   @PublicAccess()
   @Get('company/logo-image')
   public async getLogoImage(@Res() res: Response): Promise<void> {
@@ -182,7 +162,6 @@ export class SettingsController {
   /**
    * Get global notice image (public).
    */
-  @ApiOperation({ summary: 'Get global notice image' })
   @PublicAccess()
   @Get('company/global-notice-image')
   public async getGlobalNoticeImage(@Res() res: Response): Promise<void> {

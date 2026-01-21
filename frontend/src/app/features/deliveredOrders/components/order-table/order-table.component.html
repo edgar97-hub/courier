@@ -122,23 +122,25 @@
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #orderActionMenu="matMenu" xPosition="before">
+          <!-- cambiar de product_delivery_photo_url a evidence_photos -->
           <button
             mat-menu-item
             (click)="onViewImage(order)"
-            *ngIf="order.product_delivery_photo_url"
+            *ngIf="order.evidence_photos" 
+            
           >
             <mat-icon>photo</mat-icon>
             <span>Visualizar evidencia</span>
           </button>
 
-          <button
+          <!-- <button
             mat-menu-item
             (click)="onDownload(order)"
             *ngIf="order.product_delivery_photo_url"
           >
             <mat-icon>download</mat-icon>
             <span>Descargar evidencia</span>
-          </button>
+          </button> -->
         </mat-menu>
       </td>
     </ng-container>
@@ -155,7 +157,6 @@
       class="data-row"
       [ngClass]="{ 'highlight-row': false }"
     ></tr>
-    <!-- (click) para seleccionar fila opcional -->
 
     <tr class="mat-row" *matNoDataRow>
       <td [attr.colspan]="displayedColumns.length" class="no-data-cell">

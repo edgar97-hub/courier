@@ -35,7 +35,6 @@ interface Route {
 })
 export class RouteService {
   private http = inject(HttpClient);
-  // private apiUrl = `${environment.apiUrl}/planning-events`; // Changed to planning-events
   private apiUrl = `${environment.apiUrl}/routes`;
   private authService = inject(AuthService);
 
@@ -45,8 +44,7 @@ export class RouteService {
     if (token) {
       return new HttpHeaders({
         'Content-Type': 'application/json',
-        // 'Authorization': `Bearer ${token}` // ESTÁNDAR
-        codrr_token: token, // Como lo tenías
+        codrr_token: token,
       });
     }
     return new HttpHeaders({ 'Content-Type': 'application/json' });
@@ -55,7 +53,7 @@ export class RouteService {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
       return throwError(
-        () => new Error('Not authenticated to fetch planning event details.')
+        () => new Error('Not authenticated to fetch planning event details.'),
       );
     }
     return this.http.get<Route[]>(`${this.apiUrl}/my-routes?date=${date}`, {
@@ -67,7 +65,7 @@ export class RouteService {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
       return throwError(
-        () => new Error('Not authenticated to fetch planning event details.')
+        () => new Error('Not authenticated to fetch planning event details.'),
       );
     }
     return this.http.get<Route[]>(`${this.apiUrl}/${id}/live-locations`, {
@@ -77,18 +75,18 @@ export class RouteService {
 
   updateRouteLocation(
     routeId: number,
-    payload: UpdateLocationPayload
+    payload: UpdateLocationPayload,
   ): Observable<void> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
       return throwError(
-        () => new Error('Not authenticated to update route location.')
+        () => new Error('Not authenticated to update route location.'),
       );
     }
     return this.http.patch<void>(
       `${this.apiUrl}/routes/${routeId}/location`,
       payload,
-      { headers }
+      { headers },
     );
   }
 }

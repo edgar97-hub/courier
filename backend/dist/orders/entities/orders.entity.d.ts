@@ -6,14 +6,14 @@ import { CashManagementEntity } from 'src/cashManagement/entities/cashManagement
 import { Stop } from 'src/planningEvents/entities/stop.entity';
 import { OrderItemEntity } from './order-item.entity';
 export declare class OrdersEntity extends BaseEntity {
-    code?: number;
-    shipment_type?: string;
-    recipient_name?: string;
+    code: number;
+    shipment_type: string;
+    recipient_name: string;
     recipient_phone?: string;
-    delivery_district_name?: string;
+    delivery_district_name: string;
     delivery_address?: string;
     delivery_coordinates?: string;
-    delivery_date?: string;
+    delivery_date: string;
     package_size_type?: string;
     package_width_cm?: number;
     package_length_cm?: number;
@@ -32,7 +32,8 @@ export declare class OrdersEntity extends BaseEntity {
     company: UsersEntity;
     logs: OrderLogEntity[];
     tracking_code: string;
-    product_delivery_photo_url?: string;
+    product_delivery_photo_url: string;
+    evidence_photos: string[];
     observation_shipping_cost_modification?: string;
     cashManagementIncludes: CashManagementEntity[];
     stops: Stop[];

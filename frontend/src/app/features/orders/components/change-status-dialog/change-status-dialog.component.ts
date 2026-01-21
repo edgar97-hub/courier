@@ -28,11 +28,11 @@ import { TextFieldModule } from '@angular/cdk/text-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Order, Order_, OrderStatus } from '../../models/order.model';
 import { ImageUploadService } from '../../../shared/file-upload/image-upload.service';
-import { Observable, of, Subject } from 'rxjs';
-import { catchError, finalize, takeUntil, tap } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 export interface ChangeStatusDialogData {
   order: Order_;
@@ -42,9 +42,16 @@ export interface ChangeStatusDialogData {
 export interface ChangeStatusDialogResult {
   newStatus: OrderStatus;
   reason?: string;
-  proofOfDeliveryImageUrl?: string | null;
-  shippingCostPaymentMethod?: string | null; // Método de pago para el costo de envío (si se cobra en entrega)
-  collectionPaymentMethod?: string | null; // Método de pago para el monto a cobrar en entrega
+  proofOfDeliveryImageUrls?: string[] | null; // Array de URLs
+  shippingCostPaymentMethod?: string | null;
+  collectionPaymentMethod?: string | null;
+}
+
+// Interfaz interna para manejar la galería visualmente antes de subir
+interface EvidencePhoto {
+  file?: File; // El archivo físico (si es nuevo)
+  previewUrl: string; // URL para mostrar (Base64 o URL remota)
+  uploadedUrl?: string; // La URL final si ya existía o se subió
 }
 
 @Component({
@@ -52,8 +59,8 @@ export interface ChangeStatusDialogResult {
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule, // Para ngModel en el select de estado y reason
-    ReactiveFormsModule, // Para el formulario de los campos adicionales
+    FormsModule,
+    ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
     MatSelectModule,
@@ -64,6 +71,8 @@ export interface ChangeStatusDialogResult {
     MatIconModule,
     MatProgressSpinnerModule,
     MatDividerModule,
+    MatTooltipModule,
+    MatSnackBarModule,
   ],
   templateUrl: './change-status-dialog.component.html',
   styleUrls: ['./change-status-dialog.component.scss'],
@@ -78,14 +87,14 @@ export class ChangeStatusDialogComponent implements OnInit {
   @ViewChild('videoPlayer') videoPlayer!: ElementRef<HTMLVideoElement>;
   @ViewChild('canvasElement') canvasElement!: ElementRef<HTMLCanvasElement>;
 
-  imagePreviewUrl: string | ArrayBuffer | null = null; // Se usará para la foto tomada o subida
-  selectedImageFile: File | null = null; // Para el caso de subir archivo (fallback o alternativa)
+  // --- CONFIGURACIÓN DE GALERÍA ---
+  evidencePhotos: EvidencePhoto[] = [];
+  readonly MAX_PHOTOS = 5;
   isUploadingImage: boolean = false;
-  uploadedImageUrl: string | null = null;
+  // -------------------------------
 
   showCamera = false;
   stream: MediaStream | null = null;
-  photoTaken = false;
   cameraError: string | null = null;
 
   formSubmitted: boolean = false;
@@ -104,91 +113,98 @@ export class ChangeStatusDialogComponent implements OnInit {
   private imageUploadService = inject(ImageUploadService);
   private snackBar = inject(MatSnackBar);
   private cdr = inject(ChangeDetectorRef);
-  private destroy$ = new Subject<void>();
 
   constructor(
     public dialogRef: MatDialogRef<
       ChangeStatusDialogComponent,
       ChangeStatusDialogResult
     >,
-    @Inject(MAT_DIALOG_DATA) public data: ChangeStatusDialogData
+    @Inject(MAT_DIALOG_DATA) public data: ChangeStatusDialogData,
   ) {
     this.deliveryDetailsForm = this.fb.group({
-      shippingCostPaymentMethod: [null], // Opcional, solo si se cobra en entrega
-      collectionPaymentMethod: [null], // Opcional, solo si hay monto a cobrar
-      // proofOfDeliveryImage: [null] // El input de archivo se maneja por separado
+      shippingCostPaymentMethod: [null],
+      collectionPaymentMethod: [null],
     });
   }
 
   ngOnInit(): void {}
 
+  // ============================================================
+  // === LÓGICA DE CÁMARA (CORREGIDA) ===
+  // ============================================================
+
   async startCamera(): Promise<void> {
+    if (this.evidencePhotos.length >= this.MAX_PHOTOS) {
+      this.snackBar.open(
+        `Límite de ${this.MAX_PHOTOS} fotos alcanzado.`,
+        'Cerrar',
+        { duration: 3000 },
+      );
+      return;
+    }
+
     this.cameraError = null;
-    this.removeImage(); // Limpiar cualquier imagen previa
     try {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        // 1. Activamos la bandera. Al usar [style.display] en el HTML, el elemento ya existe, solo se hace visible.
+        this.showCamera = true;
+
         this.stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' }, // Preferir cámara trasera
+          video: { facingMode: 'environment' }, // Intenta usar cámara trasera
           audio: false,
         });
 
+        // 2. Vinculamos el stream al elemento de video
         if (this.videoPlayer && this.videoPlayer.nativeElement) {
           this.videoPlayer.nativeElement.srcObject = this.stream;
           this.videoPlayer.nativeElement
             .play()
-            .catch((err) => console.error('Error playing video:', alert(err)));
-          this.showCamera = true;
-          this.photoTaken = false;
+            .catch((err) => console.error('Error playing video:', err));
         }
-        this.showCamera = true;
-        this.photoTaken = false;
       } else {
         this.cameraError = 'Tu navegador no soporta el acceso a la cámara.';
         this.snackBar.open(this.cameraError, 'Cerrar', { duration: 5000 });
       }
-      // alert('this.showCamera' + this.showCamera);
     } catch (err: any) {
-      console.error('Error al acceder a la cámara:', err);
-      if (
-        err.name === 'NotAllowedError' ||
-        err.name === 'PermissionDeniedError'
-      ) {
-        this.cameraError =
-          'Permiso de cámara denegado. Por favor, habilita el acceso en tu navegador.';
-      } else if (
-        err.name === 'NotFoundError' ||
-        err.name === 'DevicesNotFoundError'
-      ) {
-        this.cameraError = 'No se encontró una cámara compatible.';
-      } else {
-        this.cameraError =
-          'Error al iniciar la cámara. Intenta de nuevo o sube un archivo.';
-      }
-      this.snackBar.open(this.cameraError, 'Cerrar', { duration: 7000 });
+      console.error('Error cámara:', err);
+      this.cameraError = 'Error al iniciar cámara. Verifica permisos.';
+      this.snackBar.open(this.cameraError, 'Cerrar', { duration: 5000 });
       this.showCamera = false;
     }
-    this.cdr.detectChanges(); // Forzar detección de cambios después de actualizar showCamera
+    this.cdr.detectChanges();
   }
 
   takePhoto(): void {
     if (!this.stream || !this.videoPlayer || !this.canvasElement) return;
+
+    if (this.evidencePhotos.length >= this.MAX_PHOTOS) {
+      this.snackBar.open(`Límite alcanzado.`, 'Cerrar', { duration: 2000 });
+      this.stopCamera();
+      return;
+    }
 
     const video = this.videoPlayer.nativeElement;
     const canvas = this.canvasElement.nativeElement;
     const context = canvas.getContext('2d');
 
     if (context) {
-      // Ajustar tamaño del canvas a las dimensiones del video
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // Convertir el canvas a Data URL (imagen base64) para la vista previa
-      this.imagePreviewUrl = canvas.toDataURL('image/jpeg'); // O 'image/png'
-      this.photoTaken = true;
-      this.selectedImageFile = null; // Resetear archivo seleccionado si se toma foto
-      this.uploadedImageUrl = null;
-      this.stopCamera(); // Detener la cámara después de tomar la foto
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.8); // Calidad 0.8
+
+      // Convertir DataURL a File Blob para tratarlo igual que un upload normal
+      fetch(dataUrl)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const filename = `camara_${Date.now()}.jpg`;
+          const file = new File([blob], filename, { type: 'image/jpeg' });
+          this.addPhotoToGallery(file, dataUrl);
+        });
+
+      // Opcional: Detener cámara tras tomar foto si prefieres flujo de 1 en 1
+      // this.stopCamera();
     }
   }
 
@@ -201,46 +217,86 @@ export class ChangeStatusDialogComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  // ============================================================
+  // === LÓGICA DE ARCHIVOS (Galería y Multi-Selección) ===
+  // ============================================================
+
+  triggerFileUpload(): void {
+    if (this.evidencePhotos.length >= this.MAX_PHOTOS) {
+      this.snackBar.open(
+        `Máximo ${this.MAX_PHOTOS} fotos permitidas.`,
+        'Cerrar',
+        { duration: 3000 },
+      );
+      return;
+    }
+    this.stopCamera();
+    const fileUpload = document.getElementById(
+      'proofOfDeliveryImageUpload',
+    ) as HTMLInputElement;
+    fileUpload.value = ''; // Reset
+    fileUpload?.click();
+  }
+
   onFileSelected(event: Event): void {
-    this.stopCamera(); // Detener cámara si estaba activa
-    this.photoTaken = false;
     const element = event.currentTarget as HTMLInputElement;
     let fileList: FileList | null = element.files;
-    if (fileList && fileList[0]) {
-      this.selectedImageFile = fileList[0];
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.imagePreviewUrl = e.target.result;
-        this.uploadedImageUrl = null;
-        this.cdr.detectChanges(); // Forzar detección si la imagen no se actualiza en la UI
-      };
-      reader.readAsDataURL(this.selectedImageFile);
-    } else {
-      this.selectedImageFile = null;
-      this.imagePreviewUrl = null;
+
+    if (fileList && fileList.length > 0) {
+      // 1. Calcular espacios disponibles
+      const slotsRemaining = this.MAX_PHOTOS - this.evidencePhotos.length;
+
+      if (slotsRemaining <= 0) {
+        this.snackBar.open(`Límite de fotos alcanzado.`, 'Cerrar', {
+          duration: 3000,
+        });
+        return;
+      }
+
+      // 2. Cortar la lista si seleccionó demasiados (SOLUCIÓN AL BUG DE EXCESO)
+      const filesToProcess = Array.from(fileList).slice(0, slotsRemaining);
+
+      if (fileList.length > slotsRemaining) {
+        this.snackBar.open(
+          `Solo se agregaron ${slotsRemaining} fotos para respetar el límite.`,
+          'OK',
+          { duration: 4000 },
+        );
+      }
+
+      // 3. Procesar y agregar
+      filesToProcess.forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+          if (this.evidencePhotos.length < this.MAX_PHOTOS) {
+            this.addPhotoToGallery(file, e.target.result);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
     }
   }
 
-  triggerFileUpload(): void {
-    this.stopCamera();
-    const fileUpload = document.getElementById(
-      'proofOfDeliveryImageUpload'
-    ) as HTMLInputElement;
-    fileUpload?.click();
+  // ============================================================
+  // === GESTIÓN DE GALERÍA ===
+  // ============================================================
+
+  addPhotoToGallery(file: File, previewUrl: string) {
+    this.evidencePhotos.push({
+      file: file,
+      previewUrl: previewUrl,
+    });
+    this.cdr.detectChanges();
   }
-  removeImage(): void {
-    this.stopCamera();
-    this.selectedImageFile = null;
-    this.imagePreviewUrl = null;
-    this.uploadedImageUrl = null;
-    this.photoTaken = false;
-    const fileInput = document.getElementById(
-      'proofOfDeliveryImageUpload'
-    ) as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = '';
-    }
+
+  removePhoto(index: number): void {
+    this.evidencePhotos.splice(index, 1);
+    this.cdr.detectChanges();
   }
+
+  // ============================================================
+  // === VALIDACIONES Y CONFIRMACIÓN ===
+  // ============================================================
 
   onStatusChange(event: MatSelectChange | { value: OrderStatus }): void {
     this.selectedStatus = event.value;
@@ -260,7 +316,6 @@ export class ChangeStatusDialogComponent implements OnInit {
     const currentStatus = status || this.selectedStatus;
     if (!currentStatus) return false;
     const statusesRequiringReason: OrderStatus[] = [
-      // OrderStatus.CANCELADO,
       OrderStatus.REPROGRAMADO,
       OrderStatus.RECHAZADO,
       OrderStatus.ANULADO,
@@ -271,37 +326,11 @@ export class ChangeStatusDialogComponent implements OnInit {
   checkIfDeliveryDetailsNeeded(status: OrderStatus | undefined): void {
     if (status === OrderStatus.ENTREGADO) {
       this.showDeliveryDetails = true;
-      // Habilitar y poner validadores si es necesario (ej. si el monto a cobrar es > 0)
-      // if (this.data.order.shipping_cost && this.data.order.shipping_cost > 0) {
-      //   this.deliveryDetailsForm
-      //     .get('shippingCostPaymentMethod')
-      //     ?.setValidators([Validators.required]);
-      // } else {
-      //   this.deliveryDetailsForm
-      //     .get('shippingCostPaymentMethod')
-      //     ?.clearValidators();
-      // }
-
       this.deliveryDetailsForm
         .get('shippingCostPaymentMethod')
         ?.setValidators([Validators.required]);
-      // if (
-      //   this.data.order.amount_to_collect_at_delivery &&
-      //   this.data.order.amount_to_collect_at_delivery > 0
-      // ) {
-      //   this.deliveryDetailsForm
-      //     .get('collectionPaymentMethod')
-      //     ?.setValidators([Validators.required]);
-      // } else {
-      //   this.deliveryDetailsForm
-      //     .get('collectionPaymentMethod')
-      //     ?.clearValidators();
-      // }
       this.deliveryDetailsForm
         .get('shippingCostPaymentMethod')
-        ?.updateValueAndValidity();
-      this.deliveryDetailsForm
-        .get('collectionPaymentMethod')
         ?.updateValueAndValidity();
     } else {
       this.showDeliveryDetails = false;
@@ -311,35 +340,25 @@ export class ChangeStatusDialogComponent implements OnInit {
       this.deliveryDetailsForm
         .get('shippingCostPaymentMethod')
         ?.updateValueAndValidity();
-      this.deliveryDetailsForm
-        .get('collectionPaymentMethod')
-        ?.clearValidators();
-      this.deliveryDetailsForm
-        .get('collectionPaymentMethod')
-        ?.updateValueAndValidity();
       this.deliveryDetailsForm.reset();
-      this.imagePreviewUrl = null;
-      this.selectedImageFile = null;
-      this.uploadedImageUrl = null;
+      this.evidencePhotos = []; // Limpiar fotos si cambia de estado
     }
   }
 
   isConfirmDisabled(): boolean {
-    if (!this.selectedStatus) return true; // Siempre se necesita un estado
+    if (!this.selectedStatus) return true;
     if (
       this.isReasonMandatory(this.selectedStatus) &&
       (!this.reason || this.reason.trim() === '')
     ) {
-      return true; // Motivo obligatorio no provisto
+      return true;
     }
     if (this.selectedStatus === OrderStatus.ENTREGADO) {
-      // Si es ENTREGADO, el formulario de detalles de entrega debe ser válido
-      // y se requiere una imagen si la política del negocio lo exige.
-      // Para este ejemplo, haremos que la imagen sea opcional, pero los selects de pago sí deben ser válidos si los montos son > 0
       if (!this.deliveryDetailsForm.valid) return true;
-      if (!this.imagePreviewUrl) return true; // Si la imagen es obligatoria
+      // VALIDACIÓN: Al menos 1 foto
+      if (this.evidencePhotos.length === 0) return true;
     }
-    return false; // Si pasa todas las validaciones, no está deshabilitado
+    return false;
   }
 
   async onConfirm(): Promise<void> {
@@ -350,60 +369,44 @@ export class ChangeStatusDialogComponent implements OnInit {
       return;
     }
 
-    let proofImageUrlToSubmit: string | null = this.uploadedImageUrl;
+    const uploadedUrls: string[] = [];
 
-    // Si se tomó una foto y aún no se ha subido, o si se seleccionó un archivo y no se ha subido
+    // Lógica de subida masiva
     if (
       this.selectedStatus === OrderStatus.ENTREGADO &&
-      (this.photoTaken || this.selectedImageFile) &&
-      !this.uploadedImageUrl
+      this.evidencePhotos.length > 0
     ) {
       this.isUploadingImage = true;
-      try {
-        let imageBlob: Blob | null = null;
-        if (
-          this.photoTaken &&
-          this.imagePreviewUrl &&
-          typeof this.imagePreviewUrl === 'string'
-        ) {
-          // Convertir Data URL de la foto tomada a Blob
-          const res = await fetch(this.imagePreviewUrl);
-          imageBlob = await res.blob();
-        } else if (this.selectedImageFile) {
-          imageBlob = this.selectedImageFile;
-        }
 
-        if (imageBlob) {
-          const imageFileToUpload =
-            imageBlob instanceof File
-              ? imageBlob
-              : new File([imageBlob], 'proof_of_delivery.jpg', {
-                  type: imageBlob.type,
-                });
-          const uploadResponse = await this.imageUploadService
-            .uploadFile(imageFileToUpload)
-            .toPromise();
-          proofImageUrlToSubmit = uploadResponse?.file_url || null;
-          console.log('uploadResponse', uploadResponse);
-          this.uploadedImageUrl = proofImageUrlToSubmit;
-        } else if (!this.uploadedImageUrl) {
-          // Si no hay imagen y no se pudo crear blob, y no había una subida previa
-          // Decide si la imagen es estrictamente obligatoria para ENTREGADO
-          // this.snackBar.open('Se requiere una prueba de entrega.', 'Cerrar', { duration: 3000 });
-          // this.isUploadingImage = false;
-          // return;
-          console.warn(
-            'No image data to upload, but proceeding as ENTREGADO without image proof.'
-          );
-        }
-      } catch (error) {
-        console.error('Error uploading/processing image:', error);
-        this.snackBar.open('Error al procesar la imagen de prueba.', 'Cerrar', {
-          duration: 3000,
-          panelClass: ['error-snackbar'],
+      try {
+        // Subimos todas las fotos en paralelo
+        const uploadPromises = this.evidencePhotos.map(async (photo) => {
+          if (photo.uploadedUrl) {
+            return photo.uploadedUrl; // Ya estaba en la nube
+          } else if (photo.file) {
+            // Subir archivo nuevo
+            const response = await firstValueFrom(
+              this.imageUploadService.uploadFile(photo.file),
+            );
+            return response.file_url;
+          }
+          return null;
         });
+
+        const results = await Promise.all(uploadPromises);
+
+        results.forEach((url) => {
+          if (url) uploadedUrls.push(url);
+        });
+      } catch (error) {
+        console.error('Error uploading images:', error);
+        this.snackBar.open(
+          'Error al subir las imágenes. Verifique su conexión.',
+          'Cerrar',
+          { duration: 3000 },
+        );
         this.isUploadingImage = false;
-        return; // No continuar si la subida falla
+        return;
       } finally {
         this.isUploadingImage = false;
       }
@@ -413,7 +416,8 @@ export class ChangeStatusDialogComponent implements OnInit {
       newStatus: this.selectedStatus,
       reason:
         this.showReasonField && this.reason ? this.reason.trim() : undefined,
-      proofOfDeliveryImageUrl: proofImageUrlToSubmit,
+      // Enviamos el array de URLs
+      proofOfDeliveryImageUrls: uploadedUrls.length > 0 ? uploadedUrls : null,
       shippingCostPaymentMethod: this.showDeliveryDetails
         ? this.deliveryDetailsForm.value.shippingCostPaymentMethod
         : null,
@@ -427,7 +431,6 @@ export class ChangeStatusDialogComponent implements OnInit {
     this.dialogRef.close();
   }
 
-  // Para que el template pueda acceder a los controles del formGroup anidado
   get scpmCtrl() {
     return this.deliveryDetailsForm.get('shippingCostPaymentMethod');
   }
@@ -435,16 +438,8 @@ export class ChangeStatusDialogComponent implements OnInit {
     return this.deliveryDetailsForm.get('collectionPaymentMethod');
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
   getStatusClass(status: string | undefined | null): string {
-    if (!status) {
-      return 'status-desconocido';
-    }
-    const formattedStatus = status.toLowerCase().replace(/[\s_]+/g, '-');
-    return `status-${formattedStatus}`;
+    if (!status) return 'status-desconocido';
+    return `status-${status.toLowerCase().replace(/[\s_]+/g, '-')}`;
   }
 }

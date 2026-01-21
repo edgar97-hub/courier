@@ -8,6 +8,7 @@
 
   <form [formGroup]="deliveryDetailsForm" (ngSubmit)="onConfirm()">
     <mat-dialog-content class="dialog-content">
+      <!-- ESTADO ACTUAL -->
       <div class="current-status-container">
         <span>Estado Actual:</span>
         <span
@@ -18,6 +19,7 @@
         </span>
       </div>
 
+      <!-- SELECTOR DE ESTADO -->
       <mat-form-field
         appearance="outline"
         class="full-width select-status-field"
@@ -27,7 +29,6 @@
           [(ngModel)]="selectedStatus"
           (selectionChange)="onStatusChange($event)"
           [ngModelOptions]="{ standalone: true }"
-          name="newStatus"
           required
         >
           <mat-option
@@ -37,11 +38,9 @@
             {{ status | titlecase }}
           </mat-option>
         </mat-select>
-        <mat-error *ngIf="formSubmitted && !selectedStatus"
-          >Debe seleccionar un nuevo estado.</mat-error
-        >
       </mat-form-field>
 
+      <!-- MOTIVO (CONDICIONAL) -->
       <mat-form-field
         appearance="outline"
         class="full-width reason-field"
@@ -52,205 +51,183 @@
           matInput
           [(ngModel)]="reason"
           [ngModelOptions]="{ standalone: true }"
-          name="reason"
           rows="3"
-          cdkTextareaAutosize
-          cdkAutosizeMinRows="2"
-          cdkAutosizeMaxRows="3"
-          placeholder="Describa el motivo del cambio de estado..."
+          placeholder="Describa el motivo..."
         ></textarea>
-        <mat-hint align="start" *ngIf="isReasonMandatory(selectedStatus)">
-          Es importante detallar el motivo de este estado.
-        </mat-hint>
-        <mat-error
-          *ngIf="
-            formSubmitted &&
-            isReasonMandatory(selectedStatus) &&
-            (!reason || reason.trim() === '')
-          "
-        >
-          El motivo es obligatorio.
-        </mat-error>
       </mat-form-field>
 
-      <!-- Sección de Detalles de Entrega (Visible solo para estado ENTREGADO) -->
-      @if (showDeliveryDetails) {
-      <div class="delivery-details-section">
-        <mat-divider></mat-divider>
-        <h4>Prueba de Entrega y Pagos</h4>
+      @if (this.showDeliveryDetails) {
+        <div class="delivery-details-section">
+          <mat-divider></mat-divider>
+          <h4>Prueba de Entrega y Pagos</h4>
 
-        <div class="image-upload-container">
-          <label class="image-upload-label">Foto de Prueba de Entrega:</label>
-          <!-- 
-          
-            class="image-actions"
+          <!-- === SECCIÓN DE EVIDENCIAS === -->
+          <div class="image-upload-container">
+            <!-- Cabecera con contador -->
+            <div class="upload-header">
+              <label class="image-upload-label">Fotos de Evidencia</label>
+              <span class="counter-badge"
+                >{{ evidencePhotos.length }} / {{ MAX_PHOTOS }}</span
+              >
+            </div>
 
-
--->
-          <div
-            style="
-              display: flex !important;
-              flex-direction: row !important;
-              justify-content: center !important;
-              align-items: center !important;
-              flex-wrap: wrap;
-              gap: 15px;
-              width: 100% !important;
-              border: 0px solid black;
-              margin-bottom: 10px;
-            "
-          >
-            <button
-              mat-flat-button
-              type="button"
-              class="camera-button btn-corp-primary"
-              (click)="startCamera()"
-              [disabled]="showCamera"
-            >
-              <mat-icon>photo_camera</mat-icon> Acceder a Cámara
-            </button>
-            <!-- <span class="or-divider">o</span> -->
-            <button
-              mat-flat-button
-              type="button"
-              (click)="triggerFileUpload()"
-              class="upload-button btn-corp-primary"
-            >
-              <mat-icon>attach_file</mat-icon> Subir Archivo
-            </button>
-          </div>
-          <input
-            type="file"
-            hidden
-            #fileUpload
-            id="proofOfDeliveryImageUpload"
-            (change)="onFileSelected($event)"
-            accept="image/*"
-          />
-
-          <div class="camera-view">
-            <video
-              [style.display]="showCamera ? 'block' : 'none'"
-              #videoPlayer
-              autoplay
-              playsinline
-              class="video-preview"
-            ></video>
-
+            <!-- Zona de Botones (Se oculta si llega al límite) -->
             <div
-              style="
-                display: flex;
-                gap: 3;
-                justify-content: center;
-                align-items: center;
-              "
+              class="upload-actions-zone"
+              *ngIf="evidencePhotos.length < MAX_PHOTOS && !showCamera"
             >
               <button
-                mat-fab
-                extended
-                class="take-photo-button btn-corp-primary"
-                (click)="takePhoto()"
-                [disabled]="!stream"
+                mat-flat-button
+                type="button"
+                class="btn-corp-primary"
+                (click)="startCamera()"
               >
-                <mat-icon>camera</mat-icon> Tomar Foto
+                <mat-icon>photo_camera</mat-icon> Usar Cámara
               </button>
               <button
-                mat-icon-button
-                (click)="stopCamera()"
-                class="stop-camera-button"
-                matTooltip="Cerrar cámara"
+                mat-stroked-button
+                type="button"
+                class="btn-corp-secondary"
+                (click)="triggerFileUpload()"
               >
-                <mat-icon>videocam_off</mat-icon>
+                <mat-icon>image</mat-icon> Subir de Galería
               </button>
             </div>
-          </div>
-          <!-- Canvas oculto para procesar la foto -->
-          <canvas #canvasElement style="display: none"></canvas>
 
-          @if (imagePreviewUrl) {
-          <div class="image-preview-wrapper">
-            <p class="preview-label">Vista Previa:</p>
-            <img
-              [src]="imagePreviewUrl"
-              alt="Vista previa de la imagen"
-              class="image-preview"
+            <!-- Input oculto -->
+            <input
+              type="file"
+              hidden
+              #fileUpload
+              id="proofOfDeliveryImageUpload"
+              (change)="onFileSelected($event)"
+              accept="image/*"
+              multiple
             />
-            <button
-              mat-icon-button
-              type="button"
-              (click)="removeImage()"
-              class="remove-image-button"
-              matTooltip="Quitar imagen / Tomar otra"
-            >
-              <mat-icon>delete_forever</mat-icon>
-            </button>
-          </div>
-          } @if (isUploadingImage) {
-          <div class="upload-spinner">
-            <mat-progress-spinner
-              mode="indeterminate"
-              diameter="24"
-            ></mat-progress-spinner>
-            <span>Subiendo imagen...</span>
-          </div>
-          }
-        </div>
 
-        <!-- Campos de Método de Pago (como los tenías) -->
-        <!-- @if (data.order.shipping_cost && data.order.shipping_cost > 0) { -->
-        <mat-form-field
-          appearance="outline"
-          class="full-width payment-method-field"
-        >
-          <mat-label
-            >Método Pago Costo Envío (S/
-            {{ data.order.shipping_cost | number : "1.2-2" }})</mat-label
-          >
-          <mat-select
-            formControlName="shippingCostPaymentMethod"
-            name="shippingCostPaymentMethod"
-          >
-            <mat-option
-              *ngFor="let method of paymentMethodsCostoEnvio"
-              [value]="method"
-              >{{ method }}</mat-option
+            <!-- VISTA DE CÁMARA (MODERNA) -->
+            <div
+              class="camera-view"
+              [style.display]="showCamera ? 'flex' : 'none'"
             >
-          </mat-select>
-          @if (formSubmitted && scpmCtrl?.hasError('required')) {
-          <mat-error>Seleccione método de pago para costo de envío.</mat-error>
-          }
-        </mat-form-field>
-        <!-- } -->
-        <!-- @if (data.order.amount_to_collect_at_delivery &&
-        data.order.amount_to_collect_at_delivery > 0) { -->
-        <mat-form-field
-          appearance="outline"
-          class="full-width payment-method-field"
-        >
-          <mat-label
-            >Método Pago Cobro (S/
-            {{
-              data.order.amount_to_collect_at_delivery | number : "1.2-2"
-            }})</mat-label
-          >
-          <mat-select
-            formControlName="collectionPaymentMethod"
-            name="collectionPaymentMethod"
-          >
-            <mat-option
-              *ngFor="let method of paymentMethods"
-              [value]="method"
-              >{{ method }}</mat-option
+              <video
+                #videoPlayer
+                autoplay
+                playsinline
+                class="video-preview"
+              ></video>
+
+              <!-- Controles Flotantes -->
+              <div class="camera-controls">
+                <button
+                  mat-icon-button
+                  type="button"
+                  (click)="stopCamera()"
+                  class="stop-camera-button"
+                  matTooltip="Cancelar"
+                >
+                  <mat-icon>close</mat-icon>
+                </button>
+
+                <button
+                  type="button"
+                  class="take-photo-button"
+                  (click)="takePhoto()"
+                >
+                  <mat-icon>camera</mat-icon>
+                </button>
+
+                <!-- Espaciador para centrar el botón de captura -->
+                <div style="width: 40px"></div>
+              </div>
+            </div>
+            <canvas #canvasElement style="display: none"></canvas>
+
+            <!-- GALERÍA DE MINIATURAS -->
+            <div class="evidence-gallery" *ngIf="evidencePhotos.length > 0">
+              @for (photo of evidencePhotos; track $index) {
+                <div class="evidence-item">
+                  <img [src]="photo.previewUrl" class="thumb-img" />
+                  <button
+                    mat-icon-button
+                    class="remove-btn"
+                    type="button"
+                    (click)="removePhoto($index)"
+                  >
+                    <mat-icon>delete_forever</mat-icon>
+                  </button>
+                  <span class="photo-index">Foto {{ $index + 1 }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- Mensaje de Error -->
+            <div
+              *ngIf="formSubmitted && evidencePhotos.length === 0"
+              class="gallery-error"
             >
-          </mat-select>
-          @if (formSubmitted && cpmCtrl?.hasError('required')) {
-          <mat-error
-            >Seleccione método de pago para el monto a cobrar.</mat-error
+              <mat-icon>error_outline</mat-icon>
+              <span>Debe adjuntar al menos una foto de evidencia.</span>
+            </div>
+
+            <!-- Spinner de Subida -->
+            @if (isUploadingImage) {
+              <div class="upload-spinner">
+                <mat-progress-spinner
+                  mode="indeterminate"
+                  diameter="24"
+                ></mat-progress-spinner>
+                <span
+                  >Subiendo {{ evidencePhotos.length }} imágenes al
+                  servidor...</span
+                >
+              </div>
+            }
+          </div>
+
+          <!-- MÉTODOS DE PAGO -->
+          <mat-form-field
+            appearance="outline"
+            class="full-width payment-method-field"
           >
-          }
-        </mat-form-field>
-        <!-- } -->
-      </div>
+            <mat-label
+              >Método Pago Costo Envío (S/
+              {{ data.order.shipping_cost | number: "1.2-2" }})</mat-label
+            >
+            <mat-select formControlName="shippingCostPaymentMethod">
+              <mat-option
+                *ngFor="let method of paymentMethodsCostoEnvio"
+                [value]="method"
+                >{{ method }}</mat-option
+              >
+            </mat-select>
+            <mat-error *ngIf="formSubmitted && scpmCtrl?.hasError('required')"
+              >Requerido</mat-error
+            >
+          </mat-form-field>
+
+          <mat-form-field
+            appearance="outline"
+            class="full-width payment-method-field"
+          >
+            <mat-label
+              >Método Pago Cobro (S/
+              {{
+                data.order.amount_to_collect_at_delivery | number: "1.2-2"
+              }})</mat-label
+            >
+            <mat-select formControlName="collectionPaymentMethod">
+              <mat-option
+                *ngFor="let method of paymentMethods"
+                [value]="method"
+                >{{ method }}</mat-option
+              >
+            </mat-select>
+            <mat-error *ngIf="formSubmitted && cpmCtrl?.hasError('required')"
+              >Requerido</mat-error
+            >
+          </mat-form-field>
+        </div>
       }
     </mat-dialog-content>
 
@@ -266,14 +243,10 @@
       <button
         mat-flat-button
         type="submit"
-        [disabled]="
-          isConfirmDisabled() ||
-          isUploadingImage ||
-          (showCamera && !photoTaken && !imagePreviewUrl)
-        "
+        [disabled]="isConfirmDisabled() || isUploadingImage"
         class="confirm-button btn-corp-primary"
       >
-        {{ isUploadingImage ? "Subiendo..." : "Confirmar Cambio" }}
+        {{ isUploadingImage ? "Procesando..." : "Confirmar Entrega" }}
       </button>
     </mat-dialog-actions>
   </form>

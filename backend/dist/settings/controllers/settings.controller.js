@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SettingsController = void 0;
 const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
-const swagger_1 = require("@nestjs/swagger");
 const admin_decorator_1 = require("../../auth/decorators/admin.decorator");
 const auth_guard_1 = require("../../auth/guards/auth.guard");
 const roles_guard_1 = require("../../auth/guards/roles.guard");
@@ -67,7 +66,6 @@ let SettingsController = class SettingsController {
 };
 exports.SettingsController = SettingsController;
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Create settings' }),
     (0, admin_decorator_1.AdminAccess)(),
     (0, roles_decorator_1.Roles)(roles_1.ROLES.RECEPCIONISTA),
     (0, common_1.Post)('register'),
@@ -77,24 +75,18 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SettingsController.prototype, "createSettings", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Get all settings' }),
     (0, common_1.Get)('all'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], SettingsController.prototype, "findAllSettings", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Get promotional sets' }),
     (0, common_1.Get)('promotional-sets'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], SettingsController.prototype, "getPromotionalSets", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Get settings by ID' }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'Settings UUID' }),
-    (0, swagger_1.ApiHeader)({ name: 'codrr_token' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'No se encontro resultado' }),
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
     __metadata("design:type", Function),
@@ -102,8 +94,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SettingsController.prototype, "findSettingsById", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Update settings' }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'Settings UUID' }),
     (0, admin_decorator_1.AdminAccess)(),
     (0, roles_decorator_1.Roles)(roles_1.ROLES.RECEPCIONISTA),
     (0, common_1.Put)('edit/:id'),
@@ -114,8 +104,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SettingsController.prototype, "updateSettings", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Delete settings' }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'Settings UUID' }),
     (0, admin_decorator_1.AdminAccess)(),
     (0, roles_decorator_1.Roles)(roles_1.ROLES.RECEPCIONISTA),
     (0, common_1.Delete)('delete/:id'),
@@ -125,8 +113,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SettingsController.prototype, "deleteSettings", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Upload logo' }),
-    (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, common_1.Post)('upload-logo'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('logoFile')),
     __param(0, (0, common_1.UploadedFile)()),
@@ -136,8 +122,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SettingsController.prototype, "uploadLogo", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Upload terms PDF' }),
-    (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, common_1.Post)('upload-terms-pdf'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('termsPdfFile')),
     __param(0, (0, common_1.UploadedFile)()),
@@ -147,8 +131,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SettingsController.prototype, "uploadTermsPdf", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Upload generic file' }),
-    (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, common_1.Post)('upload-file'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
     __param(0, (0, common_1.UploadedFile)()),
@@ -158,7 +140,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SettingsController.prototype, "uploadFile", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Get background image' }),
     (0, public_decorator_1.PublicAccess)(),
     (0, common_1.Get)('company/background-image'),
     __param(0, (0, common_1.Res)()),
@@ -167,7 +148,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SettingsController.prototype, "getBackgroundImage", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Get logo image' }),
     (0, public_decorator_1.PublicAccess)(),
     (0, common_1.Get)('company/logo-image'),
     __param(0, (0, common_1.Res)()),
@@ -176,7 +156,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SettingsController.prototype, "getLogoImage", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Get global notice image' }),
     (0, public_decorator_1.PublicAccess)(),
     (0, common_1.Get)('company/global-notice-image'),
     __param(0, (0, common_1.Res)()),
@@ -185,7 +164,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SettingsController.prototype, "getGlobalNoticeImage", null);
 exports.SettingsController = SettingsController = __decorate([
-    (0, swagger_1.ApiTags)('Settings'),
     (0, common_1.Controller)('settings'),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard, roles_guard_1.RolesGuard),
     __metadata("design:paramtypes", [settings_service_1.SettingsService])

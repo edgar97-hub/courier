@@ -1,4 +1,8 @@
-// No necesitas @use '@angular/material' as mat; si no usas sus funciones de theming Sass aquí.
+// Variables
+$bg-dark: #121212;
+$text-light: #ffffff;
+$overlay-color: rgba(0, 0, 0, 0.6);
+$primary-color: #3f51b5;
 
 :host {
   display: block;
@@ -7,252 +11,239 @@
 .dialog-container {
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 80px);
+  height: 100%;
+  max-height: 90vh;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative; // Necesario para posicionamiento absoluto en móvil si se requiere
 }
 
+// --- HEADER ---
 .dialog-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
-  border-bottom: 1px solid #e0e0e0; // mat.gray-300
-  background-color: #f5f5f5; // mat.gray-100
-}
-
-.dialog-header-draggable {
-  cursor: move;
-}
-
-h2.mat-mdc-dialog-title {
-  margin: 0;
-  font-size: 1.35em;
-  font-weight: 500;
-  color: #455a64; // mat.blue-grey-700
-}
-
-.order-code-chip {
-  font-size: 0.9em;
-  color: #3f51b5; // mat.indigo-500
-  font-weight: 500;
-  margin-left: 16px;
-  flex-grow: 1;
-}
-
-.close-button {
-  min-width: auto;
-  padding: 0;
-  line-height: normal;
-  color: #757575; // mat.gray-600
-}
-
-.dialog-content {
-  padding: 20px 24px 24px 24px;
-  overflow-y: auto;
-  flex-grow: 1;
+  padding: 12px 24px;
   background-color: #fff;
-}
+  border-bottom: 1px solid #f0f0f0;
+  z-index: 10;
+  flex-shrink: 0; // Evita que el header se aplaste
 
-.info-card {
-  margin-bottom: 24px;
-  border: 1px solid #eeeeee !important; // mat.gray-200
-  box-shadow: none !important;
-  border-radius: 8px;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-
-  mat-card-header.compact-card-header {
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: #fafafa; // mat.gray-50
-    border-bottom: 1px solid #eeeeee; // mat.gray-200
-  }
-
-  mat-card-title {
-    font-size: 1.1em;
-    font-weight: 500;
-    color: #546e7a; // mat.blue-grey-600
+  .dialog-title {
     margin: 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .status-badge-dialog {
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    color: #fff;
-    line-height: 1.2;
-  }
-  mat-card-content {
-    padding: 16px;
-    font-size: 0.9rem;
-  }
-}
-
-mat-grid-list {
-  padding: 0;
-}
-
-mat-grid-tile {
-  ::ng-deep .mat-figure {
-    align-items: flex-start;
-    padding: 8px;
-  }
-}
-
-.detail-item {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  gap: 10px;
-
-  .detail-icon {
-    color: #90a4ae; // mat.blue-grey-300
-    font-size: 20px;
-  }
-
-  div {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.4;
-  }
-}
-
-.interactive-detail-item {
-  cursor: pointer;
-  &:hover .detail-value {
-    color: #3f51b5; // mat.indigo-500
-    text-decoration: underline;
-  }
-}
-.link-like {
-  color: #5c6bc0; // mat.indigo-400
-  font-weight: 500;
-}
-
-.detail-label {
-  font-size: 0.75em;
-  color: #616161; // mat.gray-700
-  margin-bottom: 2px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.detail-value {
-  color: #212121; // mat.gray-900 (o un gris más oscuro)
-  word-break: break-word;
-}
-.bold-value {
-  font-weight: 600;
-  font-size: 1.05em;
-}
-
-.item-description {
-  font-style: italic;
-  color: #555;
-  margin-bottom: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px dashed #e0e0e0; // mat.gray-300
-  font-size: 0.9em;
-}
-
-.detail-block {
-  margin-bottom: 16px;
-  .detail-label-block {
+  .header-controls {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.9em;
-    font-weight: 500;
-    color: #607d8b; // mat.blue-grey-500
-    margin-bottom: 6px;
-    mat-icon {
-      font-size: 18px;
-    }
+    gap: 12px;
   }
-  .detail-value-block {
-    font-size: 0.9em;
-    color: #424242; // mat.gray-800
-    padding-left: 26px;
-    white-space: pre-wrap;
+
+  .photo-counter {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    background-color: #f5f5f5;
+    padding: 4px 12px;
+    border-radius: 16px;
+    white-space: nowrap;
   }
-}
 
-.dialog-actions {
-  padding: 16px 24px;
-  border-top: 1px solid #e0e0e0; // mat.gray-300
-  background-color: #fafafa; // mat.gray-50
-
-  button {
-    margin-left: 8px;
-    &:first-child {
-      margin-left: 0;
-    }
+  .header-actions {
+    display: flex;
+    gap: 4px;
   }
 }
 
-// Clases de status-badge (colores hexadecimales directos)
-.status-registrado {
-  background-color: #6610f2;
-  color: #fff;
-} // Índigo con texto blanco
-.status-recogido {
-  background-color: #fd7e14;
-  color: #fff;
-} // Naranja con texto blanco
-.status-en-almacen {
-  background-color: #0d6efd;
-  color: #fff;
-} // Azul primario con texto blanco
-.status-en-transito {
-  background-color: #0c1a77;
-  color: #d0c8c8;
-}
-.status-entregado {
-  background-color: #198754;
-  color: #fff;
-} // Verde éxito con texto blanco
-.status-no-entregado {
-  background-color: #dc3545;
-  color: #fff;
-} // Rojo peligro con texto blanco
-.status-cancelado {
-  background-color: #6c757d;
-  color: #fff;
-} // Gris secundario con texto blanco
-.status-rechazado-en-punto {
-  background-color: #ff6b6b;
-  color: #fff;
-}
-.status-reprogramado {
-  background-color: #adb5bd;
-  color: #212529;
-}
-
-// Badge genérico por si el estado no coincide con ninguno de los anteriores
-.status-desconocido {
-  background-color: #9e9e9e; // Gris neutro
-  color: white;
-}
-
-/*  */
+// --- CONTENIDO PRINCIPAL ---
 .evidence-dialog-content {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
+  padding: 0 !important;
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: $bg-dark;
+  position: relative;
+  overflow: hidden;
+  min-height: 300px; // Altura mínima base
 }
-.image-wrapper {
-  width: 300px;
-  height: 300px;
-}
-.evidence-image {
+
+.carousel-container {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.image-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.evidence-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+}
+
+// --- BOTONES DE NAVEGACIÓN ---
+.nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #f97c06;
+  color: $text-light;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease-in-out;
+  z-index: 20;
+  cursor: pointer;
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+  }
+
+  // &:hover {
+  //   background-color: rgba(143, 139, 139, 0.3);
+  // }
+
+  &.prev {
+    left: 20px;
+    color: #fffdfd;
+  }
+  &.next {
+    right: 20px;
+    color: #ffffff;
+  }
+
+  &:disabled {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+// --- SPINNER Y ERRORES ---
+.spinner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 5;
+}
+
+.placeholder-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #757575;
+  text-align: center;
+  .placeholder-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+}
+
+// --- FOOTER ---
+.dialog-actions {
+  padding: 12px 24px;
+  background-color: #fff;
+  border-top: 1px solid #f0f0f0;
+  margin: 0;
+  flex-shrink: 0; // Evita que el footer desaparezca
+}
+
+// ============================================================
+// === ADAPTACIÓN MÓVIL (RESPONSIVE) ===
+// ============================================================
+@media (max-width: 600px) {
+  .dialog-container {
+    max-height: 100vh; // En móvil usamos toda la altura
+    border-radius: 0; // Sin bordes redondeados en full screen
+  }
+
+  .dialog-header {
+    padding: 8px 12px; // Header más compacto
+
+    .dialog-title {
+      font-size: 1rem; // Título un poco más pequeño
+    }
+
+    .header-controls {
+      gap: 8px;
+    }
+
+    // Ocultar texto del contador si es muy pequeño el celular, o hacerlo más chico
+    .photo-counter {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+    }
+  }
+
+  .image-wrapper {
+    padding: 0; // En móvil queremos la imagen de borde a borde
+    background-color: #000; // Fondo negro total para inmersión
+  }
+
+  .evidence-image {
+    border-radius: 0; // Sin bordes en la imagen
+    max-height: 80vh; // Asegurar que quepa entre header y footer
+  }
+
+  // Botones de navegación más sutiles en móvil
+  .nav-btn {
+    width: 40px;
+    height: 40px;
+    background-color: rgba(0, 0, 0, 0.3); // Más transparentes
+    border: none;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+
+    &.prev {
+      left: 10px;
+    }
+    &.next {
+      right: 10px;
+    }
+  }
+
+  .dialog-actions {
+    padding: 8px 16px; // Footer más compacto
+  }
 }
