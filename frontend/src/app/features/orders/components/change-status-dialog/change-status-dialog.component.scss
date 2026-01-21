@@ -15,8 +15,12 @@ $radius: 12px;
 .dialog-container {
   display: flex;
   flex-direction: column;
-  max-height: 90vh; // Altura máxima para evitar desbordes
-  overflow: hidden;
+  // max-height: 90vh; // Altura máxima para evitar desbordes
+  // overflow: hidden;
+  // border: 1px solid black;
+  // height: 100% !important;
+  // min-height: 100% !important;
+  // max-height: 100% !important;
 }
 
 .dialog-header {
@@ -24,10 +28,10 @@ $radius: 12px;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 14px 10px 14px;
+  padding: 5px 14px 10px 14px;
   border-bottom: 1px solid $border-color;
   background-color: #fff;
-  z-index: 10;
+  // z-index: 10;
 
   h2 {
     margin: 0;
@@ -50,6 +54,9 @@ $radius: 12px;
   padding: 20px 24px;
   overflow-y: auto;
   flex-grow: 1;
+  // border: 1px solid black;
+  // height: 100vh !important;
+  // height: 100%;
 }
 
 // ============================================================
@@ -433,7 +440,7 @@ $radius: 12px;
 // ============================================================
 @media (max-width: 600px) {
   .dialog-header {
-    padding: 16px;
+    padding: 1px 10px 10px 10px;
 
     h2 {
       font-size: 1.2rem;
