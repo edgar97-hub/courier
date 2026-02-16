@@ -15,6 +15,37 @@ export declare class OrdersController {
     }>;
     findOrderById(id: string): Promise<any>;
     importOrders(ordersData: any[], req: any): Promise<ImportResult | undefined>;
+    getVolumeDiscountPreview(req: any, deliveryDate: string, companyId: string): Promise<{
+        applies: boolean;
+        message: string;
+        currentDailyCount?: undefined;
+        nextSequenceNumber?: undefined;
+        discountPercentage?: undefined;
+    } | {
+        applies: boolean;
+        message?: undefined;
+        currentDailyCount?: undefined;
+        nextSequenceNumber?: undefined;
+        discountPercentage?: undefined;
+    } | {
+        applies: boolean;
+        currentDailyCount: number;
+        nextSequenceNumber: number;
+        discountPercentage: number;
+        message: string;
+    } | {
+        applies: boolean;
+        currentDailyCount: number;
+        nextSequenceNumber: number;
+        message: string;
+        discountPercentage?: undefined;
+    }>;
+    simulateBatchVolumeDiscount(body: {
+        orders: any[];
+    }): Promise<{
+        temp_id: any;
+        appliedDiscount: number;
+    }[]>;
     getActiveDistricts(req: any, startDate: string, endDate: string, status?: string): Promise<{
         success: boolean;
         data: string[];
@@ -44,4 +75,13 @@ export declare class OrdersController {
     getOrderPdfA4Landscape(orderId: string, req: Request, res: Response): Promise<void>;
     getOrderPdfTicket80mm(orderId: string, req: Request, res: Response): Promise<void>;
     getDashboardSummary(req: any): Promise<any>;
+    getVolumeDiscountReport(startDate: string, endDate: string, companyId?: string, statusMeta?: 'ALCANZADA' | 'NO_ALCANZADA'): Promise<{
+        date: any;
+        clientName: any;
+        totalOrders: number;
+        rangeReached: any;
+        discount: string;
+        totalInvoiced: string;
+        hasReachedMeta: boolean;
+    }[]>;
 }

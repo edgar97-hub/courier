@@ -95,17 +95,6 @@ export class SettingsController {
   }
 
   /**
-   * Delete settings by ID.
-   * Restricted to admin and recepcionista roles.
-   */
-  @AdminAccess()
-  @Roles(ROLES.RECEPCIONISTA)
-  @Delete('delete/:id')
-  public async deleteSettings(@Param('id', new ParseUUIDPipe()) id: string) {
-    return await this.settingsService.deleteSettings(id);
-  }
-
-  /**
    * Upload company logo.
    */
   @Post('upload-logo')

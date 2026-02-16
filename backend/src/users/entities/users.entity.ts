@@ -101,4 +101,13 @@ export class UsersEntity extends BaseEntity implements IUser {
 
   @OneToMany(() => DistributorRecordEntity, (item) => item.user)
   distributorRecords: DistributorRecordEntity[];
+
+  @Column({
+    name: 'is_volume_discount_enabled',
+    type: 'boolean',
+    default: false,
+    comment:
+      'Indica si a este cliente se le aplican descuentos automáticos por volumen',
+  })
+  isVolumeDiscountEnabled: boolean;
 }

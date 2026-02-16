@@ -138,6 +138,15 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => distributor_record_entity_1.DistributorRecordEntity, (item) => item.user),
     __metadata("design:type", Array)
 ], UsersEntity.prototype, "distributorRecords", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        name: 'is_volume_discount_enabled',
+        type: 'boolean',
+        default: false,
+        comment: 'Indica si a este cliente se le aplican descuentos automáticos por volumen',
+    }),
+    __metadata("design:type", Boolean)
+], UsersEntity.prototype, "isVolumeDiscountEnabled", void 0);
 exports.UsersEntity = UsersEntity = __decorate([
     (0, typeorm_1.Entity)({ name: 'users' })
 ], UsersEntity);

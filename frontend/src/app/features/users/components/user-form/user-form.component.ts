@@ -18,11 +18,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { User } from '../../models/user.model';  
+import { User } from '../../models/user.model';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+
 @Component({
   selector: 'app-user-form',
   standalone: true,
@@ -37,6 +39,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     MatIconModule,
     MatDividerModule,
     MatCheckboxModule,
+    MatSlideToggleModule,
   ],
   templateUrl: './user-form.component.html',
   styleUrls: ['./user-form.component.scss'],
@@ -94,6 +97,7 @@ export class UserFormComponent implements OnInit {
 
       owner_bank_account: ['', []],
       name_account_number_owner: ['', []],
+      isVolumeDiscountEnabled: [false, []],
     });
   }
 
@@ -108,14 +112,14 @@ export class UserFormComponent implements OnInit {
     if (this.userForm.valid) {
       if (this.userToEdit && this.userToEdit.id) {
         const formData: User = {
-          ...(this.userToEdit as User), // Mantener propiedades no editables si las hay
+          ...(this.userToEdit as User),
           ...this.userForm.value,
           id: this.userToEdit.id,
         };
         console.log('formData', formData);
         this.formSubmit.emit(formData);
       } else {
-        const { id, ...formDataWithoutId } = this.userForm.value; // Excluir el ID (que sería null)
+        const { id, ...formDataWithoutId } = this.userForm.value;
         this.formSubmit.emit(formDataWithoutId as Omit<User, 'id'>);
       }
     } else {

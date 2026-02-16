@@ -2,9 +2,9 @@
   padding: 20px 24px;
   background-color: var(
     --sys-surface-container-lowest
-  ); // Un fondo de página muy claro
+  );  
   color: var(--sys-on-surface);
-  min-height: calc(100vh - 64px); // Asumiendo un toolbar de 64px
+  min-height: calc(100vh - 64px);  
 }
 
 .page-title-bar {

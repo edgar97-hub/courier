@@ -34,6 +34,13 @@ let OrdersController = class OrdersController {
     async importOrders(ordersData, req) {
         return await this.ordersService.importOrdersFromExcelData(ordersData, req.idUser);
     }
+    async getVolumeDiscountPreview(req, deliveryDate, companyId) {
+        const targetUserId = companyId;
+        return await this.ordersService.previewVolumeDiscount(targetUserId, deliveryDate);
+    }
+    async simulateBatchVolumeDiscount(body) {
+        return await this.ordersService.simulateBatchVolumeDiscount(body.orders);
+    }
     async getActiveDistricts(req, startDate, endDate, status) {
         const districts = await this.ordersService.getActiveDistrictsByDateRange(req, startDate, endDate, status);
         return {
@@ -153,6 +160,9 @@ let OrdersController = class OrdersController {
     async getDashboardSummary(req) {
         return this.ordersService.dashboardOrders(req);
     }
+    async getVolumeDiscountReport(startDate, endDate, companyId, statusMeta) {
+        return await this.ordersService.getVolumeDiscountReport(startDate, endDate, companyId, statusMeta);
+    }
 };
 exports.OrdersController = OrdersController;
 __decorate([
@@ -179,6 +189,22 @@ __decorate([
     __metadata("design:paramtypes", [Array, Object]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "importOrders", null);
+__decorate([
+    (0, common_1.Get)('volume-discount-preview'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('delivery_date')),
+    __param(2, (0, common_1.Query)('company_id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "getVolumeDiscountPreview", null);
+__decorate([
+    (0, common_1.Post)('batch-volume-discount-simulation'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "simulateBatchVolumeDiscount", null);
 __decorate([
     (0, common_1.Get)('active-districts'),
     __param(0, (0, common_1.Req)()),
@@ -318,6 +344,16 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "getDashboardSummary", null);
+__decorate([
+    (0, common_1.Get)('reports/volume-discounts'),
+    __param(0, (0, common_1.Query)('startDate')),
+    __param(1, (0, common_1.Query)('endDate')),
+    __param(2, (0, common_1.Query)('companyId')),
+    __param(3, (0, common_1.Query)('statusMeta')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, String]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "getVolumeDiscountReport", null);
 exports.OrdersController = OrdersController = __decorate([
     (0, common_1.Controller)('orders'),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard, roles_guard_1.RolesGuard),

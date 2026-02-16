@@ -1,5 +1,6 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../../config/base.entity';
+
 export interface PromotionalSetItem {
   id: string;
   imageUrl: string | null;
@@ -7,6 +8,16 @@ export interface PromotionalSetItem {
   buttonText: string | null;
   isActive?: boolean;
   order?: number;
+}
+
+export interface VolumeDiscountRule {
+  id: string;
+  minOrders: number;
+  maxOrders: number;
+  discountPercentage: number;
+  startDate: string | null;
+  endDate: string | null;
+  isActive: boolean;
 }
 
 @Entity({ name: 'settings' })
@@ -106,4 +117,13 @@ export class SettingsEntity extends BaseEntity {
     comment: 'Fecha de fin de la vigencia del descuento',
   })
   multiPackageDiscountEndDate: Date | null;
+
+  @Column({
+    name: 'volume_discount_rules',
+    type: 'jsonb',
+    nullable: true,
+    default: () => "'[]'",
+    comment: 'Array de reglas para descuentos por volumen diario',
+  })
+  volumeDiscountRules: VolumeDiscountRule[];
 }

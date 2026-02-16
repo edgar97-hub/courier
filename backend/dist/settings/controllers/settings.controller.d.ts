@@ -10,7 +10,6 @@ export declare class SettingsController {
     getPromotionalSets(): Promise<PromotionalSetItem[]>;
     findSettingsById(id: string): Promise<import("../entities/settings.entity").SettingsEntity | null>;
     updateSettings(id: string, body: SettingUpdateDTO): Promise<import("../entities/settings.entity").SettingsEntity>;
-    deleteSettings(id: string): Promise<import("typeorm").DeleteResult>;
     uploadLogo(logoFile: Express.Multer.File, request: Request): Promise<{
         logo_url: string;
     }>;

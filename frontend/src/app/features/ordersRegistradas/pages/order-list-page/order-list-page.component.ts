@@ -75,7 +75,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
   totalOrderCount = 0;
   currentPageIndex = 0;
   currentPageSize = 10;
-  currentSortField = 'createdAt'; // Change default sort field to createdAt
+  currentSortField = 'code';
   currentSortDirection: 'asc' | 'desc' = 'desc';
   showMyOrders: boolean = false; // New property for the toggle
 

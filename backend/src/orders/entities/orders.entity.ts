@@ -57,7 +57,23 @@ export class OrdersEntity extends BaseEntity {
   package_weight_kg?: number;
 
   @Column({ nullable: false, type: 'float', default: 0.0 })
-  shipping_cost?: number;
+  shipping_cost: number;
+
+  @Column({
+    name: 'volume_discount_amount',
+    type: 'float',
+    default: 0.0,
+    comment: 'Monto monetario descontado por volumen (Ej. 5.00)',
+  })
+  volumeDiscountAmount: number;
+
+  @Column({
+    name: 'applied_volume_discount_rule',
+    type: 'jsonb',
+    nullable: true,
+    comment: 'Snapshot de la regla aplicada (Rango, %, ID) para auditoría',
+  })
+  appliedVolumeDiscountRule: any;
 
   @Column({ nullable: true, default: '' })
   payment_method_for_shipping_cost?: string;
@@ -66,7 +82,7 @@ export class OrdersEntity extends BaseEntity {
   item_description?: string;
 
   @Column({ nullable: true, type: 'float', default: 0.0 })
-  amount_to_collect_at_delivery?: number;
+  amount_to_collect_at_delivery: number;
 
   @Column({ nullable: true, default: '' })
   payment_method_for_collection?: string;

@@ -79,7 +79,13 @@ let SettingsService = class SettingsService {
             if (body.promotional_sets !== undefined) {
                 body.promotional_sets = body.promotional_sets.map((set) => ({
                     ...set,
-                    id: set.id || Date.now().toString(),
+                    id: set.id || `pro-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                }));
+            }
+            if (body.volumeDiscountRules !== undefined) {
+                body.volumeDiscountRules = body.volumeDiscountRules.map((rule) => ({
+                    ...rule,
+                    id: rule.id || `vol-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                 }));
             }
             const updateResult = await this.settingsRepository.update(id, body);
@@ -99,21 +105,6 @@ let SettingsService = class SettingsService {
                 });
             }
             return updatedSettings;
-        }
-        catch (error) {
-            throw error_manager_1.ErrorManager.createSignatureError(error.message);
-        }
-    }
-    async deleteSettings(id) {
-        try {
-            const deleteResult = await this.settingsRepository.delete(id);
-            if (deleteResult.affected === 0) {
-                throw new error_manager_1.ErrorManager({
-                    type: 'BAD_REQUEST',
-                    message: 'No se pudo borrar',
-                });
-            }
-            return deleteResult;
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
@@ -191,7 +182,6 @@ let SettingsService = class SettingsService {
                     message: 'Background image URL not found in settings',
                 });
             }
-            console.log(`Fetching background image from: ${setting.background_image_url}`);
             const imageResponse = await fetch(setting.background_image_url);
             if (imageResponse.ok && imageResponse.body) {
                 const contentType = imageResponse.headers.get('content-type');
@@ -219,7 +209,6 @@ let SettingsService = class SettingsService {
                     message: 'Logo URL not found in settings',
                 });
             }
-            console.log(`Fetching logo from: ${setting.logo_url}`);
             const imageResponse = await fetch(setting.logo_url);
             if (imageResponse.ok && imageResponse.body) {
                 const contentType = imageResponse.headers.get('content-type');
@@ -247,7 +236,6 @@ let SettingsService = class SettingsService {
                     message: 'Global notice image URL not found in settings',
                 });
             }
-            console.log(`Fetching global notice image from: ${setting.global_notice_image_url}`);
             const imageResponse = await fetch(setting.global_notice_image_url);
             if (imageResponse.ok && imageResponse.body) {
                 const contentType = imageResponse.headers.get('content-type');

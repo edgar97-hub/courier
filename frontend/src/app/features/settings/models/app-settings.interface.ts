@@ -1,5 +1,5 @@
 export interface PromotionalSetItem {
-  id: string; 
+  id: string;
   imageUrl: string | null;
   linkUrl: string | null;
   buttonText: string | null;
@@ -9,8 +9,18 @@ export interface PromotionalSetItem {
   imagePreviewUrl?: string | null;
 }
 
+export interface VolumeDiscountRule {
+  id: string;
+  minOrders: number;
+  maxOrders: number;
+  discountPercentage: number;
+  startDate: Date | string | null;
+  endDate: Date | string | null;
+  isActive: boolean;
+}
+
 export interface AppSettings {
-  id?: string; 
+  id?: string;
   business_name: string | null;
   ruc: string | null;
   address: string | null;
@@ -27,6 +37,7 @@ export interface AppSettings {
   multiPackageDiscountPercentage: number;
   multiPackageDiscountStartDate: number | null;
   multiPackageDiscountEndDate: number | null;
+  volumeDiscountRules: VolumeDiscountRule[];
 }
 
 export const initialAppSettings: AppSettings = {
@@ -46,4 +57,5 @@ export const initialAppSettings: AppSettings = {
   multiPackageDiscountPercentage: 0,
   multiPackageDiscountStartDate: null,
   multiPackageDiscountEndDate: null,
+  volumeDiscountRules: [],
 };

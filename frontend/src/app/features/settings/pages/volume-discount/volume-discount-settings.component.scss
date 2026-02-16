@@ -1,0 +1,462 @@
+// --- VARIABLES DE DISEÑO ---
+$primary: #3f51b5;
+$primary-soft: #e8eaf6;
+$text-main: #1e293b;
+$text-secondary: #64748b;
+$border-light: #e2e8f0;
+$bg-page: #f8fafc;
+$white: #ffffff;
+$radius: 12px;
+$shadow-card:
+  0 4px 6px -1px rgba(0, 0, 0, 0.1),
+  0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-hover:
+  0 10px 15px -3px rgba(0, 0, 0, 0.1),
+  0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$danger-color: #2765c9;
+// --- LAYOUT GENERAL ---
+.page-container {
+  padding: 32px;
+  padding-bottom: 100px; // Espacio para el footer sticky
+  max-width: 1100px;
+  margin: 0 auto;
+  background-color: $bg-page;
+  min-height: 100vh;
+  font-family:
+    "Inter", "Roboto", sans-serif; // Fuente moderna si está disponible
+}
+
+.header-section {
+  margin-bottom: 32px;
+  h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: $text-main;
+    letter-spacing: -0.025em;
+  }
+  .subtitle {
+    margin-top: 8px;
+    color: $text-secondary;
+    font-size: 1rem;
+    max-width: 600px;
+  }
+}
+
+// --- TARJETA DE FORMULARIO ---
+.modern-card {
+  border-radius: $radius;
+  border: 1px solid $border-light;
+  box-shadow: $shadow-card;
+  background: $white;
+  overflow: visible; // Para que los selectores no se corten
+  margin-bottom: 32px;
+
+  mat-card-header {
+    padding: 24px;
+    border-bottom: 1px solid $border-light;
+    display: flex;
+    align-items: center;
+
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background-color: $primary-soft;
+      color: $primary;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 16px;
+
+      mat-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    mat-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: $primary  !important;
+      margin-bottom: 4px;
+    }
+    mat-card-subtitle {
+      font-size: 0.875rem;
+      color: $text-secondary;
+    }
+  }
+
+  mat-card-content {
+    padding: 24px;
+  }
+}
+
+// --- FORMULARIO GRID ---
+.rule-form {
+  .form-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: flex-end;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .group-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: $text-secondary;
+      letter-spacing: 0.05em;
+    }
+
+    .row-inputs {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  }
+
+  .compact-field {
+    width: 140px;
+
+    // Ajustes finos a Material
+    ::ng-deep .mat-mdc-text-field-wrapper {
+      background-color: $white;
+      border: 1px solid $border-light;
+      border-radius: 8px;
+      padding-left: 12px;
+    }
+    ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+      display: none; // Ocultar espacio de error si quieres más compacto (opcional)
+    }
+  }
+
+  .discount-field {
+    width: 120px;
+    .bold-suffix {
+      font-weight: 700;
+      color: $text-main;
+    }
+  }
+
+  .separator {
+    color: $text-secondary;
+    font-weight: bold;
+  }
+
+  .action-group {
+    margin-left: auto; // Empujar a la derecha
+    .btn-add {
+      height: 48px;
+      padding: 0 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      box-shadow: none;
+      background-color: $text-main; // Botón negro/oscuro se ve muy moderno
+      color: white;
+
+      &:hover {
+        background-color: lighten($text-main, 10%);
+      }
+    }
+  }
+}
+
+// --- TABLA MODERNA ---
+.table-container {
+  background: $white;
+  border-radius: $radius;
+  border: 1px solid $border-light;
+  box-shadow: $shadow-card;
+  overflow: auto;
+  // width: 100%;
+  // min-width: 500px !important;
+
+  .table-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid $border-light;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      color: $text-main;
+    }
+    .badge-count {
+      background: $primary-soft;
+      color: $primary;
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+  }
+}
+
+.modern-table {
+  min-width: 700px !important;
+  width: 100% !important;
+
+  th.mat-header-cell {
+    background-color: #f8fafc;
+    color: $text-secondary;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 16px 24px;
+    border-bottom: 1px solid $border-light;
+  }
+
+  td.mat-cell {
+    padding: 16px 24px;
+    color: $text-main;
+    border-bottom: 1px solid $border-light;
+    font-size: 0.9rem;
+  }
+
+  tr.data-row {
+    transition: background-color 0.2s;
+    &:hover {
+      background-color: #f1f5f9;
+    }
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+}
+
+// --- CELDAS PERSONALIZADAS ---
+.range-cell {
+  display: flex;
+  flex-direction: column;
+  .range-values {
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  .range-unit {
+    font-size: 0.75rem;
+    color: $text-secondary;
+  }
+}
+
+.discount-badge {
+  background-color: #dcfce7; // Verde suave
+  color: #15803d; // Verde oscuro
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: 1px solid #bbf7d0;
+}
+
+.date-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  .date-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    .tiny-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+      color: $text-secondary;
+    }
+  }
+  .sub-date {
+    color: $text-secondary;
+    font-size: 0.8rem;
+  }
+  .permanent-tag {
+    font-size: 0.75rem;
+    color: $primary;
+    font-weight: 600;
+    background: $primary-soft;
+    padding: 2px 8px;
+    border-radius: 4px;
+    width: fit-content;
+  }
+}
+
+// --- PILLS DE ESTADO ---
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: currentColor;
+  }
+
+  &.badge-success {
+    background: #f0fdf4;
+    color: #166534;
+    border-color: #bbf7d0;
+  }
+  &.badge-warning {
+    background: #fefce8;
+    color: #854d0e;
+    border-color: #fef08a;
+  }
+  &.badge-error {
+    background: #fef2f2;
+    color: #991b1b;
+    border-color: #fecaca;
+  }
+}
+
+.btn-delete {
+  color: #e92828;
+}
+
+// --- EMPTY STATE ---
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+
+  .empty-icon-bg {
+    width: 64px;
+    height: 64px;
+    background-color: $bg-page;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+      color: $text-secondary;
+    }
+  }
+  h4 {
+    margin: 0 0 8px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: $text-main;
+  }
+  p {
+    margin: 0;
+    color: $text-secondary;
+    font-size: 0.9rem;
+  }
+}
+
+// --- STICKY FOOTER ---
+.sticky-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid $border-light;
+  padding: 16px 32px;
+  display: flex;
+  justify-content: center;
+  z-index: 100;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+
+  .footer-content {
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .unsaved-changes {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #d97706;
+    font-weight: 500;
+    font-size: 0.9rem;
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .btn-save-global {
+    height: 48px;
+    padding: 0 32px;
+    border-radius: 24px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 12px rgba(63, 81, 181, 0.3);
+    transition: transform 0.2s;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  gap: 16px;
+  color: $text-secondary;
+}
+
+// --- RESPONSIVE ---
+@media (max-width: 768px) {
+  .page-container {
+    padding: 16px;
+    padding-bottom: 80px;
+  }
+
+  .rule-form .form-grid {
+    flex-direction: column;
+    gap: 20px;
+    .input-group {
+      width: 100%;
+    }
+    .row-inputs {
+      width: 100%;
+    }
+    .compact-field {
+      width: 100%;
+    }
+  }
+
+  .action-group {
+    width: 100%;
+    .btn-add {
+      width: 100%;
+    }
+  }
+}

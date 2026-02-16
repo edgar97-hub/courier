@@ -42,9 +42,6 @@ let SettingsController = class SettingsController {
     async updateSettings(id, body) {
         return await this.settingsService.updateSettings(body, id);
     }
-    async deleteSettings(id) {
-        return await this.settingsService.deleteSettings(id);
-    }
     async uploadLogo(logoFile, request) {
         return await this.settingsService.uploadLogo(logoFile, request);
     }
@@ -103,15 +100,6 @@ __decorate([
     __metadata("design:paramtypes", [String, setting_dto_1.SettingUpdateDTO]),
     __metadata("design:returntype", Promise)
 ], SettingsController.prototype, "updateSettings", null);
-__decorate([
-    (0, admin_decorator_1.AdminAccess)(),
-    (0, roles_decorator_1.Roles)(roles_1.ROLES.RECEPCIONISTA),
-    (0, common_1.Delete)('delete/:id'),
-    __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], SettingsController.prototype, "deleteSettings", null);
 __decorate([
     (0, common_1.Post)('upload-logo'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('logoFile')),

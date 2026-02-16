@@ -135,6 +135,16 @@ __decorate([
     }),
     __metadata("design:type", Object)
 ], SettingsEntity.prototype, "multiPackageDiscountEndDate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        name: 'volume_discount_rules',
+        type: 'jsonb',
+        nullable: true,
+        default: () => "'[]'",
+        comment: 'Array de reglas para descuentos por volumen diario',
+    }),
+    __metadata("design:type", Array)
+], SettingsEntity.prototype, "volumeDiscountRules", void 0);
 exports.SettingsEntity = SettingsEntity = __decorate([
     (0, typeorm_1.Entity)({ name: 'settings' })
 ], SettingsEntity);

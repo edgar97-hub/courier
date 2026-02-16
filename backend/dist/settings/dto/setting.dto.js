@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SettingUpdateDTO = exports.SettingDTO = exports.PromotionalSetItemDto = void 0;
+exports.SettingUpdateDTO = exports.SettingDTO = exports.VolumeDiscountRuleDto = exports.PromotionalSetItemDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
@@ -48,6 +48,39 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], PromotionalSetItemDto.prototype, "order", void 0);
+class VolumeDiscountRuleDto {
+}
+exports.VolumeDiscountRuleDto = VolumeDiscountRuleDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], VolumeDiscountRuleDto.prototype, "id", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], VolumeDiscountRuleDto.prototype, "minOrders", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], VolumeDiscountRuleDto.prototype, "maxOrders", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], VolumeDiscountRuleDto.prototype, "discountPercentage", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_2.IsDateString)(),
+    __metadata("design:type", Object)
+], VolumeDiscountRuleDto.prototype, "startDate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_2.IsDateString)(),
+    __metadata("design:type", Object)
+], VolumeDiscountRuleDto.prototype, "endDate", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], VolumeDiscountRuleDto.prototype, "isActive", void 0);
 class SettingDTO {
 }
 exports.SettingDTO = SettingDTO;
@@ -241,4 +274,11 @@ __decorate([
     (0, class_validator_2.IsDateString)(),
     __metadata("design:type", Object)
 ], SettingUpdateDTO.prototype, "multiPackageDiscountEndDate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => VolumeDiscountRuleDto),
+    __metadata("design:type", Array)
+], SettingUpdateDTO.prototype, "volumeDiscountRules", void 0);
 //# sourceMappingURL=setting.dto.js.map

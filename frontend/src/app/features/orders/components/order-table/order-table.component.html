@@ -182,9 +182,28 @@
         *matCellDef="let order"
         class="compact-table-cell compact-cell date-cell column-delivery_date"
       >
-        {{
+        <!-- {{
           order.delivery_date ? (order.delivery_date | date : "dd/MM/yy") : "-"
-        }}
+        }} -->
+        <div class="date-cell-content">
+          <!-- La Fecha -->
+          <span>
+            {{
+              order.delivery_date
+                ? (order.delivery_date | date: "dd/MM/yy")
+                : "-"
+            }}
+          </span>
+
+          <!-- El Badge de Descuento (Solo si existe) -->
+          <span
+            *ngIf="order.appliedVolumeDiscountRule?.percentage"
+            class="discount-badge-table"
+            matTooltip="Descuento por volumen aplicado"
+          >
+            -{{ order.appliedVolumeDiscountRule.percentage }}%
+          </span>
+        </div>
       </td>
     </ng-container>
     <!-- Type Column -->
@@ -222,7 +241,7 @@
         class="compact-table-cell align-right amount-cell compact-cell column-amount_to_collect_at_delivery"
       >
         {{
-          order.amount_to_collect_at_delivery | currency : "PEN" : "" : "1.2-2"
+          order.amount_to_collect_at_delivery | currency: "PEN" : "" : "1.2-2"
         }}
       </td>
     </ng-container>
@@ -349,7 +368,7 @@
       class="data-row"
       [ngClass]="{
         'highlight-row': false,
-        'row-cancelled-strikethrough': row.status === OrderStatus.ANULADO
+        'row-cancelled-strikethrough': row.status === OrderStatus.ANULADO,
       }"
     ></tr>
 

@@ -1,0 +1,255 @@
+<div class="page-container">
+  <!-- HEADER CON ESTILO -->
+  <div class="header-section">
+    <div class="header-content">
+      <h1>Configuración de Tarifas por Volumen</h1>
+      <p class="subtitle">
+        Automatiza los descuentos basados en el rendimiento diario de tus
+        clientes.
+      </p>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading()" class="loading-container">
+    <mat-spinner diameter="40" strokeWidth="3"></mat-spinner>
+    <p>Cargando configuración...</p>
+  </div>
+
+  <div class="content-wrapper" *ngIf="!isLoading()">
+    <!-- SECCIÓN 1: FORMULARIO DE CREACIÓN -->
+    <mat-card class="modern-card create-rule-card">
+      <mat-card-header>
+        <div class="card-icon">
+          <mat-icon>add_circle_outline</mat-icon>
+        </div>
+        <mat-card-title>Definir Nueva Regla</mat-card-title>
+        <mat-card-subtitle
+          >Establece los parámetros para un nuevo rango de
+          descuento.</mat-card-subtitle
+        >
+      </mat-card-header>
+
+      <mat-card-content>
+        <form [formGroup]="newRuleForm" class="rule-form">
+          <div class="form-grid">
+            <!-- GRUPO 1: RANGOS -->
+            <div class="input-group">
+              <span class="group-label">Rango de Pedidos</span>
+              <div class="row-inputs">
+                <mat-form-field appearance="outline" class="compact-field">
+                  <mat-label>Desde</mat-label>
+                  <input
+                    matInput
+                    type="number"
+                    formControlName="minOrders"
+                    min="1"
+                    placeholder="Ej. 10"
+                    appAutoSelect
+                  />
+                </mat-form-field>
+                <span class="separator">—</span>
+                <mat-form-field appearance="outline" class="compact-field">
+                  <mat-label>Hasta</mat-label>
+                  <input
+                    matInput
+                    type="number"
+                    formControlName="maxOrders"
+                    min="1"
+                    placeholder="Ej. 20"
+                    appAutoSelect
+                  />
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- GRUPO 2: BENEFICIO -->
+            <div class="input-group">
+              <span class="group-label">Beneficio</span>
+              <mat-form-field
+                appearance="outline"
+                class="compact-field discount-field"
+              >
+                <mat-label>Descuento %</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  formControlName="discountPercentage"
+                  min="1"
+                  max="100"
+                  placeholder="5"
+                  appAutoSelect
+                />
+              </mat-form-field>
+            </div>
+
+            <!-- GRUPO 3: VIGENCIA -->
+            <div class="input-group">
+              <span class="group-label">Vigencia (Opcional)</span>
+              <div class="row-inputs">
+                <mat-form-field appearance="outline" class="compact-field">
+                  <mat-label>Inicio</mat-label>
+                  <input
+                    matInput
+                    [matDatepicker]="pickerStart"
+                    formControlName="startDate"
+                  />
+                  <mat-datepicker-toggle
+                    matIconSuffix
+                    [for]="pickerStart"
+                  ></mat-datepicker-toggle>
+                  <mat-datepicker #pickerStart></mat-datepicker>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="compact-field">
+                  <mat-label>Fin</mat-label>
+                  <input
+                    matInput
+                    [matDatepicker]="pickerEnd"
+                    formControlName="endDate"
+                  />
+                  <mat-datepicker-toggle
+                    matIconSuffix
+                    [for]="pickerEnd"
+                  ></mat-datepicker-toggle>
+                  <mat-datepicker #pickerEnd></mat-datepicker>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- BOTÓN AGREGAR -->
+            <div class="action-group">
+              <button
+                mat-flat-button
+                color="primary"
+                class="btn-add btn-corp-primary"
+                (click)="addRule()"
+                [disabled]="newRuleForm.invalid"
+              >
+                <mat-icon>check</mat-icon> AGREGAR
+              </button>
+            </div>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- SECCIÓN 2: TABLA DE REGLAS -->
+    <div class="table-container mat-elevation-z0">
+      <div class="table-header">
+        <h3>Reglas Activas</h3>
+        <span class="badge-count">{{ dataSource.data.length }} reglas</span>
+      </div>
+
+      <table mat-table [dataSource]="dataSource" class="modern-table">
+        <!-- Rango Column -->
+        <ng-container matColumnDef="range">
+          <th mat-header-cell *matHeaderCellDef>Rango de Volumen</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="range-cell">
+              <span class="range-values"
+                >{{ element.minOrders }} - {{ element.maxOrders }}</span
+              >
+              <span class="range-unit">pedidos/día</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Descuento Column -->
+        <ng-container matColumnDef="discount">
+          <th mat-header-cell *matHeaderCellDef>Descuento</th>
+          <td mat-cell *matCellDef="let element">
+            <span class="discount-badge"
+              >{{ element.discountPercentage }}%
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Vigencia Column -->
+        <ng-container matColumnDef="validity">
+          <th mat-header-cell *matHeaderCellDef>Vigencia</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="date-cell">
+              <div class="date-row">
+                <span>{{ element.startDate | date: "dd MMM yyyy" }} -</span>
+                <span *ngIf="element.endDate">
+                  {{ element.endDate | date: "dd MMM yyyy" }}</span
+                >
+                <span class="permanent-tag" *ngIf="!element.endDate"
+                  >Permanente</span
+                >
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Estado Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let element">
+            <span class="status-pill" [ngClass]="getRuleStatus(element).class">
+              <span class="dot"></span>
+              {{ getRuleStatus(element).label }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td
+            mat-cell
+            *matCellDef="let element; let i = index"
+            class="actions-cell"
+          >
+            <button
+              mat-icon-button
+              color="warn"
+              class="btn-delete"
+              (click)="removeRule(i)"
+              matTooltip="Eliminar regla"
+            >
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns"
+          class="data-row"
+        ></tr>
+
+        <!-- EMPTY STATE -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="5">
+            <div class="empty-state">
+              <div class="empty-icon-bg">
+                <mat-icon>rule</mat-icon>
+              </div>
+              <h4>No hay reglas configuradas</h4>
+              <p>
+                Agrega una nueva regla arriba para comenzar a aplicar
+                descuentos.
+              </p>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- BARRA DE ACCIÓN FLOTANTE (STICKY BOTTOM) -->
+    <div class="sticky-footer">
+      <button
+        mat-raised-button
+        color="primary"
+        class="btn-save-global btn-corp-primary"
+        (click)="saveChanges()"
+        [disabled]="isSaving()"
+      >
+        <mat-icon>save</mat-icon>
+        {{ isSaving() ? "GUARDANDO..." : "GUARDAR CONFIGURACIÓN" }}
+      </button>
+    </div>
+  </div>
+</div>

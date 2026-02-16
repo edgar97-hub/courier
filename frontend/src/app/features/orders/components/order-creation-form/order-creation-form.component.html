@@ -53,14 +53,18 @@
       (optionSelected)="onDriverSelected($event)"
     >
       @for (driver of filteredDrivers$ | async; track driver.id) {
-      <mat-option [value]="driver">
-        <div class="driver-option">
-          <span>{{ driver.username }}</span>
-        </div>
-      </mat-option>
-      } @if ((filteredDrivers$ | async)?.length === 0 && !isLoadingDrivers &&
-      driverSearchCtrl.value) {
-      <mat-option disabled>No se encontraron motorizados.</mat-option>
+        <mat-option [value]="driver">
+          <div class="driver-option">
+            <span>{{ driver.username }}</span>
+          </div>
+        </mat-option>
+      }
+      @if (
+        (filteredDrivers$ | async)?.length === 0 &&
+        !isLoadingDrivers &&
+        driverSearchCtrl.value
+      ) {
+        <mat-option disabled>No se encontraron motorizados.</mat-option>
       }
     </mat-autocomplete>
 
@@ -146,14 +150,18 @@
         (optionSelected)="onDistrictSelected($event)"
       >
         @for (district of filteredDistricts$ | async; track district.id) {
-        <mat-option [value]="district">
-          <div class="driver-option">
-            <span>{{ district.name_and_price }}</span>
-          </div>
-        </mat-option>
-        } @if ((filteredDistricts$ | async)?.length === 0 && !isLoadingDistricts
-        && districtSearchCtrl.value) {
-        <mat-option disabled>No se encontraron distritos.</mat-option>
+          <mat-option [value]="district">
+            <div class="driver-option">
+              <span>{{ district.name_and_price }}</span>
+            </div>
+          </mat-option>
+        }
+        @if (
+          (filteredDistricts$ | async)?.length === 0 &&
+          !isLoadingDistricts &&
+          districtSearchCtrl.value
+        ) {
+          <mat-option disabled>No se encontraron distritos.</mat-option>
         }
       </mat-autocomplete>
 
@@ -209,6 +217,25 @@
         >Requerido</mat-error
       >
     </mat-form-field>
+
+    <div
+      *ngIf="volumeDiscountInfo() as info"
+      class="volume-discount-alert"
+      [ngClass]="{ 'alert-success': info.applies, 'alert-info': !info.applies }"
+    >
+      <mat-icon>{{ info.applies ? "verified" : "info" }}</mat-icon>
+
+      <div class="alert-content">
+        <strong>{{
+          info.applies ? "¡Descuento Disponible!" : "Estado de Tarifa"
+        }}</strong>
+        <span>{{ info.message }}</span>
+      </div>
+
+      <span *ngIf="info.applies" class="discount-tag"
+        >-{{ info.percentage }}%</span
+      >
+    </div>
   </div>
 
   <mat-divider class="section-divider"></mat-divider>
@@ -344,7 +371,7 @@
       >
         Costo de envío del paquete =
         <span class="cost-value"
-          >S/ {{ shippingCostPackage() | number : "1.2-2" }}</span
+          >S/ {{ shippingCostPackage() | number: "1.2-2" }}</span
         >
       </div>
     </div>
@@ -394,7 +421,7 @@
         <ng-container matColumnDef="basePrice">
           <th mat-header-cell *matHeaderCellDef>Precio Base</th>
           <td mat-cell *matCellDef="let element">
-            {{ element.value.basePrice | currency : "S/ " }}
+            {{ element.value.basePrice | currency: "S/ " }}
           </td>
         </ng-container>
 
@@ -404,7 +431,7 @@
             <span
               [ngClass]="{
                 'principal-item': element.value.isPrincipal,
-                'additional-item': !element.value.isPrincipal
+                'additional-item': !element.value.isPrincipal,
               }"
             >
               {{ element.value.isPrincipal ? "Principal" : "Adicional" }}
@@ -424,10 +451,10 @@
               class="discounted-price"
             >
               <span class="original-price">{{
-                element.value.basePrice | currency : "S/ "
+                element.value.basePrice | currency: "S/ "
               }}</span>
               <span class="final-price">{{
-                element.value.finalPrice | currency : "S/ "
+                element.value.finalPrice | currency: "S/ "
               }}</span>
             </div>
 
@@ -438,7 +465,7 @@
                 element.value.finalPrice >= element.value.basePrice
               "
             >
-              {{ element.value.finalPrice | currency : "S/ " }}
+              {{ element.value.finalPrice | currency: "S/ " }}
             </div>
           </td>
         </ng-container>
@@ -468,7 +495,7 @@
     Costo de envío =
     <span class="cost-value"
       >S/
-      {{ this.orderForm.get("shipping_cost")?.value | number : "1.2-2" }}</span
+      {{ this.orderForm.get("shipping_cost")?.value | number: "1.2-2" }}</span
     >
   </div>
 

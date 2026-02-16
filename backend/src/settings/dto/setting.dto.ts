@@ -43,6 +43,31 @@ export class PromotionalSetItemDto {
   order?: number;
 }
 
+export class VolumeDiscountRuleDto {
+  @IsString()
+  id: string;
+
+  @IsNumber()
+  minOrders: number;
+
+  @IsNumber()
+  maxOrders: number;
+
+  @IsNumber()
+  discountPercentage: number;
+
+  @IsOptional()
+  @IsDateString()
+  startDate: string | null;
+
+  @IsOptional()
+  @IsDateString()
+  endDate: string | null;
+
+  @IsBoolean()
+  isActive: boolean;
+}
+
 export class SettingDTO {
   @ApiProperty()
   @IsString()
@@ -189,4 +214,10 @@ export class SettingUpdateDTO {
   @IsOptional()
   @IsDateString()
   multiPackageDiscountEndDate?: Date | null;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => VolumeDiscountRuleDto)
+  volumeDiscountRules: VolumeDiscountRuleDto[];
 }

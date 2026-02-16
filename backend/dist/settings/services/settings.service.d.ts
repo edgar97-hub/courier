@@ -1,4 +1,4 @@
-import { DeleteResult, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Response } from 'express';
 import { SettingDTO, SettingUpdateDTO } from '../dto/setting.dto';
 import { PromotionalSetItem, SettingsEntity } from '../entities/settings.entity';
@@ -14,7 +14,6 @@ export declare class SettingsService {
     }): Promise<SettingsEntity>;
     getPromotionalSets(): Promise<PromotionalSetItem[] | []>;
     updateSettings(body: SettingUpdateDTO, id: string): Promise<SettingsEntity>;
-    deleteSettings(id: string): Promise<DeleteResult>;
     uploadLogo(logoFile: Express.Multer.File, req: Request): Promise<{
         logo_url: string;
     }>;

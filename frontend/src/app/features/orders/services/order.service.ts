@@ -613,6 +613,38 @@ export class OrderService {
       .pipe(catchError(this.handleError));
   }
 
+  getVolumeDiscountPreview(
+    deliveryDate: string,
+    companyId?: string,
+  ): Observable<any> {
+    const headers = this.getAuthHeaders();
+    let params = new HttpParams().set('delivery_date', deliveryDate);
+
+    if (companyId) {
+      params = params.set('company_id', companyId);
+    }
+
+    return this.http
+      .get<any>(`${this.apiUrlOrders}/volume-discount-preview`, {
+        params,
+        headers,
+      })
+      .pipe(catchError(this.handleError));
+  }
+
+  simulateBatchVolumeDiscount(orders: any[]): Observable<any[]> {
+    const headers = this.getAuthHeaders();
+
+    // Enviamos solo los datos necesarios para el cálculo
+    const payload = { orders };
+
+    return this.http
+      .post<
+        any[]
+      >(`${this.apiUrlOrders}/batch-volume-discount-simulation`, payload, { headers })
+      .pipe(catchError(this.handleError));
+  }
+
   getEffectiveDiscount(settings: AppSettings): number {
     const now = new Date();
 

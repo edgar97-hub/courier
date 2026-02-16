@@ -63,11 +63,15 @@ export const menuItems: MenuItem[] = [
         route: 'settings',
       },
       {
+        icon: 'settings_applications',
+        label: 'Ajustes de descuentos por volumen',
+        route: 'settings-volume-discounts',
+      },
+      {
         icon: 'group',
         label: 'Usuarios',
         route: 'users',
       },
-
       {
         icon: 'settings_applications',
         label: 'Tarifas de Envío',
@@ -123,7 +127,7 @@ export const menuItems: MenuItem[] = [
   },
   {
     icon: 'list_alt',
-    label: 'Pedidos entregados',
+    label: 'Pedidos Entregados',
     route: 'orders-delivered',
     roles: [
       UserRole.ADMIN,
@@ -131,6 +135,12 @@ export const menuItems: MenuItem[] = [
       UserRole.RECEPTIONIST,
       UserRole.EMPRESA_DISTRIBUIDOR,
     ],
+  },
+  {
+    icon: 'list_alt',
+    label: 'Descuento por volumen',
+    route: 'reports-volume-discounts',
+    roles: [UserRole.ADMIN, UserRole.RECEPTIONIST],
   },
   {
     icon: 'list_alt',

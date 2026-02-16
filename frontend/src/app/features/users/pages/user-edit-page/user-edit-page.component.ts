@@ -38,10 +38,10 @@ export class UserEditPageComponent implements OnInit, OnDestroy {
   private snackBar = inject(MatSnackBar);
 
   userSubject = new BehaviorSubject<User | null>(null);
-  user$ = this.userSubject.asObservable(); // Para pasar al UserCardComponent si no se edita
+  user$ = this.userSubject.asObservable();
 
   isLoading = true;
-  isEditMode = false; // Determinará si estamos en modo vista o edición
+  isEditMode = false;
   userId: string | null = null;
   private destroy$ = new Subject<void>();
 
@@ -51,7 +51,7 @@ export class UserEditPageComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
         tap(() => {
           this.isLoading = true;
-          this.userSubject.next(null); // Limpiar usuario anterior
+          this.userSubject.next(null);
         }),
         switchMap((params) => {
           const idParam = params.get('id');
@@ -73,7 +73,7 @@ export class UserEditPageComponent implements OnInit, OnDestroy {
           this.router.navigate(['/users']);
           return of(null);
         }),
-        filter((user) => user !== null) // Solo continuar si el usuario no es null
+        filter((user) => user !== null),
       )
       .subscribe((user) => {
         this.isLoading = false;
@@ -81,11 +81,10 @@ export class UserEditPageComponent implements OnInit, OnDestroy {
         if (user) {
           this.userSubject.next(user);
         } else if (this.userId) {
-          // Si había un ID pero el user es null (no encontrado por el servicio)
           this.snackBar.open(
             `User with ID ${this.userId} not found.`,
             'Close',
-            { duration: 3000 }
+            { duration: 3000 },
           );
           this.router.navigate(['/users']);
         }
@@ -136,7 +135,7 @@ export class UserEditPageComponent implements OnInit, OnDestroy {
                 duration: 5000,
                 verticalPosition: 'top',
                 panelClass: ['error-snackbar'],
-              }
+              },
             );
             console.error('Error updating user:', err);
           },
@@ -154,7 +153,7 @@ export class UserEditPageComponent implements OnInit, OnDestroy {
         .subscribe({
           next: (savedUser) => {
             this.isLoading = false;
-            this.userSubject.next(savedUser); // Actualiza el usuario mostrado si es necesario
+            this.userSubject.next(savedUser); 
             this.snackBar.open(`¡Actualizado exitosamente!`, 'OK', {
               duration: 3000,
               verticalPosition: 'top',
@@ -172,7 +171,7 @@ export class UserEditPageComponent implements OnInit, OnDestroy {
                 duration: 5000,
                 verticalPosition: 'top',
                 panelClass: ['error-snackbar'],
-              }
+              },
             );
             console.error('Error updating user:', err);
           },

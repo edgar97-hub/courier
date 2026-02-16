@@ -79,6 +79,24 @@ __decorate([
     __metadata("design:type", Number)
 ], OrdersEntity.prototype, "shipping_cost", void 0);
 __decorate([
+    (0, typeorm_1.Column)({
+        name: 'volume_discount_amount',
+        type: 'float',
+        default: 0.0,
+        comment: 'Monto monetario descontado por volumen (Ej. 5.00)',
+    }),
+    __metadata("design:type", Number)
+], OrdersEntity.prototype, "volumeDiscountAmount", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        name: 'applied_volume_discount_rule',
+        type: 'jsonb',
+        nullable: true,
+        comment: 'Snapshot de la regla aplicada (Rango, %, ID) para auditoría',
+    }),
+    __metadata("design:type", Object)
+], OrdersEntity.prototype, "appliedVolumeDiscountRule", void 0);
+__decorate([
     (0, typeorm_1.Column)({ nullable: true, default: '' }),
     __metadata("design:type", String)
 ], OrdersEntity.prototype, "payment_method_for_shipping_cost", void 0);

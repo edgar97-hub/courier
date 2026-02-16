@@ -6,6 +6,15 @@ export declare class PromotionalSetItemDto {
     isActive?: boolean;
     order?: number;
 }
+export declare class VolumeDiscountRuleDto {
+    id: string;
+    minOrders: number;
+    maxOrders: number;
+    discountPercentage: number;
+    startDate: string | null;
+    endDate: string | null;
+    isActive: boolean;
+}
 export declare class SettingDTO {
     business_name: string;
     ruc: string;
@@ -52,4 +61,5 @@ export declare class SettingUpdateDTO {
     multiPackageDiscountPercentage?: number;
     multiPackageDiscountStartDate?: Date | null;
     multiPackageDiscountEndDate?: Date | null;
+    volumeDiscountRules: VolumeDiscountRuleDto[];
 }

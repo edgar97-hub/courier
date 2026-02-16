@@ -8,7 +8,7 @@ import {
   ViewChild,
   ChangeDetectorRef,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import {
   FormBuilder,
   FormGroup,
@@ -56,6 +56,8 @@ import {
   styleUrls: ['./order-create-page.component.scss'],
 })
 export class OrderCreatePageComponent implements OnInit, OnDestroy {
+  private datePipe = inject(DatePipe);
+
   @ViewChild(OrderCreationFormComponent)
   orderCreationFormComponent!: OrderCreationFormComponent;
 
@@ -65,7 +67,7 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
 
   pickupOptionControl = new FormControl(
     'RECOGER EN DOMICILIO',
-    Validators.required
+    Validators.required,
   );
   termsAcceptedControl = new FormControl(false, Validators.requiredTrue);
 
@@ -79,9 +81,7 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
 
   constructor() {}
 
-  ngOnInit(): void {
-    // Podrías cargar opciones de pickup si vienen de una API
-  }
+  ngOnInit(): void {}
 
   handleOrderAdded(newOrder: NewOrderData): void {
     this.pendingOrders.update((currentOrders) => [...currentOrders, newOrder]);
@@ -94,15 +94,53 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
       this.orderCreationFormComponent.resetFormForNextOrder();
     }
     this.cdr.detectChanges();
+    this.recalculateDiscounts();
   }
 
   handleRemoveOrder(tempIdToRemove: string): void {
     this.pendingOrders.update((currentOrders) =>
-      currentOrders.filter((order) => order.temp_id !== tempIdToRemove)
+      currentOrders.filter((order) => order.temp_id !== tempIdToRemove),
     );
     this.snackBar.open('Pedido quitado del listado.', 'OK', {
       duration: 2000,
       verticalPosition: 'top',
+    });
+    this.recalculateDiscounts();
+  }
+
+  recalculateDiscounts() {
+    const currentOrders: any = this.pendingOrders();
+
+    if (currentOrders.length === 0) return;
+
+    // Preparamos el payload (solo lo necesario)
+    const payload = currentOrders.map((o: any) => ({
+      temp_id: o.temp_id,
+      company_id: o.company_id,
+      delivery_date: this.datePipe.transform(o.delivery_date, 'yyyy-MM-dd'),
+    }));
+
+    this.orderService.simulateBatchVolumeDiscount(payload).subscribe({
+      next: (results) => {
+        // Actualizamos la lista con los resultados del backend
+        this.pendingOrders.update((orders) => {
+          return orders.map((order) => {
+            const result = results.find((r) => r.temp_id === order.temp_id);
+
+            if (result) {
+              // Si el backend dice que hay descuento
+              return {
+                ...order,
+                appliedVolumeDiscountPercent: result.appliedDiscount,
+              };
+            }
+            return order;
+          });
+        });
+
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error recalculating discounts:', err),
     });
   }
 
@@ -115,7 +153,7 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
       this.snackBar.open(
         'No hay pedidos en el listado para enviar.',
         'Cerrar',
-        { duration: 3000, verticalPosition: 'top' }
+        { duration: 3000, verticalPosition: 'top' },
       );
       return;
     }
@@ -123,7 +161,7 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
       this.snackBar.open(
         'Por favor, seleccione cómo se hará el traslado.',
         'Cerrar',
-        { duration: 3000, verticalPosition: 'top' }
+        { duration: 3000, verticalPosition: 'top' },
       );
       this.pickupOptionControl.markAsTouched();
       return;
@@ -140,7 +178,7 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
       this.pendingOrders().map((order) => {
         const { temp_id, ...orderDataForBackend } = order;
         return orderDataForBackend;
-      })
+      }),
     );
     // return;
 
@@ -163,7 +201,7 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
       .createBatchOrders(payload)
       .pipe(
         takeUntil(this.destroy$),
-        finalize(() => this.isSubmittingBatch.set(false))
+        finalize(() => this.isSubmittingBatch.set(false)),
       )
       .subscribe({
         next: (response) => {
@@ -174,7 +212,7 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
               duration: 4000,
               verticalPosition: 'top',
               panelClass: ['success-snackbar'],
-            }
+            },
           );
           this.pendingOrders.set([]);
           this.pickupOptionControl.reset('RECOGER_DOMICILIO');
@@ -189,7 +227,7 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
               duration: 5000,
               verticalPosition: 'top',
               panelClass: ['error-snackbar'],
-            }
+            },
           );
           console.error('Error submitting batch orders:', err);
         },

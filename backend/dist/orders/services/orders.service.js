@@ -20,7 +20,7 @@ const typeorm_2 = require("typeorm");
 const orders_entity_1 = require("../entities/orders.entity");
 const districts_entity_1 = require("../../districts/entities/districts.entity");
 const roles_1 = require("../../constants/roles");
-const typeorm_3 = require("typeorm");
+const users_entity_1 = require("../../users/entities/users.entity");
 const orderLog_entity_1 = require("../entities/orderLog.entity");
 const date_fns_tz_1 = require("date-fns-tz");
 const date_fns_1 = require("date-fns");
@@ -40,13 +40,13 @@ const EXCEL_HEADER_TO_ENTITY_KEY_MAP = {
     OBSERVACION: 'observations',
 };
 let OrdersService = class OrdersService {
-    constructor(orderRepository, orderLogRepository, settingsRepository, districtsRepository, cashManagementService, entityManager) {
+    constructor(orderRepository, orderLogRepository, settingsRepository, districtsRepository, userRepository, cashManagementService) {
         this.orderRepository = orderRepository;
         this.orderLogRepository = orderLogRepository;
         this.settingsRepository = settingsRepository;
         this.districtsRepository = districtsRepository;
+        this.userRepository = userRepository;
         this.cashManagementService = cashManagementService;
-        this.entityManager = entityManager;
     }
     async updateOrderStatus(body, idUser) {
         let log;
@@ -318,6 +318,9 @@ let OrdersService = class OrdersService {
                 operationErrors.length === orderDTOs.length) {
                 throw new Error('Todos los pedidos en el lote fallaron al guardarse.');
             }
+            if (createdOrders.length > 0) {
+                await this.applyDiscountsToBatch(queryRunner, createdOrders);
+            }
             await queryRunner.commitTransaction();
             console.log('Batch orders created successfully (or partially, if errors occurred and were handled).');
             return {
@@ -488,6 +491,18 @@ let OrdersService = class OrdersService {
                 });
                 rowHasErrors = true;
             }
+            const standardItem = new order_item_entity_1.OrderItemEntity();
+            standardItem.package_type = order_item_entity_1.PackageType.STANDARD;
+            standardItem.description =
+                orderEntity.item_description || 'Paquete Importado';
+            standardItem.width_cm = 0;
+            standardItem.length_cm = 0;
+            standardItem.height_cm = 0;
+            standardItem.weight_kg = 0;
+            standardItem.basePrice = orderEntity.shipping_cost || 0;
+            standardItem.finalPrice = orderEntity.shipping_cost || 0;
+            standardItem.isPrincipal = true;
+            orderEntity.items = [standardItem];
             console.log('rowHasErrors');
             if (!rowHasErrors) {
                 orderEntity.status = roles_1.STATES.REGISTERED;
@@ -503,7 +518,6 @@ let OrdersService = class OrdersService {
                 ordersToSave.push(orderEntity);
             }
         }
-        console.log('ordersToSave.length', ordersToSave.length);
         if (ordersToSave.length > 0 && errors.length === 0) {
             const queryRunner = this.orderRepository.manager.connection.createQueryRunner();
             await queryRunner.connect();
@@ -511,9 +525,12 @@ let OrdersService = class OrdersService {
             try {
                 console.log(`Iniciando transacción para guardar ${ordersToSave.length} pedidos.`);
                 const entitiesToSave = ordersToSave.map((orderData) => queryRunner.manager.create(orders_entity_1.OrdersEntity, orderData));
-                await queryRunner.manager.save(orders_entity_1.OrdersEntity, entitiesToSave, {
+                const createdOrders = await queryRunner.manager.save(orders_entity_1.OrdersEntity, entitiesToSave, {
                     chunk: 100,
                 });
+                if (createdOrders.length > 0) {
+                    await this.applyDiscountsToBatch(queryRunner, createdOrders);
+                }
                 await queryRunner.commitTransaction();
                 importedCount = ordersToSave.length;
                 console.log(`${importedCount} pedidos guardados exitosamente dentro de la transacción.`);
@@ -584,6 +601,177 @@ let OrdersService = class OrdersService {
             importedCount: importedCount,
             errors: errors,
         };
+    }
+    async applyDiscountsToBatch(queryRunner, newOrders) {
+        const settings = await queryRunner.manager.findOne(settings_entity_1.SettingsEntity, {
+            where: {},
+        });
+        if (!settings?.volumeDiscountRules)
+            return;
+        const companyDatePairs = [
+            ...new Set(newOrders.map((o) => `${o.company.id}|${o.delivery_date}`)),
+        ];
+        const userStatusCache = new Map();
+        for (const pair of companyDatePairs) {
+            const [companyId, dateStr] = pair.split('|');
+            if (!dateStr || dateStr === 'null')
+                continue;
+            if (!userStatusCache.has(companyId)) {
+                const user = await queryRunner.manager.findOne(users_entity_1.UsersEntity, {
+                    where: { id: companyId },
+                    select: ['isVolumeDiscountEnabled'],
+                });
+                userStatusCache.set(companyId, user?.isVolumeDiscountEnabled ?? false);
+            }
+            if (!userStatusCache.get(companyId))
+                continue;
+            const dailyOrders = await queryRunner.manager.find(orders_entity_1.OrdersEntity, {
+                where: {
+                    company: { id: companyId },
+                    delivery_date: dateStr,
+                    status: (0, typeorm_2.Not)(roles_1.STATES.CANCELED),
+                },
+                order: { code: 'ASC' },
+            });
+            const ordersToUpdate = [];
+            for (let i = 0; i < dailyOrders.length; i++) {
+                const order = dailyOrders[i];
+                const sequenceNumber = i + 1;
+                const isPartOfCurrentBatch = newOrders.some((no) => no.id === order.id);
+                if (!isPartOfCurrentBatch)
+                    continue;
+                const activeRule = settings.volumeDiscountRules.find((rule) => {
+                    const isInRange = sequenceNumber >= rule.minOrders &&
+                        sequenceNumber <= rule.maxOrders;
+                    let isDateValid = true;
+                    if (rule.startDate && (0, date_fns_1.isBefore)(order.delivery_date, rule.startDate))
+                        isDateValid = false;
+                    if (rule.endDate && (0, date_fns_1.isAfter)(order.delivery_date, rule.endDate))
+                        isDateValid = false;
+                    return rule.isActive && isInRange && isDateValid;
+                });
+                if (activeRule) {
+                    const currentPrice = order.shipping_cost;
+                    const discountVal = (currentPrice * activeRule.discountPercentage) / 100;
+                    order.volumeDiscountAmount = parseFloat(discountVal.toFixed(2));
+                    order.shipping_cost = parseFloat((currentPrice - discountVal).toFixed(2));
+                    order.appliedVolumeDiscountRule = {
+                        ruleId: activeRule.id,
+                        percentage: activeRule.discountPercentage,
+                        sequenceNumber: sequenceNumber,
+                        range: `${activeRule.minOrders} - ${activeRule.maxOrders}`,
+                        appliedAtDate: new Date().toISOString(),
+                    };
+                    ordersToUpdate.push(order);
+                }
+            }
+            if (ordersToUpdate.length > 0) {
+                await queryRunner.manager.save(orders_entity_1.OrdersEntity, ordersToUpdate);
+            }
+        }
+    }
+    async previewVolumeDiscount(userId, deliveryDate) {
+        const user = await this.userRepository.findOne({ where: { id: userId } });
+        if (!user?.isVolumeDiscountEnabled) {
+            return {
+                applies: false,
+                message: 'Cliente no habilitado para descuentos por volumen.',
+            };
+        }
+        const settings = await this.settingsRepository.findOne({ where: {} });
+        if (!settings?.volumeDiscountRules)
+            return { applies: false };
+        const currentCount = await this.orderRepository.count({
+            where: {
+                user: { id: userId },
+                delivery_date: deliveryDate,
+                status: (0, typeorm_2.Not)(roles_1.STATES.CANCELED),
+            },
+        });
+        const nextSequenceNumber = currentCount + 1;
+        const activeRule = settings.volumeDiscountRules.find((rule) => {
+            const isInRange = nextSequenceNumber >= rule.minOrders &&
+                nextSequenceNumber <= rule.maxOrders;
+            let isDateValid = true;
+            if (rule.startDate && (0, date_fns_1.isBefore)(deliveryDate, rule.startDate))
+                isDateValid = false;
+            if (rule.endDate && (0, date_fns_1.isAfter)(deliveryDate, rule.endDate))
+                isDateValid = false;
+            return rule.isActive && isInRange && isDateValid;
+        });
+        if (activeRule) {
+            return {
+                applies: true,
+                currentDailyCount: currentCount,
+                nextSequenceNumber: nextSequenceNumber,
+                discountPercentage: activeRule.discountPercentage,
+                message: `¡Genial! Este será tu pedido #${nextSequenceNumber} del día. Aplica ${activeRule.discountPercentage}% de descuento.`,
+            };
+        }
+        else {
+            const nextRule = settings.volumeDiscountRules
+                .filter((r) => r.minOrders > nextSequenceNumber)
+                .sort((a, b) => a.minOrders - b.minOrders)[0];
+            const missing = nextRule ? nextRule.minOrders - nextSequenceNumber : 0;
+            return {
+                applies: false,
+                currentDailyCount: currentCount,
+                nextSequenceNumber: nextSequenceNumber,
+                message: nextRule
+                    ? `Pedido #${nextSequenceNumber}. Te faltan ${missing} pedidos para obtener ${nextRule.discountPercentage}% de descuento.`
+                    : `Pedido #${nextSequenceNumber}. Tarifa estándar.`,
+            };
+        }
+    }
+    async simulateBatchVolumeDiscount(tempOrders) {
+        const groups = new Map();
+        for (const order of tempOrders) {
+            const key = `${order.company_id}_${order.delivery_date}`;
+            if (!groups.has(key)) {
+                groups.set(key, 0);
+            }
+        }
+        const settings = await this.settingsRepository.findOne({ where: {} });
+        const dbCounts = new Map();
+        for (const key of groups.keys()) {
+            const [userId, date] = key.split('_');
+            const user = await this.userRepository.findOne({ where: { id: userId } });
+            if (!user?.isVolumeDiscountEnabled) {
+                dbCounts.set(key, -1);
+                continue;
+            }
+            const count = await this.orderRepository.count({
+                where: {
+                    user: { id: userId },
+                    delivery_date: date,
+                    status: (0, typeorm_2.Not)(roles_1.STATES.CANCELED),
+                },
+            });
+            dbCounts.set(key, count);
+        }
+        const results = tempOrders.map((order) => {
+            const key = `${order.company_id}_${order.delivery_date}`;
+            const currentDbCount = dbCounts.get(key);
+            if (currentDbCount === -1 || !settings?.volumeDiscountRules) {
+                return { temp_id: order.temp_id, appliedDiscount: 0 };
+            }
+            const sequenceNumber = (currentDbCount || 0) + 1;
+            dbCounts.set(key, sequenceNumber);
+            const activeRule = settings.volumeDiscountRules.find((rule) => {
+                const isInRange = sequenceNumber >= rule.minOrders && sequenceNumber <= rule.maxOrders;
+                let isDateValid = true;
+                if (rule.startDate && (0, date_fns_1.isBefore)(order.delivery_date, rule.startDate))
+                    isDateValid = false;
+                if (rule.endDate && (0, date_fns_1.isAfter)(order.delivery_date, rule.endDate))
+                    isDateValid = false;
+                return rule.isActive && isInRange && isDateValid;
+            });
+            return {
+                temp_id: order.temp_id,
+                appliedDiscount: activeRule ? activeRule.discountPercentage : 0,
+            };
+        });
+        return results;
     }
     async getActiveDistrictsByDateRange(req, startDate, endDate, status) {
         const idUser = req.idUser;
@@ -1051,6 +1239,50 @@ let OrdersService = class OrdersService {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
+    async getVolumeDiscountReport(startDate, endDate, companyId, statusMeta) {
+        const query = this.orderRepository
+            .createQueryBuilder('order')
+            .leftJoin('order.company', 'company')
+            .select([
+            'order.delivery_date AS date',
+            'company.username AS client_name',
+            'company.id AS client_id',
+            'COUNT(order.id) AS total_orders',
+            'SUM(order.shipping_cost) AS total_invoiced',
+            `MAX( ("order".applied_volume_discount_rule->>'percentage')::float ) AS max_discount`,
+            `MAX( "order".applied_volume_discount_rule->>'range' ) AS range_reached`,
+        ])
+            .where('order.status != :status', { status: roles_1.STATES.CANCELED })
+            .andWhere('order.delivery_date BETWEEN :startDate AND :endDate', {
+            startDate,
+            endDate,
+        });
+        if (companyId) {
+            query.andWhere('company.id = :companyId', { companyId });
+        }
+        query
+            .groupBy('order.delivery_date')
+            .addGroupBy('company.id')
+            .addGroupBy('company.username')
+            .orderBy('order.delivery_date', 'DESC');
+        const rawResults = await query.getRawMany();
+        let report = rawResults.map((res) => ({
+            date: res.date,
+            clientName: res.client_name,
+            totalOrders: parseInt(res.total_orders),
+            rangeReached: res.range_reached || 'No alcanzó',
+            discount: res.max_discount ? `${res.max_discount}%` : '0%',
+            totalInvoiced: parseFloat(res.total_invoiced).toFixed(2),
+            hasReachedMeta: !!res.range_reached,
+        }));
+        if (statusMeta === 'ALCANZADA') {
+            report = report.filter((r) => r.hasReachedMeta);
+        }
+        else if (statusMeta === 'NO_ALCANZADA') {
+            report = report.filter((r) => !r.hasReachedMeta);
+        }
+        return report;
+    }
 };
 exports.OrdersService = OrdersService;
 exports.OrdersService = OrdersService = __decorate([
@@ -1059,12 +1291,12 @@ exports.OrdersService = OrdersService = __decorate([
     __param(1, (0, typeorm_1.InjectRepository)(orderLog_entity_1.OrderLogEntity)),
     __param(2, (0, typeorm_1.InjectRepository)(settings_entity_1.SettingsEntity)),
     __param(3, (0, typeorm_1.InjectRepository)(districts_entity_1.DistrictsEntity)),
-    __param(5, (0, typeorm_1.InjectEntityManager)()),
+    __param(4, (0, typeorm_1.InjectRepository)(users_entity_1.UsersEntity)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
-        cashManagement_service_1.CashManagementService,
-        typeorm_3.EntityManager])
+        typeorm_2.Repository,
+        cashManagement_service_1.CashManagementService])
 ], OrdersService);
 //# sourceMappingURL=orders.service.js.map

@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrdersEntity } from './entities/orders.entity';
 import { OrderPdfGeneratorService } from './services/order-pdf-generator.service';
 import { OrderLogEntity } from './entities/orderLog.entity';
-import { CashManagementModule } from '../cashManagement/cashManagement.module'; // Import CashManagementModule
+import { CashManagementModule } from '../cashManagement/cashManagement.module';
 
 @Global()
 @Module({

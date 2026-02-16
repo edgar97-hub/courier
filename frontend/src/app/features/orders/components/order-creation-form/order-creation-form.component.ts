@@ -110,6 +110,8 @@ interface FormErrors {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OrderCreationFormComponent implements OnInit, OnDestroy {
+  private datePipe = inject(DatePipe);
+
   itemsDataSource = new MatTableDataSource<AbstractControl>();
 
   @Output() orderSubmit = new EventEmitter<NewOrderData>();
@@ -138,6 +140,12 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   staWidthCm: WritableSignal<number> = signal(0);
   staHeightCm: WritableSignal<number> = signal(0);
   staWeightKg: WritableSignal<number> = signal(0);
+
+  volumeDiscountInfo = signal<{
+    applies: boolean;
+    message: string;
+    percentage: number;
+  } | null>(null);
 
   shipmentTypes: string[] = [
     'CONTRAENTREGA',
@@ -217,10 +225,10 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
           catchError(() => {
             this.isLoadingDrivers = false;
             return of([]);
-          })
+          }),
         );
       }),
-      takeUntil(this.destroy$)
+      takeUntil(this.destroy$),
     );
 
     this.filteredDistricts$ = this.districtSearchCtrl.valueChanges.pipe(
@@ -231,17 +239,17 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
         return this.orderService
           .getDistricts(
             searchTerm || '',
-            this.orderForm.get('isExpress')?.value
+            this.orderForm.get('isExpress')?.value,
           )
           .pipe(
             tap(() => (this.isLoadingDistricts = false)),
             catchError(() => {
               this.isLoadingDistricts = false;
               return of([]);
-            })
+            }),
           );
       }),
-      takeUntil(this.destroy$)
+      takeUntil(this.destroy$),
     );
 
     effect(() => {
@@ -260,7 +268,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
         {
           duration: 3000,
           panelClass: ['error-snackbar'],
-        }
+        },
       );
       return 0;
     }
@@ -314,7 +322,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
         : customData.package_weight_kg;
 
     const districtFound = this.districtsCache.find(
-      (item) => item.id === customData.delivery_district_id
+      (item) => item.id === customData.delivery_district_id,
     );
     if (!districtFound) {
       this.shippingCostPackage.set(0);
@@ -322,7 +330,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     }
 
     const filtrados = this.districtsCache.filter(
-      (item) => item.name === districtFound.name
+      (item) => item.name === districtFound.name,
     );
     const tarifa = this.findTariffForWeight(pesoCobrado, filtrados);
     const precio = tarifa?.price ? parseFloat(tarifa.price) : 0;
@@ -331,7 +339,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       this.snackBar.open(
         `No hay ninguna tarifa asociada con el peso (${pesoCobrado}) del distrito seleccionado.`,
         'Cerrar',
-        { duration: 3000, panelClass: ['error-snackbar'] }
+        { duration: 3000, panelClass: ['error-snackbar'] },
       );
     }
     this.shippingCostPackage.set(precio);
@@ -340,7 +348,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
 
   private findTariffForWeight(
     weight: number,
-    tariffs: DistrictOption[]
+    tariffs: DistrictOption[],
   ): DistrictOption | undefined {
     const tariffList = tariffs as any[];
     for (const tariff of tariffList) {
@@ -442,7 +450,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       .subscribe((status) => {
         console.log(
           'Order form is invalid:',
-          this.getFormErrors(this.orderForm)
+          this.getFormErrors(this.orderForm),
         );
 
         this.formValidityChanged.emit(status === 'VALID');
@@ -469,12 +477,13 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
 
   private buildForm(): void {
     const company_id = this.isCompany()
-      ? this.appStore.currentUser()?.id ?? null
+      ? (this.appStore.currentUser()?.id ?? null)
       : null;
     this.createNewItemForm();
     this.setupPackageTypeSubscription();
     this.createOrderForm(company_id);
     this.setupRealtimePriceCalculation();
+    this.setupVolumeDiscountListener();
   }
 
   private createNewItemForm(): void {
@@ -494,7 +503,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       ?.valueChanges.pipe(takeUntil(this.destroy$))
       .subscribe((type) => {
         const deliveryDistrictId = this.orderForm.get(
-          'delivery_district_id'
+          'delivery_district_id',
         )?.value;
         if (!deliveryDistrictId) {
           this.itemsFormArray.clear();
@@ -513,16 +522,66 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
             fields.forEach((field) =>
               this.newItemForm
                 .get(field)
-                ?.setValidators([Validators.required, Validators.min(0.1)])
+                ?.setValidators([Validators.required, Validators.min(0.1)]),
             );
           } else {
             fields.forEach((field) =>
-              this.newItemForm.get(field)?.clearValidators()
+              this.newItemForm.get(field)?.clearValidators(),
             );
           }
           this.newItemForm.updateValueAndValidity();
         }
       });
+  }
+
+  private setupVolumeDiscountListener(): void {
+    // Escuchar cambios en Fecha de Entrega o Empresa (si es admin)
+    merge(
+      this.orderForm.get('delivery_date')!.valueChanges,
+      this.orderForm.get('company_id')!.valueChanges,
+    )
+      .pipe(debounceTime(500), takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.checkVolumeDiscount();
+      });
+  }
+
+  private checkVolumeDiscount(): void {
+    const date = this.orderForm.get('delivery_date')?.value;
+    // Si es admin, tomamos el ID del combo, si es empresa, del store
+    // const companyId = this.isCompany()
+    //   ? this.appStore.currentUser()?.id
+    //   : this.orderForm.get('company_id')?.value;
+
+    const companyId = this.orderForm.get('company_id')?.value;
+
+    if (date && companyId) {
+      // Formatear fecha a YYYY-MM-DD (Asegúrate de usar tu DatePipe o lógica de formato)
+      const formattedDate = this.datePipe.transform(date, 'yyyy-MM-dd') || '';
+
+      this.orderService
+        .getVolumeDiscountPreview(formattedDate, companyId)
+        .subscribe({
+          next: (res) => {
+            if (res && res.applies) {
+              this.volumeDiscountInfo.set({
+                applies: true,
+                message: res.message, // Ej: "¡Genial! Este pedido activa el 5% de dscto."
+                percentage: res.discountPercentage,
+              });
+            } else {
+              this.volumeDiscountInfo.set({
+                applies: false,
+                message: res.message || '', // Ej: "Pedido #4. Faltan 6 para el descuento."
+                percentage: 0,
+              });
+            }
+          },
+          error: () => this.volumeDiscountInfo.set(null),
+        });
+    } else {
+      this.volumeDiscountInfo.set(null);
+    }
   }
 
   private createOrderForm(company_id: string | null): void {
@@ -558,7 +617,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   private setupRealtimePriceCalculation(): void {
     merge(
       this.newItemForm.valueChanges,
-      this.orderForm.get('delivery_district_id')!.valueChanges
+      this.orderForm.get('delivery_district_id')!.valueChanges,
     )
       .pipe(debounceTime(300), takeUntil(this.destroy$))
       .subscribe(() => {
@@ -596,7 +655,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
         {
           duration: 3000,
           panelClass: ['error-snackbar'],
-        }
+        },
       );
       return;
     }
@@ -619,7 +678,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       this.snackBar.open(
         'No se pudo calcular una tarifa para el paquete. Verifique el distrito y las medidas.',
         'Cerrar',
-        { duration: 3000, panelClass: ['error-snackbar'] }
+        { duration: 3000, panelClass: ['error-snackbar'] },
       );
       return;
     }
@@ -637,7 +696,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
         basePrice: [basePrice],
         finalPrice: [0],
         isPrincipal: [false],
-      })
+      }),
     );
     this.recalculateTotalCost(this.itemsFormArray.value);
 
@@ -661,7 +720,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     // Encontrar el principal
     const principalItem = items.reduce(
       (max, item) => (item.basePrice > max.basePrice ? item : max),
-      items[0]
+      items[0],
     );
 
     let totalCost = 0;
@@ -699,7 +758,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
         {
           duration: 3000,
           panelClass: ['error-snackbar'],
-        }
+        },
       );
       return;
     }
@@ -776,10 +835,15 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
         .join(', ') +
       (formValue.item_description ? ' | ' + formValue.item_description : '');
 
+    const discountInfo = this.volumeDiscountInfo();
+
     const newOrderData: NewOrderData = {
       ...formValue,
       delivery_district_name: this.selectedDistrictName(),
       temp_id: `temp-${Date.now()}`,
+      appliedVolumeDiscountPercent: discountInfo?.applies
+        ? discountInfo.percentage
+        : undefined,
     };
     console.log('Submitting New Order Data:', newOrderData);
     this.orderSubmit.emit(newOrderData);
@@ -836,7 +900,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       // Si es un FormGroup anidado, recurrir
       if (formGroup.get(key) instanceof FormGroup) {
         const nestedErrors = this.getFormErrors(
-          formGroup.get(key) as FormGroup
+          formGroup.get(key) as FormGroup,
         );
         if (Object.keys(nestedErrors).length > 0) {
           errors[key] = nestedErrors;

@@ -16,9 +16,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatCardModule } from '@angular/material/card';
 import { MatGridListModule } from '@angular/material/grid-list';
-import { MatTooltipModule } from '@angular/material/tooltip'; // Para tooltips
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Order, Order_, OrderStatus } from '../../models/order.model';
-import { DefaultPipe } from '../../../../shared/pipes/default.pipe';  
+import { DefaultPipe } from '../../../../shared/pipes/default.pipe';
 
 export interface OrderDetailDialogData {
   order: Order_;
@@ -47,7 +47,7 @@ export interface OrderDetailDialogData {
 export class OrderDetailDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<OrderDetailDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: OrderDetailDialogData
+    @Inject(MAT_DIALOG_DATA) public data: OrderDetailDialogData,
   ) {
     console.log('data', data);
   }
@@ -74,7 +74,7 @@ export class OrderDetailDialogComponent {
     if (coordinates) {
       window.open(
         `https://www.google.com/maps/search/?api=1&query=${coordinates}`,
-        '_blank'
+        '_blank',
       );
     }
   }

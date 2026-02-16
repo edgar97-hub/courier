@@ -9,8 +9,8 @@ import { Observable, Subject } from 'rxjs';
 import { takeUntil, tap, filter } from 'rxjs/operators';
 
 import { Store } from '@ngrx/store';
-import * as UserActions from '../../store/user.actions'; // Asume que tienes estas acciones
-import * as UserSelectors from '../../store/user.selectors'; // Asume que tienes estos selectors
+import * as UserActions from '../../store/user.actions';
+import * as UserSelectors from '../../store/user.selectors';
 
 import { UserTableComponent } from '../../components/user-table/user-table.component';
 import { User } from '../../models/user.model';
@@ -25,8 +25,8 @@ import { ConfirmDialogComponent } from './confirm-dialog.component';
     UserTableComponent,
     MatButtonModule,
     MatIconModule,
-    MatDialogModule, // Añadir MatDialogModule
-    MatSnackBarModule, // Añadir MatSnackBarModule
+    MatDialogModule,
+    MatSnackBarModule,
   ],
   templateUrl: './user-list-page.component.html',
   styleUrls: ['./user-list-page.component.scss'],
@@ -38,7 +38,7 @@ export class UserListPageComponent implements OnInit, OnDestroy {
 
   users$: Observable<User[]>;
   isLoading$: Observable<boolean>;
-  error$: Observable<string | null>; // Para mostrar errores del store si es necesario
+  error$: Observable<string | null>;
   private destroy$ = new Subject<void>();
 
   constructor() {
@@ -46,15 +46,18 @@ export class UserListPageComponent implements OnInit, OnDestroy {
       .select(UserSelectors.selectAllUsers)
       .pipe(
         tap((users) =>
-          console.log('UserListPageComponent: Users from store:', users)
-        )
+          console.log('UserListPageComponent: Users from store:', users),
+        ),
       );
     this.isLoading$ = this.store
       .select(UserSelectors.selectUserIsLoading)
       .pipe(
         tap((isLoading) =>
-          console.log('UserListPageComponent: IsLoading from store:', isLoading)
-        )
+          console.log(
+            'UserListPageComponent: IsLoading from store:',
+            isLoading,
+          ),
+        ),
       );
     this.error$ = this.store.select(UserSelectors.selectUserError).pipe(
       filter((error) => !!error), // Solo reaccionar si hay un error
@@ -66,7 +69,7 @@ export class UserListPageComponent implements OnInit, OnDestroy {
         // this.snackBar.open(error || 'An unknown error occurred.', 'Close', {
         //   duration: 5000, panelClass: ['error-snackbar'], verticalPosition: 'top'
         // });
-      })
+      }),
     );
   }
 
@@ -104,7 +107,7 @@ export class UserListPageComponent implements OnInit, OnDestroy {
       .afterClosed()
       .pipe(
         filter((result) => !!result), // Solo continuar si result es true
-        takeUntil(this.destroy$)
+        takeUntil(this.destroy$),
       )
       .subscribe(() => {
         this.performDelete(user);

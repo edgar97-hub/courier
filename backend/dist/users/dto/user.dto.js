@@ -295,4 +295,9 @@ __decorate([
     (0, class_validator_1.IsEnum)(roles_1.ROLES),
     __metadata("design:type", String)
 ], RegistrationUserCompanyDTO.prototype, "role", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], RegistrationUserCompanyDTO.prototype, "isVolumeDiscountEnabled", void 0);
 //# sourceMappingURL=user.dto.js.map

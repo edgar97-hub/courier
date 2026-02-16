@@ -19,10 +19,12 @@ export declare class OrdersEntity extends BaseEntity {
     package_length_cm?: number;
     package_height_cm?: number;
     package_weight_kg?: number;
-    shipping_cost?: number;
+    shipping_cost: number;
+    volumeDiscountAmount: number;
+    appliedVolumeDiscountRule: any;
     payment_method_for_shipping_cost?: string;
     item_description?: string;
-    amount_to_collect_at_delivery?: number;
+    amount_to_collect_at_delivery: number;
     payment_method_for_collection?: string;
     observations?: string;
     type_order_transfer_to_warehouse?: string;

@@ -10,7 +10,7 @@ import { AppStore } from '../../../app.store';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { MatListModule } from '@angular/material/list';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { NoticeService } from '../../../core/services/notice.service'; // Ajusta ruta
+import { NoticeService } from '../../../core/services/notice.service';  
 import {
   RouteSpecificNoticeDialogComponent,
   RouteNoticeDialogData,
@@ -18,7 +18,7 @@ import {
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Subject } from 'rxjs';
 import { filter, takeUntil, switchMap, tap } from 'rxjs/operators';
-import { Router, NavigationEnd, Event as RouterEvent } from '@angular/router'; // Event para tipar
+import { Router, NavigationEnd, Event as RouterEvent } from '@angular/router';  
 
 @Component({
   selector: 'app-layout',

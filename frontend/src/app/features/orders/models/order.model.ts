@@ -50,6 +50,9 @@ export interface NewOrderData {
   delivery_district_name?: string;
   temp_id?: string;
   company_id?: string;
+
+  appliedVolumeDiscountPercent?: number; // Ej: 5 (para 5%)
+  discountMessage?: string; // Mensaje explicativo
 }
 
 // Para el payload final que se envía al backend con el lote de pedidos
@@ -157,7 +160,7 @@ export interface Order_ {
   package_height_cm?: number;
   package_weight_kg?: number;
   item_description?: string;
-  shipping_cost?: number;
+  shipping_cost: number;
   payment_method_for_shipping_cost?: string;
   amount_to_collect_at_delivery?: number;
   payment_method_for_collection?: string;
@@ -174,6 +177,8 @@ export interface Order_ {
   observation_shipping_cost_modification?: string;
   isExpress?: boolean;
   items: OrderItem[];
+  volumeDiscountAmount: number;
+  appliedVolumeDiscountRule: any;
 }
 
 export interface Motorized {

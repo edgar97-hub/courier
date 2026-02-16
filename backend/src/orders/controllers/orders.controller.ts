@@ -54,6 +54,25 @@ export class OrdersController {
     );
   }
 
+  @Get('volume-discount-preview')
+  async getVolumeDiscountPreview(
+    @Req() req: any,
+    @Query('delivery_date') deliveryDate: string, // YYYY-MM-DD
+    @Query('company_id') companyId: string,
+  ) {
+    const targetUserId = companyId;
+
+    return await this.ordersService.previewVolumeDiscount(
+      targetUserId,
+      deliveryDate,
+    );
+  }
+
+  @Post('batch-volume-discount-simulation')
+  async simulateBatchVolumeDiscount(@Body() body: { orders: any[] }) {
+    return await this.ordersService.simulateBatchVolumeDiscount(body.orders);
+  }
+
   @Get('active-districts')
   async getActiveDistricts(
     @Req() req: any,
@@ -281,5 +300,20 @@ export class OrdersController {
   @Get('dashboard/data')
   async getDashboardSummary(@Request() req): Promise<any> {
     return this.ordersService.dashboardOrders(req);
+  }
+
+  @Get('reports/volume-discounts')
+  async getVolumeDiscountReport(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+    @Query('companyId') companyId?: string,
+    @Query('statusMeta') statusMeta?: 'ALCANZADA' | 'NO_ALCANZADA',
+  ) {
+    return await this.ordersService.getVolumeDiscountReport(
+      startDate,
+      endDate,
+      companyId,
+      statusMeta,
+    );
   }
 }

@@ -49,12 +49,12 @@ export class SettingsService {
         this.settingsSubject.next(settings);
         console.log(
           'SettingsService: Settings loaded from API and Subject updated',
-          settings
+          settings,
         );
       }),
       catchError(
-        this.handleError<AppSettings>('loadSettings', initialAppSettings)
-      )
+        this.handleError<AppSettings>('loadSettings', initialAppSettings),
+      ),
     );
   }
   saveSettings(settings: AppSettings): Observable<AppSettings> {
@@ -71,10 +71,10 @@ export class SettingsService {
           this.settingsSubject.next(savedSettings);
           console.log(
             'SettingsService: Settings saved and Subject updated',
-            savedSettings
+            savedSettings,
           );
         }),
-        catchError(this.handleError<AppSettings>('saveSettings'))
+        catchError(this.handleError<AppSettings>('saveSettings')),
       );
   }
 
@@ -96,15 +96,14 @@ export class SettingsService {
       })
       .pipe(
         tap((response) =>
-          console.log('SettingsService: Logo uploaded', response)
+          console.log('SettingsService: Logo uploaded', response),
         ),
-        catchError(this.handleError<{ logo_url: string }>('uploadLogo'))
+        catchError(this.handleError<{ logo_url: string }>('uploadLogo')),
       );
   }
 
   uploadTermsPdf(file: File): Observable<{ terms_conditions_url: string }> {
     const formData = new FormData();
-    // El backend esperará un campo como 'termsPdfFile' o similar
     formData.append('termsPdfFile', file, file.name);
     const token = this.authService.getAccessToken();
     if (!token) {
@@ -114,18 +113,16 @@ export class SettingsService {
       codrr_token: token,
     });
     return this.http
-      .post<{ terms_conditions_url: string }>(
-        `${this.apiUrl}/upload-terms-pdf`,
-        formData,
-        { headers }
-      )
+      .post<{
+        terms_conditions_url: string;
+      }>(`${this.apiUrl}/upload-terms-pdf`, formData, { headers })
       .pipe(
         tap((response) =>
-          console.log('SettingsService: Terms PDF uploaded', response)
+          console.log('SettingsService: Terms PDF uploaded', response),
         ),
         catchError(
-          this.handleError<{ terms_conditions_url: string }>('uploadTermsPdf')
-        )
+          this.handleError<{ terms_conditions_url: string }>('uploadTermsPdf'),
+        ),
       );
   }
 
@@ -145,17 +142,16 @@ export class SettingsService {
       })
       .pipe(
         tap((response) =>
-          console.log('SettingsService: Terms PDF uploaded', response)
+          console.log('SettingsService: Terms PDF uploaded', response),
         ),
         catchError(
           this.handleError<{
             file_url: string;
-          }>('file')
-        )
+          }>('file'),
+        ),
       );
   }
 
-  // Método genérico para manejo de errores
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: HttpErrorResponse): Observable<T> => {
       console.error(`${operation} failed: ${error.message}`, error);
@@ -167,14 +163,13 @@ export class SettingsService {
             new Error(
               `Error in ${operation}. Details: ${
                 error.message || 'Server error'
-              }`
-            )
+              }`,
+            ),
         );
       }
     };
   }
 
-  // Para obtener el valor actual de las configuraciones de forma síncrona (si ya se cargaron)
   getCurrentSettings(): AppSettings | null {
     return this.settingsSubject.value;
   }

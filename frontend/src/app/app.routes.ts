@@ -14,24 +14,24 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: () =>
       import('./features/login/pages/login-page/login-page.component').then(
-        (m) => m.LoginPageComponent
+        (m) => m.LoginPageComponent,
       ),
     canMatch: [redirectDashboardIfAuthenticated],
   },
   {
     path: 'register',
     loadComponent: () =>
-      import(
-        './features/auth/pages/register-page/register-page.component'
-      ).then((m) => m.RegisterPageComponent),
+      import('./features/auth/pages/register-page/register-page.component').then(
+        (m) => m.RegisterPageComponent,
+      ),
     canMatch: [redirectDashboardIfAuthenticated],
   },
   {
     path: 'forgot-password',
     loadComponent: () =>
-      import(
-        './features/auth/pages/forgot-password-page/forgot-password-page.component'
-      ).then((m) => m.ForgotPasswordPageComponent),
+      import('./features/auth/pages/forgot-password-page/forgot-password-page.component').then(
+        (m) => m.ForgotPasswordPageComponent,
+      ),
     canMatch: [redirectDashboardIfAuthenticated],
   },
   {
@@ -44,7 +44,7 @@ export const routes: Routes = [
         path: 'dashboard',
         loadChildren: () =>
           import('./features/dashboard/dashboard.routes').then(
-            (m) => m.DASHBOARD_ROUTES
+            (m) => m.DASHBOARD_ROUTES,
           ),
       },
       {
@@ -56,9 +56,16 @@ export const routes: Routes = [
       {
         path: 'settings',
         loadComponent: () =>
-          import(
-            './features/settings/pages/settings-page/settings-page.component'
-          ).then((m) => m.SettingsPageComponent),
+          import('./features/settings/pages/settings-page/settings-page.component').then(
+            (m) => m.SettingsPageComponent,
+          ),
+      },
+      {
+        path: 'settings-volume-discounts',
+        loadComponent: () =>
+          import('./features/settings/pages/volume-discount/volume-discount-settings.component').then(
+            (m) => m.VolumeDiscountSettingsComponent,
+          ),
       },
       {
         path: 'shipping-rates',
@@ -67,86 +74,93 @@ export const routes: Routes = [
       {
         path: 'tarifas',
         loadComponent: () =>
-          import(
-            './features/shared/image-display/image-display.component'
-          ).then((m) => m.ImageDisplayComponent),
+          import('./features/shared/image-display/image-display.component').then(
+            (m) => m.ImageDisplayComponent,
+          ),
       },
       {
         path: 'terms-and-conditions',
         loadComponent: () =>
-          import(
-            './features/shared/terms-and-conditions-display/terms-and-conditions-display.component'
-          ).then((m) => m.TermsConditionsDisplayComponent),
+          import('./features/shared/terms-and-conditions-display/terms-and-conditions-display.component').then(
+            (m) => m.TermsConditionsDisplayComponent,
+          ),
       },
       {
         path: 'package-calculator',
         loadComponent: () =>
-          import(
-            './features/shared/package-calculator/package-calculator.component'
-          ).then((m) => m.PackageCalculatorComponent),
+          import('./features/shared/package-calculator/package-calculator.component').then(
+            (m) => m.PackageCalculatorComponent,
+          ),
       },
       {
         path: 'districts',
         loadChildren: () =>
           import('./features/districts/districts.routes').then(
-            (m) => m.DISTRICTS_ROUTES
+            (m) => m.DISTRICTS_ROUTES,
           ),
       },
       {
         path: 'orders',
         loadChildren: () =>
           import('./features/orders/orders.routes').then(
-            (m) => m.ORDERS_ROUTES
+            (m) => m.ORDERS_ROUTES,
           ),
       },
       {
         path: 'orders-registered',
         loadChildren: () =>
           import('./features/ordersRegistradas/orders.routes').then(
-            (m) => m.ORDERS_ROUTES
+            (m) => m.ORDERS_ROUTES,
           ),
       },
       {
         path: 'orders-delivered',
         loadChildren: () =>
           import('./features/deliveredOrders/orders.routes').then(
-            (m) => m.ORDERS_ROUTES
+            (m) => m.ORDERS_ROUTES,
+          ),
+      },
+      {
+        path: 'reports-volume-discounts',
+        loadComponent: () =>
+          import('./features/volume-discount-report/pages/volume-discount-report/volume-discount-report.component').then(
+            (m) => m.VolumeDiscountReportComponent,
           ),
       },
       {
         path: 'lista-cierre-caja',
         loadChildren: () =>
           import('./features/listaCierreCaja/orders.routes').then(
-            (m) => m.ORDERS_ROUTES
+            (m) => m.ORDERS_ROUTES,
           ),
       },
       {
         path: 'cash-management',
         loadChildren: () =>
           import('./features/cashManagement/cash-management.routes').then(
-            (m) => m.CASH_MANAGEMENT_ROUTES
+            (m) => m.CASH_MANAGEMENT_ROUTES,
           ),
       },
       {
         path: 'registros-distribuidor',
         loadChildren: () =>
-          import(
-            './features/distributor-registrations/distributor-records.routes'
-          ).then((m) => m.DISTRIBUTOR_RECORDS_ROUTES),
+          import('./features/distributor-registrations/distributor-records.routes').then(
+            (m) => m.DISTRIBUTOR_RECORDS_ROUTES,
+          ),
       },
       {
         path: 'planning-events',
         loadChildren: () =>
           import('./features/planning-events/planning-events.routes').then(
-            (m) => m.PLANNING_EVENTS_ROUTES
+            (m) => m.PLANNING_EVENTS_ROUTES,
           ),
       },
       {
         path: 'my-orders',
         loadComponent: () =>
-          import(
-            './features/myRoute/pages/my-route-page/my-route-page.component'
-          ).then((m) => m.MyRoutePageComponent),
+          import('./features/myRoute/pages/my-route-page/my-route-page.component').then(
+            (m) => m.MyRoutePageComponent,
+          ),
       },
     ],
   },
@@ -154,7 +168,7 @@ export const routes: Routes = [
     path: 'tracking',
     loadChildren: () =>
       import('./features/tracking/tracking.routes').then(
-        (m) => m.TRACKING_ROUTES
+        (m) => m.TRACKING_ROUTES,
       ),
     title: 'Seguimiento de Envíos',
   },

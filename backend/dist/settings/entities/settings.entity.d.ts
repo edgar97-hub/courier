@@ -7,6 +7,15 @@ export interface PromotionalSetItem {
     isActive?: boolean;
     order?: number;
 }
+export interface VolumeDiscountRule {
+    id: string;
+    minOrders: number;
+    maxOrders: number;
+    discountPercentage: number;
+    startDate: string | null;
+    endDate: string | null;
+    isActive: boolean;
+}
 export declare class SettingsEntity extends BaseEntity {
     business_name: string;
     ruc: string;
@@ -33,4 +42,5 @@ export declare class SettingsEntity extends BaseEntity {
     multiPackageDiscountPercentage: number;
     multiPackageDiscountStartDate: Date | null;
     multiPackageDiscountEndDate: Date | null;
+    volumeDiscountRules: VolumeDiscountRule[];
 }

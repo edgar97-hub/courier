@@ -76,7 +76,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
   totalOrderCount = 0;
   currentPageIndex = 0;
   currentPageSize = 10;
-  currentSortField = 'registration_date';
+  currentSortField = 'code';
   currentSortDirection: 'asc' | 'desc' = 'desc';
   showMyOrders: boolean = false;
   isExpress: boolean = false;

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -7,7 +8,7 @@ import {
   IsString,
   IsUUID,
 } from 'class-validator';
-import { ACCESS_LEVEL, ROLES } from 'src/constants/roles';
+import { ROLES } from 'src/constants/roles';
 
 export class UserDTO {
   @ApiProperty()
@@ -223,4 +224,8 @@ export class RegistrationUserCompanyDTO {
   @IsOptional()
   @IsEnum(ROLES)
   role?: ROLES;
+
+  @IsOptional()
+  @IsBoolean()
+  isVolumeDiscountEnabled: boolean;
 }

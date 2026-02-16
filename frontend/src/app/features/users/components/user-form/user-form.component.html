@@ -81,7 +81,9 @@
               <mat-option value="MOTORIZADO">Motorizado</mat-option>
               <mat-option value="EMPRESA">Empresa</mat-option>
               <mat-option value="RECEPCIONISTA">Recepcionista</mat-option>
-              <mat-option value="EMPRESA_DISTRIBUIDOR">EMPRESA y DISTRIBUIDOR</mat-option>
+              <mat-option value="EMPRESA_DISTRIBUIDOR"
+                >EMPRESA y DISTRIBUIDOR</mat-option
+              >
             </mat-select>
             <mat-error
               *ngIf="
@@ -107,7 +109,36 @@
           </mat-form-field>
         </div>
       </div>
-      <ng-container *ngIf="roleControl.value === 'EMPRESA'">
+      <ng-container
+        *ngIf="
+          roleControl.value === 'EMPRESA' ||
+          roleControl.value === 'EMPRESA_DISTRIBUIDOR'
+        "
+      >
+        <div class="form-section volume-discount-section">
+          <div class="volume-discount-container">
+            <div class="discount-info">
+              <h3 class="discount-title">Tarifa Especial por Volumen</h3>
+              <p class="discount-desc">
+                Si se activa, el sistema aplicará descuentos automáticos a los
+                paquetes cuando supere la meta diaria configurada.
+              </p>
+            </div>
+            <div class="discount-toggle">
+              <mat-slide-toggle
+                formControlName="isVolumeDiscountEnabled"
+                color="primary"
+              >
+                {{
+                  userForm.get("isVolumeDiscountEnabled")?.value
+                    ? "Activado"
+                    : "Desactivado"
+                }}
+              </mat-slide-toggle>
+            </div>
+          </div>
+        </div>
+
         <mat-divider class="section-divider"></mat-divider>
 
         <div class="form-section">

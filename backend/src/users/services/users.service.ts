@@ -56,12 +56,6 @@ export class UsersService {
           code: 'ASC',
         },
       });
-      // if (users.length === 0) {
-      //   throw new ErrorManager({
-      //     type: 'BAD_REQUEST',
-      //     message: 'No se encontro resultado',
-      //   });
-      // }
       return users;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
@@ -103,8 +97,6 @@ export class UsersService {
       const user: UsersEntity = (await this.userRepository
         .createQueryBuilder('user')
         .where({ id })
-        // .leftJoinAndSelect('user.projectsIncludes', 'projectsIncludes')
-        // .leftJoinAndSelect('projectsIncludes.project', 'project')
         .getOne()) as any;
       if (!user) {
         throw new ErrorManager({

@@ -30,7 +30,7 @@
               <div>
                 <div class="detail-label">Tipo de Envío</div>
                 <div class="detail-value">
-                  {{ data.order.shipment_type | titlecase | default : "N/A" }}
+                  {{ data.order.shipment_type | titlecase | default: "N/A" }}
                 </div>
               </div>
             </div>
@@ -43,8 +43,8 @@
                 <div class="detail-value">
                   {{
                     data.order.createdAt
-                      | date : "dd/MM/yy HH:mm"
-                      | default : "N/A"
+                      | date: "dd/MM/yy HH:mm"
+                      | default: "N/A"
                   }}
                 </div>
               </div>
@@ -58,8 +58,8 @@
                 <div class="detail-value">
                   {{
                     data.order.delivery_date
-                      | date : "dd/MM/yyyy"
-                      | default : "No especificada"
+                      | date: "dd/MM/yyyy"
+                      | default: "No especificada"
                   }}
                 </div>
               </div>
@@ -71,7 +71,7 @@
               <div>
                 <div class="detail-label">Usuario Creador</div>
                 <div class="detail-value">
-                  {{ data.order.user?.username | default : "N/A" }}
+                  {{ data.order.user?.username | default: "N/A" }}
                 </div>
               </div>
             </div>
@@ -82,7 +82,7 @@
               <div>
                 <div class="detail-label">Motorizado</div>
                 <div class="detail-value">
-                  {{ data.order.assigned_driver?.username | default : "N/A" }}
+                  {{ data.order.assigned_driver?.username | default: "N/A" }}
                 </div>
               </div>
             </div>
@@ -105,7 +105,7 @@
               <div>
                 <div class="detail-label">Nombre Destinatario</div>
                 <div class="detail-value">
-                  {{ data.order.recipient_name | default : "N/A" }}
+                  {{ data.order.recipient_name | default: "N/A" }}
                 </div>
               </div>
             </div>
@@ -130,7 +130,7 @@
               <div>
                 <div class="detail-label">Dirección de Entrega</div>
                 <div class="detail-value">
-                  {{ data.order.delivery_address | default : "N/A" }}
+                  {{ data.order.delivery_address | default: "N/A" }}
                 </div>
               </div>
             </div>
@@ -144,7 +144,7 @@
                   {{
                     data.order.delivery_district_name
                       | titlecase
-                      | default : "N/A"
+                      | default: "N/A"
                   }}
                 </div>
               </div>
@@ -173,7 +173,7 @@
         <p class="item-description">
           {{
             data.order.item_description
-              | default : "Sin descripción del contenido."
+              | default: "Sin descripción del contenido."
           }}
         </p>
         <mat-divider
@@ -202,7 +202,7 @@
               <div>
                 <div class="detail-label">Peso (kg)</div>
                 <div class="detail-value">
-                  {{ data.order.package_weight_kg | number : "1.1-2" }} kg
+                  {{ data.order.package_weight_kg | number: "1.1-2" }} kg
                 </div>
               </div>
             </div>
@@ -246,13 +246,13 @@
                 <div class="detail-value bold-value">
                   {{
                     data.order.amount_to_collect_at_delivery || 0
-                      | currency : "PEN" : "S/ " : "1.2-2"
+                      | currency: "PEN" : "S/ " : "1.2-2"
                   }}
                 </div>
               </div>
             </div>
           </mat-grid-tile>
-          <mat-grid-tile>
+          <!-- <mat-grid-tile>
             <div class="detail-item">
               <mat-icon class="detail-icon">local_atm</mat-icon>
               <div>
@@ -260,9 +260,72 @@
                 <div class="detail-value bold-value">
                   {{
                     data.order.shipping_cost || 0
-                      | currency : "PEN" : "S/ " : "1.2-2"
+                      | currency: "PEN" : "S/ " : "1.2-2"
                   }}
                 </div>
+              </div>
+            </div>
+          </mat-grid-tile> -->
+          <mat-grid-tile>
+            <div class="detail-item">
+              <mat-icon class="detail-icon">local_atm</mat-icon>
+
+              <!-- Contenedor de Precios -->
+              <div class="price-column">
+                <div class="detail-label">Costo de Envío</div>
+
+                <!-- CASO A: TIENE DESCUENTO -->
+                <ng-container
+                  *ngIf="
+                    data.order.volumeDiscountAmount &&
+                      data.order.volumeDiscountAmount > 0;
+                    else noDiscount
+                  "
+                >
+                  <!-- Precio Original Tachado -->
+                  <span class="original-price">
+                    {{
+                      data.order.shipping_cost +
+                        data.order.volumeDiscountAmount 
+                        | currency: "PEN" : "S/ " : "1.2-2"
+                    }}
+                  </span>
+
+                  <!-- Precio Final + Badge -->
+                  <div class="final-price-wrapper">
+                    <span class="final-price">
+                      {{
+                        data.order.shipping_cost
+                          | currency: "PEN" : "S/ " : "1.2-2"
+                      }}
+                    </span>
+
+                    <!-- Badge de Porcentaje (si existe la regla guardada) -->
+                    <span
+                      class="discount-badge"
+                      *ngIf="data.order.appliedVolumeDiscountRule?.percentage"
+                    >
+                      -{{ data.order.appliedVolumeDiscountRule.percentage }}%
+                    </span>
+                    <!-- Fallback si no hay regla guardada pero hay monto -->
+                    <span
+                      class="discount-badge"
+                      *ngIf="!data.order.appliedVolumeDiscountRule?.percentage"
+                    >
+                      Desc.
+                    </span>
+                  </div>
+                </ng-container>
+
+                <!-- CASO B: PRECIO NORMAL -->
+                <ng-template #noDiscount>
+                  <div class="detail-value bold-value">
+                    {{
+                      data.order.shipping_cost || 0
+                        | currency: "PEN" : "S/ " : "1.2-2"
+                    }}
+                  </div>
+                </ng-template>
               </div>
             </div>
           </mat-grid-tile>
@@ -322,13 +385,6 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end" class="dialog-actions">
-    <!-- <button
-      mat-stroked-button
-      (click)="printOrder()"
-      matTooltip="Generar PDF/Imprimir (Función simulada)"
-    >
-      <mat-icon>print</mat-icon> Imprimir
-    </button> -->
     <button mat-flat-button class="btn-corp-primary" (click)="onClose()">
       Cerrar
     </button>
