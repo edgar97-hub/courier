@@ -138,7 +138,7 @@ export const menuItems: MenuItem[] = [
   },
   {
     icon: 'list_alt',
-    label: 'Descuento por volumen',
+    label: 'Reporte de Descuento por volumen',
     route: 'reports-volume-discounts',
     roles: [UserRole.ADMIN, UserRole.RECEPTIONIST],
   },
