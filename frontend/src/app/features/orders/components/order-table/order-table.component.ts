@@ -209,7 +209,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
       this.snackBar.open(
         'No hay cambios de estado disponibles para este pedido.',
         'OK',
-        { duration: 3000 }
+        { duration: 3000 },
       );
       return;
     }
@@ -262,7 +262,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     const rol = this.appStore.currentUser()?.role;
 
     let almacen = [OrderStatus.EN_ALMACEN];
-    if (rol === 'MOTORIZADO' && OrderStatus.REGISTRADO) {
+    if (rol === UserRole.MOTORIZED && OrderStatus.REGISTRADO) {
       almacen = [];
     }
 
@@ -349,7 +349,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
         console.log(
           'Driver selected from dialog:',
           order.id,
-          result.selectedDriver
+          result.selectedDriver,
         );
         this.motorizedChanged.emit({
           orderId: order.id,
@@ -365,7 +365,11 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     console.log(`Open modal to reschedule order: ${order.code}`);
 
     const minRescheduleDate = new Date();
-    minRescheduleDate.setDate(minRescheduleDate.getDate());
+    const rol = this.appStore.currentUser()?.role;
+    if (rol === UserRole.ADMIN) {
+      minRescheduleDate.setFullYear(minRescheduleDate.getFullYear() - 1);
+    }
+    // minRescheduleDate.setDate(minRescheduleDate.getDate());
     interface RescheduleOrderDialogResult {
       newDeliveryDate: Date;
       reason: string;
@@ -430,7 +434,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
         'Cerrar',
         {
           duration: 3000,
-        }
+        },
       );
       return;
     }
@@ -462,12 +466,12 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     if (!order.id) {
       console.error(
         'Order ID or current monto a cabrar is missing for editing.',
-        order
+        order,
       );
       this.snackBar.open(
         'No se puede modificar el monto a cabrar: faltan datos del pedido.',
         'Cerrar',
-        { duration: 3000 }
+        { duration: 3000 },
       );
       return;
     }
@@ -507,13 +511,13 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     ) {
       console.error(
         'Order ID or current shipping cost is missing for editing.',
-        order
+        order,
       );
       // Podrías mostrar un snackbar aquí
       this.snackBar.open(
         'No se puede modificar el costo: faltan datos del pedido.',
         'Cerrar',
-        { duration: 3000 }
+        { duration: 3000 },
       );
       return;
     }

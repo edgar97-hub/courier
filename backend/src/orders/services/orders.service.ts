@@ -485,7 +485,7 @@ export class OrdersService {
         throw new Error('Todos los pedidos en el lote fallaron al guardarse.');
       }
       if (createdOrders.length > 0) {
-        await this.applyDiscountsToBatch(queryRunner, createdOrders);
+        // await this.applyDiscountsToBatch(queryRunner, createdOrders);
       }
       await queryRunner.commitTransaction();
       console.log(
@@ -765,7 +765,7 @@ export class OrdersService {
           },
         );
         if (createdOrders.length > 0) {
-          await this.applyDiscountsToBatch(queryRunner, createdOrders);
+          // await this.applyDiscountsToBatch(queryRunner, createdOrders);
         }
         await queryRunner.commitTransaction();
 
@@ -839,104 +839,6 @@ export class OrdersService {
       errors: errors,
     };
   }
-  // private async applyDiscountsToBatch(
-  //   queryRunner: QueryRunner,
-  //   newOrders: OrdersEntity[],
-  //   userId: string,
-  // ): Promise<void> {
-  //   // A. Verificar si el usuario tiene el beneficio activado
-  //   const user = await queryRunner.manager.findOne(UsersEntity, {
-  //     where: { id: userId },
-  //     select: ['isVolumeDiscountEnabled'],
-  //   });
-  //   console.log(user);
-  //   if (!user?.isVolumeDiscountEnabled) return;
-
-  //   // B. Obtener configuración de reglas
-  //   const settings = await queryRunner.manager.findOne(SettingsEntity, {
-  //     where: {},
-  //   });
-  //   if (!settings?.volumeDiscountRules) return;
-
-  //   // C. Identificar las fechas únicas involucradas en este lote
-  //   // (Para no recalcular días que no se tocaron)
-  //   const uniqueDates = [...new Set(newOrders.map((o) => o.delivery_date))];
-
-  //   // D. Procesar cada fecha por separado
-  //   for (const dateStr of uniqueDates) {
-  //     if (!dateStr) continue;
-
-  //     // 1. Traer TODOS los pedidos de ese día para ese usuario (Viejos + Nuevos)
-  //     // Necesitamos el orden correcto para saber cuál es el #10, #11, etc.
-  //     const dailyOrders = await queryRunner.manager.find(OrdersEntity, {
-  //       where: {
-  //         user: { id: userId },
-  //         delivery_date: dateStr,
-  //         status: Not(STATES.CANCELED),
-  //       },
-  //       order: { code: 'ASC' },
-  //     });
-
-  //     // 2. Recorrer y calcular
-  //     const ordersToUpdate: OrdersEntity[] = [];
-  //     const now = new Date();
-
-  //     for (let i = 0; i < dailyOrders.length; i++) {
-  //       const order = dailyOrders[i];
-  //       const sequenceNumber = i + 1; // Este es el pedido N° X del día
-
-  //       // Buscamos si hay regla para este número
-  //       const activeRule = settings.volumeDiscountRules.find((rule) => {
-  //         const isInRange =
-  //           sequenceNumber >= rule.minOrders &&
-  //           sequenceNumber <= rule.maxOrders;
-
-  //         // Validar Vigencia
-  //         let isDateValid = true;
-  //         if (rule.startDate && now < new Date(rule.startDate))
-  //           isDateValid = false;
-  //         if (rule.endDate && now > new Date(rule.endDate)) isDateValid = false;
-
-  //         return rule.isActive && isInRange && isDateValid;
-  //       });
-
-  //       // Si hay regla Y el pedido aún no tiene ese descuento aplicado
-  //       // (Verificamos para no re-actualizar lo que ya estaba bien)
-  //       if (activeRule) {
-  //         // Verificamos si ya tiene este descuento aplicado para no sobrescribir
-  //         // o si es uno de los NUEVOS que acabamos de insertar (que vienen sin descuento)
-  //         const isNewOrder = newOrders.some((no) => no.id === order.id);
-
-  //         if (isNewOrder) {
-  //           // Calculamos el descuento sobre el precio base que ya tiene
-  //           const currentPrice = order.shipping_cost;
-  //           const discountVal =
-  //             (currentPrice * activeRule.discountPercentage) / 100;
-
-  //           order.volumeDiscountAmount = parseFloat(discountVal.toFixed(2));
-  //           order.shipping_cost = parseFloat(
-  //             (currentPrice - discountVal).toFixed(2),
-  //           );
-
-  //           order.appliedVolumeDiscountRule = {
-  //             ruleId: activeRule.id,
-  //             percentage: activeRule.discountPercentage,
-  //             sequenceNumber: sequenceNumber,
-  //             range: `${activeRule.minOrders} - ${activeRule.maxOrders}`,
-  //             appliedAtDate: new Date().toISOString(),
-  //           };
-
-  //           ordersToUpdate.push(order);
-  //         }
-  //       }
-  //     }
-
-  //     // 3. Guardar los cambios (Bulk Update si es posible, o save normal)
-  //     if (ordersToUpdate.length > 0) {
-  //       await queryRunner.manager.save(OrdersEntity, ordersToUpdate);
-  //     }
-  //   }
-  // }
 
   private async applyDiscountsToBatch(
     queryRunner: QueryRunner,

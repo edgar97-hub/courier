@@ -319,7 +319,6 @@ let OrdersService = class OrdersService {
                 throw new Error('Todos los pedidos en el lote fallaron al guardarse.');
             }
             if (createdOrders.length > 0) {
-                await this.applyDiscountsToBatch(queryRunner, createdOrders);
             }
             await queryRunner.commitTransaction();
             console.log('Batch orders created successfully (or partially, if errors occurred and were handled).');
@@ -529,7 +528,6 @@ let OrdersService = class OrdersService {
                     chunk: 100,
                 });
                 if (createdOrders.length > 0) {
-                    await this.applyDiscountsToBatch(queryRunner, createdOrders);
                 }
                 await queryRunner.commitTransaction();
                 importedCount = ordersToSave.length;

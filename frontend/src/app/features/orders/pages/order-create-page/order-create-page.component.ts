@@ -94,7 +94,7 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
       this.orderCreationFormComponent.resetFormForNextOrder();
     }
     this.cdr.detectChanges();
-    this.recalculateDiscounts();
+    // this.recalculateDiscounts();
   }
 
   handleRemoveOrder(tempIdToRemove: string): void {
@@ -105,7 +105,7 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
       duration: 2000,
       verticalPosition: 'top',
     });
-    this.recalculateDiscounts();
+    // this.recalculateDiscounts();
   }
 
   recalculateDiscounts() {

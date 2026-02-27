@@ -483,7 +483,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     this.setupPackageTypeSubscription();
     this.createOrderForm(company_id);
     this.setupRealtimePriceCalculation();
-    this.setupVolumeDiscountListener();
+    // this.setupVolumeDiscountListener();
   }
 
   private createNewItemForm(): void {
@@ -548,11 +548,6 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
 
   private checkVolumeDiscount(): void {
     const date = this.orderForm.get('delivery_date')?.value;
-    // Si es admin, tomamos el ID del combo, si es empresa, del store
-    // const companyId = this.isCompany()
-    //   ? this.appStore.currentUser()?.id
-    //   : this.orderForm.get('company_id')?.value;
-
     const companyId = this.orderForm.get('company_id')?.value;
 
     if (date && companyId) {
