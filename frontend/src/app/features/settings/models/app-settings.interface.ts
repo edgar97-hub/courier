@@ -9,10 +9,16 @@ export interface PromotionalSetItem {
   imagePreviewUrl?: string | null;
 }
 
+export enum DiscountRuleType {
+  RANGE = 'RANGE', // Progresivo: solo aplica dentro del rango (ej. 10 al 20)
+  GOAL = 'GOAL', // Meta/Retroactivo: aplica a todos desde el 1 al llegar a X
+}
+
 export interface VolumeDiscountRule {
   id: string;
+  type: DiscountRuleType;
   minOrders: number;
-  maxOrders: number;
+  maxOrders?: number;
   discountPercentage: number;
   startDate: Date | string | null;
   endDate: Date | string | null;

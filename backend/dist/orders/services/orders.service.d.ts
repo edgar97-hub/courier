@@ -24,6 +24,7 @@ export declare class OrdersService {
     }>;
     importOrdersFromExcelData(excelRows: any[], idUser: string): Promise<ImportResult | undefined>;
     private applyDiscountsToBatch;
+    private updateOrderDiscount;
     previewVolumeDiscount(userId: string, deliveryDate: string): Promise<{
         applies: boolean;
         message: string;

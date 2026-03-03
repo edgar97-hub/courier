@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsArray,
   IsBoolean,
   IsEnum,
   IsNotEmpty,
@@ -218,14 +219,19 @@ export class RegistrationUserCompanyDTO {
 
   @ApiProperty()
   @IsString()
-  password?: string;
+  @IsBoolean()
+  password: string;
 
   @ApiProperty()
   @IsOptional()
   @IsEnum(ROLES)
-  role?: ROLES;
+  role: ROLES;
 
   @IsOptional()
   @IsBoolean()
   isVolumeDiscountEnabled: boolean;
+
+  @IsOptional()
+  @IsArray()
+  assignedVolumeDiscountRuleIds: string[];
 }

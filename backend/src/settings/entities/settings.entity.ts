@@ -1,6 +1,11 @@
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../../config/base.entity';
 
+export enum DiscountRuleType {
+  RANGE = 'RANGE', // Progresivo: solo aplica dentro del rango (ej. 10 al 20)
+  GOAL = 'GOAL', // Meta/Retroactivo: aplica a todos desde el 1 al llegar a X
+}
+
 export interface PromotionalSetItem {
   id: string;
   imageUrl: string | null;
@@ -12,8 +17,9 @@ export interface PromotionalSetItem {
 
 export interface VolumeDiscountRule {
   id: string;
+  type: DiscountRuleType;
   minOrders: number;
-  maxOrders: number;
+  maxOrders?: number;
   discountPercentage: number;
   startDate: string | null;
   endDate: string | null;
@@ -123,7 +129,8 @@ export class SettingsEntity extends BaseEntity {
     type: 'jsonb',
     nullable: true,
     default: () => "'[]'",
-    comment: 'Array de reglas para descuentos por volumen diario',
+    comment:
+      'Array de reglas duales (RANGE o GOAL) para descuentos por volumen',
   })
   volumeDiscountRules: VolumeDiscountRule[];
 }

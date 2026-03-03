@@ -15,6 +15,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { IsDateString } from 'class-validator';
+import { DiscountRuleType } from '../entities/settings.entity';
 
 export class PromotionalSetItemDto {
   @IsUUID()
@@ -47,10 +48,14 @@ export class VolumeDiscountRuleDto {
   @IsString()
   id: string;
 
+  @IsEnum(DiscountRuleType)
+  type: DiscountRuleType;
+
   @IsNumber()
   minOrders: number;
 
   @IsNumber()
+  @IsOptional()
   maxOrders: number;
 
   @IsNumber()

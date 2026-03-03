@@ -1,7 +1,0 @@
-<div class="page-container detail-page-container">
-  <app-user-display [userData]="userDataToDisplay"></app-user-display>
-
-  <p *ngIf="!isLoading && !(user$ | async) && userId" class="not-found-message">
-    User with ID {{ userId }} not found or could not be loaded.
-  </p>
-</div>

@@ -67,7 +67,8 @@ export declare class RegistrationUserCompanyDTO {
     email: string;
     username: string;
     owner_phone_number: string;
-    password?: string;
-    role?: ROLES;
+    password: string;
+    role: ROLES;
     isVolumeDiscountEnabled: boolean;
+    assignedVolumeDiscountRuleIds: string[];
 }

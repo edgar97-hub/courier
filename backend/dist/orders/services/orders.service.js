@@ -319,6 +319,7 @@ let OrdersService = class OrdersService {
                 throw new Error('Todos los pedidos en el lote fallaron al guardarse.');
             }
             if (createdOrders.length > 0) {
+                await this.applyDiscountsToBatch(queryRunner, createdOrders);
             }
             await queryRunner.commitTransaction();
             console.log('Batch orders created successfully (or partially, if errors occurred and were handled).');
@@ -528,6 +529,7 @@ let OrdersService = class OrdersService {
                     chunk: 100,
                 });
                 if (createdOrders.length > 0) {
+                    await this.applyDiscountsToBatch(queryRunner, createdOrders);
                 }
                 await queryRunner.commitTransaction();
                 importedCount = ordersToSave.length;
@@ -604,68 +606,105 @@ let OrdersService = class OrdersService {
         const settings = await queryRunner.manager.findOne(settings_entity_1.SettingsEntity, {
             where: {},
         });
-        if (!settings?.volumeDiscountRules)
+        if (!settings?.volumeDiscountRules?.length)
             return;
-        const companyDatePairs = [
+        const affectedGroups = [
             ...new Set(newOrders.map((o) => `${o.company.id}|${o.delivery_date}`)),
         ];
-        const userStatusCache = new Map();
-        for (const pair of companyDatePairs) {
-            const [companyId, dateStr] = pair.split('|');
+        console.log('affectedGroups', affectedGroups);
+        const userCache = new Map();
+        for (const group of affectedGroups) {
+            const [companyId, dateStr] = group.split('|');
             if (!dateStr || dateStr === 'null')
                 continue;
-            if (!userStatusCache.has(companyId)) {
+            if (!userCache.has(companyId)) {
                 const user = await queryRunner.manager.findOne(users_entity_1.UsersEntity, {
                     where: { id: companyId },
-                    select: ['isVolumeDiscountEnabled'],
+                    select: [
+                        'id',
+                        'isVolumeDiscountEnabled',
+                        'assignedVolumeDiscountRuleIds',
+                    ],
                 });
-                userStatusCache.set(companyId, user?.isVolumeDiscountEnabled ?? false);
+                userCache.set(companyId, user);
             }
-            if (!userStatusCache.get(companyId))
+            const currentUser = userCache.get(companyId);
+            if (!currentUser?.isVolumeDiscountEnabled ||
+                !currentUser.assignedVolumeDiscountRuleIds?.length)
                 continue;
+            console.log('currentUser', currentUser);
             const dailyOrders = await queryRunner.manager.find(orders_entity_1.OrdersEntity, {
                 where: {
                     company: { id: companyId },
                     delivery_date: dateStr,
-                    status: (0, typeorm_2.Not)(roles_1.STATES.CANCELED),
+                    status: (0, typeorm_2.Not)((0, typeorm_2.In)([roles_1.STATES.CANCELED])),
                 },
                 order: { code: 'ASC' },
             });
+            console.log('dailyOrders', dailyOrders.length);
+            if (dailyOrders.length === 0)
+                continue;
+            const userRules = settings.volumeDiscountRules.filter((r) => currentUser.assignedVolumeDiscountRuleIds.includes(r.id) &&
+                (!r.startDate || dateStr >= r.startDate) &&
+                (!r.endDate || dateStr <= r.endDate));
+            console.log('userRules', userRules);
+            if (userRules.length === 0)
+                continue;
+            const currentMode = userRules[0].type;
+            const totalCount = dailyOrders.length;
             const ordersToUpdate = [];
-            for (let i = 0; i < dailyOrders.length; i++) {
-                const order = dailyOrders[i];
-                const sequenceNumber = i + 1;
-                const isPartOfCurrentBatch = newOrders.some((no) => no.id === order.id);
-                if (!isPartOfCurrentBatch)
-                    continue;
-                const activeRule = settings.volumeDiscountRules.find((rule) => {
-                    const isInRange = sequenceNumber >= rule.minOrders &&
-                        sequenceNumber <= rule.maxOrders;
-                    let isDateValid = true;
-                    if (rule.startDate && (0, date_fns_1.isBefore)(order.delivery_date, rule.startDate))
-                        isDateValid = false;
-                    if (rule.endDate && (0, date_fns_1.isAfter)(order.delivery_date, rule.endDate))
-                        isDateValid = false;
-                    return rule.isActive && isInRange && isDateValid;
-                });
-                if (activeRule) {
-                    const currentPrice = order.shipping_cost;
-                    const discountVal = (currentPrice * activeRule.discountPercentage) / 100;
-                    order.volumeDiscountAmount = parseFloat(discountVal.toFixed(2));
-                    order.shipping_cost = parseFloat((currentPrice - discountVal).toFixed(2));
-                    order.appliedVolumeDiscountRule = {
-                        ruleId: activeRule.id,
-                        percentage: activeRule.discountPercentage,
-                        sequenceNumber: sequenceNumber,
-                        range: `${activeRule.minOrders} - ${activeRule.maxOrders}`,
-                        appliedAtDate: new Date().toISOString(),
-                    };
-                    ordersToUpdate.push(order);
+            if (currentMode === settings_entity_1.DiscountRuleType.GOAL) {
+                const bestGoal = userRules
+                    .filter((r) => totalCount >= r.minOrders)
+                    .sort((a, b) => b.minOrders - a.minOrders)[0];
+                for (let i = 0; i < dailyOrders.length; i++) {
+                    const order = dailyOrders[i];
+                    const sequenceNumber = i + 1;
+                    let ruleToApply = undefined;
+                    if (bestGoal && sequenceNumber <= bestGoal.minOrders) {
+                        ruleToApply = bestGoal;
+                    }
+                    this.updateOrderDiscount(order, ruleToApply, sequenceNumber, ordersToUpdate);
+                }
+            }
+            else {
+                for (let i = 0; i < dailyOrders.length; i++) {
+                    const order = dailyOrders[i];
+                    const sequenceNumber = i + 1;
+                    const activeRange = userRules.find((r) => sequenceNumber >= r.minOrders &&
+                        sequenceNumber <= (r.maxOrders || 999999));
+                    this.updateOrderDiscount(order, activeRange, sequenceNumber, ordersToUpdate);
                 }
             }
             if (ordersToUpdate.length > 0) {
                 await queryRunner.manager.save(orders_entity_1.OrdersEntity, ordersToUpdate);
             }
+        }
+    }
+    updateOrderDiscount(order, rule, seq, list) {
+        const basePrice = order.shipping_cost + (order.volumeDiscountAmount || 0);
+        let newDiscountAmount = 0;
+        let newShippingCost = basePrice;
+        let ruleSnapshot;
+        if (rule) {
+            newDiscountAmount = (basePrice * rule.discountPercentage) / 100;
+            newShippingCost = basePrice - newDiscountAmount;
+            ruleSnapshot = {
+                ruleId: rule.id,
+                type: rule.type,
+                percentage: rule.discountPercentage,
+                range: rule.type === settings_entity_1.DiscountRuleType.GOAL
+                    ? `Meta ${rule.minOrders}`
+                    : `${rule.minOrders}-${rule.maxOrders}`,
+                sequenceNumber: seq,
+            };
+        }
+        if (order.shipping_cost !== newShippingCost ||
+            order.volumeDiscountAmount !== newDiscountAmount) {
+            order.volumeDiscountAmount = newDiscountAmount;
+            order.shipping_cost = newShippingCost;
+            order.appliedVolumeDiscountRule = ruleSnapshot;
+            list.push(order);
         }
     }
     async previewVolumeDiscount(userId, deliveryDate) {
@@ -689,7 +728,7 @@ let OrdersService = class OrdersService {
         const nextSequenceNumber = currentCount + 1;
         const activeRule = settings.volumeDiscountRules.find((rule) => {
             const isInRange = nextSequenceNumber >= rule.minOrders &&
-                nextSequenceNumber <= rule.maxOrders;
+                nextSequenceNumber <= (rule.maxOrders || 0);
             let isDateValid = true;
             if (rule.startDate && (0, date_fns_1.isBefore)(deliveryDate, rule.startDate))
                 isDateValid = false;
@@ -756,7 +795,8 @@ let OrdersService = class OrdersService {
             const sequenceNumber = (currentDbCount || 0) + 1;
             dbCounts.set(key, sequenceNumber);
             const activeRule = settings.volumeDiscountRules.find((rule) => {
-                const isInRange = sequenceNumber >= rule.minOrders && sequenceNumber <= rule.maxOrders;
+                const isInRange = sequenceNumber >= rule.minOrders &&
+                    sequenceNumber <= (rule.maxOrders || 0);
                 let isDateValid = true;
                 if (rule.startDate && (0, date_fns_1.isBefore)(order.delivery_date, rule.startDate))
                     isDateValid = false;

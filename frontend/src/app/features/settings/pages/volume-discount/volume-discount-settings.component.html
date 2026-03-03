@@ -19,57 +19,79 @@
     <!-- SECCIÓN 1: FORMULARIO DE CREACIÓN -->
     <mat-card class="modern-card create-rule-card">
       <mat-card-header>
-        <div class="card-icon">
+        <!-- <div class="card-icon">
           <mat-icon>add_circle_outline</mat-icon>
-        </div>
+        </div> -->
         <mat-card-title>Definir Nueva Regla</mat-card-title>
-        <mat-card-subtitle
+        <!-- <mat-card-subtitle
           >Establece los parámetros para un nuevo rango de
           descuento.</mat-card-subtitle
-        >
+        > -->
       </mat-card-header>
-
+      <div [formGroup]="newRuleForm" class="rule-type-selector">
+        <mat-radio-group formControlName="type">
+          <mat-radio-button [value]="'RANGE'"
+            >Por Rango (Progresivo)</mat-radio-button
+          >
+          <mat-radio-button [value]="'GOAL'"
+            >Por Meta (Retroactivo)</mat-radio-button
+          >
+        </mat-radio-group>
+      </div>
       <mat-card-content>
         <form [formGroup]="newRuleForm" class="rule-form">
           <div class="form-grid">
-            <!-- GRUPO 1: RANGOS -->
+            <!-- RANGOS / METAS -->
             <div class="input-group">
-              <span class="group-label">Rango de Pedidos</span>
+              <span class="group-label">
+                {{
+                  newRuleForm.get("type")?.value === "RANGE"
+                    ? "Rango de Pedidos"
+                    : "Meta de Pedidos"
+                }}
+              </span>
               <div class="row-inputs">
                 <mat-form-field appearance="outline" class="compact-field">
-                  <mat-label>Desde</mat-label>
+                  <mat-label>{{
+                    newRuleForm.get("type")?.value === "RANGE"
+                      ? "Desde"
+                      : "Meta"
+                  }}</mat-label>
                   <input
                     matInput
                     type="number"
                     formControlName="minOrders"
                     min="1"
-                    placeholder="Ej. 10"
                     appAutoSelect
                   />
                 </mat-form-field>
-                <span class="separator">—</span>
-                <mat-form-field appearance="outline" class="compact-field">
-                  <mat-label>Hasta</mat-label>
-                  <input
-                    matInput
-                    type="number"
-                    formControlName="maxOrders"
-                    min="1"
-                    placeholder="Ej. 20"
-                    appAutoSelect
-                  />
-                </mat-form-field>
+
+                <!-- SE MUESTRA SOLO SI ES RANGE -->
+                <ng-container
+                  *ngIf="newRuleForm.get('type')?.value === 'RANGE'"
+                >
+                  <span class="separator">—</span>
+                  <mat-form-field appearance="outline" class="compact-field">
+                    <mat-label>Hasta</mat-label>
+                    <input
+                      matInput
+                      type="number"
+                      formControlName="maxOrders"
+                      min="1"
+                      appAutoSelect
+                    />
+                  </mat-form-field>
+                </ng-container>
               </div>
             </div>
-
-            <!-- GRUPO 2: BENEFICIO -->
+            <!-- BENEFICIO -->
             <div class="input-group">
               <span class="group-label">Beneficio</span>
               <mat-form-field
                 appearance="outline"
                 class="compact-field discount-field"
               >
-                <mat-label>Descuento %</mat-label>
+                <mat-label>Dscto. por Pedido (%)</mat-label>
                 <input
                   matInput
                   type="number"
@@ -82,9 +104,9 @@
               </mat-form-field>
             </div>
 
-            <!-- GRUPO 3: VIGENCIA -->
+            <!-- VIGENCIA -->
             <div class="input-group">
-              <span class="group-label">Vigencia (Opcional)</span>
+              <span class="group-label">Vigencia</span>
               <div class="row-inputs">
                 <mat-form-field appearance="outline" class="compact-field">
                   <mat-label>Inicio</mat-label>
@@ -143,20 +165,26 @@
       <table mat-table [dataSource]="dataSource" class="modern-table">
         <!-- Rango Column -->
         <ng-container matColumnDef="range">
-          <th mat-header-cell *matHeaderCellDef>Rango de Volumen</th>
+          <th mat-header-cell *matHeaderCellDef>Configuración</th>
           <td mat-cell *matCellDef="let element">
             <div class="range-cell">
-              <span class="range-values"
-                >{{ element.minOrders }} - {{ element.maxOrders }}</span
-              >
-              <span class="range-unit">pedidos/día</span>
+              <ng-container *ngIf="element.type === 'RANGE'">
+                <span class="range-values"
+                  >{{ element.minOrders }} - {{ element.maxOrders }}</span
+                >
+                <span class="range-unit">rango pedidos/día</span>
+              </ng-container>
+              <ng-container *ngIf="element.type === 'GOAL'">
+                <span class="range-values">Meta: {{ element.minOrders }}</span>
+                <span class="range-unit">pedidos (auto-ajuste)</span>
+              </ng-container>
             </div>
           </td>
         </ng-container>
 
         <!-- Descuento Column -->
         <ng-container matColumnDef="discount">
-          <th mat-header-cell *matHeaderCellDef>Descuento</th>
+          <th mat-header-cell *matHeaderCellDef>Dscto. por Pedido</th>
           <td mat-cell *matCellDef="let element">
             <span class="discount-badge"
               >{{ element.discountPercentage }}%
@@ -170,9 +198,9 @@
           <td mat-cell *matCellDef="let element">
             <div class="date-cell">
               <div class="date-row">
-                <span>{{ element.startDate | date: "dd MMM yyyy" }} -</span>
+                <span>{{ element.startDate | date: "dd/MM/yy" }} -</span>
                 <span *ngIf="element.endDate">
-                  {{ element.endDate | date: "dd MMM yyyy" }}</span
+                  {{ element.endDate | date: "dd/MM/yy" }}</span
                 >
                 <span class="permanent-tag" *ngIf="!element.endDate"
                   >Permanente</span

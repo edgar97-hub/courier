@@ -9,9 +9,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SettingsEntity = void 0;
+exports.SettingsEntity = exports.DiscountRuleType = void 0;
 const typeorm_1 = require("typeorm");
 const base_entity_1 = require("../../config/base.entity");
+var DiscountRuleType;
+(function (DiscountRuleType) {
+    DiscountRuleType["RANGE"] = "RANGE";
+    DiscountRuleType["GOAL"] = "GOAL";
+})(DiscountRuleType || (exports.DiscountRuleType = DiscountRuleType = {}));
 let SettingsEntity = class SettingsEntity extends base_entity_1.BaseEntity {
 };
 exports.SettingsEntity = SettingsEntity;
@@ -141,7 +146,7 @@ __decorate([
         type: 'jsonb',
         nullable: true,
         default: () => "'[]'",
-        comment: 'Array de reglas para descuentos por volumen diario',
+        comment: 'Array de reglas duales (RANGE o GOAL) para descuentos por volumen',
     }),
     __metadata("design:type", Array)
 ], SettingsEntity.prototype, "volumeDiscountRules", void 0);

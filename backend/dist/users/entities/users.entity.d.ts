@@ -35,4 +35,5 @@ export declare class UsersEntity extends BaseEntity implements IUser {
     cashManagementIncludes: CashManagementEntity[];
     distributorRecords: DistributorRecordEntity[];
     isVolumeDiscountEnabled: boolean;
+    assignedVolumeDiscountRuleIds: string[];
 }

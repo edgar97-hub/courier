@@ -1,3 +1,4 @@
+import { DiscountRuleType } from '../entities/settings.entity';
 export declare class PromotionalSetItemDto {
     id: string;
     imageUrl: string | null;
@@ -8,6 +9,7 @@ export declare class PromotionalSetItemDto {
 }
 export declare class VolumeDiscountRuleDto {
     id: string;
+    type: DiscountRuleType;
     minOrders: number;
     maxOrders: number;
     discountPercentage: number;

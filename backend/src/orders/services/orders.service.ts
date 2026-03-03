@@ -6,6 +6,7 @@ import {
   DeepPartial,
   DeleteResult,
   FindOptionsWhere,
+  In,
   Not,
   QueryRunner,
   Repository,
@@ -24,7 +25,11 @@ import { startOfDay, endOfDay, parseISO } from 'date-fns';
 import { fromZonedTime, formatInTimeZone } from 'date-fns-tz';
 import { parse, format, isBefore, isAfter, isEqual } from 'date-fns';
 import { CashManagementService } from 'src/cashManagement/services/cashManagement.service';
-import { SettingsEntity } from 'src/settings/entities/settings.entity';
+import {
+  DiscountRuleType,
+  SettingsEntity,
+  VolumeDiscountRule,
+} from 'src/settings/entities/settings.entity';
 import { OrderItemEntity, PackageType } from '../entities/order-item.entity';
 
 const EXCEL_HEADER_TO_ENTITY_KEY_MAP: {
@@ -485,7 +490,7 @@ export class OrdersService {
         throw new Error('Todos los pedidos en el lote fallaron al guardarse.');
       }
       if (createdOrders.length > 0) {
-        // await this.applyDiscountsToBatch(queryRunner, createdOrders);
+        await this.applyDiscountsToBatch(queryRunner, createdOrders);
       }
       await queryRunner.commitTransaction();
       console.log(
@@ -765,7 +770,7 @@ export class OrdersService {
           },
         );
         if (createdOrders.length > 0) {
-          // await this.applyDiscountsToBatch(queryRunner, createdOrders);
+          await this.applyDiscountsToBatch(queryRunner, createdOrders);
         }
         await queryRunner.commitTransaction();
 
@@ -840,105 +845,272 @@ export class OrdersService {
     };
   }
 
+  // private async applyDiscountsToBatch(
+  //   queryRunner: QueryRunner,
+  //   newOrders: OrdersEntity[],
+  // ): Promise<void> {
+  //   // 1. Obtener configuración global de reglas una sola vez
+  //   const settings = await queryRunner.manager.findOne(SettingsEntity, {
+  //     where: {},
+  //   });
+  //   if (!settings?.volumeDiscountRules) return;
+
+  //   // 2. Identificar combinaciones únicas de Empresa + Fecha en este lote
+  //   // Formato de la llave: "companyId|deliveryDate"
+  //   const companyDatePairs = [
+  //     ...new Set(newOrders.map((o) => `${o.company.id}|${o.delivery_date}`)),
+  //   ];
+
+  //   // Cache para no consultar el estado del usuario repetidamente
+  //   const userStatusCache = new Map<string, boolean>();
+
+  //   // 3. Procesar cada grupo (Empresa + Fecha) de forma independiente
+  //   for (const pair of companyDatePairs) {
+  //     const [companyId, dateStr] = pair.split('|');
+  //     if (!dateStr || dateStr === 'null') continue;
+
+  //     // A. Verificar si esta empresa tiene el beneficio (usando cache)
+  //     if (!userStatusCache.has(companyId)) {
+  //       const user = await queryRunner.manager.findOne(UsersEntity, {
+  //         where: { id: companyId },
+  //         select: ['isVolumeDiscountEnabled'],
+  //       });
+  //       userStatusCache.set(companyId, user?.isVolumeDiscountEnabled ?? false);
+  //     }
+
+  //     if (!userStatusCache.get(companyId)) continue;
+
+  //     // B. Traer TODOS los pedidos de ese día para esa empresa específica
+  //     // Ordenamos por 'code' o 'createdAt' para determinar la secuencia real
+  //     const dailyOrders = await queryRunner.manager.find(OrdersEntity, {
+  //       where: {
+  //         company: { id: companyId },
+  //         delivery_date: dateStr,
+  //         status: Not(STATES.CANCELED),
+  //       },
+  //       order: { code: 'ASC' }, // Mantener el orden de llegada
+  //     });
+
+  //     const ordersToUpdate: OrdersEntity[] = [];
+
+  //     // C. Calcular secuencia y aplicar reglas
+  //     for (let i = 0; i < dailyOrders.length; i++) {
+  //       const order = dailyOrders[i];
+  //       const sequenceNumber = i + 1; // Posición del pedido en el día
+
+  //       // ¿Es este pedido uno de los que acabamos de insertar en este lote?
+  //       // (Solo aplicamos descuento a los nuevos para no recalcular pedidos viejos ya cerrados)
+  //       const isPartOfCurrentBatch = newOrders.some((no) => no.id === order.id);
+  //       if (!isPartOfCurrentBatch) continue;
+
+  //       // Buscar regla aplicable para este número de secuencia y fecha
+  //       const activeRule = settings.volumeDiscountRules.find((rule) => {
+  //         const isInRange =
+  //           sequenceNumber >= rule.minOrders &&
+  //           sequenceNumber <= rule.maxOrders;
+  //         // Validar fechas...
+  //         let isDateValid = true;
+  //         if (rule.startDate && isBefore(order.delivery_date, rule.startDate))
+  //           isDateValid = false;
+  //         if (rule.endDate && isAfter(order.delivery_date, rule.endDate))
+  //           isDateValid = false;
+  //         return rule.isActive && isInRange && isDateValid;
+  //       });
+
+  //       if (activeRule) {
+  //         const currentPrice = order.shipping_cost;
+  //         const discountVal =
+  //           (currentPrice * activeRule.discountPercentage) / 100;
+
+  //         order.volumeDiscountAmount = parseFloat(discountVal.toFixed(2));
+  //         order.shipping_cost = parseFloat(
+  //           (currentPrice - discountVal).toFixed(2),
+  //         );
+
+  //         // Snapshot de la regla para auditoría física
+  //         order.appliedVolumeDiscountRule = {
+  //           ruleId: activeRule.id,
+  //           percentage: activeRule.discountPercentage,
+  //           sequenceNumber: sequenceNumber,
+  //           range: `${activeRule.minOrders} - ${activeRule.maxOrders}`,
+  //           appliedAtDate: new Date().toISOString(),
+  //         };
+
+  //         ordersToUpdate.push(order);
+  //       }
+  //     }
+
+  //     // 4. Guardar cambios del grupo en la base de datos
+  //     if (ordersToUpdate.length > 0) {
+  //       await queryRunner.manager.save(OrdersEntity, ordersToUpdate);
+  //     }
+  //   }
+  // }
+
   private async applyDiscountsToBatch(
     queryRunner: QueryRunner,
     newOrders: OrdersEntity[],
   ): Promise<void> {
-    // 1. Obtener configuración global de reglas una sola vez
     const settings = await queryRunner.manager.findOne(SettingsEntity, {
       where: {},
     });
-    if (!settings?.volumeDiscountRules) return;
+    if (!settings?.volumeDiscountRules?.length) return;
 
-    // 2. Identificar combinaciones únicas de Empresa + Fecha en este lote
-    // Formato de la llave: "companyId|deliveryDate"
-    const companyDatePairs = [
+    const affectedGroups = [
       ...new Set(newOrders.map((o) => `${o.company.id}|${o.delivery_date}`)),
     ];
 
-    // Cache para no consultar el estado del usuario repetidamente
-    const userStatusCache = new Map<string, boolean>();
+    console.log('affectedGroups', affectedGroups);
 
-    // 3. Procesar cada grupo (Empresa + Fecha) de forma independiente
-    for (const pair of companyDatePairs) {
-      const [companyId, dateStr] = pair.split('|');
+    const userCache = new Map<string, UsersEntity | null>();
+
+    for (const group of affectedGroups) {
+      const [companyId, dateStr] = group.split('|');
       if (!dateStr || dateStr === 'null') continue;
 
-      // A. Verificar si esta empresa tiene el beneficio (usando cache)
-      if (!userStatusCache.has(companyId)) {
+      if (!userCache.has(companyId)) {
         const user = await queryRunner.manager.findOne(UsersEntity, {
           where: { id: companyId },
-          select: ['isVolumeDiscountEnabled'],
+          select: [
+            'id',
+            'isVolumeDiscountEnabled',
+            'assignedVolumeDiscountRuleIds',
+          ],
         });
-        userStatusCache.set(companyId, user?.isVolumeDiscountEnabled ?? false);
+        userCache.set(companyId, user);
       }
 
-      if (!userStatusCache.get(companyId)) continue;
-
-      // B. Traer TODOS los pedidos de ese día para esa empresa específica
-      // Ordenamos por 'code' o 'createdAt' para determinar la secuencia real
+      const currentUser = userCache.get(companyId);
+      if (
+        !currentUser?.isVolumeDiscountEnabled ||
+        !currentUser.assignedVolumeDiscountRuleIds?.length
+      )
+        continue;
+      console.log('currentUser', currentUser);
+      // 1. Obtener todos los pedidos del día
       const dailyOrders = await queryRunner.manager.find(OrdersEntity, {
         where: {
           company: { id: companyId },
           delivery_date: dateStr,
-          status: Not(STATES.CANCELED),
+          status: Not(In([STATES.CANCELED])),
         },
-        order: { code: 'ASC' }, // El 'code' autoincremental define el orden de llegada
+        order: { code: 'ASC' },
       });
+      console.log('dailyOrders', dailyOrders.length);
+      if (dailyOrders.length === 0) continue;
 
+      // 2. Filtrar biblioteca de reglas del usuario vigentes para este día
+      const userRules = settings.volumeDiscountRules.filter(
+        (r) =>
+          currentUser.assignedVolumeDiscountRuleIds.includes(r.id) &&
+          (!r.startDate || dateStr >= r.startDate) &&
+          (!r.endDate || dateStr <= r.endDate),
+      );
+      console.log('userRules', userRules);
+      if (userRules.length === 0) continue;
+
+      // 3. DETECTAR EL MODO DE HOY (Gracias a tu validación, todas las reglas de hoy son del mismo tipo)
+      const currentMode = userRules[0].type;
+      const totalCount = dailyOrders.length;
       const ordersToUpdate: OrdersEntity[] = [];
 
-      // C. Calcular secuencia y aplicar reglas
-      for (let i = 0; i < dailyOrders.length; i++) {
-        const order = dailyOrders[i];
-        const sequenceNumber = i + 1; // Posición del pedido en el día
+      // --- LOGICA PARA METAS (Retroactivo) ---
+      if (currentMode === DiscountRuleType.GOAL) {
+        // Buscamos la meta más alta alcanzada con el total de pedidos
+        const bestGoal = userRules
+          .filter((r) => totalCount >= r.minOrders)
+          .sort((a, b) => b.minOrders - a.minOrders)[0];
 
-        // ¿Es este pedido uno de los que acabamos de insertar en este lote?
-        // (Solo aplicamos descuento a los nuevos para no recalcular pedidos viejos ya cerrados)
-        const isPartOfCurrentBatch = newOrders.some((no) => no.id === order.id);
-        if (!isPartOfCurrentBatch) continue;
+        for (let i = 0; i < dailyOrders.length; i++) {
+          const order = dailyOrders[i];
+          const sequenceNumber = i + 1;
 
-        // Buscar regla aplicable para este número de secuencia y fecha
-        const activeRule = settings.volumeDiscountRules.find((rule) => {
-          const isInRange =
-            sequenceNumber >= rule.minOrders &&
-            sequenceNumber <= rule.maxOrders;
-          // Validar fechas...
-          let isDateValid = true;
-          if (rule.startDate && isBefore(order.delivery_date, rule.startDate))
-            isDateValid = false;
-          if (rule.endDate && isAfter(order.delivery_date, rule.endDate))
-            isDateValid = false;
-          return rule.isActive && isInRange && isDateValid;
-        });
+          let ruleToApply: VolumeDiscountRule | undefined = undefined;
 
-        if (activeRule) {
-          const currentPrice = order.shipping_cost;
-          const discountVal =
-            (currentPrice * activeRule.discountPercentage) / 100;
+          // 2. VALIDACIÓN CRÍTICA:
+          // El descuento SOLO aplica si el pedido está dentro del grupo de la meta.
+          // Si la meta es 5, solo los pedidos 1, 2, 3, 4 y 5 lo reciben.
+          if (bestGoal && sequenceNumber <= bestGoal.minOrders) {
+            ruleToApply = bestGoal;
+          }
 
-          order.volumeDiscountAmount = parseFloat(discountVal.toFixed(2));
-          order.shipping_cost = parseFloat(
-            (currentPrice - discountVal).toFixed(2),
+          // 3. El helper se encarga:
+          // - Si está dentro de la meta (1-5): Aplica descuento.
+          // - Si es el pedido sobrante (6): Lo resetea a precio normal.
+          this.updateOrderDiscount(
+            order,
+            ruleToApply,
+            sequenceNumber,
+            ordersToUpdate,
           );
-
-          // Snapshot de la regla para auditoría física
-          order.appliedVolumeDiscountRule = {
-            ruleId: activeRule.id,
-            percentage: activeRule.discountPercentage,
-            sequenceNumber: sequenceNumber,
-            range: `${activeRule.minOrders} - ${activeRule.maxOrders}`,
-            appliedAtDate: new Date().toISOString(),
-          };
-
-          ordersToUpdate.push(order);
+          // this.updateOrderDiscount(order, bestGoal, i + 1, ordersToUpdate);
         }
       }
 
-      // 4. Guardar cambios del grupo en la base de datos
+      // --- LOGICA PARA RANGOS (Progresivo) ---
+      else {
+        for (let i = 0; i < dailyOrders.length; i++) {
+          const order = dailyOrders[i];
+          const sequenceNumber = i + 1;
+          // Buscamos en qué rango cae este pedido específico
+          const activeRange = userRules.find(
+            (r) =>
+              sequenceNumber >= r.minOrders &&
+              sequenceNumber <= (r.maxOrders || 999999),
+          );
+          this.updateOrderDiscount(
+            order,
+            activeRange,
+            sequenceNumber,
+            ordersToUpdate,
+          );
+        }
+      }
+
+      // 4. Guardado masivo
       if (ordersToUpdate.length > 0) {
         await queryRunner.manager.save(OrdersEntity, ordersToUpdate);
       }
+    }
+  }
+
+  // Helper para procesar el cálculo y verificar si realmente cambió el precio
+  private updateOrderDiscount(
+    order: OrdersEntity,
+    rule: VolumeDiscountRule | undefined,
+    seq: number,
+    list: OrdersEntity[],
+  ) {
+    const basePrice = order.shipping_cost + (order.volumeDiscountAmount || 0);
+
+    let newDiscountAmount = 0;
+    let newShippingCost = basePrice;
+    let ruleSnapshot;
+
+    if (rule) {
+      newDiscountAmount = (basePrice * rule.discountPercentage) / 100;
+      newShippingCost = basePrice - newDiscountAmount;
+      ruleSnapshot = {
+        ruleId: rule.id,
+        type: rule.type,
+        percentage: rule.discountPercentage,
+        range:
+          rule.type === DiscountRuleType.GOAL
+            ? `Meta ${rule.minOrders}`
+            : `${rule.minOrders}-${rule.maxOrders}`,
+        sequenceNumber: seq,
+      };
+    }
+
+    // Solo actualizamos si hay una diferencia real (evita guardar mil veces lo mismo)
+    if (
+      order.shipping_cost !== newShippingCost ||
+      order.volumeDiscountAmount !== newDiscountAmount
+    ) {
+      order.volumeDiscountAmount = newDiscountAmount;
+      order.shipping_cost = newShippingCost;
+      order.appliedVolumeDiscountRule = ruleSnapshot;
+      list.push(order);
     }
   }
 
@@ -972,7 +1144,7 @@ export class OrdersService {
     const activeRule = settings.volumeDiscountRules.find((rule) => {
       const isInRange =
         nextSequenceNumber >= rule.minOrders &&
-        nextSequenceNumber <= rule.maxOrders;
+        nextSequenceNumber <= (rule.maxOrders || 0);
 
       // Validar fechas
       let isDateValid = true;
@@ -1069,7 +1241,8 @@ export class OrdersService {
       // Buscar regla
       const activeRule = settings.volumeDiscountRules.find((rule) => {
         const isInRange =
-          sequenceNumber >= rule.minOrders && sequenceNumber <= rule.maxOrders;
+          sequenceNumber >= rule.minOrders &&
+          sequenceNumber <= (rule.maxOrders || 0);
         // Validar fechas...
         let isDateValid = true;
         if (rule.startDate && isBefore(order.delivery_date, rule.startDate))

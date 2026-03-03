@@ -1,4 +1,8 @@
 import { BaseEntity } from '../../config/base.entity';
+export declare enum DiscountRuleType {
+    RANGE = "RANGE",
+    GOAL = "GOAL"
+}
 export interface PromotionalSetItem {
     id: string;
     imageUrl: string | null;
@@ -9,8 +13,9 @@ export interface PromotionalSetItem {
 }
 export interface VolumeDiscountRule {
     id: string;
+    type: DiscountRuleType;
     minOrders: number;
-    maxOrders: number;
+    maxOrders?: number;
     discountPercentage: number;
     startDate: string | null;
     endDate: string | null;

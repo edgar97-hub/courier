@@ -96,7 +96,6 @@ let UsersService = class UsersService {
         }
     }
     async findUserPerfil(idUser) {
-        console.log('idUser', idUser);
         try {
             const user = await this.userRepository.findOne({
                 where: { id: idUser },

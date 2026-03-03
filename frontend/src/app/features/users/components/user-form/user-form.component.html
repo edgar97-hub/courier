@@ -115,30 +115,139 @@
           roleControl.value === 'EMPRESA_DISTRIBUIDOR'
         "
       >
-        <div class="form-section volume-discount-section">
-          <div class="volume-discount-container">
-            <div class="discount-info">
-              <h3 class="discount-title">Tarifa Especial por Volumen</h3>
-              <p class="discount-desc">
-                Si se activa, el sistema aplicará descuentos automáticos a los
-                paquetes cuando supere la meta diaria configurada.
-              </p>
+        <div class="volume-discount-card">
+          <div class="card-header-row">
+            <div class="header-info">
+              <div class="title-with-icon">
+                <mat-icon class="title-icon">auto_graph</mat-icon>
+                <h3 class="section-title">Tarifa Especial por Volumen</h3>
+              </div>
             </div>
-            <div class="discount-toggle">
-              <mat-slide-toggle
-                formControlName="isVolumeDiscountEnabled"
-                color="primary"
+            <mat-slide-toggle
+              formControlName="isVolumeDiscountEnabled"
+              color="primary"
+            ></mat-slide-toggle>
+          </div>
+
+          <div class="rules-info-box">
+            <div class="info-header">
+              <mat-icon>info_outline</mat-icon>
+              <span>Guía de asignación de tarifas</span>
+            </div>
+            <ul class="info-list">
+              <li>
+                <strong>Consistencia:</strong> No puedes mezclar
+                <em>Rangos</em> y <em>Metas</em> que se crucen en las mismas
+                fechas.
+              </li>
+              <li>
+                <strong>Rangos:</strong> Para un mismo periodo, los números de
+                envíos deben ser secuenciales (ej: 1-10 y 11-20).
+              </li>
+              <li>
+                <strong>Metas:</strong> Puedes marcar varias para un mismo día
+                siempre que tengan objetivos diferentes (ej: Meta 10 y Meta 20).
+              </li>
+            </ul>
+          </div>
+
+          <!-- SELECTOR DE REGLAS CON DISEÑO MEJORADO -->
+          <div
+            class="rules-container"
+            *ngIf="userForm.get('isVolumeDiscountEnabled')?.value"
+          >
+            <mat-form-field
+              appearance="outline"
+              class="full-width compact-field"
+            >
+              <mat-label>Seleccionar Planes de Descuento</mat-label>
+              <mat-select
+                formControlName="assignedVolumeDiscountRuleIds"
+                multiple
               >
-                {{
-                  userForm.get("isVolumeDiscountEnabled")?.value
-                    ? "Activado"
-                    : "Desactivado"
-                }}
-              </mat-slide-toggle>
-            </div>
+                <!-- Personalizamos lo que se ve cuando el selector está cerrado -->
+                <mat-select-trigger>
+                  <span
+                    class="selected-count"
+                    *ngIf="
+                      userForm.get('assignedVolumeDiscountRuleIds')?.value
+                        ?.length > 0
+                    "
+                  >
+                    {{
+                      userForm.get("assignedVolumeDiscountRuleIds")?.value
+                        ?.length
+                    }}
+                    plan(es) asignado(s)
+                  </span>
+                </mat-select-trigger>
+
+                <!-- Grupo: RANGOS -->
+                <mat-optgroup label="PROGRESIVOS (Por Rango)">
+                  <mat-option
+                    *ngFor="let rule of getRulesByType('RANGE')"
+                    [value]="rule.id"
+                    class="multi-line-option"
+                  >
+                    <div class="option-content">
+                      <span class="rule-main-text"
+                        >Rango {{ rule.minOrders }} -
+                        {{ rule.maxOrders }} envíos</span
+                      >
+                      <span class="rule-details">
+                        <span class="discount-label"
+                          >Desc: {{ rule.discountPercentage }}%</span
+                        >
+                        <span class="date-range">
+                          <mat-icon class="tiny-icon">event</mat-icon>
+                          {{ rule.startDate | date: "dd/MM/yy" }} —
+                          {{
+                            rule.endDate
+                              ? (rule.endDate | date: "dd/MM/yy")
+                              : "Permanente"
+                          }}
+                        </span>
+                      </span>
+                    </div>
+                  </mat-option>
+                </mat-optgroup>
+
+                <!-- Grupo: METAS -->
+                <mat-optgroup label="RETROACTIVOS (Por Meta)">
+                  <mat-option
+                    *ngFor="let rule of getRulesByType('GOAL')"
+                    [value]="rule.id"
+                    class="multi-line-option"
+                  >
+                    <div class="option-content">
+                      <span class="rule-main-text"
+                        >Meta de {{ rule.minOrders }} envíos</span
+                      >
+                      <span class="rule-details">
+                        <span class="discount-label"
+                          >Desc: {{ rule.discountPercentage }}%</span
+                        >
+                        <span class="date-range">
+                          <mat-icon class="tiny-icon">event</mat-icon>
+                          {{ rule.startDate | date: "dd/MM/yy" }} —
+                          {{
+                            rule.endDate
+                              ? (rule.endDate | date: "dd/MM/yy")
+                              : "Permanente"
+                          }}
+                        </span>
+                      </span>
+                    </div>
+                  </mat-option>
+                </mat-optgroup>
+
+                <mat-option *ngIf="allRules.length === 0" disabled
+                  >No hay reglas creadas en configuración</mat-option
+                >
+              </mat-select>
+            </mat-form-field>
           </div>
         </div>
-
         <mat-divider class="section-divider"></mat-divider>
 
         <div class="form-section">

@@ -22,11 +22,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SettingsService } from '../../services/settings.service';
 import {
   AppSettings,
+  DiscountRuleType,
   VolumeDiscountRule,
 } from '../../models/app-settings.interface';
 import { v4 as uuidv4 } from 'uuid';
 import { AutoSelectDirective } from '../../../../shared/directives/auto-select.directive';
 import { DatePipe } from '@angular/common';
+import { MatRadioModule } from '@angular/material/radio';
 
 @Component({
   selector: 'app-volume-discount-settings',
@@ -46,6 +48,7 @@ import { DatePipe } from '@angular/common';
     MatSnackBarModule,
     MatProgressSpinnerModule,
     AutoSelectDirective,
+    MatRadioModule,
   ],
   templateUrl: './volume-discount-settings.component.html',
   styleUrls: ['./volume-discount-settings.component.scss'],
@@ -72,15 +75,30 @@ export class VolumeDiscountSettingsComponent implements OnInit {
   newRuleForm: FormGroup;
 
   constructor() {
+    const date1 = new Date();
+    const date2 = new Date();
+    date2.setDate(date2.getDate() + 1);
     this.newRuleForm = this.fb.group({
+      type: [DiscountRuleType.RANGE, Validators.required],
       minOrders: [10, [Validators.required, Validators.min(1)]],
       maxOrders: [19, [Validators.required, Validators.min(1)]],
       discountPercentage: [
         5,
         [Validators.required, Validators.min(1), Validators.max(100)],
       ],
-      startDate: [new Date(), [Validators.required]],
-      endDate: [null, [Validators.required]],
+      startDate: [date1, [Validators.required]],
+      endDate: [date2, [Validators.required]],
+    });
+
+    this.newRuleForm.get('type')?.valueChanges.subscribe((type) => {
+      const maxOrdersCtrl = this.newRuleForm.get('maxOrders');
+      if (type === DiscountRuleType.GOAL) {
+        maxOrdersCtrl?.clearValidators();
+        maxOrdersCtrl?.setValue(null);
+      } else {
+        maxOrdersCtrl?.setValidators([Validators.required, Validators.min(1)]);
+      }
+      maxOrdersCtrl?.updateValueAndValidity();
     });
   }
 
@@ -135,41 +153,46 @@ export class VolumeDiscountSettingsComponent implements OnInit {
     }
 
     // VALIDACIÓN 2: Lógica de Volumen
-    if (Number(formVal.maxOrders) <= Number(formVal.minOrders)) {
-      this.snackBar.open(
-        'El rango "Hasta" debe ser mayor al "Desde".',
-        'Cerrar',
-        { duration: 3000 },
-      );
-      return;
+    if (formVal.type === DiscountRuleType.RANGE) {
+      if (Number(formVal.maxOrders) <= Number(formVal.minOrders)) {
+        this.snackBar.open(
+          'El rango "Hasta" debe ser mayor al "Desde".',
+          'Cerrar',
+          { duration: 3000 },
+        );
+        return;
+      }
     }
 
     // VALIDACIÓN 3: Cruce con reglas existentes
-    if (this.hasOverlap(formVal, this.dataSource.data)) {
-      this.snackBar.open(
-        '⚠️ Error: Las fechas seleccionadas ya están ocupadas o coinciden con otra regla.',
-        'Cerrar',
-        { duration: 5000, panelClass: ['error-snackbar'] },
-      );
-      return;
-    }
+    // if (this.hasOverlap(formVal, this.dataSource.data)) {
+    //   this.snackBar.open(
+    //     `⚠️ Error: Ya existe una regla de tipo ${formVal.type === 'RANGE' ? 'Rango' : 'Meta'} para estas fechas.`,
+    //     'Cerrar',
+    //     { duration: 5000, panelClass: ['error-snackbar'] },
+    //   );
+    //   return;
+    // }
 
     // Si pasa todo, agregar a la lista
     const newRule: VolumeDiscountRule = {
       id: uuidv4(),
+      type: formVal.type,
       minOrders: formVal.minOrders,
-      maxOrders: formVal.maxOrders,
+      maxOrders:
+        formVal.type === DiscountRuleType.RANGE ? formVal.maxOrders : null,
       discountPercentage: formVal.discountPercentage,
       startDate: nStart,
       endDate: nEnd,
       isActive: true,
     };
 
-    this.dataSource.data = [...this.dataSource.data, newRule];
+    this.dataSource.data = [newRule, ...this.dataSource.data];
     this.newRuleForm.reset({
-      minOrders: 10,
-      maxOrders: 19,
-      discountPercentage: 5,
+      type: formVal.type,
+      minOrders: 1,
+      maxOrders: formVal.type === DiscountRuleType.RANGE ? 2 : null,
+      discountPercentage: 1,
       startDate: null,
       endDate: null,
     });
@@ -214,17 +237,26 @@ export class VolumeDiscountSettingsComponent implements OnInit {
 
   // Helper para mostrar estado en la tabla
   getRuleStatus(rule: VolumeDiscountRule): { label: string; class: string } {
-    const now = new Date();
-    const start = rule.startDate ? new Date(rule.startDate) : null;
-    const end = rule.endDate ? new Date(rule.endDate) : null;
+    // 1. Obtenemos la fecha de hoy en formato string 'YYYY-MM-DD' para anular las horas/minutos
+    const today = this.datePipe.transform(new Date(), 'yyyy-MM-dd')!;
 
-    if (start && now < start)
+    // 2. Las fechas de la regla ya vienen del backend/formulario como strings 'YYYY-MM-DD'
+    const start = rule.startDate;
+    const end = rule.endDate;
+
+    // Caso: Todavía no llega la fecha de inicio
+    if (start && today < start) {
       return { label: 'PROGRAMADO', class: 'badge-warning' };
-    if (end && now > end) return { label: 'VENCIDO', class: 'badge-error' };
+    }
 
+    // Caso: Ya pasó la fecha de fin
+    if (end && today > end) {
+      return { label: 'VENCIDO', class: 'badge-error' };
+    }
+
+    // Caso: Estamos dentro del rango (today >= start && today <= end)
     return { label: 'ACTIVO', class: 'badge-success' };
   }
-
   private hasOverlap(
     newRule: any,
     existingRules: VolumeDiscountRule[],
@@ -232,17 +264,19 @@ export class VolumeDiscountSettingsComponent implements OnInit {
     // Convertimos las fechas del formulario a strings YYYY-MM-DD
     const nStart = this.datePipe.transform(newRule.startDate, 'yyyy-MM-dd')!;
     const nEnd = this.datePipe.transform(newRule.endDate, 'yyyy-MM-dd')!;
+    const nType = newRule.type;
 
     return existingRules.some((ex) => {
+      if (nType !== ex.type) {
+        return false;
+      }
+
       const exStart = ex.startDate!;
       const exEnd = ex.endDate!;
 
-      // 1. Validar si las fechas son exactamente iguales
       const isSameStart = nStart === exStart;
       const isSameEnd = nEnd === exEnd;
 
-      // 2. Validar solapamiento de rangos (Algoritmo estándar)
-      // Se cruzan si: (Inicio_A <= Fin_B) Y (Fin_A >= Inicio_B)
       const isOverlapping = nStart <= exEnd && nEnd >= exStart;
 
       return isSameStart || isSameEnd || isOverlapping;

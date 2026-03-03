@@ -147,6 +147,16 @@ __decorate([
     }),
     __metadata("design:type", Boolean)
 ], UsersEntity.prototype, "isVolumeDiscountEnabled", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        name: 'assigned_volume_discount_rule_ids',
+        type: 'jsonb',
+        nullable: true,
+        default: () => "'[]'",
+        comment: 'IDs de las reglas (RANGE o GOAL) asignadas a esta empresa',
+    }),
+    __metadata("design:type", Array)
+], UsersEntity.prototype, "assignedVolumeDiscountRuleIds", void 0);
 exports.UsersEntity = UsersEntity = __decorate([
     (0, typeorm_1.Entity)({ name: 'users' })
 ], UsersEntity);

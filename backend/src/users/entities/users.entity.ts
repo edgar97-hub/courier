@@ -110,4 +110,13 @@ export class UsersEntity extends BaseEntity implements IUser {
       'Indica si a este cliente se le aplican descuentos automáticos por volumen',
   })
   isVolumeDiscountEnabled: boolean;
+
+  @Column({
+    name: 'assigned_volume_discount_rule_ids',
+    type: 'jsonb',
+    nullable: true,
+    default: () => "'[]'",
+    comment: 'IDs de las reglas (RANGE o GOAL) asignadas a esta empresa',
+  })
+  assignedVolumeDiscountRuleIds: string[];
 }

@@ -78,41 +78,194 @@ mat-card-subtitle {
   gap: 10px !important;
 }
 
-.volume-discount-section {
-  margin: 20px 0;
-}
+// .volume-discount-section {
+//   margin: 20px 0;
+// }
 
-.volume-discount-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #f1f8e9;
-  border: 1px solid #a6e1a5;
-  border-radius: 8px;
-  padding: 20px;
+// .volume-discount-container {
+//   display: flex;
+//   justify-content: space-between;
+//   align-items: center;
+//   background-color: #f1f8e9;
+//   border: 1px solid #a6e1a5;
+//   border-radius: 8px;
+//   padding: 20px;
 
-  @media (max-width: 600px) {
-    flex-direction: column;
+//   @media (max-width: 600px) {
+//     flex-direction: column;
+//     align-items: flex-start;
+//     gap: 15px;
+//   }
+// }
+
+// .discount-info {
+//   flex: 1;
+//   margin-right: 20px;
+
+//   .discount-title {
+//     margin: 0 0 5px 0;
+//     font-weight: 900 !important;
+//     color: rgb(25, 146, 43) !important;
+//   }
+
+//   .discount-desc {
+//     margin: 0;
+//     font-size: 0.85rem;
+//     color: #4a9912;
+//     font-weight: 700;
+//     line-height: 1.4;
+//   }
+// }
+// --- SECCIÓN DE DESCUENTOS MODERNA ---
+.volume-discount-card {
+  margin: 16px 0;
+  padding: 24px;
+  // background-color: #fbfbfb;
+  border: 1px solid #c6c7c8;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+
+  .card-header-row {
+    display: flex;
+    justify-content: space-between;
     align-items: flex-start;
-    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .title-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+
+    .title-icon {
+      color: #2e7d32;
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+    }
+
+    .section-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #1e293b;
+      border-bottom: none; // Quitamos el borde por defecto de h3 si existe
+      padding: 0;
+    }
+  }
+
+  .section-subtitle {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
   }
 }
 
-.discount-info {
-  flex: 1;
-  margin-right: 20px;
+// --- ESTILOS DENTRO DEL SELECTOR ---
+.multi-line-option {
+  height: auto !important; // Permite que la opción crezca verticalmente
+  padding: 8px 16px !important;
+  line-height: 1.4 !important;
 
-  .discount-title {
-    margin: 0 0 5px 0;
-    font-weight: 900 !important;
-    color: rgb(25, 146, 43) !important;
+  .option-content {
+    display: flex;
+    flex-direction: column;
+
+    .rule-main-text {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #334155;
+    }
+
+    .rule-details {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.75rem;
+      color: #64748b;
+
+      .discount-label {
+        color: #16a34a; // Verde éxito
+        font-weight: 700;
+      }
+
+      .date-range {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        .tiny-icon {
+          font-size: 14px;
+          width: 14px;
+          height: 14px;
+          color: #94a3b8;
+        }
+      }
+    }
+  }
+}
+
+.selected-count {
+  font-weight: 600;
+  color: #3f51b5;
+  background-color: #eef2ff;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+}
+
+.rules-container {
+  animation: slideDown 0.3s ease-out;
+}
+
+.rules-info-box {
+  background-color: #f0f7ff; // Azul muy claro
+  border: 1px solid #c2e0ff; // Borde azul sutil
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  animation: fadeIn 0.4s ease-out;
+
+  .info-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: #0056b3; // Azul fuerte para el título
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    span {
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
   }
 
-  .discount-desc {
+  .info-list {
     margin: 0;
-    font-size: 0.85rem;
-    color: #4a9912;
-    font-weight: 700;
-    line-height: 1.4;
+    padding-left: 20px;
+
+    li {
+      font-size: 0.82rem;
+      color: #475569;
+      line-height: 1.5;
+      margin-bottom: 4px;
+
+      strong {
+        color: #1e293b;
+      }
+
+      em {
+        color: #3f51b5;
+        font-style: normal;
+        font-weight: 500;
+      }
+    }
   }
 }
