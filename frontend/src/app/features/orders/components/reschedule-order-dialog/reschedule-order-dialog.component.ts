@@ -71,12 +71,13 @@ export class RescheduleOrderDialogComponent implements OnInit {
     }
 
     this.rescheduleForm = this.fb.group({
-      newDeliveryDate: [
-        this.data.order.delivery_date
-          ? new Date(this.data.order.delivery_date)
-          : null,
-        Validators.required,
-      ],
+      // newDeliveryDate: [
+      //   this.data.order.delivery_date
+      //     ? new Date(this.data.order.delivery_date)
+      //     : null,
+      //   Validators.required,
+      // ],
+      newDeliveryDate: [null, Validators.required],
       reason: ['', Validators.maxLength(250)],
     });
   }
