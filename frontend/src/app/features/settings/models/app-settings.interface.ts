@@ -38,6 +38,7 @@ export interface AppSettings {
   excel_import_template_url: string | null;
   coverage_map_url: string | null;
   global_notice_image_url: string | null;
+  fulfillment_banner_image_url: string | null;
   promotional_sets: PromotionalSetItem[];
   googleMapsApiKey?: string;
   multiPackageDiscountPercentage: number;
@@ -58,6 +59,7 @@ export const initialAppSettings: AppSettings = {
   excel_import_template_url: null,
   coverage_map_url: null,
   global_notice_image_url: null,
+  fulfillment_banner_image_url: null,
   promotional_sets: [],
 
   multiPackageDiscountPercentage: 0,

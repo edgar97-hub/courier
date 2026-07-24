@@ -14,7 +14,6 @@ import { MatListModule } from '@angular/material/list';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatRippleModule } from '@angular/material/core';
-
 import { MenuItemComponent } from './menu-item/menu-item.component';
 import { MenuItem, menuItems as baseMenuItems } from './menu-items';
 import { AppStore } from '../../../app.store';
@@ -124,9 +123,14 @@ export class CustomSidenavComponent implements OnInit, OnDestroy {
         if (!item.roles || item.roles.length === 0) return true;
         return userRole && item.roles.includes(userRole as UserRole);
       })
-      .map((item) =>
-        this.filterSubItemsRecursively(item, userRole, isAuthenticated)
-      );
+      .map((item) => {
+        const adapted = this.filterSubItemsRecursively(item, userRole, isAuthenticated);
+        const roleLabel = adapted.labelByRole && userRole && adapted.labelByRole[userRole as UserRole];
+        if (roleLabel) {
+          return { ...adapted, label: roleLabel };
+        }
+        return adapted;
+      });
   });
 
   private filterSubItemsRecursively(
@@ -141,11 +145,20 @@ export class CustomSidenavComponent implements OnInit, OnDestroy {
           if (!child.roles || child.roles.length === 0) return true;
           return userRole && child.roles.includes(userRole as UserRole);
         })
-        .map((child) =>
-          this.filterSubItemsRecursively(child, userRole, isAuthenticated)
-        );
+        .map((child) => {
+          const adapted = this.filterSubItemsRecursively(child, userRole, isAuthenticated);
+          const roleLabel = adapted.labelByRole && userRole && adapted.labelByRole[userRole as UserRole];
+          if (roleLabel) {
+            return { ...adapted, label: roleLabel };
+          }
+          return adapted;
+        });
 
       return { ...item, subItems: visibleSubItems };
+    }
+    const roleLabel = item.labelByRole && userRole && item.labelByRole[userRole as UserRole];
+    if (roleLabel) {
+      return { ...item, label: roleLabel };
     }
     return { ...item };
   }

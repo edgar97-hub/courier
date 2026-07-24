@@ -95,7 +95,7 @@ export default class LayoutComponent implements OnDestroy {
   collapsed = signal(false);
   appStore = inject(AppStore);
   isSidenavOpen = false;
-  sidenavWidth = computed(() => (this.isSidenavOpen ? '65px' : '250px'));
+  sidenavWidth = computed(() => (this.isSidenavOpen ? '56px' : '220px'));
 
   protected readonly isMobile = signal(true);
   private readonly _mobileQuery: MediaQueryList;

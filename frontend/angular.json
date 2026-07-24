@@ -29,7 +29,9 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss"],
+            "styles": [
+              "src/styles.scss"
+            ],
 
             "stylePreprocessorOptions": {
               "includePaths": ["./node_modules"]

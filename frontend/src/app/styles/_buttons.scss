@@ -1,0 +1,71 @@
+@use "./variables" as corp;
+
+%btn-corp-base {
+  border-radius: 20px !important;
+  padding: 6px 24px !important;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  line-height: 24px !important;
+  min-width: 100px !important;
+  transition: background-color 0.2s ease-out, border-color 0.2s ease-out,
+    color 0.2s ease-out, box-shadow 0.2s ease-out;
+
+  .mat-mdc-progress-spinner {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 8px;
+    circle {
+      stroke: currentColor !important;
+    }
+  }
+}
+
+.btn-corp-primary {
+  font-weight: 700 !important;
+
+  &.mat-mdc-button-base {
+    @extend %btn-corp-base;
+    background-color: corp.$bg-button-primary !important;
+    color: corp.$text-button-primary !important;
+    border: 1px solid transparent !important;
+
+    &:hover:not([disabled]) {
+      background-color: corp.$bg-button-primary-hover !important;
+    }
+    &:active:not([disabled]) {
+      background-color: corp.$bg-button-primary-active !important;
+    }
+    &[disabled],
+    &.mat-mdc-button-disabled {
+      background-color: corp.$disabled-bg !important;
+      color: corp.$disabled-text !important;
+      border-color: corp.$disabled-bg !important;
+    }
+  }
+}
+
+.btn-corp-secondary {
+  font-weight: 700 !important;
+
+  &.mat-mdc-button-base {
+    @extend %btn-corp-base;
+    background-color: corp.$bg-button-secondary !important;
+    color: corp.$text-button-secondary !important;
+    border: 1.5px solid corp.$border-button-secondary !important;
+
+    &:hover:not([disabled]) {
+      background-color: corp.$bg-button-secondary-hover !important;
+    }
+    &:active:not([disabled]) {
+      background-color: corp.$bg-button-secondary-active !important;
+    }
+    &[disabled],
+    &.mat-mdc-button-disabled {
+      border-color: corp.$disabled-bg !important;
+      color: corp.$disabled-text !important;
+      background-color: transparent !important;
+    }
+  }
+}

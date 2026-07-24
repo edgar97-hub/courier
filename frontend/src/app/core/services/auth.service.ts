@@ -126,6 +126,7 @@ export class AuthService {
           role: response.user.role,
           email: credentials.email,
           username: credentials.email.split('@')[0],
+          isFulfillmentEnabled: response.user.isFulfillmentEnabled,
         };
         return {
           accessToken: response.accessToken,

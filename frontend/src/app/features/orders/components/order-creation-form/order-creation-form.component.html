@@ -3,561 +3,650 @@
   (ngSubmit)="onSubmit()"
   class="order-creation-form"
 >
-  <h2 class="form-section-title">Registrar pedido</h2>
+  <div class="page-header">
+    <mat-icon class="card-icon">note_add</mat-icon>
+    <h2 class="form-section-title">Registrar pedido</h2>
+  </div>
 
-  <mat-checkbox
-    formControlName="isExpress"
-    color="primary"
-    class="standard-checkbox"
-    (click)="getCheckboxValue()"
-  >
-    Express
-  </mat-checkbox>
+  <div class="form-card">
+    <div class="card-header">
+      <mat-icon class="card-icon">local_shipping</mat-icon>
+      <h2 class="card-title">Información del Envío</h2>
+    </div>
 
-  <mat-form-field
-    appearance="outline"
-    class="full-width driver-search-field"
-    *ngIf="!isCompany()"
-  >
-    <mat-label>Buscar y Seleccionar empresa</mat-label>
-    <input
-      type="text"
-      placeholder="Escriba el nombre del la empresa..."
-      aria-label="cliente"
-      matInput
-      [formControl]="driverSearchCtrl"
-      [matAutocomplete]="autoDriver"
-    />
-    <button
-      *ngIf="driverSearchCtrl.value && !isLoadingDrivers"
-      matSuffix
-      mat-icon-button
-      aria-label="Limpiar"
-      (click)="clearDriverSelection()"
+    <mat-checkbox
+      formControlName="isExpress"
+      color="primary"
+      class="standard-checkbox"
+      (click)="getCheckboxValue()"
     >
-      <mat-icon>close</mat-icon>
-    </button>
-    <mat-icon matSuffix *ngIf="!driverSearchCtrl.value && !isLoadingDrivers"
-      >person_search</mat-icon
+      Express
+    </mat-checkbox>
+
+    <mat-form-field
+      appearance="outline"
+      class="full-width driver-search-field"
+      *ngIf="!isCompany()"
     >
-    <mat-progress-spinner
-      *ngIf="isLoadingDrivers"
-      matSuffix
-      mode="indeterminate"
-      diameter="20"
-    ></mat-progress-spinner>
-
-    <mat-autocomplete
-      #autoDriver="matAutocomplete"
-      [displayWith]="displayDriverName"
-      (optionSelected)="onDriverSelected($event)"
-    >
-      @for (driver of filteredDrivers$ | async; track driver.id) {
-        <mat-option [value]="driver">
-          <div class="driver-option">
-            <span>{{ driver.username }}</span>
-          </div>
-        </mat-option>
-      }
-      @if (
-        (filteredDrivers$ | async)?.length === 0 &&
-        !isLoadingDrivers &&
-        driverSearchCtrl.value
-      ) {
-        <mat-option disabled>No se encontraron motorizados.</mat-option>
-      }
-    </mat-autocomplete>
-
-    <mat-error *ngIf="orderForm.get('company_id')?.hasError('required')"
-      >Requerido</mat-error
-    >
-  </mat-form-field>
-  <div class="form-grid">
-    <mat-form-field appearance="outline">
-      <mat-label>Tipo de envío</mat-label>
-      <mat-select formControlName="shipment_type">
-        <mat-option *ngFor="let type of shipmentTypes" [value]="type">{{
-          type
-        }}</mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Nombre del destinatario</mat-label>
-      <input
-        matInput
-        formControlName="recipient_name"
-        placeholder="Nombre completo"
-      />
-      <mat-icon matSuffix>person_outline</mat-icon>
-      <mat-error *ngIf="orderForm.get('recipient_name')?.hasError('required')"
-        >Requerido</mat-error
-      >
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Teléfono del destinatario</mat-label>
-      <input
-        matInput
-        formControlName="recipient_phone"
-        type="tel"
-        placeholder=""
-      />
-      <mat-icon matSuffix>phone_outline</mat-icon>
-      <mat-hint align="end">No se debe agregar el +51</mat-hint>
-      <mat-error *ngIf="orderForm.get('recipient_phone')?.hasError('required')"
-        >Requerido</mat-error
-      >
-      <mat-error *ngIf="orderForm.get('recipient_phone')?.hasError('pattern')"
-        >Teléfono inválido</mat-error
-      >
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="driver-search-field">
-      <mat-label>Buscar y Seleccionar distrito</mat-label>
+      <mat-label>Buscar y Seleccionar empresa</mat-label>
       <input
         type="text"
-        placeholder="Escriba el nombre del distrito..."
-        aria-label="distrito"
+        placeholder="Escriba el nombre del la empresa..."
+        aria-label="cliente"
         matInput
-        [formControl]="districtSearchCtrl"
-        [matAutocomplete]="autoDistric"
+        [formControl]="driverSearchCtrl"
+        [matAutocomplete]="autoDriver"
       />
       <button
-        *ngIf="districtSearchCtrl.value && !isLoadingDistricts"
+        *ngIf="driverSearchCtrl.value && !isLoadingDrivers"
         matSuffix
         mat-icon-button
         aria-label="Limpiar"
-        (click)="clearDistrictSelection()"
+        (click)="clearDriverSelection()"
       >
         <mat-icon>close</mat-icon>
       </button>
-      <mat-icon
-        matSuffix
-        *ngIf="!districtSearchCtrl.value && !isLoadingDistricts"
+      <mat-icon matSuffix *ngIf="!driverSearchCtrl.value && !isLoadingDrivers"
         >person_search</mat-icon
       >
       <mat-progress-spinner
-        *ngIf="isLoadingDistricts"
+        *ngIf="isLoadingDrivers"
         matSuffix
         mode="indeterminate"
         diameter="20"
       ></mat-progress-spinner>
 
       <mat-autocomplete
-        #autoDistric="matAutocomplete"
-        [displayWith]="displayDistrictName"
-        (optionSelected)="onDistrictSelected($event)"
+        #autoDriver="matAutocomplete"
+        [displayWith]="displayDriverName"
+        (optionSelected)="onDriverSelected($event)"
       >
-        @for (district of filteredDistricts$ | async; track district.id) {
-          <mat-option [value]="district">
+        @for (driver of filteredDrivers$ | async; track driver.id) {
+          <mat-option [value]="driver">
             <div class="driver-option">
-              <span>{{ district.name_and_price }}</span>
+              <span>{{ driver.username }}</span>
             </div>
           </mat-option>
         }
         @if (
-          (filteredDistricts$ | async)?.length === 0 &&
-          !isLoadingDistricts &&
-          districtSearchCtrl.value
+          (filteredDrivers$ | async)?.length === 0 &&
+          !isLoadingDrivers &&
+          driverSearchCtrl.value
         ) {
-          <mat-option disabled>No se encontraron distritos.</mat-option>
+          <mat-option disabled>No se encontraron motorizados.</mat-option>
         }
       </mat-autocomplete>
 
-      <mat-error
-        *ngIf="orderForm.get('delivery_district_id')?.hasError('required')"
+      <mat-error *ngIf="orderForm.get('company_id')?.hasError('required')"
         >Requerido</mat-error
       >
     </mat-form-field>
+    <div class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Tipo de envío</mat-label>
+        <mat-select formControlName="shipment_type">
+          <mat-option *ngFor="let type of shipmentTypes" [value]="type">{{
+            type
+          }}</mat-option>
+        </mat-select>
+      </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-span-column">
-      <mat-label>Dirección de entrega</mat-label>
-      <input
-        matInput
-        formControlName="delivery_address"
-        placeholder="Ingresar lugar de entrega (Mínimo 6 caracteres)"
-      />
-      <mat-hint align="end"
-        >No acepta caracteres especiales se borran automáticos</mat-hint
-      >
-      <mat-error *ngIf="orderForm.get('delivery_address')?.hasError('required')"
-        >Requerido</mat-error
-      >
-      <mat-error
-        *ngIf="orderForm.get('delivery_address')?.hasError('minlength')"
-        >Mínimo 6 caracteres</mat-error
-      >
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Coordenadas (Opcional)</mat-label>
-      <input
-        matInput
-        formControlName="delivery_coordinates"
-        placeholder="-12.070,-77.012"
-      />
-      <mat-icon matSuffix>location_on_outline</mat-icon>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Fecha Entrega</mat-label>
-      <input
-        matInput
-        [matDatepicker]="deliveryDatePicker"
-        formControlName="delivery_date"
-        [min]="minDeliveryDate"
-      />
-      <mat-datepicker-toggle
-        matSuffix
-        [for]="deliveryDatePicker"
-      ></mat-datepicker-toggle>
-      <mat-datepicker #deliveryDatePicker></mat-datepicker>
-      <mat-error *ngIf="orderForm.get('delivery_date')?.hasError('required')"
-        >Requerido</mat-error
-      >
-    </mat-form-field>
-
-    <div
-      *ngIf="volumeDiscountInfo() as info"
-      class="volume-discount-alert"
-      [ngClass]="{ 'alert-success': info.applies, 'alert-info': !info.applies }"
-    >
-      <mat-icon>{{ info.applies ? "verified" : "info" }}</mat-icon>
-
-      <div class="alert-content">
-        <strong>{{
-          info.applies ? "¡Descuento Disponible!" : "Estado de Tarifa"
-        }}</strong>
-        <span>{{ info.message }}</span>
-      </div>
-
-      <span *ngIf="info.applies" class="discount-tag"
-        >-{{ info.percentage }}%</span
-      >
-    </div>
-  </div>
-
-  <mat-divider class="section-divider"></mat-divider>
-
-  <!-- ======================================================= -->
-  <!-- === SECCIÓN PARA AÑADIR PAQUETES === -->
-  <!-- ======================================================= -->
-
-  <h3 class="section-subtitle">Tamaño del paquete</h3>
-
-  <!-- El radio button que controla el MODO GENERAL (dentro de newItemForm) -->
-  <div [formGroup]="newItemForm">
-    <mat-radio-group
-      formControlName="package_type"
-      aria-label="Tipo de paquete"
-    >
-      <mat-radio-button value="STANDARD"
-        >Estándar (1 solo paquete)</mat-radio-button
-      >
-      <mat-radio-button value="CUSTOM"
-        >Otros tamaños (Múltiples paquetes)</mat-radio-button
-      >
-    </mat-radio-group>
-  </div>
-  <div
-    id="standard-package-info"
-    class="info-box hidden"
-    *ngIf="newItemForm.get('package_type')?.value === 'STANDARD'"
-  >
-    <div class="info-content">
-      <span class="info-icon">📦</span>
-      <div class="info-text">
-        <strong>Paquete Estándar seleccionado</strong>
-        <div>{{ this.standardPackageLabel() }}</div>
-      </div>
-    </div>
-  </div>
-  <div
-    class="warning-paquete-size"
-    *ngIf="newItemForm.get('package_type')?.value === 'STANDARD'"
-  >
-    <p>
-      Si su paquete excede las medidas y pesos estándar y no utiliza la
-      calculadora de envío, se le cobrará en función de esas medidas sin previo
-      aviso.
-    </p>
-  </div>
-  <div class="max-dimensions-info">
-    <p>{{ this.maxDimensionsInfo() }}</p>
-  </div>
-  <div *ngIf="newItemForm.get('package_type')?.value === 'CUSTOM'">
-    <div [formGroup]="newItemForm" class="package-calculator-container">
-      <h3 class="section-subtitle">Añadir Paquete a la Lista</h3>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Descripción del Bulto</mat-label>
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre del destinatario</mat-label>
         <input
           matInput
-          formControlName="description"
-          placeholder="Ej: Zapatos, Laptop..."
-          appAutoSelect
+          formControlName="recipient_name"
+          placeholder="Nombre completo"
         />
-        <mat-error *ngIf="newItemForm.get('description')?.hasError('required')"
+        <mat-icon matSuffix>person_outline</mat-icon>
+        <mat-error *ngIf="orderForm.get('recipient_name')?.hasError('required')"
           >Requerido</mat-error
         >
       </mat-form-field>
 
-      <div class="custom-dimensions-grid">
-        <mat-form-field appearance="outline">
-          <mat-label>Largo (cm)</mat-label>
-          <input
-            matInput
-            type="number"
-            formControlName="length_cm"
-            appAutoSelect
-          />
-          <mat-error *ngIf="newItemForm.get('length_cm')?.hasError('required')"
-            >Requerido</mat-error
-          >
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Ancho (cm)</mat-label>
-          <input
-            matInput
-            type="number"
-            formControlName="width_cm"
-            appAutoSelect
-          />
-          <mat-error *ngIf="newItemForm.get('width_cm')?.hasError('required')"
-            >Requerido</mat-error
-          >
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Alto (cm)</mat-label>
-          <input
-            matInput
-            type="number"
-            formControlName="height_cm"
-            appAutoSelect
-          />
-          <mat-error *ngIf="newItemForm.get('height_cm')?.hasError('required')"
-            >Requerido</mat-error
-          >
-        </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>Peso (kg)</mat-label>
-          <input
-            matInput
-            type="number"
-            formControlName="weight_kg"
-            appAutoSelect
-          />
-          <mat-error *ngIf="newItemForm.get('weight_kg')?.hasError('required')"
-            >Requerido</mat-error
-          >
-        </mat-form-field>
-      </div>
-
-      <div class="add-item-button-container">
-        <button
-          mat-flat-button
-          type="button"
-          class="btn-corp-primary"
-          (click)="addItemToList()"
-        >
-          <mat-icon>add</mat-icon>
-          Agregar Paquete a la Lista
-        </button>
-      </div>
-      <div
-        class="shipping-cost-display-package"
-        *ngIf="newItemForm.get('package_type')?.value === 'CUSTOM'"
-      >
-        Costo de envío del paquete =
-        <span class="cost-value"
-          >S/ {{ shippingCostPackage() | number: "1.2-2" }}</span
-        >
-      </div>
-    </div>
-
-    <div
-      *ngIf="itemsFormArray.controls.length > 0"
-      class="package-list-container"
-    >
-      <h3 class="section-subtitle">Desglose de Paquetes</h3>
-      <mat-form-field appearance="outline" class="discount-field">
-        <mat-label>% Descuento Adicional</mat-label>
+      <mat-form-field appearance="outline">
+        <mat-label>Teléfono del destinatario</mat-label>
         <input
           matInput
-          [value]="multiPackageDiscountPercentage()"
-          (input)="
-            multiPackageDiscountPercentage.set(+$any($event.target).value)
-          "
-          [disabled]="!this.hasPermissionToEditPercentage()"
+          formControlName="recipient_phone"
+          type="tel"
+          placeholder=""
         />
-        <mat-icon matSuffix>percent</mat-icon>
+        <mat-icon matSuffix>phone_outline</mat-icon>
+        <mat-hint align="end">No se debe agregar el +51</mat-hint>
+        <mat-error
+          *ngIf="orderForm.get('recipient_phone')?.hasError('required')"
+          >Requerido</mat-error
+        >
+        <mat-error *ngIf="orderForm.get('recipient_phone')?.hasError('pattern')"
+          >Teléfono inválido</mat-error
+        >
       </mat-form-field>
 
-      <table
-        mat-table
-        [dataSource]="itemsDataSource"
-        class="mat-elevation-z2 items-table"
+      <mat-form-field appearance="outline" class="driver-search-field">
+        <mat-label>Buscar y Seleccionar distrito</mat-label>
+        <input
+          type="text"
+          placeholder="Escriba el nombre del distrito..."
+          aria-label="distrito"
+          matInput
+          [formControl]="districtSearchCtrl"
+          [matAutocomplete]="autoDistric"
+        />
+        <button
+          *ngIf="districtSearchCtrl.value && !isLoadingDistricts"
+          matSuffix
+          mat-icon-button
+          aria-label="Limpiar"
+          (click)="clearDistrictSelection()"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-icon
+          matSuffix
+          *ngIf="!districtSearchCtrl.value && !isLoadingDistricts"
+          >person_search</mat-icon
+        >
+        <mat-progress-spinner
+          *ngIf="isLoadingDistricts"
+          matSuffix
+          mode="indeterminate"
+          diameter="20"
+        ></mat-progress-spinner>
+
+        <mat-autocomplete
+          #autoDistric="matAutocomplete"
+          [displayWith]="displayDistrictName"
+          (optionSelected)="onDistrictSelected($event)"
+        >
+          @for (district of filteredDistricts$ | async; track district.id) {
+            <mat-option [value]="district">
+              <div class="driver-option">
+                <span>{{ district.name_and_price }}</span>
+              </div>
+            </mat-option>
+          }
+          @if (
+            (filteredDistricts$ | async)?.length === 0 &&
+            !isLoadingDistricts &&
+            districtSearchCtrl.value
+          ) {
+            <mat-option disabled>No se encontraron distritos.</mat-option>
+          }
+        </mat-autocomplete>
+
+        <mat-error
+          *ngIf="orderForm.get('delivery_district_id')?.hasError('required')"
+          >Requerido</mat-error
+        >
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-span-column">
+        <mat-label>Dirección de entrega</mat-label>
+        <input
+          matInput
+          formControlName="delivery_address"
+          placeholder="Ingresar lugar de entrega (Mínimo 6 caracteres)"
+        />
+        <mat-hint align="end"
+          >No acepta caracteres especiales se borran automáticos</mat-hint
+        >
+        <mat-error
+          *ngIf="orderForm.get('delivery_address')?.hasError('required')"
+          >Requerido</mat-error
+        >
+        <mat-error
+          *ngIf="orderForm.get('delivery_address')?.hasError('minlength')"
+          >Mínimo 6 caracteres</mat-error
+        >
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Coordenadas (Opcional)</mat-label>
+        <input
+          matInput
+          formControlName="delivery_coordinates"
+          placeholder="-12.070,-77.012"
+        />
+        <mat-icon matSuffix>location_on_outline</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha Entrega</mat-label>
+        <input
+          matInput
+          [matDatepicker]="deliveryDatePicker"
+          formControlName="delivery_date"
+          [min]="minDeliveryDate"
+        />
+        <mat-datepicker-toggle
+          matSuffix
+          [for]="deliveryDatePicker"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #deliveryDatePicker></mat-datepicker>
+        <mat-error *ngIf="orderForm.get('delivery_date')?.hasError('required')"
+          >Requerido</mat-error
+        >
+      </mat-form-field>
+
+      <div
+        *ngIf="volumeDiscountInfo() as info"
+        class="volume-discount-alert"
+        [ngClass]="{
+          'alert-success': info.applies,
+          'alert-info': !info.applies,
+        }"
       >
-        <!-- Columna Descripción -->
-        <ng-container matColumnDef="description">
-          <th mat-header-cell *matHeaderCellDef>Descripción</th>
-          <td mat-cell *matCellDef="let element">
-            {{ element.value.description }}
-          </td>
-        </ng-container>
+        <mat-icon>{{ info.applies ? "verified" : "info" }}</mat-icon>
 
-        <!-- Columna Medidas -->
-        <ng-container matColumnDef="medidas">
-          <th mat-header-cell *matHeaderCellDef>Medidas</th>
-          <td mat-cell *matCellDef="let element">
-            {{ element.value.length_cm }}x{{ element.value.width_cm }}x{{
-              element.value.height_cm
-            }}cm <br />
-            <small>{{ element.value.weight_kg }}kg</small>
-          </td>
-        </ng-container>
+        <div class="alert-content">
+          <strong>{{
+            info.applies ? "¡Descuento Disponible!" : "Estado de Tarifa"
+          }}</strong>
+          <span>{{ info.message }}</span>
+        </div>
 
-        <ng-container matColumnDef="basePrice">
-          <th mat-header-cell *matHeaderCellDef>Precio Base</th>
-          <td mat-cell *matCellDef="let element">
-            {{ element.value.basePrice | currency: "S/ " }}
-          </td>
-        </ng-container>
+        <span *ngIf="info.applies" class="discount-tag"
+          >-{{ info.percentage }}%</span
+        >
+      </div>
+    </div>
 
-        <ng-container matColumnDef="tipo">
-          <th mat-header-cell *matHeaderCellDef>Tipo</th>
-          <td mat-cell *matCellDef="let element">
+    <div class="form-card">
+      <div class="card-header">
+        <mat-icon class="card-icon">{{ isFulfillment() ? 'difference' : 'inventory_2' }}</mat-icon>
+        <h2 class="card-title">{{ isFulfillment() ? 'Productos Fulfillment' : 'Paquetes' }}</h2>
+      </div>
+
+      <div *ngIf="!isFulfillment()">
+        <!-- El radio button que controla el MODO GENERAL (dentro de newItemForm) -->
+        <div [formGroup]="newItemForm">
+          <mat-radio-group
+            formControlName="package_type"
+            aria-label="Tipo de paquete"
+          >
+            <mat-radio-button value="STANDARD"
+              >Estándar (1 solo paquete)</mat-radio-button
+            >
+            <mat-radio-button value="CUSTOM"
+              >Otros tamaños (Múltiples paquetes)</mat-radio-button
+            >
+          </mat-radio-group>
+        </div>
+        <div
+          id="standard-package-info"
+          class="info-box hidden"
+          *ngIf="newItemForm.get('package_type')?.value === 'STANDARD'"
+        >
+          <div class="info-content">
+            <span class="info-icon">📦</span>
+            <div class="info-text">
+              <strong>Paquete Estándar seleccionado</strong>
+              <div>{{ this.standardPackageLabel() }}</div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="warning-paquete-size"
+          *ngIf="newItemForm.get('package_type')?.value === 'STANDARD'"
+        >
+          <p>
+            Si su paquete excede las medidas y pesos estándar y no utiliza la
+            calculadora de envío, se le cobrará en función de esas medidas sin
+            previo aviso.
+          </p>
+        </div>
+        <div class="max-dimensions-info">
+          <p>{{ this.maxDimensionsInfo() }}</p>
+        </div>
+        <div *ngIf="newItemForm.get('package_type')?.value === 'CUSTOM'">
+          <div [formGroup]="newItemForm" class="package-calculator-container">
+            <h3 class="section-subtitle">Añadir Paquete a la Lista</h3>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Descripción del Bulto</mat-label>
+              <input
+                matInput
+                formControlName="description"
+                placeholder="Ej: Zapatos, Laptop..."
+                appAutoSelect
+              />
+              <mat-error
+                *ngIf="newItemForm.get('description')?.hasError('required')"
+                >Requerido</mat-error
+              >
+            </mat-form-field>
+
+            <div class="custom-dimensions-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Largo (cm)</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  formControlName="length_cm"
+                  appAutoSelect
+                />
+                <mat-error
+                  *ngIf="newItemForm.get('length_cm')?.hasError('required')"
+                  >Requerido</mat-error
+                >
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Ancho (cm)</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  formControlName="width_cm"
+                  appAutoSelect
+                />
+                <mat-error
+                  *ngIf="newItemForm.get('width_cm')?.hasError('required')"
+                  >Requerido</mat-error
+                >
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Alto (cm)</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  formControlName="height_cm"
+                  appAutoSelect
+                />
+                <mat-error
+                  *ngIf="newItemForm.get('height_cm')?.hasError('required')"
+                  >Requerido</mat-error
+                >
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Peso (kg)</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  formControlName="weight_kg"
+                  appAutoSelect
+                />
+                <mat-error
+                  *ngIf="newItemForm.get('weight_kg')?.hasError('required')"
+                  >Requerido</mat-error
+                >
+              </mat-form-field>
+            </div>
+
+            <div class="add-item-button-container">
+              <button
+                mat-flat-button
+                type="button"
+                class="btn-corp-primary"
+                (click)="addItemToList()"
+              >
+                <mat-icon>add</mat-icon>
+                Agregar Paquete a la Lista
+              </button>
+            </div>
+            <div
+              class="shipping-cost-display-package"
+              *ngIf="newItemForm.get('package_type')?.value === 'CUSTOM'"
+            >
+              Costo de envío del paquete =
+              <span class="cost-value"
+                >S/ {{ shippingCostPackage() | number: "1.2-2" }}</span
+              >
+            </div>
+          </div>
+
+          <div
+            *ngIf="itemsFormArray.controls.length > 0 || isFulfillment()"
+            class="package-list-container"
+          >
+            <h3 class="section-subtitle">Desglose de Paquetes</h3>
+            <mat-form-field appearance="outline" class="discount-field">
+              <mat-label>% Descuento Adicional</mat-label>
+              <input
+                matInput
+                [value]="multiPackageDiscountPercentage()"
+                (input)="
+                  multiPackageDiscountPercentage.set(+$any($event.target).value)
+                "
+                [disabled]="!this.hasPermissionToEditPercentage()"
+              />
+              <mat-icon matSuffix>percent</mat-icon>
+            </mat-form-field>
+
+            <table
+              mat-table
+              [dataSource]="itemsDataSource"
+              class="mat-elevation-z2 items-table"
+            >
+              <!-- Columna Descripción -->
+              <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef>Descripción</th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.value.description }}
+                </td>
+              </ng-container>
+
+              <!-- Columna Medidas -->
+              <ng-container matColumnDef="medidas">
+                <th mat-header-cell *matHeaderCellDef>Medidas</th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.value.length_cm }}x{{ element.value.width_cm }}x{{
+                    element.value.height_cm
+                  }}cm <br />
+                  <small>{{ element.value.weight_kg }}kg</small>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="basePrice">
+                <th mat-header-cell *matHeaderCellDef>Precio Base</th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.value.basePrice | currency: "S/ " }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="tipo">
+                <th mat-header-cell *matHeaderCellDef>Tipo</th>
+                <td mat-cell *matCellDef="let element">
+                  <span
+                    [ngClass]="{
+                      'principal-item': element.value.isPrincipal,
+                      'additional-item': !element.value.isPrincipal,
+                    }"
+                  >
+                    {{ element.value.isPrincipal ? "Principal" : "Adicional" }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="finalPrice">
+                <th mat-header-cell *matHeaderCellDef>Precio Final</th>
+                <td mat-cell *matCellDef="let element">
+                  <!-- Si el item NO es principal y tiene descuento, muestra el precio tachado -->
+                  <div
+                    *ngIf="
+                      !element.value.isPrincipal &&
+                      element.value.finalPrice < element.value.basePrice
+                    "
+                    class="discounted-price"
+                  >
+                    <span class="original-price">{{
+                      element.value.basePrice | currency: "S/ "
+                    }}</span>
+                    <span class="final-price">{{
+                      element.value.finalPrice | currency: "S/ "
+                    }}</span>
+                  </div>
+
+                  <!-- Si es principal o no tiene descuento, muestra el precio normal -->
+                  <div
+                    *ngIf="
+                      element.value.isPrincipal ||
+                      element.value.finalPrice >= element.value.basePrice
+                    "
+                  >
+                    {{ element.value.finalPrice | currency: "S/ " }}
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- Columna Eliminar -->
+              <ng-container matColumnDef="eliminar">
+                <th mat-header-cell *matHeaderCellDef>Eliminar</th>
+                <td mat-cell *matCellDef="let element; let i = index">
+                  <button
+                    mat-icon-button
+                    color="warn"
+                    type="button"
+                    (click)="removeItem(i)"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="itemsDisplayedColumns"></tr>
+              <tr
+                mat-row
+                *matRowDef="let row; columns: itemsDisplayedColumns"
+              ></tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="shipping-cost-display">
+          Costo de envío =
+          <span class="cost-value"
+            >S/
+            {{
+              this.orderForm.get("shipping_cost")?.value | number: "1.2-2"
+            }}</span
+          >
+        </div>
+      </div>
+
+      <div *ngIf="isFulfillment()" class="fulfillment-section">
+        @if (isCompany() && !isFulfillmentEnabled && fulfillmentBannerUrl()) {
+          <div class="fulfillment-banner">
+            <img [src]="fulfillmentBannerUrl()" alt="Banner Fulfillment" />
+          </div>
+        }
+          @if (isFulfillmentEnabled) {
+        <ng-container
+          *ngIf="
+            orderForm.get('delivery_district_id')?.value;
+            else noDistrictMsg
+          "
+        >
+          <h3 class="section-subtitle">Agregar Productos Fulfillment</h3>
+          <p class="fulfillment-hint">
+            Seleccione los productos de su inventario. El sistema calculará el
+            costo de envío automáticamente según las dimensiones y el distrito.
+          </p>
+          <mat-form-field appearance="outline" class="discount-field">
+            <mat-label>% Descuento Adicional</mat-label>
+            <input
+              matInput
+              [value]="multiPackageDiscountPercentage()"
+              (input)="
+                multiPackageDiscountPercentage.set(+$any($event.target).value)
+              "
+              [disabled]="!this.hasPermissionToEditPercentage()"
+            />
+            <mat-icon matSuffix>percent</mat-icon>
+          </mat-form-field>
+          <app-fulfillment-product-selector
+            #fulfillmentSelector
+            [deliveryDistrictId]="orderForm.get('delivery_district_id')?.value"
+            [districtsCache]="districtsCache"
+            [volumetricFactor]="volumetricFactor()"
+            [staLengthCm]="staLengthCm()"
+            [staWidthCm]="staWidthCm()"
+            [staHeightCm]="staHeightCm()"
+            [staWeightKg]="staWeightKg()"
+            [companyId]="orderForm.get('company_id')?.value"
+            [multiPackageDiscountPercent]="multiPackageDiscountPercentage()"
+          />
+        </ng-container>
+        <ng-template #noDistrictMsg>
+          <div class="alert-warning">
+            <mat-icon>warning_amber</mat-icon>
             <span
-              [ngClass]="{
-                'principal-item': element.value.isPrincipal,
-                'additional-item': !element.value.isPrincipal,
-              }"
+              >Seleccione un distrito de entrega primero para agregar productos
+              Fulfillment.</span
             >
-              {{ element.value.isPrincipal ? "Principal" : "Adicional" }}
-            </span>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="finalPrice">
-          <th mat-header-cell *matHeaderCellDef>Precio Final</th>
-          <td mat-cell *matCellDef="let element">
-            <!-- Si el item NO es principal y tiene descuento, muestra el precio tachado -->
-            <div
-              *ngIf="
-                !element.value.isPrincipal &&
-                element.value.finalPrice < element.value.basePrice
-              "
-              class="discounted-price"
-            >
-              <span class="original-price">{{
-                element.value.basePrice | currency: "S/ "
-              }}</span>
-              <span class="final-price">{{
-                element.value.finalPrice | currency: "S/ "
-              }}</span>
-            </div>
-
-            <!-- Si es principal o no tiene descuento, muestra el precio normal -->
-            <div
-              *ngIf="
-                element.value.isPrincipal ||
-                element.value.finalPrice >= element.value.basePrice
-              "
-            >
-              {{ element.value.finalPrice | currency: "S/ " }}
-            </div>
-          </td>
-        </ng-container>
-
-        <!-- Columna Eliminar -->
-        <ng-container matColumnDef="eliminar">
-          <th mat-header-cell *matHeaderCellDef>Eliminar</th>
-          <td mat-cell *matCellDef="let element; let i = index">
-            <button
-              mat-icon-button
-              color="warn"
-              type="button"
-              (click)="removeItem(i)"
-            >
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="itemsDisplayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: itemsDisplayedColumns"></tr>
-      </table>
+          </div>
+        </ng-template>
+        }
+      </div>
     </div>
   </div>
 
-  <div class="shipping-cost-display">
-    Costo de envío =
-    <span class="cost-value"
-      >S/
-      {{ this.orderForm.get("shipping_cost")?.value | number: "1.2-2" }}</span
-    >
-  </div>
+  <div class="form-card">
+    <div class="card-header">
+      <mat-icon class="card-icon">receipt_long</mat-icon>
+      <h2 class="card-title">Detalles del Pedido</h2>
+    </div>
 
-  <mat-divider class="section-divider"></mat-divider>
-
-  <!-- Sección 3: Detalles del Envío y Pago -->
-  <div class="form-grid">
-    <mat-form-field appearance="outline" class="full-span-column">
-      <mat-label>¿Qué envía?</mat-label>
-      <input
-        matInput
-        formControlName="item_description"
-        placeholder="Detalle del pedido"
-      />
-      <mat-icon matSuffix>inventory_2_outline</mat-icon>
-      <mat-error *ngIf="orderForm.get('item_description')?.hasError('required')"
-        >Requerido</mat-error
-      >
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Monto total a cobrar</mat-label>
-      <input
-        matInput
-        formControlName="amount_to_collect_at_delivery"
-        type="number"
-        min="0"
-        placeholder="S/"
-      />
-      <span matPrefix>S/ </span>
-      <mat-error
-        *ngIf="
-          orderForm.get('amount_to_collect_at_delivery')?.hasError('required')
-        "
-        >Requerido</mat-error
-      >
-      <mat-error
-        *ngIf="orderForm.get('amount_to_collect_at_delivery')?.hasError('min')"
-        >Monto no puede ser negativo</mat-error
-      >
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Método de Pago (para cobro en entrega)</mat-label>
-      <mat-select formControlName="payment_method_for_collection">
-        <mat-option
-          *ngFor="let method of paymentMethodsForCollection"
-          [value]="method"
-          >{{ method }}</mat-option
+    <!-- Sección 3: Detalles del Envío y Pago -->
+    <div class="form-grid">
+      <mat-form-field appearance="outline" class="full-span-column">
+        <mat-label>¿Qué envía?</mat-label>
+        <input
+          matInput
+          formControlName="item_description"
+          placeholder="Detalle del pedido"
+        />
+        <mat-icon matSuffix>inventory_2_outline</mat-icon>
+        <mat-error
+          *ngIf="orderForm.get('item_description')?.hasError('required')"
+          >Requerido</mat-error
         >
-      </mat-select>
-    </mat-form-field>
+      </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-span-column">
-      <mat-label>Observaciones (Opcional)</mat-label>
-      <textarea
-        matInput
-        formControlName="observations"
-        placeholder="¿Qué envías?..."
-        rows="3"
-      ></textarea>
-    </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Monto total a cobrar</mat-label>
+        <input
+          matInput
+          formControlName="amount_to_collect_at_delivery"
+          type="number"
+          min="0"
+          placeholder="S/"
+        />
+        <span matPrefix>S/ </span>
+        <mat-error
+          *ngIf="
+            orderForm.get('amount_to_collect_at_delivery')?.hasError('required')
+          "
+          >Requerido</mat-error
+        >
+        <mat-error
+          *ngIf="
+            orderForm.get('amount_to_collect_at_delivery')?.hasError('min')
+          "
+          >Monto no puede ser negativo</mat-error
+        >
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Método de Pago (para cobro en entrega)</mat-label>
+        <mat-select formControlName="payment_method_for_collection">
+          <mat-option
+            *ngFor="let method of paymentMethodsForCollection"
+            [value]="method"
+            >{{ method }}</mat-option
+          >
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-span-column">
+        <mat-label>Observaciones (Opcional)</mat-label>
+        <textarea
+          matInput
+          formControlName="observations"
+          placeholder="¿Qué envías?..."
+          rows="3"
+        ></textarea>
+      </mat-form-field>
+    </div>
   </div>
   <div class="add-order-button-container">
     <button

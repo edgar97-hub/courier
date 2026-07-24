@@ -1,4 +1,4 @@
-import { Component, computed, input, signal, Input } from '@angular/core'; 
+import { Component, computed, input, signal, Input } from '@angular/core';
 import { RouterLinkActive, RouterModule } from '@angular/router';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
@@ -52,113 +52,117 @@ import { MatSidenav } from '@angular/material/sidenav';
       >
         {{ item().icon }}
       </mat-icon>
-      @if(!collapsed()) {
-      <span matListItemTitle class="menu-item-label">{{ item().label }}</span>
-      } @if(hasSubitems() && !collapsed()) {
-      <span matListItemMeta class="expand-indicator">
-        <mat-icon>{{
-          isSubmenuOpen() ? 'expand_less' : 'expand_more'
-        }}</mat-icon>
-      </span>
+      @if (!collapsed()) {
+        <span matListItemTitle class="menu-item-label">{{ item().label }}</span>
+      }
+      @if (hasSubitems() && !collapsed()) {
+        <span matListItemMeta class="expand-indicator">
+          <mat-icon>{{
+            isSubmenuOpen() ? 'expand_less' : 'expand_more'
+          }}</mat-icon>
+        </span>
       }
     </a>
 
     @if (hasSubitems() && isSubmenuOpen()) {
-    <div
-      [@expandContractMenu]="isSubmenuOpen() ? 'expanded' : 'collapsed'"
-      class="submenu-container"
-    >
-      @for(subItem of item().subItems; track subItem.label) {
-      <app-menu-item
-        [item]="subItem"
-        [collapsed]="collapsed()"
-        [level]="level() + 1"
-        [sidenavInstance]="sidenavInstance()"
-        [isMobile]="isMobile()"
-      />
-      }
-    </div>
+      <div
+        [@expandContractMenu]="isSubmenuOpen() ? 'expanded' : 'collapsed'"
+        class="submenu-container"
+      >
+        @for (subItem of item().subItems; track subItem.label) {
+          <app-menu-item
+            [item]="subItem"
+            [collapsed]="collapsed()"
+            [level]="level() + 1"
+            [sidenavInstance]="sidenavInstance()"
+            [isMobile]="isMobile()"
+          />
+        }
+      </div>
     }
   </ng-container> `,
-  styles: ` 
- :host {
-  display: block;
-  width: 100%;
-}
-
-.menu-item {
-  width: 100%;
-  border-radius: 0; // O el radio que desees para los ítems
-  transition: background-color 0.2s ease-out, color 0.2s ease-out;
-  height: 48px; // Altura estándar de MatList item
-
-  .menu-item-icon {
-    margin-right: 16px; // Espacio entre icono y texto
-    color: inherit; // Hereda color del link
-  }
-
-  .menu-item-label {
-    line-height: 1.5;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    
-  }
-
-  .expand-indicator mat-icon,
-  .external-link-indicator mat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-    opacity: 0.7;
-  }
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.04); // Hover sutil
-  }
-
-  &.active-menu-item {
-    background-color: rgba(63, 81, 181, 0.1); // Un color de activo sutil
-    // color: #3f51b5; // Color primario para el texto e icono activo
-
-    .menu-item-icon, .menu-item-label {
-      color: #f97c06; // Color primario
-            font-weight: 700;
-
+  styles: `
+    :host {
+      display: block;
+      width: 100%;
     }
-  }
+    
+    .menu-item {
+      width: 100%;
+      border-radius: 0;
+      transition:
+        background-color 0.2s ease-out,
+        color 0.2s ease-out;
+      height: 38px;
 
-  // Si el ítem tiene submenús y está expandido, también podría tener un estilo activo
-  &.has-subitems.expanded {
-    // background-color: rgba(0, 0, 0, 0.03); // Un fondo ligeramente diferente
-  }
-}
+      .menu-item-icon {
+        margin-right: 12px;
+        color: inherit;
+      }
 
-.submenu-container {
-  // background-color: rgba(0,0,0,0.02); // Fondo sutil para el contenedor del submenú
-  overflow: hidden; // Necesario para la animación
-  // Los app-menu-item hijos manejarán su propia indentación basada en [level]
-}
+      .menu-item-label {
+        line-height: 1.5;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+      }
 
-// Estilos para el Sidenav colapsado (cuando CustomSidenav pasa collapsed=true)
-:host-context(.collapsed) .menu-item { // Si CustomSidenav tiene una clase .collapsed
-  .menu-item-label, .expand-indicator, .external-link-indicator {
-    display: none; // Ocultar texto e indicadores
-  }
-  .menu-item-icon {
-    margin-right: 0; // Quitar margen si solo se muestra el icono
-  }
-}`,
+      .expand-indicator mat-icon,
+      .external-link-indicator mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        opacity: 0.7;
+      }
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.04) !important;
+      }
+
+      &.active-menu-item {
+        background-color: rgba(249, 124, 6, 0.2) !important;
+
+        .menu-item-icon,
+        .menu-item-label {
+          color: #f97c06; // Color primario
+          font-weight: 700;
+        }
+      }
+
+      &.has-subitems.expanded {
+        background-color: transparent;
+      }
+    }
+
+    .submenu-container {
+      overflow: hidden; // Necesario para la animación
+    }
+
+    // Estilos para el Sidenav colapsado (cuando CustomSidenav pasa collapsed=true)
+    :host-context(.collapsed) .menu-item {
+      // Si CustomSidenav tiene una clase .collapsed
+      .menu-item-label,
+      .expand-indicator,
+      .external-link-indicator {
+        display: none; // Ocultar texto e indicadores
+      }
+      .menu-item-icon {
+        margin-right: 0; // Quitar margen si solo se muestra el icono
+      }
+    }
+  `,
   animations: [
     trigger('expandContractMenu', [
       state(
         'collapsed',
-        style({ height: '0px', opacity: 0, overflow: 'hidden' })
+        style({ height: '0px', opacity: 0, overflow: 'hidden' }),
       ),
       state('expanded', style({ height: '*', opacity: 1 })), // Altura automática
       transition(
         'expanded <=> collapsed',
-        animate('300ms cubic-bezier(0.4, 0.0, 0.2, 1)')
+        animate('300ms cubic-bezier(0.4, 0.0, 0.2, 1)'),
       ),
     ]),
   ],
@@ -223,7 +227,7 @@ export class MenuItemComponent {
         segments.push(...parentRoute.split('/').filter((s) => s.length > 0));
       }
       segments.push(
-        ...currentRouteSegment.split('/').filter((s) => s.length > 0)
+        ...currentRouteSegment.split('/').filter((s) => s.length > 0),
       );
       return ['/', ...segments]; // Siempre construir rutas absolutas desde la raíz para el menú principal
     }

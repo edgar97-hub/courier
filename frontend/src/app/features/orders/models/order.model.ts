@@ -110,6 +110,7 @@ export enum OrderStatus {
 export enum PackageType {
   STANDARD = 'STANDARD',
   CUSTOM = 'CUSTOM',
+  FULFILLMENT = 'FULFILLMENT',
 }
 export interface OrderItem {
   package_type: PackageType;
@@ -121,6 +122,10 @@ export interface OrderItem {
   basePrice: number;
   finalPrice: number;
   isPrincipal: boolean;
+  variationId?: string;
+  productId?: string;
+  quantity?: number;
+  fulfillmentGroupId?: string;
 }
 export interface Order_importacion {
   id?: string;

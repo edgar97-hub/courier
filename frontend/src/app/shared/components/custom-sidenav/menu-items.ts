@@ -3,6 +3,7 @@ import { UserRole } from '../../../common/roles.enum';
 export type MenuItem = {
   icon: string;
   label: string;
+  labelByRole?: Partial<Record<UserRole, string>>;
   route?: string;
   subItems?: MenuItem[];
   roles?: UserRole[];
@@ -10,7 +11,7 @@ export type MenuItem = {
 
 export const menuItems: MenuItem[] = [
   {
-    icon: 'list_alt',
+    icon: 'dashboard',
     label: 'Inicio',
     route: 'dashboard',
     roles: [
@@ -34,7 +35,7 @@ export const menuItems: MenuItem[] = [
     ],
   },
   {
-    icon: 'list_alt',
+    icon: 'receipt_long',
     label: 'Tarifas',
     route: 'tarifas',
     roles: [
@@ -46,24 +47,24 @@ export const menuItems: MenuItem[] = [
     ],
   },
   {
-    icon: 'list_alt',
+    icon: 'business',
     label: 'Detalles del negocio',
     route: 'users/detail',
     roles: [UserRole.COMPANY, UserRole.EMPRESA_DISTRIBUIDOR],
   },
   {
-    icon: 'format_list_bulleted',
+    icon: 'settings',
     label: 'Configuración',
     route: 'configuracion',
     roles: [UserRole.ADMIN],
     subItems: [
       {
-        icon: 'settings_applications',
+        icon: 'store',
         label: 'Empresa - Sucursal',
         route: 'settings',
       },
       {
-        icon: 'settings_applications',
+        icon: 'percent',
         label: 'Ajustes de descuentos por volumen',
         route: 'settings-volume-discounts',
       },
@@ -73,20 +74,64 @@ export const menuItems: MenuItem[] = [
         route: 'users',
       },
       {
-        icon: 'settings_applications',
+        icon: 'local_shipping',
         label: 'Tarifas de Envío',
         route: 'shipping-rates',
       },
       {
-        icon: 'settings_applications',
+        icon: 'location_city',
         label: 'Distritos',
         route: 'districts',
       },
     ],
   },
-
   {
-    icon: 'format_list_bulleted',
+    icon: 'inventory_2',
+    label: 'Fulfillment',
+    route: 'fulfillment',
+    roles: [
+      UserRole.ADMIN,
+      UserRole.COMPANY,
+      UserRole.RECEPTIONIST,
+      UserRole.EMPRESA_DISTRIBUIDOR,
+    ],
+    subItems: [
+      {
+        icon: 'category',
+        label: 'Productos',
+        route: 'fulfillment/products',
+        roles: [UserRole.ADMIN, UserRole.RECEPTIONIST],
+      },
+      {
+        icon: 'swap_vert',
+        label: 'Ingresos y Ajustes',
+        route: 'fulfillment/stock-adjustments',
+        roles: [UserRole.ADMIN, UserRole.RECEPTIONIST],
+      },
+      {
+        icon: 'visibility',
+        label: 'Consulta de Stock',
+        roles: [UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.COMPANY, UserRole.EMPRESA_DISTRIBUIDOR],
+        labelByRole: {
+          [UserRole.COMPANY]: 'Mi Stock',
+          [UserRole.EMPRESA_DISTRIBUIDOR]: 'Mi Stock',
+        },
+        route: 'fulfillment/stock-query',
+      },
+      {
+        icon: 'receipt_long',
+        label: 'Kardex',
+        roles: [UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.COMPANY, UserRole.EMPRESA_DISTRIBUIDOR],
+        labelByRole: {
+          [UserRole.COMPANY]: 'Mis Movimientos',
+          [UserRole.EMPRESA_DISTRIBUIDOR]: 'Mis Movimientos',
+        },
+        route: 'fulfillment/kardex',
+      },
+    ],
+  },
+  {
+    icon: 'shopping_cart',
     label: 'Pedidos',
     route: 'orders',
     roles: [
@@ -97,25 +142,25 @@ export const menuItems: MenuItem[] = [
     ],
     subItems: [
       {
-        icon: 'add',
+        icon: 'add_shopping_cart',
         label: 'Nuevo Pedido',
         route: 'orders/create',
       },
       {
-        icon: 'shopping_basket',
+        icon: 'shopping_cart',
         label: 'Pedidos',
         route: 'orders',
       },
     ],
   },
   {
-    icon: 'shopping_basket',
+    icon: 'shopping_cart',
     label: 'Pedidos',
     route: 'orders',
     roles: [UserRole.MOTORIZED],
   },
   {
-    icon: 'list_alt',
+    icon: 'assignment',
     label: 'Pedidos Registrados',
     route: 'orders-registered',
     roles: [
@@ -126,7 +171,7 @@ export const menuItems: MenuItem[] = [
     ],
   },
   {
-    icon: 'list_alt',
+    icon: 'check_circle',
     label: 'Pedidos Entregados',
     route: 'orders-delivered',
     roles: [
@@ -137,25 +182,25 @@ export const menuItems: MenuItem[] = [
     ],
   },
   {
-    icon: 'list_alt',
+    icon: 'assessment',
     label: 'Reporte de Descuento por volumen',
     route: 'reports-volume-discounts',
     roles: [UserRole.ADMIN, UserRole.RECEPTIONIST],
   },
   {
-    icon: 'list_alt',
+    icon: 'route',
     label: 'Planes de Rutas',
     route: 'planning-events',
     roles: [UserRole.ADMIN, UserRole.RECEPTIONIST],
   },
   {
-    icon: 'shopping_basket',
+    icon: 'directions_car',
     label: 'Mis Rutas',
     route: 'my-orders',
     roles: [UserRole.MOTORIZED],
   },
   {
-    icon: 'analytics',
+    icon: 'bar_chart',
     label: 'Reportes',
     route: 'lista-cierre-caja',
     roles: [
@@ -166,7 +211,7 @@ export const menuItems: MenuItem[] = [
     ],
   },
   {
-    icon: 'analytics',
+    icon: 'attach_money',
     label: 'Gestión de Caja',
     route: 'cash-management',
     roles: [UserRole.ADMIN, UserRole.RECEPTIONIST],
@@ -184,7 +229,7 @@ export const menuItems: MenuItem[] = [
     ],
   },
   {
-    icon: 'article',
+    icon: 'gavel',
     label: 'Terminos y condiciones',
     route: 'terms-and-conditions',
     roles: [
@@ -196,7 +241,7 @@ export const menuItems: MenuItem[] = [
     ],
   },
   {
-    icon: 'assignment',
+    icon: 'inventory_2',
     label: 'Registros de Envios',
     route: 'registros-distribuidor',
     roles: [

@@ -1,0 +1,260 @@
+@use '../../../../styles/variables' as corp;
+
+.fulfillment-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.product-search-section {
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.section-label {
+  font-size: 0.9em;
+  font-weight: 500;
+  color: corp.$corp-blue-dark;
+  margin: 0 0 4px 0;
+}
+
+.table-container {
+  overflow-x: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+
+  table {
+    width: 100%;
+  }
+}
+
+.variations-table,
+.desglose-table {
+  th.mat-header-cell {
+    background-color: corp.$bg-table-header;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 6px;
+  }
+
+  td.mat-cell {
+    padding: 3px 6px;
+    font-size: 11px;
+    vertical-align: middle;
+  }
+
+  .center {
+    text-align: center;
+  }
+}
+
+.stock-low {
+  color: #e65100;
+  font-weight: 600;
+}
+
+.stock-empty {
+  color: #d32f2f;
+  font-weight: 600;
+}
+
+.quantity-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.qty-btn {
+  width: 24px;
+  height: 24px;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.qty-value {
+  min-width: 20px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 11px;
+}
+
+.add-btn {
+  font-size: 10px;
+  padding: 0 8px;
+  height: 24px;
+  line-height: 24px;
+}
+
+.drag-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: #999;
+  margin-bottom: 4px;
+
+  mat-icon {
+    font-size: 12px;
+    width: 12px;
+    height: 12px;
+  }
+}
+
+.fulfillment-total {
+  font-size: 0.95em;
+  font-weight: bold;
+  text-align: right;
+  color: #d32f2f;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+
+  .cost-value {
+    font-size: 0.95em;
+  }
+}
+
+.desglose-actions {
+  text-align: center;
+  margin-top: 6px;
+
+  button {
+    padding: 4px 12px;
+    font-size: 0.85em;
+  }
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+}
+
+.no-data {
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  padding: 8px;
+  font-size: 11px;
+}
+
+.desglose-section {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 6px;
+  background-color: #fff8e1;
+}
+
+.standard-group {
+  margin-bottom: 4px;
+
+  .group-title {
+    font-size: 0.85em;
+    font-weight: 600;
+    color: corp.$corp-blue-dark;
+    margin: 0 0 2px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .badge-standard {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 8px;
+    background-color: corp.$corp-orange;
+    color: #ffffff;
+    font-size: 9px;
+    font-weight: 600;
+  }
+}
+
+.custom-items {
+  .group-title {
+    font-size: 0.85em;
+    font-weight: 600;
+    color: corp.$corp-blue-dark;
+    margin: 0 0 2px 0;
+  }
+}
+
+.total-row td {
+  background-color: #fff3e0;
+  font-weight: 500;
+  font-size: 11px;
+  padding: 4px 6px;
+  border-top: 2px solid corp.$corp-orange;
+}
+
+.variations-section {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 6px;
+}
+
+/* Drag & Drop */
+.cdk-drag-preview {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  background: white;
+  opacity: 0.95;
+  display: table-row;
+  font-size: 11px;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.cdk-drop-list-dragging .cdk-drag {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drop-list-disabled {
+  cursor: not-allowed;
+}
+
+[cdkDropList] {
+  min-height: 20px;
+}
+
+.principal-item {
+  font-weight: bold;
+  color: #1e88e5;
+  background-color: #e3f2fd;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.additional-item {
+  color: #43a047;
+  background-color: #e8f5e9;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.discounted-price {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .original-price {
+    text-decoration: line-through;
+    color: #e03131;
+    font-size: 0.85em;
+  }
+
+  .final-price {
+    font-weight: bold;
+  }
+}

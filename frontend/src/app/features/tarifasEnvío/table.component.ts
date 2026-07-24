@@ -57,7 +57,7 @@ export interface UserData {
     PesoVolumetricoComponent,
   ],
   template: `
-    <div class="@apply flex   flex-col  gap-3">
+    <div style="display: flex; flex-direction: column; gap: 12px;">
       <mat-card appearance="outlined">
         <mat-card-header>
           <mat-card-title> 1. Configuración de medida Estándar </mat-card-title>
@@ -68,9 +68,9 @@ export interface UserData {
           <form
             [formGroup]="form_sta_mea"
             (ngSubmit)="onSubmitStandardMeasurement(form_sta_mea)"
-            class="@apply flex justify-between  flex-col items-start gap-3"
+            style="display: flex; justify-content: space-between; flex-direction: column; align-items: flex-start; gap: 12px;"
           >
-            <div class="@apply flex justify-between items-center gap-3">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
               <mat-form-field appearance="outline">
                 <mat-label>Ancho (cm)</mat-label>
                 <input matInput formControlName="standard_measurements_width" />
@@ -107,7 +107,8 @@ export interface UserData {
 
             <button
               type="submit"
-              class="mb-3 mt-5 btn-corp-primary"
+              class="btn-corp-primary"
+              style="margin-bottom: 12px; margin-top: 20px;"
               mat-flat-button
               [disabled]="isLoading"
             >
@@ -118,7 +119,7 @@ export interface UserData {
       </mat-card>
 
       <mat-card appearance="outlined">
-        <mat-card-header class="@apply mb-[10px]">
+        <mat-card-header style="margin-bottom: 10px;">
           <mat-card-title-group>
             <mat-card-title style="margin:5px;margin-bottom:20px"
               >2. Configuración de cálculo para medida
@@ -130,21 +131,20 @@ export interface UserData {
           <form
             [formGroup]="form_max_mea"
             (ngSubmit)="onSubmitMaximumMeasurement(form_max_mea)"
-            class="@apply flex justify-between  flex-col items-start gap-3"
+            style="display: flex; justify-content: space-between; flex-direction: column; align-items: flex-start; gap: 12px;"
           >
             <div
-              class="@apply flex justify-between items-center gap-3 flex-wrap"
+              style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;"
             >
               <mat-card appearance="outlined">
                 <mat-card-header
-                  class="@apply mb-[5px] "
-                  style="margin-left: 20px;"
+                  style="margin-bottom: 5px; margin-left: 20px;"
                 >
                   <mat-card-title>Medidas máximas (cm):</mat-card-title>
                 </mat-card-header>
                 <mat-card-content>
                   <div
-                    class="@apply flex justify-between items-center gap-3"
+                    style="display: flex; justify-content: space-between; align-items: center; gap: 12px;"
                     style="padding:20px;"
                   >
                     <mat-form-field appearance="outline">
@@ -196,7 +196,7 @@ export interface UserData {
 
             <button
               type="submit"
-              class="mb-3 mt-5 btn-corp-primary"
+              class="btn-corp-primary"
               style="margin-top: 10px;"
               mat-flat-button
               [disabled]="isLoading2"

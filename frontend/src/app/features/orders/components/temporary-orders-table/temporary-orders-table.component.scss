@@ -62,7 +62,6 @@
 // }
 
 .table-responsive-wrapper {
-  background-color: #6c757d !important;
   overflow: auto;
 }
 
@@ -95,10 +94,10 @@
 
 th.mat-header-cell,
 td.mat-cell {
-  padding: 10px 12px; // Ajusta el padding para más espacio
-  border-bottom: 1px solid #e0e0e0; // Línea divisoria más sutil
-  vertical-align: middle; // Alinear contenido verticalmente
-  text-align: left; // Alinear texto a la izquierda por defecto
+  padding: 6px 8px;
+  border-bottom: 1px solid #e0e0e0;
+  vertical-align: middle;
+  text-align: left;
 }
 
 th.mat-header-cell {
@@ -154,10 +153,10 @@ td.mat-cell {
 
 .no-orders-message {
   text-align: center;
-  padding: 30px;
+  padding: 20px;
   font-style: italic;
   color: #6c757d;
-  background-color: #f8f9fa; // Fondo para el mensaje
+  background-color: #f8f9fa;
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
 }

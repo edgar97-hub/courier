@@ -34,42 +34,41 @@ import { AppStore } from '../../../../app.store';
   }
 
   .sidenav-header-content {
-    padding-top: 1rem; /* pt-4 */
+    padding-top: 0.5rem;
     display: flex;
-    flex-direction: column; /* flex flex-col */
-    align-items: center; /* items-center */
+    flex-direction: column;
+    align-items: center;
   }
 
   .profile-pic {
-    object-fit: cover; /* object-cover */
-    object-position: center; /* object-center */
-    border-radius: 9999px; /* rounded-full */
-    margin-bottom: 0.65rem; /* mb-3 */
-    aspect-ratio: 1 / 1; /* aspect-square */
+    object-fit: cover;
+    object-position: center;
+    border-radius: 9999px;
+    margin-bottom: 0.4rem;
+    aspect-ratio: 1 / 1;
   }
 
   .user-info {
-    text-align: center; /* text-center */
-    margin-bottom: 0.5rem; /* mb-2 */
-    height: 2rem; /* h-[2rem] */
-    // overflow: hidden; /* To handle height transition */
+    text-align: center;
+    margin-bottom: 0.25rem;
+    height: 1.5rem;
 
-    
     &.collapsed {
-      height: 0 !important; /* h-0! */
-      opacity: 0; /* opacity-0 */
+      height: 0 !important;
+      opacity: 0;
     }
   }
 
   .username {
-    font-size: 1.125rem; /* text-lg */
-    margin: 0; /* Remove default h2 margin */
-    
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0;
   }
 
   .user-role {
-    font-size: 0.875rem; /* text-sm */
-    margin: 0; /* Remove default p margin */
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin: 0;
   }
   `,
 })
@@ -78,5 +77,5 @@ export default class SidenavHeaderComponent {
 
   appStore = inject(AppStore);
 
-  profilePicSize = computed(() => (this.collapsed() ? '32' : '100'));
+  profilePicSize = computed(() => (this.collapsed() ? '28' : '56'));
 }

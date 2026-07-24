@@ -7,7 +7,9 @@ import {
   inject,
   WritableSignal,
   signal,
+  computed,
   effect,
+  ViewChild,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
@@ -64,6 +66,7 @@ import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { UserRole } from '../../../../common/roles.enum';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { AutoSelectDirective } from '../../../../shared/directives/auto-select.directive';
+import { FulfillmentProductSelectorComponent } from '../fulfillment-product-selector/fulfillment-product-selector.component';
 
 // Interfaces for internal use
 interface CustomPackageData {
@@ -104,6 +107,7 @@ interface FormErrors {
     MatTableModule,
     MatSnackBarModule,
     AutoSelectDirective,
+    FulfillmentProductSelectorComponent,
   ],
   templateUrl: './order-creation-form.component.html',
   styleUrls: ['./order-creation-form.component.scss'],
@@ -152,6 +156,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     'SOLO ENTREGAR',
     'CAMBIO',
     'RECOJO',
+    'FULFILLMENT',
   ];
   paymentMethodsForCollection: string[] = [
     'NO COBRAR',
@@ -162,6 +167,17 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   ];
 
   appStore = inject(AppStore);
+
+  isFulfillment = signal(false);
+
+  fulfillmentBannerUrl = signal<string | null>(null);
+
+  get isFulfillmentEnabled(): boolean {
+    return this.appStore.currentUser()?.isFulfillmentEnabled ?? false;
+  }
+
+  @ViewChild('fulfillmentSelector')
+  fulfillmentSelector!: FulfillmentProductSelectorComponent;
 
   selectedDistrictName = () => {
     const districtId = this.orderForm?.get('delivery_district_id')?.value;
@@ -439,12 +455,25 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
         const discount =
           this.orderService.getEffectiveDiscount(currentSettings);
         this.multiPackageDiscountPercentage.set(discount);
+        this.fulfillmentBannerUrl.set(
+          currentSettings.fulfillment_banner_image_url || null,
+        );
       });
   }
 
   ngOnInit(): void {
     this.itemsDataSource.data = this.itemsFormArray.controls;
     this.loadSettings();
+
+    this.orderForm
+      .get('shipment_type')
+      ?.valueChanges.pipe(takeUntil(this.destroy$), distinctUntilChanged())
+      .subscribe((val) => {
+        this.isFulfillment.set(val === 'FULFILLMENT');
+      });
+    this.isFulfillment.set(
+      this.orderForm.get('shipment_type')?.value === 'FULFILLMENT',
+    );
     this.orderForm.statusChanges
       .pipe(takeUntil(this.destroy$), distinctUntilChanged())
       .subscribe((status) => {
@@ -638,6 +667,39 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   }
 
   addItemToList(): void {
+    if (this.isFulfillment()) {
+      const fulfillmentItems = this.fulfillmentSelector?.getOrderItems();
+      if (!fulfillmentItems || fulfillmentItems.length === 0) {
+        this.snackBar.open(
+          'Agregue productos al desglose primero',
+          'Cerrar',
+          { duration: 3000 },
+        );
+        return;
+      }
+
+      for (const item of fulfillmentItems) {
+        this.itemsFormArray.push(this.fb.group({
+          package_type: [item.package_type],
+          description: [item.description],
+          length_cm: [item.length_cm],
+          width_cm: [item.width_cm],
+          height_cm: [item.height_cm],
+          weight_kg: [item.weight_kg],
+          basePrice: [item.basePrice],
+          finalPrice: [item.finalPrice],
+          isPrincipal: [item.isPrincipal],
+          variationId: [item.variationId ?? null],
+          productId: [item.productId ?? null],
+          quantity: [item.quantity ?? null],
+          fulfillmentGroupId: [item.fulfillmentGroupId ?? null],
+        }));
+      }
+      this.itemsDataSource.data = this.itemsFormArray.controls;
+      this.recalculateTotalCost(this.itemsFormArray.value);
+      return;
+    }
+
     if (this.newItemForm.invalid) {
       this.newItemForm.markAllAsTouched();
       return;
@@ -712,23 +774,28 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Encontrar el principal
-    const principalItem = items.reduce(
-      (max, item) => (item.basePrice > max.basePrice ? item : max),
-      items[0],
-    );
+    const principalItem = items.length > 0
+      ? items.reduce(
+          (max, item) => (item.basePrice > max.basePrice ? item : max),
+          items[0],
+        )
+      : null;
 
     let totalCost = 0;
     const updatedItems = items.map((item) => {
       const isPrincipal = item === principalItem;
       let finalPrice = item.basePrice;
 
-      if (!isPrincipal) {
+      if (!isPrincipal && this.multiPackageDiscountPercentage() > 0) {
         finalPrice =
           item.basePrice * (1 - this.multiPackageDiscountPercentage() / 100);
       }
 
-      totalCost += finalPrice;
+      const multiplier =
+        item.package_type === PackageType.FULFILLMENT && !item.fulfillmentGroupId
+          ? (item.quantity || 1)
+          : 1;
+      totalCost += finalPrice * multiplier;
 
       return { ...item, finalPrice, isPrincipal };
     });
@@ -759,8 +826,42 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     }
 
     const formValue = this.orderForm.getRawValue();
-    const packageType = this.newItemForm.get('package_type')?.value;
-    if (packageType === PackageType.STANDARD && formValue.items.length === 0) {
+
+    if (this.isFulfillment()) {
+      const fulfillmentItems = this.fulfillmentSelector?.getOrderItems();
+      if (!fulfillmentItems || fulfillmentItems.length === 0) {
+        this.snackBar.open('Agregue productos Fulfillment al pedido primero', 'Cerrar', { duration: 3000 });
+        return;
+      }
+      for (const item of fulfillmentItems) {
+        formValue.items.push(item);
+      }
+
+      const allItems = [...this.itemsFormArray.value, ...fulfillmentItems];
+      if (allItems.length > 0) {
+        const principalItem = allItems.reduce(
+          (max, item) => (item.basePrice > max.basePrice ? item : max),
+          allItems[0],
+        );
+        let totalCost = 0;
+        for (const item of allItems) {
+          const isPrincipal = item === principalItem;
+          let finalPrice = item.basePrice;
+          if (!isPrincipal && this.multiPackageDiscountPercentage() > 0) {
+            finalPrice =
+              item.basePrice * (1 - this.multiPackageDiscountPercentage() / 100);
+          }
+          const multiplier =
+            item.package_type === PackageType.FULFILLMENT && !item.fulfillmentGroupId
+              ? (item.quantity || 1)
+              : 1;
+          totalCost += finalPrice * multiplier;
+        }
+        formValue.shipping_cost = totalCost;
+      }
+    } else {
+      const packageType = this.newItemForm.get('package_type')?.value;
+      if (packageType === PackageType.STANDARD && formValue.items.length === 0) {
       const districtId = this.orderForm.get('delivery_district_id')?.value;
       if (!districtId) {
         this.snackBar.open('Por favor, seleccione un distrito.', 'Cerrar', {
@@ -790,6 +891,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
 
       formValue.items.push(standardItem);
       formValue.shipping_cost = this.orderForm.get('shipping_cost')?.value;
+    }
     }
 
     if (formValue.items.length === 0) {

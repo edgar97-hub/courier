@@ -162,6 +162,13 @@ export const routes: Routes = [
             (m) => m.MyRoutePageComponent,
           ),
       },
+      {
+        path: 'fulfillment',
+        loadChildren: () =>
+          import('./features/fulfillment/fulfillment.routes').then(
+            (m) => m.FULFILLMENT_ROUTES,
+          ),
+      },
     ],
   },
   {

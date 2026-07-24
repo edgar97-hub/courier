@@ -6,4 +6,5 @@ export interface User {
   photo_url?: string;
   role?: string;
   token?: string;
+  isFulfillmentEnabled?: boolean;
 }

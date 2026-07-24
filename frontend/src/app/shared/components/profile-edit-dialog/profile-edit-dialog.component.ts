@@ -185,7 +185,7 @@ export class ProfileEditDialogComponent implements OnInit {
         });
         this.dialogRef.close(updatedUser); // Devolver el usuario actualizado
       },
-      error: (error) => {
+      error: (error: any) => {
         this.isLoading = false;
         this.snackBar.open(
           error.message || 'Error al actualizar el perfil.',

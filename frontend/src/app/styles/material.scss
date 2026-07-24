@@ -1,47 +1,36 @@
 @use "@angular/material" as mat;
+@use "./variables" as corp;
 
-html:not(.dark-theme) {
-  @include mat.theme(
-    (
-      color: mat.$azure-palette,
-      // typography: Inter,
-    )
-  );
-}
+html {
+  color-scheme: light;
+  @include mat.theme((
+    color: (
+      primary: mat.$orange-palette,
+      tertiary: mat.$blue-palette,
+      theme-type: light,
+    ),
+    density: 0,
+  ));
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  // font-family: "Avantt Itálica", sans-serif;
-  // color: #c5d5ea;
-}
-
-p,
-label,
-span,
-div,
-input,
-textarea,
-button {
-  // font-family: "Montserrat Regular", sans-serif;
-  // color: #15044e;
-}
-body.dark-theme,
-html.dark-theme {
-  color-scheme: dark;
-}
-
-mat-form-field {
-  display: block !important;
-
-  @include mat.theme(
-    (
-      density: -2,
-    )
-  );
+  @include mat.theme-overrides((
+    primary: #{corp.$corp-orange},
+    on-primary: #{corp.$corp-white},
+    primary-container: #fff3e0,
+    on-primary-container: #1a1a1a,
+    secondary: #{corp.$corp-blue-dark},
+    on-secondary: #{corp.$corp-white},
+    background: #ffffff,
+    surface: #ffffff,
+    surface-dim: #ffffff,
+    surface-bright: #ffffff,
+    surface-container-lowest: #ffffff,
+    surface-container-low: #ffffff,
+    surface-container: #ffffff,
+    surface-container-high: #ffffff,
+    surface-container-highest: #ffffff,
+    surface-variant: #f4f4f4,
+    surface-tint: transparent,
+  ));
 }
 
 html,
@@ -49,6 +38,91 @@ body {
   height: 100%;
 }
 
-body {
-  // font-family: Inter, "Helvetica Neue", sans-serif;
+mat-form-field {
+  display: block !important;
+}
+
+.mat-mdc-form-field {
+  &.mat-focused .mdc-floating-label {
+    color: corp.$border-input-active !important;
+    font-weight: 700 !important;
+    font-size: 1.15em !important;
+  }
+  &.mat-focused .mdc-notched-outline__leading,
+  &.mat-focused .mdc-notched-outline__notch,
+  &.mat-focused .mdc-notched-outline__trailing {
+    border-color: corp.$border-input-active !important;
+  }
+  .mat-mdc-input-element {
+    caret-color: corp.$border-input-active !important;
+  }
+}
+
+.mat-mdc-form-field .mdc-floating-label,
+.mat-mdc-form-field .mat-mdc-form-field-label {
+  color: corp.$text-input-label !important;
+}
+
+.mat-mdc-form-field .mat-mdc-input-element {
+  color: corp.$text-input-value !important;
+}
+
+table.mat-mdc-table {
+  border: 1px solid rgb(127, 127, 127) !important;
+
+  thead.mat-mdc-header-row,
+  tr.mat-mdc-header-row {
+    background-color: corp.$bg-table-header !important;
+  }
+  th.mat-mdc-header-cell {
+    color: corp.$text-table-header !important;
+    font-weight: normal !important;
+    padding: 12px 16px !important;
+
+    .mat-sort-header-container {
+      color: inherit;
+
+      .mat-sort-header-arrow {
+        color: corp.$text-table-header !important;
+      }
+    }
+  }
+  td.mat-mdc-cell {
+    color: corp.$text-table-cell;
+    font-family: "Montserrat", sans-serif !important;
+    padding: 10px 16px !important;
+    border-bottom: 1px solid rgb(127, 127, 127) !important;
+  }
+  tr.mat-mdc-row:hover td.mat-mdc-cell,
+  tr.mat-mdc-footer-row:hover td.mat-mdc-cell {
+    background-color: rgba(corp.$corp-orange, 0.05) !important;
+  }
+}
+
+mat-sidenav {
+  --mat-list-active-item-bg: transparent;
+  --mat-list-active-item-label-text-color: #{corp.$corp-orange};
+  --mat-list-active-item-leading-icon-color: #{corp.$corp-orange};
+  --mat-sys-hover-state-layer-opacity: 0;
+  --mat-sys-focus-state-layer-opacity: 0;
+  --mat-sys-pressed-state-layer-opacity: 0;
+
+  background-color: #{corp.$corp-white} !important;
+  .mat-mdc-list-item {
+    .mdc-list-item__primary-text,
+    .mat-mdc-list-item-icon {
+      color: #{corp.$corp-black} !important;
+    }
+    &.active-menu-item,
+    &.mat-mdc-list-item--activated {
+      background-color: rgba(corp.$corp-orange, 0.1) !important;
+      .mdc-list-item__primary-text,
+      .mat-mdc-list-item-icon {
+        color: corp.$corp-orange !important;
+      }
+    }
+    &:hover:not(.mat-mdc-list-item--activated):not(.active-menu-item) {
+      background-color: rgba(corp.$corp-orange, 0.05) !important;
+    }
+  }
 }

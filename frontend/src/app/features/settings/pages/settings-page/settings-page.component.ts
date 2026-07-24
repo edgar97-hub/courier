@@ -81,6 +81,10 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
   selectedGlobalNoticeImageFile: File | null = null;
   globalNoticeImagePreviewUrl: string | null = null;
 
+  currentFulfillmentBannerUrl: string | null = null;
+  selectedFulfillmentBannerFile: File | null = null;
+  fulfillmentBannerPreviewUrl: string | null = null;
+
   private destroy$ = new Subject<void>();
 
   // Getter para acceder fácilmente al FormArray de promotional_sets
@@ -103,6 +107,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
       logo_url: [settings.logo_url],
       terms_conditions_url: [settings.terms_conditions_url],
       global_notice_image_url: [settings.global_notice_image_url],
+      fulfillment_banner_image_url: [settings.fulfillment_banner_image_url],
       googleMapsApiKey: [settings.googleMapsApiKey],
 
       background_image_url: [settings.background_image_url],
@@ -140,6 +145,9 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
 
     this.currentGlobalNoticeImageUrl = settings.global_notice_image_url;
     this.globalNoticeImagePreviewUrl = settings.global_notice_image_url;
+
+    this.currentFulfillmentBannerUrl = settings.fulfillment_banner_image_url;
+    this.fulfillmentBannerPreviewUrl = settings.fulfillment_banner_image_url;
 
     // Inicializar previews para imágenes de promotional_sets
     this.promotionalSetsFormArray.controls.forEach((control, index) => {
@@ -194,6 +202,10 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
             loadedSettings.global_notice_image_url;
           this.globalNoticeImagePreviewUrl =
             loadedSettings.global_notice_image_url;
+          this.currentFulfillmentBannerUrl =
+            loadedSettings.fulfillment_banner_image_url;
+          this.fulfillmentBannerPreviewUrl =
+            loadedSettings.fulfillment_banner_image_url;
         },
         error: (err) => {
           this.snackBar.open(
@@ -215,7 +227,8 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
       this.selectedBackgroundImageFile ||
       this.selectedTermsFile ||
       this.selectedGlobalNoticeImageFile ||
-      this.selectedExcelImportTemplateFile
+      this.selectedExcelImportTemplateFile ||
+      this.selectedFulfillmentBannerFile
     ) {
       return true;
     }
@@ -371,6 +384,30 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     this.globalNoticeImagePreviewUrl = 'assets/images/placeholder-image.png';
     this.settingsForm.get('global_notice_image_url')?.setValue(null);
     this.settingsForm.get('global_notice_image_url')?.markAsDirty();
+  }
+
+  onFulfillmentBannerFileSelected(event: Event): void {
+    const element = event.target as HTMLInputElement;
+    const fileList: FileList | null = element.files;
+    if (fileList && fileList.length > 0) {
+      this.selectedFulfillmentBannerFile = fileList[0];
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.fulfillmentBannerPreviewUrl = e.target.result;
+      };
+      reader.readAsDataURL(this.selectedFulfillmentBannerFile);
+      this.settingsForm.get('fulfillment_banner_image_url')?.markAsDirty();
+    } else {
+      this.selectedFulfillmentBannerFile = null;
+      this.fulfillmentBannerPreviewUrl = this.currentFulfillmentBannerUrl;
+    }
+  }
+
+  removeFulfillmentBanner(): void {
+    this.selectedFulfillmentBannerFile = null;
+    this.fulfillmentBannerPreviewUrl = 'assets/images/placeholder-image.png';
+    this.settingsForm.get('fulfillment_banner_image_url')?.setValue(null);
+    this.settingsForm.get('fulfillment_banner_image_url')?.markAsDirty();
   }
 
   onTermsFileSelected(event: Event): void {
@@ -603,6 +640,35 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     } else {
       formValues.global_notice_image_url = '';
     }
+
+    if (this.selectedFulfillmentBannerFile) {
+      try {
+        const uploadResponse = await this.settingsService
+          .uploadFile(this.selectedFulfillmentBannerFile)
+          .pipe(first(), takeUntil(this.destroy$))
+          .toPromise();
+        if (uploadResponse?.file_url) {
+          formValues.fulfillment_banner_image_url = uploadResponse.file_url;
+        } else {
+          throw new Error('Fulfillment banner URL not returned from upload.');
+        }
+      } catch (error) {
+        console.error('Fulfillment banner upload failed:', error);
+        this.snackBar.open(
+          'Error al cargar el banner de Fulfillment. No se guardaron los ajustes.',
+          'Close',
+          {
+            duration: 4000,
+            panelClass: ['error-snackbar'],
+            verticalPosition: 'top',
+          }
+        );
+        this.isSaving = false;
+        return;
+      }
+    } else {
+      formValues.fulfillment_banner_image_url = '';
+    }
     this.settingsService
       .saveSettings(formValues)
       .pipe(
@@ -624,6 +690,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
           this.selectedExcelImportTemplateFile = null;
           this.selectedTermsFile = null;
           this.selectedGlobalNoticeImageFile = null;
+          this.selectedFulfillmentBannerFile = null;
         },
         error: (err) => {
           this.snackBar.open(

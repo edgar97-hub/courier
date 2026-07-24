@@ -5,17 +5,23 @@
   >
   </app-order-creation-form>
 
-  <app-temporary-orders-table
-    [pendingOrders]="pendingOrders()"
-    (removeOrder)="handleRemoveOrder($event)"
-  >
-  </app-temporary-orders-table>
+  <div class="form-card">
+    <div class="card-header">
+      <mat-icon class="card-icon">list_alt</mat-icon>
+      <h2 class="card-title">Pedidos</h2>
+    </div>
 
-  <div
-    class="final-submission-section mat-elevation-z1"
-    *ngIf="pendingOrders().length > 0"
-  >
-    <div class="pickup-option-section">
+    <app-temporary-orders-table
+      [pendingOrders]="pendingOrders()"
+      (removeOrder)="handleRemoveOrder($event)"
+    >
+    </app-temporary-orders-table>
+
+    <div
+      class="final-submission-section"
+      *ngIf="pendingOrders().length > 0"
+    >
+      <div class="pickup-option-section">
       <mat-form-field appearance="outline" class="full-width">
         <mat-label
           >¿Cómo se hará el traslado de los pedidos al almacén?</mat-label
@@ -83,4 +89,5 @@
       </button>
     </div>
   </div>
+</div>
 </div>

@@ -1,129 +1,256 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog'; // Importar MatDialogModule
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar'; // Importar MatSnackBarModule
-import { Observable, Subject } from 'rxjs';
-import { takeUntil, tap, filter } from 'rxjs/operators';
-
-import { Store } from '@ngrx/store';
-import * as UserActions from '../../store/user.actions';
-import * as UserSelectors from '../../store/user.selectors';
-
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { UserTableComponent } from '../../components/user-table/user-table.component';
+import {
+  UserFormDialogComponent,
+  UserDialogData,
+} from '../../components/user-form-dialog/user-form-dialog.component';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { UsersStore } from '../../services/users.store';
 import { User } from '../../models/user.model';
-import { ConfirmDialogComponent } from './confirm-dialog.component';
 
 @Component({
   selector: 'app-user-list-page',
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule,
     UserTableComponent,
     MatButtonModule,
     MatIconModule,
+    MatTooltipModule,
     MatDialogModule,
     MatSnackBarModule,
   ],
-  templateUrl: './user-list-page.component.html',
-  styleUrls: ['./user-list-page.component.scss'],
+  template: `
+    <div class="page-container">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Usuarios</h1>
+          <p class="page-subtitle">
+            {{ store.totalUsers() }} usuario(s) registrado(s)
+          </p>
+        </div>
+        <div class="header-actions">
+          <button
+            mat-stroked-button
+            class="btn-refresh"
+            matTooltip="Actualizar lista"
+            (click)="refresh()"
+          >
+            <mat-icon>refresh</mat-icon>
+            Refrescar
+          </button>
+          <button
+            mat-raised-button
+            class="btn-corp-primary"
+            (click)="openCreateDialog()"
+          >
+            <mat-icon>add</mat-icon>
+            Nuevo Usuario
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        @if (store.isLoading()) {
+        <div class="loading-overlay">
+          <p>Cargando usuarios...</p>
+        </div>
+        }
+        @if (store.users().length === 0 && !store.isLoading() && !store.search_term()) {
+        <div class="empty-container">
+          <mat-icon class="empty-icon">people</mat-icon>
+          <p>No hay usuarios registrados</p>
+          <button
+            mat-stroked-button
+            class="btn-corp-secondary"
+            (click)="openCreateDialog()"
+          >
+            Crear primer usuario
+          </button>
+        </div>
+        } @else {
+        <app-user-table
+          [rowData]="store.users()"
+          (editUser)="openEditDialog($event)"
+          (deleteUser)="openDeleteConfirm($event)"
+          (searchChanged)="onSearchChanged($event)"
+          (sortChanged)="onSortChanged($event)"
+        />
+        }
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .page-container {
+        padding: 24px;
+      }
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+      }
+      .page-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--corp-blue-dark, #012147);
+        margin: 0;
+      }
+      .page-subtitle {
+        font-size: 14px;
+        color: #666;
+        margin: 4px 0 0 0;
+      }
+      .header-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .btn-refresh {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 13px;
+        border: 1.5px solid #f97c06 !important;
+        color: #f97c06;
+      }
+      .btn-refresh:hover {
+        background-color: rgba(249, 124, 6, 0.08);
+      }
+      .loading-container,
+      .empty-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 64px 24px;
+        text-align: center;
+        color: #666;
+      }
+      .empty-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        color: #ccc;
+        margin-bottom: 16px;
+      }
+      .table-wrapper {
+        position: relative;
+      }
+      .loading-overlay {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+        color: #666;
+        font-size: 14px;
+      }
+    `,
+  ],
 })
-export class UserListPageComponent implements OnInit, OnDestroy {
-  private store = inject(Store);
-  private router = inject(Router);
+export class UserListPageComponent implements OnInit {
+  store = inject(UsersStore);
   private dialog = inject(MatDialog);
-
-  users$: Observable<User[]>;
-  isLoading$: Observable<boolean>;
-  error$: Observable<string | null>;
-  private destroy$ = new Subject<void>();
-
-  constructor() {
-    this.users$ = this.store
-      .select(UserSelectors.selectAllUsers)
-      .pipe(
-        tap((users) =>
-          console.log('UserListPageComponent: Users from store:', users),
-        ),
-      );
-    this.isLoading$ = this.store
-      .select(UserSelectors.selectUserIsLoading)
-      .pipe(
-        tap((isLoading) =>
-          console.log(
-            'UserListPageComponent: IsLoading from store:',
-            isLoading,
-          ),
-        ),
-      );
-    this.error$ = this.store.select(UserSelectors.selectUserError).pipe(
-      filter((error) => !!error), // Solo reaccionar si hay un error
-      tap((error) => {
-        // Mostrar snackbar de error global si es manejado aquí
-        // o preferiblemente en un Effect.
-        // Si lo manejas en un Effect, este tap es solo para debug.
-        console.error('UserListPageComponent: Error from store:', error);
-        // this.snackBar.open(error || 'An unknown error occurred.', 'Close', {
-        //   duration: 5000, panelClass: ['error-snackbar'], verticalPosition: 'top'
-        // });
-      }),
-    );
-  }
+  private snackBar = inject(MatSnackBar);
 
   ngOnInit(): void {
-    console.log('UserListPageComponent: ngOnInit - dispatching loadUsers');
-    this.store.dispatch(UserActions.loadUsers());
-
-    // Escuchar acciones de éxito/fallo de eliminación si quieres manejar snackbars aquí
-    // (Aunque es mejor en Effects)
-    // this.store.select(UserActions.deleteUserSuccess) // Necesitarías un selector para esto o escuchar acciones
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe(() => {
-    //     this.snackBar.open('User deleted successfully.', 'OK', { duration: 3000, panelClass: ['success-snackbar'] });
-    //   });
+    this.store.loadUsers();
   }
 
-  handleViewUser(user: User): void {
-    this.router.navigate(['/users', user.id]);
+  refresh(): void {
+    this.store.loadUsers();
   }
 
-  handleEditUser(user: User): void {
-    this.router.navigate(['/users', 'edit', user.id]);
+  onSearchChanged(term: string): void {
+    this.store.setSearchTerm(term);
+    this.store.loadUsers();
   }
 
-  handleDeleteUser(user: User): void {
+  onSortChanged(sort: { field: string; direction: 'ASC' | 'DESC' }): void {
+    this.store.setSort(sort.field, sort.direction);
+    this.store.loadUsers();
+  }
+
+  openCreateDialog(): void {
+    const dialogRef = this.dialog.open(UserFormDialogComponent, {
+      width: '100vw',
+      height: '100vh',
+      maxWidth: '100vw',
+      panelClass: 'full-screen-dialog',
+      data: { mode: 'create' } as UserDialogData,
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.store.createUser(result.data).then((success) => {
+          if (success) {
+            this.store.loadUsers();
+          }
+        });
+      }
+    });
+  }
+
+  openEditDialog(user: User): void {
+    const dialogRef = this.dialog.open(UserFormDialogComponent, {
+      width: '100vw',
+      height: '100vh',
+      maxWidth: '100vw',
+      panelClass: 'full-screen-dialog',
+      data: { mode: 'edit', user } as UserDialogData,
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result && user.id) {
+        this.store.updateUser(user.id, result.data).then((success) => {
+          if (success) {
+            this.store.loadUsers();
+          }
+        });
+      }
+    });
+  }
+
+  openDeleteConfirm(user: User): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '350px',
+      width: '400px',
       data: {
-        title: 'Confirm Delete',
-        message: `¿Estás seguro que deseas eliminar el usuario "${user.username}" (codigo: ${user.code})? Esta acción no se puede deshacer.`,
+        title: 'Eliminar Usuario',
+        message: `¿Estás seguro que deseas eliminar el usuario "${user.username}" (código: ${user.code})? Esta acción no se puede deshacer.`,
+        confirmButtonText: 'Eliminar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: 'warn',
+        icon: 'warning',
+        iconColor: 'warn',
       },
     });
 
-    dialogRef
-      .afterClosed()
-      .pipe(
-        filter((result) => !!result), // Solo continuar si result es true
-        takeUntil(this.destroy$),
-      )
-      .subscribe(() => {
-        this.performDelete(user);
-      });
-  }
-
-  private performDelete(user: User): void {
-    this.store.dispatch(UserActions.deleteUser({ userId: user.id || '' }));
-  }
-
-  navigateToCreate(): void {
-    this.router.navigate(['/users/edit/0']);
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result && user.id) {
+        this.store.deleteUser(user.id).then((success) => {
+          if (success) {
+            this.store.loadUsers();
+          } else {
+            const errorMsg = this.store.error();
+            if (errorMsg) {
+              this.snackBar.open(errorMsg, 'Cerrar', {
+                duration: 6000,
+                verticalPosition: 'top',
+                panelClass: ['error-snackbar'],
+              });
+            }
+          }
+        });
+      }
+    });
   }
 }

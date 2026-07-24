@@ -1,0 +1,287 @@
+<div class="fulfillment-selector">
+
+  <!-- PASO 1: Buscar producto -->
+  <div class="product-search-section">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Buscar producto</mat-label>
+      <input
+        matInput
+        [value]="productSearchCtrl()"
+        (input)="onProductSearchChange($any($event.target).value)"
+        placeholder="Escriba el nombre del producto..."
+        [matAutocomplete]="autoProduct"
+      />
+      <mat-icon matSuffix>search</mat-icon>
+      <mat-progress-spinner
+        *ngIf="isLoadingProducts()"
+        matSuffix
+        mode="indeterminate"
+        diameter="20"
+      ></mat-progress-spinner>
+      <mat-autocomplete
+        #autoProduct="matAutocomplete"
+        (optionSelected)="onProductSelected($event.option.value)"
+        [displayWith]="productDisplayFn"
+      >
+        @for (product of filteredProducts(); track product.id) {
+          <mat-option [value]="product">
+            {{ product.name }}
+          </mat-option>
+        }
+        @if (filteredProducts().length === 0 && !isLoadingProducts()) {
+          <mat-option disabled>No se encontraron productos.</mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+  </div>
+
+  <!-- PASO 2: Tabla de variaciones del producto seleccionado -->
+  @if (selectedProduct(); as product) {
+    <div class="variations-section">
+      <h4 class="section-label">{{ product.name }} — Variaciones disponibles</h4>
+
+      @if (isLoadingVariations()) {
+        <div class="loading-spinner">
+          <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+        </div>
+      } @else if (variationsWithStock().length === 0) {
+        <p class="no-data">Este producto no tiene variaciones registradas.</p>
+      } @else {
+        <div class="table-container">
+          <table mat-table [dataSource]="variationsWithStock()" class="variations-table">
+            <ng-container matColumnDef="sku">
+              <th mat-header-cell *matHeaderCellDef>SKU</th>
+              <td mat-cell *matCellDef="let v">{{ v.sku }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="color">
+              <th mat-header-cell *matHeaderCellDef>Color</th>
+              <td mat-cell *matCellDef="let v">{{ v.color || '-' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="size">
+              <th mat-header-cell *matHeaderCellDef>Talla</th>
+              <td mat-cell *matCellDef="let v">{{ v.size || '-' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="stock">
+              <th mat-header-cell *matHeaderCellDef class="center">Stock</th>
+              <td mat-cell *matCellDef="let v" class="center"
+                  [class.stock-low]="v.availableStock <= 5 && v.availableStock > 0"
+                  [class.stock-empty]="v.availableStock === 0">
+                {{ v.availableStock }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="dimensions">
+              <th mat-header-cell *matHeaderCellDef>Dimensiones</th>
+              <td mat-cell *matCellDef="let v">
+                {{ v.length_cm }}x{{ v.width_cm }}x{{ v.height_cm }}cm
+                <br /><small>{{ v.weight_kg }}kg</small>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="quantity">
+              <th mat-header-cell *matHeaderCellDef class="center">Cantidad</th>
+              <td mat-cell *matCellDef="let v" class="quantity-cell">
+                <button mat-icon-button class="qty-btn" (click)="decrementQuantity(v)"
+                  [disabled]="v.availableStock === 0">
+                  <mat-icon>remove</mat-icon>
+                </button>
+                <span class="qty-value">{{ getVariationQuantity(v.id) }}</span>
+                <button mat-icon-button class="qty-btn" (click)="incrementQuantity(v)"
+                  [disabled]="getVariationQuantity(v.id) >= v.availableStock">
+                  <mat-icon>add</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="action">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let v">
+                <button mat-flat-button color="primary"
+                  class="add-btn"
+                  (click)="addVariationToItems(v)"
+                  [disabled]="!canAddVariation(v)">
+                  <mat-icon>add</mat-icon> Agregar
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="variationsDisplayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: variationsDisplayedColumns"></tr>
+          </table>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- PASO 3: Desglose Dinámico -->
+  @if (standardGroupItems().length + customItems().length > 0) {
+    <div class="desglose-section" cdkDropListGroup>
+      <h4 class="section-label">Desglose</h4>
+
+      <div class="drag-hint" *ngIf="standardGroupItems().length > 0 && customItems().length > 0">
+        <mat-icon>swap_vert</mat-icon>
+        <span>Arrastre los items entre tablas para cambiar de grupo</span>
+      </div>
+
+      <!-- Tabla: Grupo Estándar -->
+      @if (standardGroupItems().length > 0) {
+        <div class="standard-group">
+          <h5 class="group-title">Paquete Estándar <span class="badge-standard">Caben juntos</span></h5>
+          <div class="table-container"
+               cdkDropList
+               [cdkDropListData]="standardGroupItems()"
+               [cdkDropListEnterPredicate]="standardEnterPredicate"
+               (cdkDropListDropped)="onDrop($event)">
+            <table mat-table [dataSource]="standardGroupItems()" class="desglose-table">
+              <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef>Producto</th>
+                <td mat-cell *matCellDef="let item">
+                  {{ item.productName }}<br/>
+                  <small>{{ item.sku }}{{ item.color ? ' / ' + item.color : '' }}{{ item.size ? ' / ' + item.size : '' }}</small>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="medidas">
+                <th mat-header-cell *matHeaderCellDef>Medidas</th>
+                <td mat-cell *matCellDef="let item">
+                  {{ item.length_cm }}x{{ item.width_cm }}x{{ item.height_cm }}cm
+                  <br/><small>{{ item.weight_kg }}kg</small>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="cant">
+                <th mat-header-cell *matHeaderCellDef class="center">Cant</th>
+                <td mat-cell *matCellDef="let item" class="center">{{ item.quantity }}</td>
+              </ng-container>
+              <ng-container matColumnDef="tipo">
+                <th mat-header-cell *matHeaderCellDef class="center">Tipo</th>
+                <td mat-cell *matCellDef="let item; let i = index" class="center">
+                  @if (principalInfo().isPrincipal('standard', i)) {
+                    <span class="principal-item">Principal</span>
+                  } @else {
+                    <span class="additional-item">Adicional</span>
+                  }
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="price">
+                <th mat-header-cell *matHeaderCellDef class="center">Precio</th>
+                <td mat-cell *matCellDef="let item; let i = index" class="center">
+                  @if (i === 0) {
+                    @if (principalInfo().hasDiscount && !principalInfo().isPrincipal('standard', 0)) {
+                      <div class="discounted-price">
+                        <span class="original-price">{{ principalInfo().flatRate | currency:'S/ ' }}</span>
+                        <span class="final-price">{{ principalInfo().flatRate * (1 - principalInfo().discountPct / 100) | currency:'S/ ' }}</span>
+                      </div>
+                    } @else {
+                      {{ principalInfo().flatRate | currency:'S/ ' }}
+                    }
+                  } @else {
+                    Incluido
+                  }
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let item">
+                  <button mat-icon-button color="warn" (click)="removeItem(item.tempId)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="desgloseColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: desgloseColumns"
+                  cdkDrag [cdkDragData]="row"></tr>
+
+              <tr class="total-row">
+                <td colspan="5">
+                  <strong>Total paquete estándar:</strong>
+                  {{ standardSumDimensions().length }}x{{ standardSumDimensions().width }}x{{ standardSumDimensions().height }}cm,
+                  {{ standardSumDimensions().weight }}kg
+                  →
+                  <strong>{{ getFlatRate() | currency:'S/ ' }}</strong>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      }
+
+      <!-- Tabla: Personalizados -->
+      @if (customItems().length > 0) {
+        <div class="custom-items">
+          <h5 class="group-title">Paquetes Personalizados</h5>
+           <div class="table-container"
+                cdkDropList
+                [cdkDropListData]="customItems()"
+                (cdkDropListDropped)="onDrop($event)">
+            <table mat-table [dataSource]="customItems()" class="desglose-table">
+              <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef>Producto</th>
+                <td mat-cell *matCellDef="let item">
+                  {{ item.productName }}<br/>
+                  <small>{{ item.sku }}{{ item.color ? ' / ' + item.color : '' }}{{ item.size ? ' / ' + item.size : '' }}</small>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="medidas">
+                <th mat-header-cell *matHeaderCellDef>Medidas</th>
+                <td mat-cell *matCellDef="let item">
+                  {{ item.length_cm }}x{{ item.width_cm }}x{{ item.height_cm }}cm
+                  <br/><small>{{ item.weight_kg }}kg</small>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="cant">
+                <th mat-header-cell *matHeaderCellDef class="center">Cant</th>
+                <td mat-cell *matCellDef="let item" class="center">{{ item.quantity }}</td>
+              </ng-container>
+              <ng-container matColumnDef="tipo">
+                <th mat-header-cell *matHeaderCellDef class="center">Tipo</th>
+                <td mat-cell *matCellDef="let item; let i = index" class="center">
+                  @if (principalInfo().isPrincipal('custom', i)) {
+                    <span class="principal-item">Principal</span>
+                  } @else {
+                    <span class="additional-item">Adicional</span>
+                  }
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="price">
+                <th mat-header-cell *matHeaderCellDef class="center">Precio</th>
+                <td mat-cell *matCellDef="let item; let i = index" class="center">
+                  @if (principalInfo().hasDiscount && !principalInfo().isPrincipal('custom', i)) {
+                    <div class="discounted-price">
+                      <span class="original-price">{{ item.individualPrice * item.quantity | currency:'S/ ' }}</span>
+                      <span class="final-price">{{ item.individualPrice * (1 - principalInfo().discountPct / 100) * item.quantity | currency:'S/ ' }}</span>
+                      <br/><small>{{ item.individualPrice * (1 - principalInfo().discountPct / 100) | currency:'S/ ' }} c/u</small>
+                    </div>
+                  } @else {
+                    {{ item.individualPrice * item.quantity | currency:'S/ ' }}
+                    <br/><small>{{ item.individualPrice | currency:'S/ ' }} c/u</small>
+                  }
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let item">
+                  <button mat-icon-button color="warn" (click)="removeItem(item.tempId)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="desgloseColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: desgloseColumns"
+                  cdkDrag [cdkDragData]="row"></tr>
+            </table>
+          </div>
+        </div>
+      }
+
+      <div class="fulfillment-total">
+        Costo de envío =
+        <span class="cost-value">{{ totalShippingCost() | currency: 'S/ ' }}</span>
+      </div>
+    </div>
+  }
+
+</div>

@@ -1,135 +1,152 @@
 import { Injectable, inject } from '@angular/core';
 import {
   HttpClient,
-  HttpErrorResponse,
   HttpHeaders,
+  HttpParams,
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
-import { User } from '../models/user.model';
+import { catchError, map } from 'rxjs/operators';
+import { User, CreateUserDto, UpdateUserDto } from '../models/user.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { environment } from '../../../../environments/environment';
+
+export interface PaginatedUsersResponse {
+  items: User[];
+  total_count: number;
+  page_number: number;
+  page_size: number;
+}
+
+export interface PaginatedUsersParams {
+  page_number?: number;
+  page_size?: number;
+  sort_field?: string;
+  sort_direction?: 'ASC' | 'DESC';
+  search_term?: string;
+  role?: string;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
-  readonly apiUrl = environment.apiUrl + '/users';
-
+  private readonly apiUrl = environment.apiUrl + '/users';
   private http = inject(HttpClient);
   private authService = inject(AuthService);
-
-  constructor() {
-    console.log('UserService (NgRx integrated) initialized');
-  }
 
   private getAuthHeaders(): HttpHeaders {
     const token = this.authService.getAccessToken();
     if (token) {
       return new HttpHeaders({
         'Content-Type': 'application/json',
-        // 'Authorization': `Bearer ${token}` // ESTÁNDAR
-        codrr_token: token, // Como lo tenías
+        codrr_token: token,
       });
     }
     return new HttpHeaders({ 'Content-Type': 'application/json' });
   }
 
-  // Obtener todos los usuarios (para ser llamado por un Effect de NgRx)
   getUsers(): Observable<User[]> {
     const headers = this.getAuthHeaders();
-    if (!this.authService.getAccessToken()) {
-      return throwError(() => new Error('Not authenticated to fetch users.'));
-    }
     return this.http.get<User[]>(`${this.apiUrl}/all`, { headers }).pipe(
       map((users) => users || []),
       catchError(this.handleError)
     );
   }
 
+  getUsersFiltered(params: {
+    search_term?: string;
+    role?: string;
+    fulfillment_enabled?: boolean;
+  }): Observable<User[]> {
+    const headers = this.getAuthHeaders();
+    let httpParams = new HttpParams();
+    if (params.search_term) {
+      httpParams = httpParams.set('search_term', params.search_term);
+    }
+    if (params.role) {
+      httpParams = httpParams.set('role', params.role);
+    }
+    if (params.fulfillment_enabled !== undefined) {
+      httpParams = httpParams.set('fulfillment_enabled', String(params.fulfillment_enabled));
+    }
+    return this.http.get<User[]>(`${this.apiUrl}/filtered`, {
+      headers,
+      params: httpParams,
+    }).pipe(
+      map((users) => users || []),
+      catchError(this.handleError)
+    );
+  }
+
+  getUsersPaginated(params: PaginatedUsersParams): Observable<PaginatedUsersResponse> {
+    const headers = this.getAuthHeaders();
+    let httpParams = new HttpParams();
+    httpParams = httpParams.set('page_number', String(params.page_number ?? 1));
+    httpParams = httpParams.set('page_size', String(params.page_size ?? 20));
+    httpParams = httpParams.set('sort_field', params.sort_field ?? 'code');
+    httpParams = httpParams.set('sort_direction', params.sort_direction ?? 'ASC');
+    if (params.search_term) {
+      httpParams = httpParams.set('search_term', params.search_term);
+    }
+    if (params.role) {
+      httpParams = httpParams.set('role', params.role);
+    }
+    return this.http.get<PaginatedUsersResponse>(`${this.apiUrl}/paginated`, {
+      headers,
+      params: httpParams,
+    }).pipe(catchError(this.handleError));
+  }
+
   getUserById(id: string): Observable<User> {
     const headers = this.getAuthHeaders();
-    if (!this.authService.getAccessToken()) {
-      return throwError(
-        () => new Error('Not authenticated to fetch user by ID.')
-      );
-    }
-    return this.http
-      .get<User>(`${this.apiUrl}/${id}`, { headers })
-      .pipe(catchError(this.handleError));
+    return this.http.get<User>(`${this.apiUrl}/${id}`, { headers }).pipe(
+      catchError(this.handleError)
+    );
   }
 
-  createUser(user: User): Observable<User> {
+  createUser(dto: CreateUserDto): Observable<User> {
     const headers = this.getAuthHeaders();
-    return this.http
-      .post<User>(this.apiUrl + '/register', user, { headers })
-      .pipe(
-        tap((createdUser) =>
-          console.log('UserService: User created via API', createdUser)
-        ),
-        catchError(this.handleError)
-      );
+    return this.http.post<User>(`${this.apiUrl}/register`, dto, { headers }).pipe(
+      catchError(this.handleError)
+    );
   }
 
-  updateUser(user: User): Observable<User> {
+  updateUser(id: string, dto: UpdateUserDto): Observable<User> {
     const headers = this.getAuthHeaders();
-    if (!this.authService.getAccessToken()) {
-      return throwError(() => new Error('Not authenticated to update user.'));
-    }
-    return this.http
-      .put<User>(`${this.apiUrl}/edit/${user.id}`, user, { headers })
-      .pipe(catchError(this.handleError));
+    return this.http.put<User>(`${this.apiUrl}/edit/${id}`, dto, { headers }).pipe(
+      catchError(this.handleError)
+    );
   }
 
-  updateUserCompany(user: User): Observable<User> {
+  updateProfile(user: Partial<User>): Observable<User> {
     const headers = this.getAuthHeaders();
-    if (!this.authService.getAccessToken()) {
-      return throwError(() => new Error('Not authenticated to update user.'));
-    }
-    return this.http
-      .put<User>(`${this.apiUrl}/edit-user-company/${user.id}`, user, { headers })
-      .pipe(catchError(this.handleError));
+    return this.http.put<User>(`${this.apiUrl}/update-profile/${user.id}`, user, { headers }).pipe(
+      catchError(this.handleError)
+    );
   }
 
-  updateProfile(user: User): Observable<User> {
-    const headers = this.getAuthHeaders();
-    if (!this.authService.getAccessToken()) {
-      return throwError(() => new Error('Not authenticated to update user.'));
-    }
-    return this.http
-      .put<User>(`${this.apiUrl}/update-profile/${user.id}`, user, { headers })
-      .pipe(catchError(this.handleError));
-  }
-
-  // Eliminar un usuario (para ser llamado por un Effect de NgRx)
   deleteUser(id: string): Observable<{}> {
-    // La API podría devolver un cuerpo vacío o un mensaje
     const headers = this.getAuthHeaders();
-    if (!this.authService.getAccessToken()) {
-      return throwError(() => new Error('Not authenticated to delete user.'));
-    }
-    console.log(`UserService: Deleting user via API, ID: ${id}`);
-    return this.http
-      .delete<{}>(`${this.apiUrl}/delete/${id}`, { headers })
-      .pipe(catchError(this.handleError));
+    return this.http.delete<{}>(`${this.apiUrl}/delete/${id}`, { headers }).pipe(
+      catchError(this.handleError)
+    );
   }
 
-  private handleError(error: HttpErrorResponse) {
-    let errorMessage = 'An unknown error occurred in UserService!';
-    // ... (tu lógica de handleError existente, que es buena) ...
+  private handleError(error: any) {
+    let errorMessage = 'Ocurrió un error inesperado.';
     if (error.error instanceof ErrorEvent) {
-      errorMessage = `Client-side error: ${error.error.message}`;
+      errorMessage = `Error del cliente: ${error.error.message}`;
     } else {
-      errorMessage = `Server-side error Code: ${error.status}\nMessage: ${error.message}`;
       if (error.status === 401) {
-        errorMessage =
-          'Unauthorized. Your session may have expired or you lack permissions.';
-        // Considerar despachar una acción de logout desde un Effect si ocurre un 401
+        errorMessage = 'Sesión expirada. Por favor, inicie sesión nuevamente.';
       } else if (error.status === 403) {
-        errorMessage = 'Forbidden. You do not have permission for this action.';
+        errorMessage = 'No tiene permisos para realizar esta acción.';
+      } else if (error.error?.message) {
+        errorMessage = error.error.message;
+      } else {
+        errorMessage = `Error del servidor: ${error.status}. ${error.message}`;
       }
     }
-    console.error('UserService API Error:', errorMessage, error);
     return throwError(() => new Error(errorMessage));
   }
 }

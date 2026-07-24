@@ -1,546 +1,326 @@
-<div class="page-container settings-container">
+<div class="settings-page">
   <div class="page-header">
-    <h1>Configuración de la aplicación</h1>
+    <mat-icon class="card-icon">settings</mat-icon>
+    <h2 class="form-section-title">Configuración del Sistema</h2>
   </div>
 
   <div *ngIf="isLoadingInitialData" class="spinner-overlay">
-    <mat-progress-spinner
-      mode="indeterminate"
-      diameter="60"
-    ></mat-progress-spinner>
+    <mat-progress-spinner mode="indeterminate" diameter="60"></mat-progress-spinner>
   </div>
 
-  <mat-card *ngIf="!isLoadingInitialData && settingsForm" class="settings-card">
-    <mat-card-content>
-      <form [formGroup]="settingsForm" (ngSubmit)="onSaveSettings()">
-        <h2>Nombre del negocio</h2>
-        <!-- ... Campos de Business Name, Address, Phone Number como antes ... -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Nombre de la empresa</mat-label>
-          <input matInput formControlName="business_name" required />
-          <mat-icon matSuffix>storefront</mat-icon>
-          <mat-error
-            *ngIf="settingsForm.get('business_name')?.hasError('required')"
-          >
-            Se requiere el nombre de la empresa.
-          </mat-error>
-        </mat-form-field>
+  <div *ngIf="!isLoadingInitialData && settingsForm">
+    <form [formGroup]="settingsForm" (ngSubmit)="onSaveSettings()">
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>RUC</mat-label>
-          <input matInput formControlName="ruc" required />
-          <mat-error *ngIf="settingsForm.get('ruc')?.hasError('required')">
-            Se requiere el ruc.
-          </mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Dirección</mat-label>
-          <input matInput formControlName="address" />
-        </mat-form-field>
-
-        <div class="form-row">
-          <mat-form-field appearance="outline" class="flex-field">
-            <mat-label>Telefono</mat-label>
+      <!-- Card: Datos de la Empresa -->
+      <div class="form-card">
+        <div class="card-header">
+          <mat-icon class="card-icon">business</mat-icon>
+          <h2 class="card-title">Datos de la Empresa</h2>
+        </div>
+        <div class="form-grid">
+          <mat-form-field appearance="outline" class="full-span">
+            <mat-label>Nombre de la empresa</mat-label>
+            <input matInput formControlName="business_name" required />
+            <mat-icon matSuffix>storefront</mat-icon>
+            <mat-error *ngIf="settingsForm.get('business_name')?.hasError('required')">
+              Se requiere el nombre de la empresa.
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>RUC</mat-label>
+            <input matInput formControlName="ruc" required />
+            <mat-error *ngIf="settingsForm.get('ruc')?.hasError('required')">
+              Se requiere el ruc.
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Teléfono</mat-label>
             <input matInput formControlName="phone_number" />
             <mat-icon matSuffix>phone</mat-icon>
           </mat-form-field>
+          <mat-form-field appearance="outline" class="full-span">
+            <mat-label>Dirección</mat-label>
+            <input matInput formControlName="address" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Card: Imágenes -->
+      <div class="form-card">
+        <div class="card-header">
+          <mat-icon class="card-icon">image</mat-icon>
+          <h2 class="card-title">Imágenes</h2>
         </div>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Enlace del mapa de cobertura</mat-label>
-          <input matInput formControlName="coverage_map_url" />
-        </mat-form-field>
-
-        <h2>Marca y aspectos legales</h2>
-        <div class="logo-section file-upload-section">
-          <p class="mat-body-1 section-subtitle">Logotipo de empresa</p>
-          <div class="logo-preview-container">
-            <img
-              [src]="logoPreviewUrl"
-              alt="Vista previa del logotipo"
-              class="logo-preview"
-            />
+        <div class="file-upload-section">
+          <p class="section-subtitle">Logotipo de empresa</p>
+          <div class="upload-grid">
+            <div class="logo-preview-container">
+              <img [src]="logoPreviewUrl" alt="Vista previa del logotipo" class="logo-preview" />
+            </div>
+            <div class="upload-controls">
+              <input type="file" (change)="onLogoFileSelected($event)" #logoUploadInput accept="image/png, image/jpeg, image/svg+xml" style="display: none" />
+              <button mat-stroked-button type="button" class="upload-button btn-corp-secondary" (click)="logoUploadInput.click()">
+                <mat-icon>cloud_upload</mat-icon>
+                {{ selectedLogoFile ? "Cambiar Logo (" + selectedLogoFile.name + ")" : "Subir nuevo logotipo" }}
+              </button>
+              <span class="hint">Recomendado: PNG, JPG, SVG. Max 2MB.</span>
+            </div>
           </div>
-          <input
-            type="file"
-            (change)="onLogoFileSelected($event)"
-            #logoUploadInput
-            accept="image/png, image/jpeg, image/svg+xml"
-            style="display: none"
-          />
-          <button
-            mat-stroked-button
-            type="button"
-            class="upload-button btn-corp-secondary"
-            (click)="logoUploadInput.click()"
-          >
-            <mat-icon>cloud_upload</mat-icon>
-            {{
-              selectedLogoFile
-                ? "Cambiar Logo (" + selectedLogoFile.name + ")"
-                : "Subir nuevo logotipo"
-            }}
-          </button>
-          <p class="mat-caption hint">Recomendado: PNG, JPG, SVG. Max 2MB.</p>
         </div>
 
-        <div class="logo-section file-upload-section">
-          <p class="mat-body-1 section-subtitle">Imagen de fondo</p>
-          <div class="logo-preview-container">
-            <img
-              [src]="backgroundImagePreviewUrl"
-              alt="Vista previa del imagen de fondo"
-              class="logo-preview"
-            />
+        <div class="file-upload-section">
+          <p class="section-subtitle">Imagen de fondo (Login)</p>
+          <div class="upload-grid">
+            <div class="logo-preview-container">
+              <img [src]="backgroundImagePreviewUrl" alt="Vista previa del imagen de fondo" class="logo-preview" />
+            </div>
+            <div class="upload-controls">
+              <input type="file" (change)="onLogoFileSelected3($event)" #logoUploadInput3 accept="image/png, image/jpeg, image/svg+xml" style="display: none" />
+              <button mat-stroked-button type="button" class="upload-button btn-corp-secondary" (click)="logoUploadInput3.click()">
+                <mat-icon>cloud_upload</mat-icon>
+                {{ selectedBackgroundImageFile ? "Change imagen (" + selectedBackgroundImageFile.name + ")" : "Subir nueva imagen" }}
+              </button>
+              <span class="hint">Recomendado: PNG, JPG, SVG. Max 2MB.</span>
+            </div>
           </div>
-          <input
-            type="file"
-            (change)="onLogoFileSelected3($event)"
-            #logoUploadInput3
-            accept="image/png, image/jpeg, image/svg+xml"
-            style="display: none"
-          />
-          <button
-            mat-stroked-button
-            type="button"
-            class="upload-button btn-corp-secondary"
-            (click)="logoUploadInput3.click()"
-          >
-            <mat-icon>cloud_upload</mat-icon>
-            {{
-              selectedBackgroundImageFile
-                ? "Change imagen (" + selectedBackgroundImageFile.name + ")"
-                : "Subir nueva imagen"
-            }}
-          </button>
-          <p class="mat-caption hint">Recomendado: PNG, JPG, SVG. Max 2MB.</p>
         </div>
 
-        <div class="logo-section file-upload-section">
-          <p class="mat-body-1 section-subtitle">imagen de las tarifas</p>
-          <div class="logo-preview-container">
-            <img
-              [src]="ratesImagePreviewUrl"
-              alt="Vista previa del imagen de las tarifas"
-              class="logo-preview"
-            />
+        <div class="file-upload-section">
+          <p class="section-subtitle">Banner de tarifas</p>
+          <div class="upload-grid">
+            <div class="logo-preview-container">
+              <img [src]="ratesImagePreviewUrl" alt="Vista previa del imagen de las tarifas" class="logo-preview" />
+            </div>
+            <div class="upload-controls">
+              <input type="file" (change)="onLogoFileSelected4($event)" #logoUploadInput4 accept="image/png, image/jpeg, image/svg+xml" style="display: none" />
+              <button mat-stroked-button type="button" class="upload-button btn-corp-secondary" (click)="logoUploadInput4.click()">
+                <mat-icon>cloud_upload</mat-icon>
+                {{ selectedRatesImageFile ? "Cambiar imagen (" + selectedRatesImageFile.name + ")" : "Subir nueva imagen" }}
+              </button>
+              <span class="hint">Recomendado: PNG, JPG, SVG. Max 2MB.</span>
+            </div>
           </div>
-          <input
-            type="file"
-            (change)="onLogoFileSelected4($event)"
-            #logoUploadInput4
-            accept="image/png, image/jpeg, image/svg+xml"
-            style="display: none"
-          />
-          <button
-            mat-stroked-button
-            type="button"
-            class="upload-button btn-corp-secondary"
-            (click)="logoUploadInput4.click()"
-          >
-            <mat-icon>cloud_upload</mat-icon>
-            {{
-              selectedRatesImageFile
-                ? "Cambiar imagen (" + selectedRatesImageFile.name + ")"
-                : "Subir nueva imagen"
-            }}
-          </button>
-          <p class="mat-caption hint">Recomendado: PNG, JPG, SVG. Max 2MB.</p>
         </div>
 
-        <!-- PLANTILLA EXCEL PARA IMPORTACION -->
-        <div class="terms-pdf-section file-upload-section">
-          <p class="mat-body-1 section-subtitle">
-            Plantilla de Excel para importación
-          </p>
+        <div class="file-upload-section">
+          <p class="section-subtitle">Banner promocional (Inicio)</p>
+          <div class="upload-grid">
+            <div class="logo-preview-container">
+              <img [src]="globalNoticeImagePreviewUrl" alt="Vista previa de imagen para avisos globales" class="logo-preview" />
+            </div>
+            <div class="upload-controls">
+              <input type="file" (change)="onLogoFileSelected6($event)" #logoUploadInput6 accept="image/png, image/jpeg, image/svg+xml" style="display: none" />
+              <button mat-stroked-button type="button" class="upload-button btn-corp-secondary" (click)="logoUploadInput6.click()">
+                <mat-icon>cloud_upload</mat-icon>
+                {{ selectedGlobalNoticeImageFile ? "Cambiar imagen (" + selectedGlobalNoticeImageFile.name + ")" : "Subir nueva imagen" }}
+              </button>
+              <button mat-stroked-button type="button" class="remove-button btn-corp-primary" (click)="removeGlobalNoticeImage()"
+                *ngIf="globalNoticeImagePreviewUrl && globalNoticeImagePreviewUrl !== 'assets/images/placeholder-image.png'">
+                <mat-icon>delete_forever</mat-icon> Quitar imagen
+              </button>
+              <span class="hint">Recomendado: PNG, JPG, SVG. Max 2MB.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="file-upload-section">
+          <p class="section-subtitle">Banner Fulfillment</p>
+          <div class="upload-grid">
+            <div class="logo-preview-container">
+              <img [src]="fulfillmentBannerPreviewUrl || 'assets/images/placeholder-image.png'"
+                alt="Vista previa del banner Fulfillment" class="logo-preview" />
+            </div>
+            <div class="upload-controls">
+              <input type="file" (change)="onFulfillmentBannerFileSelected($event)" #fulfillmentBannerUploadInput
+                accept="image/png, image/jpeg, image/svg+xml" style="display: none" />
+              <button mat-stroked-button type="button" class="upload-button btn-corp-secondary" (click)="fulfillmentBannerUploadInput.click()">
+                <mat-icon>cloud_upload</mat-icon>
+                {{ selectedFulfillmentBannerFile ? "Cambiar imagen (" + selectedFulfillmentBannerFile.name + ")" : "Subir nueva imagen" }}
+              </button>
+              <button mat-stroked-button type="button" class="remove-button btn-corp-primary" (click)="removeFulfillmentBanner()"
+                *ngIf="fulfillmentBannerPreviewUrl && fulfillmentBannerPreviewUrl !== 'assets/images/placeholder-image.png'">
+                <mat-icon>delete_forever</mat-icon> Quitar banner
+              </button>
+              <span class="hint">Recomendado: PNG, JPG, SVG. Max 2MB.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Mapa y Cobertura -->
+      <div class="form-card">
+        <div class="card-header">
+          <mat-icon class="card-icon">map</mat-icon>
+          <h2 class="card-title">Mapa y Cobertura</h2>
+        </div>
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Google Maps API Key</mat-label>
+            <input matInput formControlName="googleMapsApiKey" placeholder="Pega tu API Key aquí..." />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Enlace del mapa de cobertura</mat-label>
+            <input matInput formControlName="coverage_map_url" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Card: Documentos -->
+      <div class="form-card">
+        <div class="card-header">
+          <mat-icon class="card-icon">description</mat-icon>
+          <h2 class="card-title">Documentos</h2>
+        </div>
+
+        <div class="file-upload-section">
+          <p class="section-subtitle">Plantilla de Excel para importación</p>
           <div class="current-file-info">
-            <ng-container
-              *ngIf="currentExcelImportTemplateUrl; else noTermsFile"
-            >
+            <ng-container *ngIf="currentExcelImportTemplateUrl; else noExcelFile">
               Archivo actual:
-              <a
-                [href]="currentExcelImportTemplateUrl"
-                target="_blank"
-                class="file-link"
-                >{{
-                  currentExcelImportTemplateUrl.split("/").pop() || "View Terms"
-                }}</a
-              >
+              <a [href]="currentExcelImportTemplateUrl" target="_blank" class="file-link">
+                {{ currentExcelImportTemplateUrl.split("/").pop() || "Ver archivo" }}
+              </a>
             </ng-container>
-            <ng-template #noTermsFile>
-              <span class="no-file-text"
-                >Aún no se ha cargado ningún archivo.</span
-              >
+            <ng-template #noExcelFile>
+              <span class="no-file-text">Aún no se ha cargado ningún archivo.</span>
             </ng-template>
           </div>
-
-          <input
-            type="file"
-            (change)="onLogoFileSelected5($event)"
-            #termsUploadInput2
-            style="display: none"
-          />
-          <button
-            mat-stroked-button
-            type="button"
-            class="upload-button btn-corp-secondary"
-            (click)="termsUploadInput2.click()"
-          >
+          <input type="file" (change)="onLogoFileSelected5($event)" #termsUploadInput2 style="display: none" />
+          <button mat-stroked-button type="button" class="upload-button btn-corp-secondary" (click)="termsUploadInput2.click()">
             <mat-icon>cloud_upload</mat-icon>
-            {{
-              selectedExcelImportTemplateFile
-                ? "Cambiar archivo (" +
-                  selectedExcelImportTemplateFile.name +
-                  ")"
-                : "Subir nuevo archivo"
-            }}
+            {{ selectedExcelImportTemplateFile ? "Cambiar archivo (" + selectedExcelImportTemplateFile.name + ")" : "Subir nuevo archivo" }}
           </button>
-          <p class="mat-caption hint" *ngIf="!selectedExcelImportTemplateFile">
-            Sube un archivo
-          </p>
-          <p class="mat-caption hint" *ngIf="selectedExcelImportTemplateFile">
-            Selected: {{ selectedExcelImportTemplateFile.name }}
-          </p>
+          <p class="mat-caption hint" *ngIf="!selectedExcelImportTemplateFile">Sube un archivo</p>
         </div>
 
-        <!-- --- SECCIÓN PARA TÉRMINOS Y CONDICIONES PDF --- -->
-        <div class="terms-pdf-section file-upload-section">
-          <!-- Clase común para estilos -->
-          <p class="mat-body-1 section-subtitle">
-            Términos y condiciones (PDF)
-          </p>
+        <div class="file-upload-section">
+          <p class="section-subtitle">Términos y condiciones (PDF)</p>
           <div class="current-file-info">
             <ng-container *ngIf="currentTermsUrl; else noTermsFile">
               Archivo actual:
-              <a [href]="currentTermsUrl" target="_blank" class="file-link">{{
-                currentTermsUrl.split("/").pop() || "View Terms"
-              }}</a>
+              <a [href]="currentTermsUrl" target="_blank" class="file-link">
+                {{ currentTermsUrl.split("/").pop() || "Ver PDF" }}
+              </a>
             </ng-container>
             <ng-template #noTermsFile>
-              <span class="no-file-text"
-                >Aún no se ha cargado ningún PDF de Términos y
-                Condiciones.</span
-              >
+              <span class="no-file-text">Aún no se ha cargado ningún PDF de Términos y Condiciones.</span>
             </ng-template>
           </div>
-
-          <input
-            type="file"
-            (change)="onTermsFileSelected($event)"
-            #termsUploadInput
-            accept="application/pdf"
-            style="display: none"
-          />
-          <button
-            mat-stroked-button
-            type="button"
-            class="upload-button btn-corp-secondary"
-            (click)="termsUploadInput.click()"
-          >
+          <input type="file" (change)="onTermsFileSelected($event)" #termsUploadInput accept="application/pdf" style="display: none" />
+          <button mat-stroked-button type="button" class="upload-button btn-corp-secondary" (click)="termsUploadInput.click()">
             <mat-icon>cloud_upload</mat-icon>
-            {{
-              selectedTermsFile
-                ? "Cambiar PDF (" + selectedTermsFile.name + ")"
-                : "Subir nuevo PDF"
-            }}
+            {{ selectedTermsFile ? "Cambiar PDF (" + selectedTermsFile.name + ")" : "Subir nuevo PDF" }}
           </button>
-          <p class="mat-caption hint" *ngIf="!selectedTermsFile">
-            Sube un archivo PDF con tus términos y condiciones.
-          </p>
-          <p class="mat-caption hint" *ngIf="selectedTermsFile">
-            Selected: {{ selectedTermsFile.name }}
-          </p>
+          <p class="mat-caption hint" *ngIf="!selectedTermsFile">Sube un archivo PDF con tus términos y condiciones.</p>
         </div>
+      </div>
 
-        <div class="logo-section file-upload-section">
-          <p class="mat-body-1 section-subtitle">imagen para avisos globales</p>
-          <div class="logo-preview-container">
-            <img
-              [src]="globalNoticeImagePreviewUrl"
-              alt="Vista previa de imagen para avisos globales"
-              class="logo-preview"
-            />
-          </div>
-          <input
-            type="file"
-            (change)="onLogoFileSelected6($event)"
-            #logoUploadInput6
-            accept="image/png, image/jpeg, image/svg+xml"
-            style="display: none"
-          />
-          <button
-            mat-stroked-button
-            type="button"
-            class="upload-button btn-corp-secondary"
-            (click)="logoUploadInput6.click()"
-          >
-            <mat-icon>cloud_upload</mat-icon>
-            {{
-              selectedGlobalNoticeImageFile
-                ? "Cambiar imagen (" + selectedGlobalNoticeImageFile.name + ")"
-                : "Subir nueva imagen"
-            }}
-          </button>
-          <button
-            mat-stroked-button
-            type="button"
-            class="remove-button btn-corp-warn btn-corp-primary"
-            (click)="removeGlobalNoticeImage()"
-            *ngIf="
-              globalNoticeImagePreviewUrl &&
-              globalNoticeImagePreviewUrl !==
-                'assets/images/placeholder-image.png'
-            "
-          >
-            <mat-icon>delete_forever</mat-icon>
-            Quitar imagen
-          </button>
-          <p class="mat-caption hint">Recomendado: PNG, JPG, SVG. Max 2MB.</p>
+      <!-- Card: Descuento Multi-Paquete -->
+      <div class="form-card">
+        <div class="card-header">
+          <mat-icon class="card-icon">percent</mat-icon>
+          <h2 class="card-title">Descuento Multi-Paquete</h2>
         </div>
-        <mat-form-field appearance="outline">
-          <mat-label>Google Maps API Key</mat-label>
-          <input
-            matInput
-            formControlName="googleMapsApiKey"
-            placeholder="Pega tu API Key aquí..."
-          />
-        </mat-form-field>
-
-        <!-- ============================================================= -->
-        <!-- === NUEVA SECCIÓN: CONFIGURACIÓN DE DESCUENTO MULTI-PAQUETE === -->
-        <!-- ============================================================= -->
-        <mat-divider class="section-divider"></mat-divider>
-        <h2 class="discount-section-title">
-          Promoción para Múltiples Paquetes
-        </h2>
-     
-        <div class="form-row">
-          <!-- CAMPO PORCENTAJE -->
-          <mat-form-field appearance="outline" class="flex-field">
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
             <mat-label>Porcentaje de Descuento (%)</mat-label>
-            <input
-              matInput
-              type="number"
-              formControlName="multiPackageDiscountPercentage"
-              placeholder="Ej: 50"
-              min="0"
-              max="100"
-            />
+            <input matInput type="number" formControlName="multiPackageDiscountPercentage" placeholder="Ej: 50" min="0" max="100" />
             <mat-icon matSuffix>percent</mat-icon>
-            <mat-hint
-              >El descuento que se aplicará a los paquetes adicionales en un
-              mismo pedido.</mat-hint
-            >
-            <mat-error
-              *ngIf="
-                settingsForm
-                  .get('multiPackageDiscountPercentage')
-                  ?.hasError('required')
-              "
-            >
+            <mat-hint>Descuento para paquetes adicionales en un mismo pedido.</mat-hint>
+            <mat-error *ngIf="settingsForm.get('multiPackageDiscountPercentage')?.hasError('required')">
               El porcentaje es requerido.
             </mat-error>
-            <mat-error
-              *ngIf="
-                settingsForm
-                  .get('multiPackageDiscountPercentage')
-                  ?.hasError('min') ||
-                settingsForm
-                  .get('multiPackageDiscountPercentage')
-                  ?.hasError('max')
-              "
-            >
+            <mat-error *ngIf="settingsForm.get('multiPackageDiscountPercentage')?.hasError('min') || settingsForm.get('multiPackageDiscountPercentage')?.hasError('max')">
               Debe ser un valor entre 0 y 100.
             </mat-error>
           </mat-form-field>
-        </div>
-        <div class="form-row" >
-          <!-- CAMPO FECHA DE INICIO -->
-          <mat-form-field appearance="outline" class="flex-field">
+          <mat-form-field appearance="outline">
             <mat-label>Fecha de Inicio del Descuento</mat-label>
-            <input
-              matInput
-              [matDatepicker]="startDatePicker"
-              formControlName="multiPackageDiscountStartDate"
-              placeholder="dd/mm/aaaa"
-            />
-            <mat-datepicker-toggle
-              matSuffix
-              [for]="startDatePicker"
-            ></mat-datepicker-toggle>
+            <input matInput [matDatepicker]="startDatePicker" formControlName="multiPackageDiscountStartDate" placeholder="dd/mm/aaaa" />
+            <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
             <mat-datepicker #startDatePicker></mat-datepicker>
-            <mat-hint
-              >Opcional. Si se deja en blanco, el descuento es válido desde
-              siempre.</mat-hint
-            >
+            <mat-hint>Opcional. Vacío = válido desde siempre.</mat-hint>
           </mat-form-field>
-
-          <!-- CAMPO FECHA DE FIN -->
-          <mat-form-field appearance="outline" class="flex-field">
+          <mat-form-field appearance="outline">
             <mat-label>Fecha de Fin del Descuento</mat-label>
-            <input
-              matInput
-              [matDatepicker]="endDatePicker"
-              formControlName="multiPackageDiscountEndDate"
-              placeholder="dd/mm/aaaa"
-            />
-            <mat-datepicker-toggle
-              matSuffix
-              [for]="endDatePicker"
-            ></mat-datepicker-toggle>
+            <input matInput [matDatepicker]="endDatePicker" formControlName="multiPackageDiscountEndDate" placeholder="dd/mm/aaaa" />
+            <mat-datepicker-toggle matSuffix [for]="endDatePicker"></mat-datepicker-toggle>
             <mat-datepicker #endDatePicker></mat-datepicker>
-            <mat-hint
-              >Opcional. Si se deja en blanco, el descuento no tiene fecha de
-              caducidad.</mat-hint
-            >
+            <mat-hint>Opcional. Vacío = sin fecha de caducidad.</mat-hint>
           </mat-form-field>
         </div>
-        <!-- =============================================== -->
-        <!-- === NUEVA SECCIÓN: CONJUNTOS PROMOCIONALES === -->
-        <!-- =============================================== -->
-        <mat-divider class="section-divider"></mat-divider>
-        <div class="section-header-with-action">
-          <h2>Conjuntos Promocionales/Banners (Máx. 3)</h2>
-          <button
-            mat-stroked-button
-            class="btn-corp-primary"
-            type="button"
-            (click)="addPromotionalSet()"
-            [disabled]="promotionalSetsFormArray.length >= 3"
-          >
-            <mat-icon>add_circle_outline</mat-icon> Añadir Conjunto
+      </div>
+
+      <!-- Card: Banners Promocionales -->
+      <div class="form-card">
+        <div class="card-header">
+          <mat-icon class="card-icon">campaign</mat-icon>
+          <h2 class="card-title">Banners Promocionales</h2>
+          <button mat-stroked-button class="btn-add-card" type="button" (click)="addPromotionalSet()" [disabled]="promotionalSetsFormArray.length >= 3">
+            <mat-icon>add_circle_outline</mat-icon> Añadir
           </button>
         </div>
-
+        <p class="mat-caption hint" style="margin-bottom:12px">Máximo 3 banners. Cada banner puede tener una imagen, enlace y texto de botón.</p>
         <div formArrayName="promotional_sets">
-          <!-- Usamos @for con el FormArray -->
-          @for (setGroup of promotionalSetsFormArray.controls; track
-          setGroup.get('id')?.value; let i = $index; let last = $last) {
-          <mat-card
-            appearance="outlined"
-            class="promotional-set-item"
-            [formGroupName]="i"
-          >
-            <mat-card-header class="item-header">
-              <mat-card-title>Conjunto {{ i + 1 }}</mat-card-title>
-              <button
-                mat-icon-button
-                color="warn"
-                type="button"
-                (click)="removePromotionalSet(i)"
-                matTooltip="Eliminar este conjunto"
-              >
+          @for (setGroup of promotionalSetsFormArray.controls; track setGroup.get('id')?.value; let i = $index; let last = $last) {
+          <div class="promotional-set-item" [formGroupName]="i">
+            <div class="item-header">
+              <h3>Conjunto {{ i + 1 }}</h3>
+              <button mat-icon-button color="warn" type="button" (click)="removePromotionalSet(i)" matTooltip="Eliminar este conjunto">
                 <mat-icon>delete_outline</mat-icon>
               </button>
-            </mat-card-header>
-            <mat-card-content>
-              <!-- Campo oculto para el ID del set -->
-              <input type="hidden" formControlName="id" />
-
-              <!-- Subida de Imagen para el Set -->
-              <div class="file-upload-section compact-upload">
-                <p class="mat-body-1">Imagen del Conjunto</p>
-                <div class="logo-preview-container small-preview">
-                  <img
-                    [src]="
-                      setGroup.get('imagePreviewUrl')?.value ||
-                      'assets/images/placeholder-image.png'
-                    "
-                    alt="Vista previa de imagen del conjunto {{ i + 1 }}"
-                    class="logo-preview"
-                  />
-                </div>
-                <input
-                  type="file"
-                  (change)="onPromotionalSetFileSelected($event, i)"
-                  #promoSetUploadInput
-                  accept="image/png, image/jpeg, image/svg+xml"
-                  style="display: none"
-                />
-                <button
-                  mat-stroked-button
-                  type="button"
-                  class="upload-button btn-corp-secondary"
-                  (click)="promoSetUploadInput.click()"
-                >
-                  <mat-icon>cloud_upload</mat-icon>
-                  {{
-                    setGroup.get("imageFile")?.value
-                      ? "Cambiar Imagen"
-                      : "Subir Imagen"
-                  }}
-                </button>
-                @if(setGroup.get('imageFile')?.value; as file) {
-                <p class="mat-caption hint selected-file-name">
-                  Seleccionado: {{ file.name }}
-                </p>
-                }
+            </div>
+            <input type="hidden" formControlName="id" />
+            <div class="file-upload-section compact-upload">
+              <p class="section-subtitle">Imagen del Conjunto</p>
+              <div class="logo-preview-container small-preview">
+                <img [src]="setGroup.get('imagePreviewUrl')?.value || 'assets/images/placeholder-image.png'"
+                  alt="Vista previa de imagen del conjunto {{ i + 1 }}" class="logo-preview" />
               </div>
-
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Enlace (URL)</mat-label>
-                <input
-                  matInput
-                  formControlName="linkUrl"
-                  placeholder="https://ejemplo.com/oferta"
-                />
-                <mat-icon matSuffix>link</mat-icon>
-                @if(setGroup.get('linkUrl')?.hasError('pattern')) {
-                <mat-error
-                  >Ingrese una URL válida (ej. http:// o https://).</mat-error
-                >
-                }
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Texto del Botón</mat-label>
-                <input
-                  matInput
-                  formControlName="buttonText"
-                  placeholder="Ej: Ver Más, Comprar Ahora"
-                  maxlength="30"
-                />
-                @if(setGroup.get('buttonText')?.hasError('maxlength')) {
-                <mat-error>Máximo 30 caracteres.</mat-error>
-                }
-              </mat-form-field>
-
-              <mat-slide-toggle
-                formControlName="isActive"
-                color="primary"
-                class="is-active-toggle"
-              >
-                Activo
-              </mat-slide-toggle>
-            </mat-card-content>
-          </mat-card>
+              <input type="file" (change)="onPromotionalSetFileSelected($event, i)" #promoSetUploadInput
+                accept="image/png, image/jpeg, image/svg+xml" style="display: none" />
+              <button mat-stroked-button type="button" class="upload-button btn-corp-secondary" (click)="promoSetUploadInput.click()">
+                <mat-icon>cloud_upload</mat-icon>
+                {{ setGroup.get("imageFile")?.value ? "Cambiar Imagen" : "Subir Imagen" }}
+              </button>
+              @if(setGroup.get('imageFile')?.value; as file) {
+              <p class="mat-caption hint selected-file-name">Seleccionado: {{ file.name }}</p>
+              }
+            </div>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Enlace (URL)</mat-label>
+              <input matInput formControlName="linkUrl" placeholder="https://ejemplo.com/oferta" />
+              <mat-icon matSuffix>link</mat-icon>
+              @if(setGroup.get('linkUrl')?.hasError('pattern')) {
+              <mat-error>Ingrese una URL válida (ej. http:// o https://).</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Texto del Botón</mat-label>
+              <input matInput formControlName="buttonText" placeholder="Ej: Ver Más, Comprar Ahora" maxlength="30" />
+              @if(setGroup.get('buttonText')?.hasError('maxlength')) {
+              <mat-error>Máximo 30 caracteres.</mat-error>
+              }
+            </mat-form-field>
+            <mat-slide-toggle formControlName="isActive" color="primary" class="is-active-toggle">Activo</mat-slide-toggle>
+          </div>
           @if (!last) {
           <mat-divider class="item-divider"></mat-divider>
           } }
         </div>
+      </div>
 
-        <mat-card-actions align="end" class="form-actions">
-          <button
-            mat-stroked-button
-            type="button"
-            class="btn-corp-secondary"
-            (click)="onDiscardChanges()"
-            [disabled]="isSaving || !settingsForm.dirty"
-          >
-            Descartar cambios
-          </button>
-          <button
-            mat-flat-button
-            type="submit"
-            class="btn-corp-primary"
-            [disabled]="isSaving || settingsForm.invalid || !settingsForm.dirty"
-          >
-            <mat-icon>save</mat-icon>
-            {{ isSaving ? "Guardando..." : "Guardar configuracion" }}
-          </button>
-        </mat-card-actions>
-      </form>
-    </mat-card-content>
-  </mat-card>
+      <!-- Botones de acción -->
+      <div class="form-actions">
+        <button mat-stroked-button type="button" class="btn-corp-secondary" (click)="onDiscardChanges()" [disabled]="isSaving || !settingsForm.dirty">
+          Descartar cambios
+        </button>
+        <button mat-flat-button type="submit" class="btn-corp-primary" [disabled]="isSaving || settingsForm.invalid || !settingsForm.dirty">
+          <mat-icon>save</mat-icon>
+          {{ isSaving ? "Guardando..." : "Guardar configuración" }}
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
