@@ -154,6 +154,9 @@ let PlanningImportService = class PlanningImportService {
                         });
                         await queryRunner.manager.save(route);
                     }
+                    await queryRunner.manager.delete(stop_entity_1.Stop, {
+                        orderCode: row.ID_PEDIDO,
+                    });
                     const stop = queryRunner.manager.create(stop_entity_1.Stop, {
                         route: { id: route.id },
                         orderCode: row.ID_PEDIDO,

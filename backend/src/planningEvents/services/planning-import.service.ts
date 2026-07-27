@@ -168,6 +168,11 @@ export class PlanningImportService {
             await queryRunner.manager.save(route);
           }
 
+          // Eliminar stops anteriores de esta orden para evitar duplicados
+          await queryRunner.manager.delete(Stop, {
+            orderCode: row.ID_PEDIDO,
+          });
+
           // Create Stop
           const stop = queryRunner.manager.create(Stop, {
             route: { id: route.id },
