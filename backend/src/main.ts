@@ -11,7 +11,6 @@ import { Request, Response, NextFunction } from 'express';
 import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
-
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['log', 'error', 'warn', 'debug', 'verbose'],
   });
@@ -31,43 +30,43 @@ async function bootstrap() {
   const configservice = app.get(ConfigService);
   app.enableCors(CORS);
   app.setGlobalPrefix('api');
-  const config = new DocumentBuilder()
-    .setTitle('courier API')
-    .setDescription('courier')
-    .setVersion('1.0')
-    .build();
+  // const config = new DocumentBuilder()
+  //   .setTitle('courier API')
+  //   .setDescription('courier')
+  //   .setVersion('1.0')
+  //   .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  // const document = SwaggerModule.createDocument(app, config);
+  // SwaggerModule.setup('docs', app, document);
 
-  const uploadsStaticPath = join(__dirname, '..', 'public', 'uploads');
-  app.useStaticAssets(uploadsStaticPath, {
-    prefix: '/uploads/',
-  });
+  // const uploadsStaticPath = join(__dirname, '..', 'public', 'uploads');
+  // app.useStaticAssets(uploadsStaticPath, {
+  //   prefix: '/uploads/',
+  // });
 
-  const angularAppStaticPath = join(
-    __dirname,
-    '..',
-    'public',
-    'angular',
-    'browser',
-  );
-  app.useStaticAssets(angularAppStaticPath);
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    const path = req.path;
-    console.log(`Middleware catch-all SPA: Petición para ${path}`);
+  // const angularAppStaticPath = join(
+  //   __dirname,
+  //   '..',
+  //   'public',
+  //   'angular',
+  //   'browser',
+  // );
+  // app.useStaticAssets(angularAppStaticPath);
+  // app.use((req: Request, res: Response, next: NextFunction) => {
+  //   const path = req.path;
+  //   console.log(`Middleware catch-all SPA: Petición para ${path}`);
 
-    if (
-      !path.startsWith('/api/') &&
-      !path.startsWith('/uploads/') &&
-      !path.split('/').pop()?.includes('.')
-    ) {
-      const angularIndexHtmlPath = join(angularAppStaticPath, 'index.html');
-      res.sendFile(angularIndexHtmlPath);
-    } else {
-      next();
-    }
-  });
+  //   if (
+  //     !path.startsWith('/api/') &&
+  //     !path.startsWith('/uploads/') &&
+  //     !path.split('/').pop()?.includes('.')
+  //   ) {
+  //     const angularIndexHtmlPath = join(angularAppStaticPath, 'index.html');
+  //     res.sendFile(angularIndexHtmlPath);
+  //   } else {
+  //     next();
+  //   }
+  // });
 
   await app.listen(configservice.get('PORT') ?? 3000);
   console.log(`Application running on: ${await app.getUrl()}`);

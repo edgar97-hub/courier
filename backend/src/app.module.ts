@@ -14,6 +14,10 @@ import { OrdersModule } from './orders/orders.module';
 import { CashManagementModule } from './cashManagement/cashManagement.module';
 import { PlanningEventModule } from './planningEvents/planning-events.module';
 import { FulfillmentModule } from './fulfillment/fulfillment.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -31,6 +35,19 @@ import { FulfillmentModule } from './fulfillment/fulfillment.module';
     PlanningEventModule,
     DistributorRecordsModule,
     FulfillmentModule,
+    EventEmitterModule.forRoot(),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '../public/uploads'),
+      serveRoot: '/uploads',
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '../public/angular/browser'),
+      exclude: ['/api/{*test}'],
+      serveStaticOptions: {
+        index: 'index.html',
+        fallthrough: true,
+      },
+    }),
   ],
 })
 export class AppModule {}

@@ -6,8 +6,6 @@ const config_1 = require("@nestjs/config");
 const morgan = require("morgan");
 const constants_1 = require("./constants");
 const common_1 = require("@nestjs/common");
-const swagger_1 = require("@nestjs/swagger");
-const path_1 = require("path");
 const bodyParser = require("body-parser");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, {
@@ -27,32 +25,6 @@ async function bootstrap() {
     const configservice = app.get(config_1.ConfigService);
     app.enableCors(constants_1.CORS);
     app.setGlobalPrefix('api');
-    const config = new swagger_1.DocumentBuilder()
-        .setTitle('courier API')
-        .setDescription('courier')
-        .setVersion('1.0')
-        .build();
-    const document = swagger_1.SwaggerModule.createDocument(app, config);
-    swagger_1.SwaggerModule.setup('docs', app, document);
-    const uploadsStaticPath = (0, path_1.join)(__dirname, '..', 'public', 'uploads');
-    app.useStaticAssets(uploadsStaticPath, {
-        prefix: '/uploads/',
-    });
-    const angularAppStaticPath = (0, path_1.join)(__dirname, '..', 'public', 'angular', 'browser');
-    app.useStaticAssets(angularAppStaticPath);
-    app.use((req, res, next) => {
-        const path = req.path;
-        console.log(`Middleware catch-all SPA: Petición para ${path}`);
-        if (!path.startsWith('/api/') &&
-            !path.startsWith('/uploads/') &&
-            !path.split('/').pop()?.includes('.')) {
-            const angularIndexHtmlPath = (0, path_1.join)(angularAppStaticPath, 'index.html');
-            res.sendFile(angularIndexHtmlPath);
-        }
-        else {
-            next();
-        }
-    });
     await app.listen(configservice.get('PORT') ?? 3000);
     console.log(`Application running on: ${await app.getUrl()}`);
 }

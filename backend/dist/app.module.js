@@ -21,6 +21,9 @@ const orders_module_1 = require("./orders/orders.module");
 const cashManagement_module_1 = require("./cashManagement/cashManagement.module");
 const planning_events_module_1 = require("./planningEvents/planning-events.module");
 const fulfillment_module_1 = require("./fulfillment/fulfillment.module");
+const event_emitter_1 = require("@nestjs/event-emitter");
+const serve_static_1 = require("@nestjs/serve-static");
+const path_1 = require("path");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -41,6 +44,19 @@ exports.AppModule = AppModule = __decorate([
             planning_events_module_1.PlanningEventModule,
             distributor_records_module_1.DistributorRecordsModule,
             fulfillment_module_1.FulfillmentModule,
+            event_emitter_1.EventEmitterModule.forRoot(),
+            serve_static_1.ServeStaticModule.forRoot({
+                rootPath: (0, path_1.join)(__dirname, '../public/uploads'),
+                serveRoot: '/uploads',
+            }),
+            serve_static_1.ServeStaticModule.forRoot({
+                rootPath: (0, path_1.join)(__dirname, '../public/angular/browser'),
+                exclude: ['/api/{*test}'],
+                serveStaticOptions: {
+                    index: 'index.html',
+                    fallthrough: true,
+                },
+            }),
         ],
     })
 ], AppModule);
