@@ -119,4 +119,12 @@ export class UsersEntity extends BaseEntity implements IUser {
     comment: 'IDs de las reglas (RANGE o GOAL) asignadas a esta empresa',
   })
   assignedVolumeDiscountRuleIds: string[];
+
+  @Column({
+    name: 'is_fulfillment_enabled',
+    type: 'boolean',
+    default: false,
+    comment: 'Habilita el servicio Fulfillment para la empresa',
+  })
+  isFulfillmentEnabled: boolean;
 }

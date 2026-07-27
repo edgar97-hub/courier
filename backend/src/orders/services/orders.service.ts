@@ -31,6 +31,10 @@ import {
   VolumeDiscountRule,
 } from 'src/settings/entities/settings.entity';
 import { OrderItemEntity, PackageType } from '../entities/order-item.entity';
+import { StockAdjustmentService } from 'src/fulfillment/services/stock-adjustment.service';
+import { KardexService } from 'src/fulfillment/services/kardex.service';
+import { KARDEX_MOVEMENT_TYPE } from 'src/fulfillment/entities/kardex.entity';
+import { InventoryEntity } from 'src/fulfillment/entities/inventory.entity';
 
 const EXCEL_HEADER_TO_ENTITY_KEY_MAP: {
   [key: string]: keyof OrderDTO | string;
@@ -61,7 +65,11 @@ export class OrdersService {
     private districtsRepository: Repository<DistrictsEntity>,
     @InjectRepository(UsersEntity)
     private readonly userRepository: Repository<UsersEntity>,
+    @InjectRepository(InventoryEntity)
+    private readonly inventoryRepository: Repository<InventoryEntity>,
     private readonly cashManagementService: CashManagementService,
+    private readonly stockAdjustmentService: StockAdjustmentService,
+    private readonly kardexService: KardexService,
   ) {}
 
   public async updateOrderStatus(body: any, idUser: string): Promise<any> {
@@ -69,6 +77,7 @@ export class OrdersService {
     try {
       const currentOrder = await this.orderRepository.findOne({
         where: { id: body.payload.orderId },
+        relations: ['company'],
       });
       if (!currentOrder) throw new Error('Orden no encontrada');
 
@@ -83,7 +92,9 @@ export class OrdersService {
       }
 
       if (body.payload.newStatus === STATES.ANNULLED) {
-        console.log('dejar pasar');
+        if (currentOrder.status === STATES.ANNULLED) {
+          throw new Error('El pedido ya se encuentra anulado.');
+        }
       } else {
         if (
           body.payload.action === 'CAMBIO DE ESTADO' &&
@@ -315,6 +326,42 @@ export class OrdersService {
         await this.cashManagementService.reverseAutomaticIncome(
           body.payload.orderId,
         );
+
+        const fulfillmentItems = currentOrder.items?.filter(
+          i => i.package_type === PackageType.FULFILLMENT && i.variationId && i.quantity,
+        ) as OrderItemEntity[] | undefined;
+
+        if (fulfillmentItems && fulfillmentItems.length > 0) {
+          const mainWarehouse = await this.stockAdjustmentService.getMainWarehouse();
+          for (const item of fulfillmentItems) {
+            if (!item.variationId || !item.quantity) continue;
+            const inventory = await this.inventoryRepository.findOne({
+              where: {
+                variation_id: item.variationId,
+                warehouse_id: mainWarehouse.id,
+              },
+            });
+            if (inventory) {
+              const stockBefore = inventory.stock;
+              const stockAfter = stockBefore + item.quantity;
+              await this.inventoryRepository.update(inventory.id, { stock: stockAfter });
+              await this.kardexService.create({
+                movement_type: KARDEX_MOVEMENT_TYPE.ANNUL_REVERSAL,
+                quantity: item.quantity,
+                stock_before: stockBefore,
+                stock_after: stockAfter,
+                observation: `Reversión por anulación - Pedido #${currentOrder.code}`,
+                responsible_user_id: idUser,
+                reference_id: currentOrder.id,
+                reference_type: 'order',
+                company_id: currentOrder.company?.id,
+                product_id: item.productId,
+                variation_id: item.variationId,
+                warehouse_id: mainWarehouse.id,
+              });
+            }
+          }
+        }
       }
       return updatedOrder;
     } catch (error) {
@@ -400,11 +447,14 @@ export class OrdersService {
             newItem.height_cm = itemDto.height_cm;
             newItem.weight_kg = itemDto.weight_kg;
             newItem.basePrice = itemDto.basePrice;
+            newItem.variationId = itemDto.variationId;
+            newItem.productId = itemDto.productId;
+            newItem.quantity = itemDto.quantity;
+            newItem.fulfillmentGroupId = itemDto.fulfillmentGroupId;
 
             // Determinar si es el principal
             newItem.isPrincipal = itemDto === principalItem;
 
-            // Aplicar descuento si corresponde
             if (
               isDiscountActive &&
               !newItem.isPrincipal &&
@@ -417,7 +467,12 @@ export class OrdersService {
               newItem.finalPrice = newItem.basePrice;
             }
 
-            totalShippingCost += newItem.finalPrice;
+            const qtyMultiplier =
+              newItem.package_type === PackageType.FULFILLMENT &&
+              !newItem.fulfillmentGroupId
+                ? (newItem.quantity || 1)
+                : 1;
+            totalShippingCost += newItem.finalPrice * qtyMultiplier;
             orderItems.push(newItem);
           }
 
@@ -468,6 +523,19 @@ export class OrdersService {
             OrdersEntity,
             orderToCreate,
           );
+
+          const hasFulfillmentItems = orderDto.items?.some(
+            item => item.package_type === 'FULFILLMENT'
+          );
+          if (hasFulfillmentItems) {
+            await this.deductFulfillmentStock(
+              queryRunner,
+              orderDto,
+              savedOrder,
+              idUser,
+            );
+          }
+
           createdOrders.push(savedOrder);
         } catch (individualError) {
           console.error(
@@ -522,6 +590,65 @@ export class OrdersService {
       };
     } finally {
       await queryRunner.release();
+    }
+  }
+
+  private async deductFulfillmentStock(
+    queryRunner: QueryRunner,
+    orderDto: any,
+    savedOrder: OrdersEntity,
+    idUser: string,
+  ): Promise<void> {
+    const mainWarehouse =
+      await this.stockAdjustmentService.getMainWarehouse();
+
+    for (const itemDto of orderDto.items) {
+      if (!itemDto.variationId || !itemDto.quantity) continue;
+
+      let inventory = await queryRunner.manager.findOne(InventoryEntity, {
+        where: {
+          variation_id: itemDto.variationId,
+          warehouse_id: mainWarehouse.id,
+        },
+      });
+
+      if (!inventory) {
+        inventory = queryRunner.manager.create(InventoryEntity, {
+          variation_id: itemDto.variationId,
+          warehouse_id: mainWarehouse.id,
+          stock: 0,
+        });
+        await queryRunner.manager.save(InventoryEntity, inventory);
+      }
+
+      if (inventory.stock < itemDto.quantity) {
+        throw new Error(
+          `Stock insuficiente para variación ${itemDto.variationId}: ` +
+            `disponible ${inventory.stock}, solicitado ${itemDto.quantity}`,
+        );
+      }
+
+      const stockBefore = inventory.stock;
+      const stockAfter = stockBefore - itemDto.quantity;
+
+      await queryRunner.manager.update(InventoryEntity, inventory.id, {
+        stock: stockAfter,
+      });
+
+      await this.kardexService.create({
+        movement_type: KARDEX_MOVEMENT_TYPE.ORDER_OUT,
+        quantity: itemDto.quantity,
+        stock_before: stockBefore,
+        stock_after: stockAfter,
+        observation: `Pedido #${savedOrder.code}`,
+        responsible_user_id: idUser,
+        reference_id: String(savedOrder.id),
+        reference_type: 'order',
+        company_id: orderDto.company_id,
+        product_id: itemDto.productId,
+        variation_id: itemDto.variationId,
+        warehouse_id: mainWarehouse.id,
+      });
     }
   }
 

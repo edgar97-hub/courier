@@ -10,8 +10,11 @@ const swagger_1 = require("@nestjs/swagger");
 const path_1 = require("path");
 const bodyParser = require("body-parser");
 async function bootstrap() {
-    const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    const app = await core_1.NestFactory.create(app_module_1.AppModule, {
+        logger: ['log', 'error', 'warn', 'debug', 'verbose'],
+    });
     app.set('trust proxy', 1);
+    app.set('etag', false);
     app.use(morgan('dev'));
     app.useGlobalPipes(new common_1.ValidationPipe({
         transformOptions: {

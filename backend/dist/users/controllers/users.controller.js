@@ -14,7 +14,6 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
-const swagger_1 = require("@nestjs/swagger");
 const admin_decorator_1 = require("../../auth/decorators/admin.decorator");
 const auth_guard_1 = require("../../auth/guards/auth.guard");
 const roles_guard_1 = require("../../auth/guards/roles.guard");
@@ -36,12 +35,25 @@ let UsersController = class UsersController {
     async findAllUsers() {
         return await this.usersService.findUsers();
     }
-    async findUsersByRol(search_term, role) {
+    async findUsersByRol(search_term, role, fulfillment_enabled) {
         const queryParams = {
             search_term,
             role,
         };
+        if (fulfillment_enabled !== undefined) {
+            queryParams.fulfillment_enabled = fulfillment_enabled === 'true';
+        }
         return await this.usersService.findUsersByRol(queryParams);
+    }
+    async findUsersPaginated(page_number = 1, page_size = 20, sort_field = 'code', sort_direction = 'ASC', search_term = '', role = '') {
+        return await this.usersService.findUsersPaginated({
+            page_number,
+            page_size,
+            sort_field,
+            sort_direction,
+            search_term,
+            role,
+        });
     }
     async findUserById(id) {
         return await this.usersService.findUserById(id);
@@ -93,21 +105,25 @@ __decorate([
     (0, common_1.Get)('filtered'),
     __param(0, (0, common_1.Query)('search_term')),
     __param(1, (0, common_1.Query)('role')),
+    __param(2, (0, common_1.Query)('fulfillment_enabled')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findUsersByRol", null);
 __decorate([
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-    }),
-    (0, swagger_1.ApiHeader)({
-        name: 'codrr_token',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 400,
-        description: 'No se encontro resultado',
-    }),
+    (0, public_decorator_1.PublicAccess)(),
+    (0, common_1.Get)('paginated'),
+    __param(0, (0, common_1.Query)('page_number', new common_1.ParseIntPipe({ optional: true }))),
+    __param(1, (0, common_1.Query)('page_size', new common_1.ParseIntPipe({ optional: true }))),
+    __param(2, (0, common_1.Query)('sort_field')),
+    __param(3, (0, common_1.Query)('sort_direction')),
+    __param(4, (0, common_1.Query)('search_term')),
+    __param(5, (0, common_1.Query)('role')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Number, String, String, String, String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "findUsersPaginated", null);
+__decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
     __metadata("design:type", Function),
@@ -122,9 +138,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findUserPerfil", null);
 __decorate([
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-    }),
     (0, admin_decorator_1.AdminAccess)(),
     (0, roles_decorator_1.Roles)(roles_1.ROLES.RECEPCIONISTA),
     (0, common_1.Put)('edit/:id'),
@@ -135,9 +148,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateUser", null);
 __decorate([
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-    }),
     (0, common_1.Put)('edit-user-company/:id'),
     __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
     __param(1, (0, common_1.Body)()),
@@ -146,9 +156,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateUserCompany", null);
 __decorate([
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-    }),
     (0, common_1.Put)('update-profile/:id'),
     __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
     __param(1, (0, common_1.Body)()),
@@ -157,9 +164,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateProfile", null);
 __decorate([
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-    }),
     (0, common_1.Delete)('delete/:id'),
     __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
     __metadata("design:type", Function),
@@ -167,7 +171,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "deleteUser", null);
 exports.UsersController = UsersController = __decorate([
-    (0, swagger_1.ApiTags)('Users'),
     (0, common_1.Controller)('users'),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard, roles_guard_1.RolesGuard),
     __metadata("design:paramtypes", [users_service_1.UsersService])

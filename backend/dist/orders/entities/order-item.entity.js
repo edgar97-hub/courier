@@ -17,6 +17,7 @@ var PackageType;
 (function (PackageType) {
     PackageType["STANDARD"] = "STANDARD";
     PackageType["CUSTOM"] = "CUSTOM";
+    PackageType["FULFILLMENT"] = "FULFILLMENT";
 })(PackageType || (exports.PackageType = PackageType = {}));
 let OrderItemEntity = class OrderItemEntity extends base_entity_1.BaseEntity {
 };
@@ -78,6 +79,39 @@ __decorate([
     }),
     __metadata("design:type", Boolean)
 ], OrderItemEntity.prototype, "isPrincipal", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        name: 'variation_id',
+        nullable: true,
+        comment: 'ID de la variación de producto Fulfillment asociada',
+    }),
+    __metadata("design:type", String)
+], OrderItemEntity.prototype, "variationId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        name: 'product_id',
+        nullable: true,
+        comment: 'ID del producto Fulfillment asociado',
+    }),
+    __metadata("design:type", String)
+], OrderItemEntity.prototype, "productId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        name: 'quantity',
+        type: 'int',
+        nullable: true,
+        comment: 'Cantidad de unidades de la variación en este paquete',
+    }),
+    __metadata("design:type", Number)
+], OrderItemEntity.prototype, "quantity", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        name: 'fulfillment_group_id',
+        nullable: true,
+        comment: 'UUID que agrupa OrderItems FULFILLMENT que comparten una tarifa plana estándar. Items con el mismo ID se renderizan juntos en el PDF.',
+    }),
+    __metadata("design:type", String)
+], OrderItemEntity.prototype, "fulfillmentGroupId", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => orders_entity_1.OrdersEntity, (order) => order.items, {
         onDelete: 'CASCADE',

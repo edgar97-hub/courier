@@ -65,6 +65,10 @@ __decorate([
     __metadata("design:type", String)
 ], SettingsEntity.prototype, "global_notice_image_url", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ default: '' }),
+    __metadata("design:type", String)
+], SettingsEntity.prototype, "fulfillment_banner_image_url", void 0);
+__decorate([
     (0, typeorm_1.Column)({
         type: 'jsonb',
         nullable: true,

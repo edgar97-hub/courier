@@ -5,6 +5,7 @@ import { OrdersEntity } from './orders.entity';
 export enum PackageType {
   STANDARD = 'STANDARD',
   CUSTOM = 'CUSTOM',
+  FULFILLMENT = 'FULFILLMENT',
 }
 
 @Entity({ name: 'order_items' })
@@ -56,6 +57,36 @@ export class OrderItemEntity extends BaseEntity {
     comment: 'Indica si este es el paquete principal (el más caro)',
   })
   isPrincipal: boolean;
+
+  @Column({
+    name: 'variation_id',
+    nullable: true,
+    comment: 'ID de la variación de producto Fulfillment asociada',
+  })
+  variationId?: string;
+
+  @Column({
+    name: 'product_id',
+    nullable: true,
+    comment: 'ID del producto Fulfillment asociado',
+  })
+  productId?: string;
+
+  @Column({
+    name: 'quantity',
+    type: 'int',
+    nullable: true,
+    comment: 'Cantidad de unidades de la variación en este paquete',
+  })
+  quantity?: number;
+
+  @Column({
+    name: 'fulfillment_group_id',
+    nullable: true,
+    comment:
+      'UUID que agrupa OrderItems FULFILLMENT que comparten una tarifa plana estándar. Items con el mismo ID se renderizan juntos en el PDF.',
+  })
+  fulfillmentGroupId?: string;
 
   @ManyToOne(() => OrdersEntity, (order) => order.items, {
     onDelete: 'CASCADE',

@@ -1,5 +1,4 @@
 Paso 1: Actualización del Sistema
-Es una buena práctica asegurarse de que todos los paquetes del sistema estén actualizados antes de instalar nuevo software.
 
 # Actualizar la lista de paquetes disponibles
 sudo apt-get update

@@ -52,6 +52,26 @@ export class OrderItemDTO {
   @IsBoolean()
   @IsOptional()
   isPrincipal?: boolean;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  variationId?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  productId?: string;
+
+  @ApiPropertyOptional()
+  @IsNumber()
+  @IsOptional()
+  quantity?: number;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  fulfillmentGroupId?: string;
 }
 
 export class OrderDTO {

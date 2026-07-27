@@ -36,4 +36,5 @@ export declare class UsersEntity extends BaseEntity implements IUser {
     distributorRecords: DistributorRecordEntity[];
     isVolumeDiscountEnabled: boolean;
     assignedVolumeDiscountRuleIds: string[];
+    isFulfillmentEnabled: boolean;
 }

@@ -49,6 +49,7 @@ export declare class SettingUpdateDTO {
     excel_import_template_url: string;
     coverage_map_url: string;
     global_notice_image_url: string;
+    fulfillment_banner_image_url: string;
     promotional_sets?: PromotionalSetItemDto[];
     standard_measurements_width: number;
     standard_measurements_length: number;

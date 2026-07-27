@@ -20,7 +20,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DragDropModule, CdkDragDrop, CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 import { Subject, Observable, of } from 'rxjs';
@@ -39,34 +38,6 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { FulfillmentItem } from './fulfillment-product-selector.model';
 import { OrderItem, PackageType, DistrictOption } from '../../models/order.model';
 
-interface ProductVariation {
-  id: string;
-  code: number;
-  sku: string;
-  color?: string;
-  size?: string;
-  model?: string;
-  length_cm: number;
-  width_cm: number;
-  height_cm: number;
-  weight_kg: number;
-  product_id: string;
-}
-
-interface FulfillmentProduct {
-  id: string;
-  code: number;
-  name: string;
-  description?: string;
-  company_id: string;
-  variations: ProductVariation[];
-}
-
-interface InventoryRow {
-  variation?: { id: string };
-  stock: number;
-}
-
 @Component({
   selector: 'app-fulfillment-product-selector',
   standalone: true,
@@ -80,7 +51,6 @@ interface InventoryRow {
     MatIconModule,
     MatTableModule,
     MatSnackBarModule,
-    MatAutocompleteModule,
     MatProgressSpinnerModule,
     DragDropModule,
   ],
@@ -106,25 +76,13 @@ export class FulfillmentProductSelectorComponent implements OnInit, OnDestroy {
   companyId = input.required<string | null>();
   multiPackageDiscountPercent = input<number>(0);
 
-  variationsDisplayedColumns = ['sku', 'color', 'size', 'stock', 'dimensions', 'quantity', 'action'];
-  desgloseColumns = ['description', 'medidas', 'cant', 'tipo', 'price', 'action'];
-
-  products = signal<FulfillmentProduct[]>([]);
-  selectedProduct = signal<FulfillmentProduct | null>(null);
-  variationsWithStock = signal<(ProductVariation & { availableStock: number })[]>([]);
+  inventoryItems = signal<any[]>([]);
   standardGroupItems = signal<FulfillmentItem[]>([]);
   customItems = signal<(FulfillmentItem & { individualPrice: number })[]>([]);
-  isLoadingProducts = signal(false);
-  isLoadingVariations = signal(false);
-  productSearchCtrl = signal('');
+  isLoadingInventory = signal(false);
+  searchText = signal('');
+  private searchDebounce: any;
   selectedVariationQuantities = signal<Record<string, number>>({});
-
-  filteredProducts = computed(() => {
-    const search = this.productSearchCtrl().toLowerCase();
-    const prods = this.products();
-    if (!search) return prods;
-    return prods.filter(p => p.name.toLowerCase().includes(search));
-  });
 
   standardSumDimensions = computed(() => {
     const items = this.standardGroupItems();
@@ -192,21 +150,25 @@ export class FulfillmentProductSelectorComponent implements OnInit, OnDestroy {
     return total;
   });
 
-  productDisplayFn(product: FulfillmentProduct | null): string {
-    return product?.name || '';
-  }
-
-  loadProductsEffect = effect(() => {
+  loadInventoryEffect = effect(() => {
     const cid = this.companyId();
     if (cid) {
-      untracked(() => this.loadProducts());
+      untracked(() => this.loadInventory());
     }
   });
 
   ngOnInit(): void {
     if (this.companyId()) {
-      this.loadProducts();
+      this.loadInventory();
     }
+  }
+
+  onSearchInput(value: string): void {
+    this.searchText.set(value);
+    clearTimeout(this.searchDebounce);
+    this.searchDebounce = setTimeout(() => {
+      this.loadInventory();
+    }, 300);
   }
 
   ngOnDestroy(): void {
@@ -222,90 +184,33 @@ export class FulfillmentProductSelectorComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadProducts(): void {
+  loadInventory(): void {
     const companyId = this.companyId();
     if (!companyId) return;
 
-    this.isLoadingProducts.set(true);
+    this.isLoadingInventory.set(true);
+    const search = this.searchText();
+    let url = `${this.apiUrl}/fulfillment/inventory/query?page_number=1&page_size=200&filter_company_id=${companyId}`;
+    if (search) {
+      url += `&search_term=${encodeURIComponent(search)}`;
+    }
+
     this.http
-      .get<FulfillmentProduct[]>(
-        `${this.apiUrl}/fulfillment/stock-adjustments/products/by-company/${companyId}`,
-        { headers: this.getAuthHeaders() },
-      )
+      .get<{ items: any[]; total_count: number }>(url, { headers: this.getAuthHeaders() })
       .pipe(
         takeUntil(this.destroy$),
         catchError(() => {
-          this.snackBar.open('Error al cargar productos', 'Cerrar', {
+          this.snackBar.open('Error al cargar inventario', 'Cerrar', {
             duration: 3000,
             panelClass: ['error-snackbar'],
           });
-          return of([]);
+          return of({ items: [], total_count: 0 });
         }),
       )
-      .subscribe(products => {
-        this.products.set(products);
-        this.isLoadingProducts.set(false);
-      });
-  }
-
-  onProductSearchChange(value: string): void {
-    this.productSearchCtrl.set(value);
-  }
-
-  onProductSelected(product: FulfillmentProduct): void {
-    this.productSearchCtrl.set(product.name);
-    this.selectedProduct.set(product);
-    this.selectedVariationQuantities.set({});
-    this.loadVariationsWithStock(product.id);
-  }
-
-  loadVariationsWithStock(productId: string): void {
-    this.isLoadingVariations.set(true);
-
-    this.http
-      .get<ProductVariation[]>(
-        `${this.apiUrl}/fulfillment/stock-adjustments/variations/by-product/${productId}`,
-        { headers: this.getAuthHeaders() },
-      )
-      .pipe(
-        takeUntil(this.destroy$),
-        switchMap(variations => {
-          if (variations.length === 0) return of([]);
-          return this.http
-            .get<{ items: InventoryRow[]; total_count: number }>(
-              `${this.apiUrl}/fulfillment/inventory/query?page_number=1&page_size=1000&filter_company_id=${this.companyId()}&filter_product_id=${productId}`,
-              { headers: this.getAuthHeaders() },
-            )
-            .pipe(
-              map(inventoryResponse => {
-                const stockMap = new Map<string, number>();
-                for (const row of inventoryResponse.items) {
-                  const vId = (row as any).variation?.id;
-                  if (vId) stockMap.set(vId, row.stock);
-                }
-                return variations.map(v => ({
-                  ...v,
-                  availableStock: stockMap.get(v.id) || 0,
-                }));
-              }),
-              catchError(() => {
-                return of(
-                  variations.map(v => ({ ...v, availableStock: 0 })),
-                );
-              }),
-            );
-        }),
-        catchError(() => {
-          this.snackBar.open('Error al cargar variaciones', 'Cerrar', {
-            duration: 3000,
-            panelClass: ['error-snackbar'],
-          });
-          return of([]);
-        }),
-      )
-      .subscribe(variationsWithStock => {
-        this.variationsWithStock.set(variationsWithStock);
-        this.isLoadingVariations.set(false);
+      .subscribe(response => {
+        this.inventoryItems.set(response.items);
+        this.isLoadingInventory.set(false);
+        this.selectedVariationQuantities.set({});
       });
   }
 
@@ -320,26 +225,29 @@ export class FulfillmentProductSelectorComponent implements OnInit, OnDestroy {
     }));
   }
 
-  incrementQuantity(variation: ProductVariation & { availableStock: number }): void {
-    const current = this.getVariationQuantity(variation.id);
-    if (current < variation.availableStock) {
-      this.setVariationQuantity(variation.id, current + 1);
+  incrementQuantity(row: any): void {
+    const current = this.getVariationQuantity(row.variation.id);
+    if (current < row.stock) {
+      this.setVariationQuantity(row.variation.id, current + 1);
     }
   }
 
-  decrementQuantity(variation: ProductVariation & { availableStock: number }): void {
-    const current = this.getVariationQuantity(variation.id);
+  decrementQuantity(row: any): void {
+    const current = this.getVariationQuantity(row.variation.id);
     if (current > 0) {
-      this.setVariationQuantity(variation.id, current - 1);
+      this.setVariationQuantity(row.variation.id, current - 1);
     }
   }
 
-  canAddVariation(variation: ProductVariation & { availableStock: number }): boolean {
-    const qty = this.getVariationQuantity(variation.id);
-    return qty > 0 && qty <= variation.availableStock;
+  canAddVariation(row: any): boolean {
+    const qty = this.getVariationQuantity(row.variation.id);
+    return qty > 0 && qty <= row.stock;
   }
 
-  addVariationToItems(variation: ProductVariation & { availableStock: number }): void {
+  addVariationToItems(row: any): void {
+    const variation = row.variation;
+    const product = row.product;
+    const stock = row.stock;
     const qty = this.getVariationQuantity(variation.id);
 
     if (qty <= 0) {
@@ -350,7 +258,6 @@ export class FulfillmentProductSelectorComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const product = this.selectedProduct();
     if (!product) return;
 
     const existingQty =
@@ -361,9 +268,9 @@ export class FulfillmentProductSelectorComponent implements OnInit, OnDestroy {
         .filter(i => i.variationId === variation.id)
         .reduce((s, i) => s + i.quantity, 0);
 
-    if (existingQty + qty > variation.availableStock) {
+    if (existingQty + qty > stock) {
       this.snackBar.open(
-        `Stock insuficiente: ya tiene ${existingQty} unidades en la lista, disponible ${variation.availableStock}`,
+        `Stock insuficiente: ya tiene ${existingQty} unidades en la lista, disponible ${stock}`,
         'Cerrar',
         { duration: 3000, panelClass: ['error-snackbar'] },
       );
@@ -380,7 +287,7 @@ export class FulfillmentProductSelectorComponent implements OnInit, OnDestroy {
       size: variation.size,
       model: variation.model,
       quantity: qty,
-      availableStock: variation.availableStock,
+      availableStock: stock,
       length_cm: variation.length_cm,
       width_cm: variation.width_cm,
       height_cm: variation.height_cm,
@@ -441,6 +348,10 @@ export class FulfillmentProductSelectorComponent implements OnInit, OnDestroy {
     const toStandard = event.container.data === this.standardGroupItems();
 
     if (toStandard) {
+      if (!this.canFitInStandard(item)) {
+        this.snackBar.open('Este paquete no cabe en el grupo estándar porque excede las dimensiones o peso máximo.', 'Cerrar', { duration: 4000 });
+        return;
+      }
       this.customItems.update(items => items.filter(i => i.tempId !== item.tempId));
       this.standardGroupItems.update(items => [...items, item]);
     } else {
@@ -478,7 +389,15 @@ export class FulfillmentProductSelectorComponent implements OnInit, OnDestroy {
   }
 
   standardEnterPredicate = (drag: CdkDrag<FulfillmentItem>): boolean => {
-    return this.canFitInStandard(drag.data);
+    if (!this.canFitInStandard(drag.data)) {
+      this.snackBar.open(
+        'Este paquete no cabe en el grupo estándar porque excede las dimensiones.',
+        'Cerrar',
+        { duration: 3000 },
+      );
+      return false;
+    }
+    return true;
   };
 
   getOrderItems(): OrderItem[] {

@@ -7,14 +7,20 @@ import { UsersEntity } from 'src/users/entities/users.entity';
 import { OrderLogEntity } from '../entities/orderLog.entity';
 import { CashManagementService } from 'src/cashManagement/services/cashManagement.service';
 import { SettingsEntity } from 'src/settings/entities/settings.entity';
+import { StockAdjustmentService } from 'src/fulfillment/services/stock-adjustment.service';
+import { KardexService } from 'src/fulfillment/services/kardex.service';
+import { InventoryEntity } from 'src/fulfillment/entities/inventory.entity';
 export declare class OrdersService {
     private readonly orderRepository;
     private readonly orderLogRepository;
     private readonly settingsRepository;
     private districtsRepository;
     private readonly userRepository;
+    private readonly inventoryRepository;
     private readonly cashManagementService;
-    constructor(orderRepository: Repository<OrdersEntity>, orderLogRepository: Repository<OrderLogEntity>, settingsRepository: Repository<SettingsEntity>, districtsRepository: Repository<DistrictsEntity>, userRepository: Repository<UsersEntity>, cashManagementService: CashManagementService);
+    private readonly stockAdjustmentService;
+    private readonly kardexService;
+    constructor(orderRepository: Repository<OrdersEntity>, orderLogRepository: Repository<OrderLogEntity>, settingsRepository: Repository<SettingsEntity>, districtsRepository: Repository<DistrictsEntity>, userRepository: Repository<UsersEntity>, inventoryRepository: Repository<InventoryEntity>, cashManagementService: CashManagementService, stockAdjustmentService: StockAdjustmentService, kardexService: KardexService);
     updateOrderStatus(body: any, idUser: string): Promise<any>;
     batchCreateOrders(payload: any, idUser: any): Promise<{
         success: boolean;
@@ -22,6 +28,7 @@ export declare class OrdersService {
         createdOrders?: OrdersEntity[];
         errors?: any[];
     }>;
+    private deductFulfillmentStock;
     importOrdersFromExcelData(excelRows: any[], idUser: string): Promise<ImportResult | undefined>;
     private applyDiscountsToBatch;
     private updateOrderDiscount;

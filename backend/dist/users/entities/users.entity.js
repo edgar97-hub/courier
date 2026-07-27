@@ -157,6 +157,15 @@ __decorate([
     }),
     __metadata("design:type", Array)
 ], UsersEntity.prototype, "assignedVolumeDiscountRuleIds", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        name: 'is_fulfillment_enabled',
+        type: 'boolean',
+        default: false,
+        comment: 'Habilita el servicio Fulfillment para la empresa',
+    }),
+    __metadata("design:type", Boolean)
+], UsersEntity.prototype, "isFulfillmentEnabled", void 0);
 exports.UsersEntity = UsersEntity = __decorate([
     (0, typeorm_1.Entity)({ name: 'users' })
 ], UsersEntity);

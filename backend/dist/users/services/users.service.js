@@ -57,7 +57,7 @@ let UsersService = class UsersService {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
-    async findUsersByRol({ search_term = '', role = '', }) {
+    async findUsersByRol({ search_term = '', role = '', fulfillment_enabled, }) {
         try {
             const queryBuilder = this.userRepository.createQueryBuilder('user');
             if (search_term) {
@@ -70,8 +70,62 @@ let UsersService = class UsersService {
                     role: role.split(','),
                 });
             }
+            if (fulfillment_enabled !== undefined) {
+                queryBuilder.andWhere('user.is_fulfillment_enabled = :fulfillment_enabled', {
+                    fulfillment_enabled,
+                });
+            }
             const users = await queryBuilder.getMany();
             return users;
+        }
+        catch (error) {
+            throw error_manager_1.ErrorManager.createSignatureError(error.message);
+        }
+    }
+    async findUsersPaginated(options) {
+        try {
+            const { page_number, page_size, sort_field, sort_direction, search_term, role, } = options;
+            const skip = (page_number - 1) * page_size;
+            const queryBuilder = this.userRepository.createQueryBuilder('user');
+            if (search_term) {
+                queryBuilder.andWhere(new typeorm_2.Brackets((qb) => {
+                    qb.where('user.username ILIKE :search', {
+                        search: `%${search_term}%`,
+                    })
+                        .orWhere('user.email ILIKE :search', {
+                        search: `%${search_term}%`,
+                    })
+                        .orWhere('CAST(user.code AS TEXT) ILIKE :search', {
+                        search: `%${search_term}%`,
+                    })
+                        .orWhere('user.business_name ILIKE :search', {
+                        search: `%${search_term}%`,
+                    })
+                        .orWhere('CAST(user.role AS TEXT) ILIKE :search', {
+                        search: `%${search_term}%`,
+                    });
+                }));
+            }
+            if (role) {
+                queryBuilder.andWhere('user.role IN (:...role)', {
+                    role: role.split(','),
+                });
+            }
+            const sortFieldMap = {
+                code: 'user.code',
+                username: 'user.username',
+                email: 'user.email',
+                role: 'user.role',
+                business_name: 'user.business_name',
+                createdAt: 'user.createdAt',
+            };
+            const sortBy = sortFieldMap[sort_field] || `user.${sort_field}`;
+            queryBuilder
+                .orderBy(sortBy, sort_direction)
+                .skip(skip)
+                .take(page_size);
+            const [items, total_count] = await queryBuilder.getManyAndCount();
+            return { items, total_count, page_number, page_size };
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
@@ -181,16 +235,53 @@ let UsersService = class UsersService {
     }
     async deleteUser(id) {
         try {
-            const user = await this.userRepository.delete(id);
-            if (user.affected === 0) {
+            const userExists = await this.userRepository.findOne({
+                where: { id },
+                select: ['id'],
+            });
+            if (!userExists) {
                 throw new error_manager_1.ErrorManager({
                     type: 'BAD_REQUEST',
                     message: 'No se pudo borrar',
                 });
             }
-            return user;
+            const orderCountAsUser = await this.userRepository.query(`SELECT COUNT(*) as count FROM orders WHERE user_id = $1`, [id]);
+            const orderCountAsDriver = await this.userRepository.query(`SELECT COUNT(*) as count FROM orders WHERE assigned_driver_id = $1`, [id]);
+            const orderCountAsCompany = await this.userRepository.query(`SELECT COUNT(*) as count FROM orders WHERE company_id = $1`, [id]);
+            const cashCount = await this.userRepository.query(`SELECT COUNT(*) as count FROM cash_management WHERE user_id = $1`, [id]);
+            const distributorCount = await this.userRepository.query(`SELECT COUNT(*) as count FROM distributor_records WHERE user_id = $1`, [id]);
+            const relatedRecords = [];
+            const asUser = parseInt(orderCountAsUser[0]?.count || '0', 10);
+            const asDriver = parseInt(orderCountAsDriver[0]?.count || '0', 10);
+            const asCompany = parseInt(orderCountAsCompany[0]?.count || '0', 10);
+            const cash = parseInt(cashCount[0]?.count || '0', 10);
+            const distributor = parseInt(distributorCount[0]?.count || '0', 10);
+            if (asUser > 0)
+                relatedRecords.push(`${asUser} orden(es) como cliente`);
+            if (asDriver > 0)
+                relatedRecords.push(`${asDriver} orden(es) como motorista`);
+            if (asCompany > 0)
+                relatedRecords.push(`${asCompany} orden(es) como empresa`);
+            if (cash > 0)
+                relatedRecords.push(`${cash} registro(s) de caja`);
+            if (distributor > 0)
+                relatedRecords.push(`${distributor} registro(s) de distribuidor`);
+            if (relatedRecords.length > 0) {
+                throw new common_1.BadRequestException(`No se puede eliminar el usuario porque tiene registros relacionados: ${relatedRecords.join(', ')}.`);
+            }
+            const result = await this.userRepository.delete(id);
+            if (result.affected === 0) {
+                throw new error_manager_1.ErrorManager({
+                    type: 'BAD_REQUEST',
+                    message: 'No se pudo borrar',
+                });
+            }
+            return result;
         }
         catch (error) {
+            if (error instanceof common_1.BadRequestException) {
+                throw error;
+            }
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }

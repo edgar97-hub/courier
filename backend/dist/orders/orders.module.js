@@ -15,6 +15,8 @@ const orders_entity_1 = require("./entities/orders.entity");
 const order_pdf_generator_service_1 = require("./services/order-pdf-generator.service");
 const orderLog_entity_1 = require("./entities/orderLog.entity");
 const cashManagement_module_1 = require("../cashManagement/cashManagement.module");
+const fulfillment_module_1 = require("../fulfillment/fulfillment.module");
+const inventory_entity_1 = require("../fulfillment/entities/inventory.entity");
 let OrdersModule = class OrdersModule {
 };
 exports.OrdersModule = OrdersModule;
@@ -22,8 +24,9 @@ exports.OrdersModule = OrdersModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([orders_entity_1.OrdersEntity, orderLog_entity_1.OrderLogEntity]),
+            typeorm_1.TypeOrmModule.forFeature([orders_entity_1.OrdersEntity, orderLog_entity_1.OrderLogEntity, inventory_entity_1.InventoryEntity]),
             cashManagement_module_1.CashManagementModule,
+            fulfillment_module_1.FulfillmentModule,
         ],
         providers: [orders_service_1.OrdersService, order_pdf_generator_service_1.OrderPdfGeneratorService],
         controllers: [orders_controller_1.OrdersController],

@@ -12,8 +12,11 @@ import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
 
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: ['log', 'error', 'warn', 'debug', 'verbose'],
+  });
   app.set('trust proxy', 1);
+  app.set('etag', false);
   app.use(morgan('dev'));
   app.useGlobalPipes(
     new ValidationPipe({

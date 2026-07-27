@@ -1,122 +1,76 @@
 <div class="fulfillment-selector">
 
-  <!-- PASO 1: Buscar producto -->
-  <div class="product-search-section">
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Buscar producto</mat-label>
-      <input
-        matInput
-        [value]="productSearchCtrl()"
-        (input)="onProductSearchChange($any($event.target).value)"
-        placeholder="Escriba el nombre del producto..."
-        [matAutocomplete]="autoProduct"
-      />
-      <mat-icon matSuffix>search</mat-icon>
-      <mat-progress-spinner
-        *ngIf="isLoadingProducts()"
-        matSuffix
-        mode="indeterminate"
-        diameter="20"
-      ></mat-progress-spinner>
-      <mat-autocomplete
-        #autoProduct="matAutocomplete"
-        (optionSelected)="onProductSelected($event.option.value)"
-        [displayWith]="productDisplayFn"
-      >
-        @for (product of filteredProducts(); track product.id) {
-          <mat-option [value]="product">
-            {{ product.name }}
-          </mat-option>
-        }
-        @if (filteredProducts().length === 0 && !isLoadingProducts()) {
-          <mat-option disabled>No se encontraron productos.</mat-option>
-        }
-      </mat-autocomplete>
-    </mat-form-field>
+  <!-- Buscador de inventario -->
+  <div class="inventory-search">
+    <div class="search-box">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input type="text" class="search-input" [value]="searchText()"
+        (input)="onSearchInput($any($event.target).value)"
+        placeholder="Buscar producto, SKU, color, talla..." />
+      @if (isLoadingInventory()) {
+        <mat-progress-spinner class="search-spinner" mode="indeterminate" diameter="16"></mat-progress-spinner>
+      }
+    </div>
   </div>
 
-  <!-- PASO 2: Tabla de variaciones del producto seleccionado -->
-  @if (selectedProduct(); as product) {
-    <div class="variations-section">
-      <h4 class="section-label">{{ product.name }} — Variaciones disponibles</h4>
-
-      @if (isLoadingVariations()) {
-        <div class="loading-spinner">
-          <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
-        </div>
-      } @else if (variationsWithStock().length === 0) {
-        <p class="no-data">Este producto no tiene variaciones registradas.</p>
-      } @else {
-        <div class="table-container">
-          <table mat-table [dataSource]="variationsWithStock()" class="variations-table">
-            <ng-container matColumnDef="sku">
-              <th mat-header-cell *matHeaderCellDef>SKU</th>
-              <td mat-cell *matCellDef="let v">{{ v.sku }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="color">
-              <th mat-header-cell *matHeaderCellDef>Color</th>
-              <td mat-cell *matCellDef="let v">{{ v.color || '-' }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="size">
-              <th mat-header-cell *matHeaderCellDef>Talla</th>
-              <td mat-cell *matCellDef="let v">{{ v.size || '-' }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="stock">
-              <th mat-header-cell *matHeaderCellDef class="center">Stock</th>
-              <td mat-cell *matCellDef="let v" class="center"
-                  [class.stock-low]="v.availableStock <= 5 && v.availableStock > 0"
-                  [class.stock-empty]="v.availableStock === 0">
-                {{ v.availableStock }}
+  <!-- Tabla de inventario -->
+  @if (isLoadingInventory() && inventoryItems().length === 0) {
+    <div class="loading-spinner">
+      <mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner>
+    </div>
+  } @else if (inventoryItems().length === 0) {
+    <p class="no-data">No se encontraron productos disponibles.</p>
+  } @else {
+    <div class="inventory-table-wrapper">
+      <table class="inventory-table">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>SKU</th>
+            <th>Color</th>
+            <th>Talla</th>
+            <th>Modelo</th>
+            <th class="center">Stock</th>
+            <th>Dimensiones</th>
+            <th class="center">Cant</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of inventoryItems(); track row.variation?.id) {
+            <tr>
+              <td class="product-cell">{{ row.product?.name || '-' }}</td>
+              <td>{{ row.variation?.sku || '-' }}</td>
+              <td>{{ row.variation?.color || '-' }}</td>
+              <td>{{ row.variation?.size || '-' }}</td>
+              <td>{{ row.variation?.model || '-' }}</td>
+              <td class="center" [class.stock-low]="row.stock <= 5 && row.stock > 0"
+                  [class.stock-empty]="row.stock === 0">
+                {{ row.stock }}
               </td>
-            </ng-container>
-
-            <ng-container matColumnDef="dimensions">
-              <th mat-header-cell *matHeaderCellDef>Dimensiones</th>
-              <td mat-cell *matCellDef="let v">
-                {{ v.length_cm }}x{{ v.width_cm }}x{{ v.height_cm }}cm
-                <br /><small>{{ v.weight_kg }}kg</small>
+              <td>
+                An: {{ row.variation?.width_cm ?? '-' }} x L: {{ row.variation?.length_cm ?? '-' }} x Al: {{ row.variation?.height_cm ?? '-' }}cm
+                <span class="weight-info">{{ row.variation?.weight_kg ?? '-' }}kg</span>
               </td>
-            </ng-container>
-
-            <ng-container matColumnDef="quantity">
-              <th mat-header-cell *matHeaderCellDef class="center">Cantidad</th>
-              <td mat-cell *matCellDef="let v" class="quantity-cell">
-                <button mat-icon-button class="qty-btn" (click)="decrementQuantity(v)"
-                  [disabled]="v.availableStock === 0">
-                  <mat-icon>remove</mat-icon>
-                </button>
-                <span class="qty-value">{{ getVariationQuantity(v.id) }}</span>
-                <button mat-icon-button class="qty-btn" (click)="incrementQuantity(v)"
-                  [disabled]="getVariationQuantity(v.id) >= v.availableStock">
-                  <mat-icon>add</mat-icon>
-                </button>
+              <td class="center">
+                <div class="qty-controls">
+                  <button class="qty-btn-sm" (click)="decrementQuantity(row)" [disabled]="getVariationQuantity(row.variation?.id) <= 0">−</button>
+                  <span class="qty-value-sm">{{ getVariationQuantity(row.variation?.id) }}</span>
+                  <button class="qty-btn-sm" (click)="incrementQuantity(row)" [disabled]="getVariationQuantity(row.variation?.id) >= row.stock">+</button>
+                </div>
               </td>
-            </ng-container>
-
-            <ng-container matColumnDef="action">
-              <th mat-header-cell *matHeaderCellDef></th>
-              <td mat-cell *matCellDef="let v">
-                <button mat-flat-button color="primary"
-                  class="add-btn"
-                  (click)="addVariationToItems(v)"
-                  [disabled]="!canAddVariation(v)">
-                  <mat-icon>add</mat-icon> Agregar
-                </button>
+              <td>
+                <button class="add-btn-sm" (click)="addVariationToItems(row)"
+                  [disabled]="!canAddVariation(row)">+ Agregar</button>
               </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="variationsDisplayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: variationsDisplayedColumns"></tr>
-          </table>
-        </div>
-      }
+            </tr>
+          }
+        </tbody>
+      </table>
     </div>
   }
 
-  <!-- PASO 3: Desglose Dinámico -->
+  <!-- Desglose Dinámico -->
   @if (standardGroupItems().length + customItems().length > 0) {
     <div class="desglose-section" cdkDropListGroup>
       <h4 class="section-label">Desglose</h4>
@@ -135,74 +89,69 @@
                [cdkDropListData]="standardGroupItems()"
                [cdkDropListEnterPredicate]="standardEnterPredicate"
                (cdkDropListDropped)="onDrop($event)">
-            <table mat-table [dataSource]="standardGroupItems()" class="desglose-table">
-              <ng-container matColumnDef="description">
-                <th mat-header-cell *matHeaderCellDef>Producto</th>
-                <td mat-cell *matCellDef="let item">
-                  {{ item.productName }}<br/>
-                  <small>{{ item.sku }}{{ item.color ? ' / ' + item.color : '' }}{{ item.size ? ' / ' + item.size : '' }}</small>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="medidas">
-                <th mat-header-cell *matHeaderCellDef>Medidas</th>
-                <td mat-cell *matCellDef="let item">
-                  {{ item.length_cm }}x{{ item.width_cm }}x{{ item.height_cm }}cm
-                  <br/><small>{{ item.weight_kg }}kg</small>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="cant">
-                <th mat-header-cell *matHeaderCellDef class="center">Cant</th>
-                <td mat-cell *matCellDef="let item" class="center">{{ item.quantity }}</td>
-              </ng-container>
-              <ng-container matColumnDef="tipo">
-                <th mat-header-cell *matHeaderCellDef class="center">Tipo</th>
-                <td mat-cell *matCellDef="let item; let i = index" class="center">
-                  @if (principalInfo().isPrincipal('standard', i)) {
-                    <span class="principal-item">Principal</span>
-                  } @else {
-                    <span class="additional-item">Adicional</span>
-                  }
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="price">
-                <th mat-header-cell *matHeaderCellDef class="center">Precio</th>
-                <td mat-cell *matCellDef="let item; let i = index" class="center">
-                  @if (i === 0) {
-                    @if (principalInfo().hasDiscount && !principalInfo().isPrincipal('standard', 0)) {
-                      <div class="discounted-price">
-                        <span class="original-price">{{ principalInfo().flatRate | currency:'S/ ' }}</span>
-                        <span class="final-price">{{ principalInfo().flatRate * (1 - principalInfo().discountPct / 100) | currency:'S/ ' }}</span>
-                      </div>
-                    } @else {
-                      {{ principalInfo().flatRate | currency:'S/ ' }}
-                    }
-                  } @else {
-                    Incluido
-                  }
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="action">
-                <th mat-header-cell *matHeaderCellDef></th>
-                <td mat-cell *matCellDef="let item">
-                  <button mat-icon-button color="warn" (click)="removeItem(item.tempId)">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="desgloseColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: desgloseColumns"
-                  cdkDrag [cdkDragData]="row"></tr>
-
-              <tr class="total-row">
-                <td colspan="5">
-                  <strong>Total paquete estándar:</strong>
-                  {{ standardSumDimensions().length }}x{{ standardSumDimensions().width }}x{{ standardSumDimensions().height }}cm,
-                  {{ standardSumDimensions().weight }}kg
-                  →
-                  <strong>{{ getFlatRate() | currency:'S/ ' }}</strong>
-                </td>
-              </tr>
+            <table class="desglose-table">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Medidas</th>
+                  <th class="center">Cant</th>
+                  <th class="center">Tipo</th>
+                  <th class="center">Precio</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of standardGroupItems(); track item.tempId; let i = $index) {
+                  <tr cdkDrag [cdkDragData]="item">
+                    <td>
+                      {{ item.productName }}<br/>
+                      <small>{{ item.sku }}{{ item.color ? ' / ' + item.color : '' }}{{ item.size ? ' / ' + item.size : '' }}</small>
+                    </td>
+                    <td>
+                      {{ item.length_cm }}x{{ item.width_cm }}x{{ item.height_cm }}cm
+                      <br/><small>{{ item.weight_kg }}kg</small>
+                    </td>
+                    <td class="center">{{ item.quantity }}</td>
+                    <td class="center">
+                      @if (principalInfo().isPrincipal('standard', i)) {
+                        <span class="principal-item">Principal</span>
+                      } @else {
+                        <span class="additional-item">Adicional</span>
+                      }
+                    </td>
+                    <td class="center">
+                      @if (i === 0) {
+                        @if (principalInfo().hasDiscount && !principalInfo().isPrincipal('standard', 0)) {
+                          <div class="discounted-price">
+                            <span class="original-price">{{ principalInfo().flatRate | currency:'S/ ' }}</span>
+                            <span class="final-price">{{ principalInfo().flatRate * (1 - principalInfo().discountPct / 100) | currency:'S/ ' }}</span>
+                          </div>
+                        } @else {
+                          {{ principalInfo().flatRate | currency:'S/ ' }}
+                        }
+                      } @else {
+                        Incluido
+                      }
+                    </td>
+                    <td>
+                      <button class="delete-btn-sm" (click)="removeItem(item.tempId)">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr class="total-row">
+                  <td colspan="6">
+                    <strong>Total paquete estándar:</strong>
+                    {{ standardSumDimensions().length }}x{{ standardSumDimensions().width }}x{{ standardSumDimensions().height }}cm,
+                    {{ standardSumDimensions().weight }}kg
+                    →
+                    <strong>{{ getFlatRate() | currency:'S/ ' }}</strong>
+                  </td>
+                </tr>
+              </tfoot>
             </table>
           </div>
         </div>
@@ -216,62 +165,56 @@
                 cdkDropList
                 [cdkDropListData]="customItems()"
                 (cdkDropListDropped)="onDrop($event)">
-            <table mat-table [dataSource]="customItems()" class="desglose-table">
-              <ng-container matColumnDef="description">
-                <th mat-header-cell *matHeaderCellDef>Producto</th>
-                <td mat-cell *matCellDef="let item">
-                  {{ item.productName }}<br/>
-                  <small>{{ item.sku }}{{ item.color ? ' / ' + item.color : '' }}{{ item.size ? ' / ' + item.size : '' }}</small>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="medidas">
-                <th mat-header-cell *matHeaderCellDef>Medidas</th>
-                <td mat-cell *matCellDef="let item">
-                  {{ item.length_cm }}x{{ item.width_cm }}x{{ item.height_cm }}cm
-                  <br/><small>{{ item.weight_kg }}kg</small>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="cant">
-                <th mat-header-cell *matHeaderCellDef class="center">Cant</th>
-                <td mat-cell *matCellDef="let item" class="center">{{ item.quantity }}</td>
-              </ng-container>
-              <ng-container matColumnDef="tipo">
-                <th mat-header-cell *matHeaderCellDef class="center">Tipo</th>
-                <td mat-cell *matCellDef="let item; let i = index" class="center">
-                  @if (principalInfo().isPrincipal('custom', i)) {
-                    <span class="principal-item">Principal</span>
-                  } @else {
-                    <span class="additional-item">Adicional</span>
-                  }
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="price">
-                <th mat-header-cell *matHeaderCellDef class="center">Precio</th>
-                <td mat-cell *matCellDef="let item; let i = index" class="center">
-                  @if (principalInfo().hasDiscount && !principalInfo().isPrincipal('custom', i)) {
-                    <div class="discounted-price">
-                      <span class="original-price">{{ item.individualPrice * item.quantity | currency:'S/ ' }}</span>
-                      <span class="final-price">{{ item.individualPrice * (1 - principalInfo().discountPct / 100) * item.quantity | currency:'S/ ' }}</span>
-                      <br/><small>{{ item.individualPrice * (1 - principalInfo().discountPct / 100) | currency:'S/ ' }} c/u</small>
-                    </div>
-                  } @else {
-                    {{ item.individualPrice * item.quantity | currency:'S/ ' }}
-                    <br/><small>{{ item.individualPrice | currency:'S/ ' }} c/u</small>
-                  }
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="action">
-                <th mat-header-cell *matHeaderCellDef></th>
-                <td mat-cell *matCellDef="let item">
-                  <button mat-icon-button color="warn" (click)="removeItem(item.tempId)">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="desgloseColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: desgloseColumns"
-                  cdkDrag [cdkDragData]="row"></tr>
+            <table class="desglose-table">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Medidas</th>
+                  <th class="center">Cant</th>
+                  <th class="center">Tipo</th>
+                  <th class="center">Precio</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of customItems(); track item.tempId; let i = $index) {
+                  <tr cdkDrag [cdkDragData]="item">
+                    <td>
+                      {{ item.productName }}<br/>
+                      <small>{{ item.sku }}{{ item.color ? ' / ' + item.color : '' }}{{ item.size ? ' / ' + item.size : '' }}</small>
+                    </td>
+                    <td>
+                      {{ item.length_cm }}x{{ item.width_cm }}x{{ item.height_cm }}cm
+                      <br/><small>{{ item.weight_kg }}kg</small>
+                    </td>
+                    <td class="center">{{ item.quantity }}</td>
+                    <td class="center">
+                      @if (principalInfo().isPrincipal('custom', i)) {
+                        <span class="principal-item">Principal</span>
+                      } @else {
+                        <span class="additional-item">Adicional</span>
+                      }
+                    </td>
+                    <td class="center">
+                      @if (principalInfo().hasDiscount && !principalInfo().isPrincipal('custom', i)) {
+                        <div class="discounted-price">
+                          <span class="original-price">{{ item.individualPrice * item.quantity | currency:'S/ ' }}</span>
+                          <span class="final-price">{{ item.individualPrice * (1 - principalInfo().discountPct / 100) * item.quantity | currency:'S/ ' }}</span>
+                          <br/><small>{{ item.individualPrice * (1 - principalInfo().discountPct / 100) | currency:'S/ ' }} c/u</small>
+                        </div>
+                      } @else {
+                        {{ item.individualPrice * item.quantity | currency:'S/ ' }}
+                        <br/><small>{{ item.individualPrice | currency:'S/ ' }} c/u</small>
+                      }
+                    </td>
+                    <td>
+                      <button class="delete-btn-sm" (click)="removeItem(item.tempId)">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
             </table>
           </div>
         </div>

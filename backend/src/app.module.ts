@@ -13,6 +13,7 @@ import { SettingsModule } from './settings/settings.module';
 import { OrdersModule } from './orders/orders.module';
 import { CashManagementModule } from './cashManagement/cashManagement.module';
 import { PlanningEventModule } from './planningEvents/planning-events.module';
+import { FulfillmentModule } from './fulfillment/fulfillment.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { PlanningEventModule } from './planningEvents/planning-events.module';
     CashManagementModule,
     PlanningEventModule,
     DistributorRecordsModule,
+    FulfillmentModule,
   ],
 })
 export class AppModule {}

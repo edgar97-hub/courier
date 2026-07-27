@@ -22,6 +22,7 @@ export declare class UserDTO {
     owner_email_address: string;
     owner_bank_account: string;
     name_account_number_owner: string;
+    isFulfillmentEnabled: boolean;
 }
 export declare class UserUpdateDTO {
     email: string;
@@ -46,6 +47,7 @@ export declare class UserUpdateDTO {
     owner_email_address: string;
     owner_bank_account: string;
     name_account_number_owner: string;
+    isFulfillmentEnabled: boolean;
 }
 export declare class UserCompanyUpdateDTO {
     business_type: string;

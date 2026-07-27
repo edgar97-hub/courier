@@ -6,7 +6,8 @@ export declare class UsersController {
     registerUser(body: UserDTO): Promise<import("../entities/users.entity").UsersEntity>;
     registerCompany(body: RegistrationUserCompanyDTO): Promise<import("../entities/users.entity").UsersEntity>;
     findAllUsers(): Promise<import("../entities/users.entity").UsersEntity[]>;
-    findUsersByRol(search_term: string, role: string): Promise<import("../entities/users.entity").UsersEntity[]>;
+    findUsersByRol(search_term: string, role: string, fulfillment_enabled?: string): Promise<import("../entities/users.entity").UsersEntity[]>;
+    findUsersPaginated(page_number?: number, page_size?: number, sort_field?: string, sort_direction?: 'ASC' | 'DESC', search_term?: string, role?: string): Promise<import("../services/users.service").PaginatedUsers>;
     findUserById(id: string): Promise<import("../entities/users.entity").UsersEntity>;
     findUserPerfil(req: any): Promise<import("../entities/users.entity").UsersEntity>;
     updateUser(id: string, body: UserUpdateDTO): Promise<import("typeorm").UpdateResult | undefined>;

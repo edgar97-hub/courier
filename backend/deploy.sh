@@ -189,7 +189,6 @@ Salida Correcta (Ejemplo):
         "RW": true,
         "Propagation": ""
     },
-    // ... puede haber otros montajes como el de init.sql
 ],
 Listar todos los Volúmenes de Docker:
 Verifica que el volumen nombrado postgres-data existe en el sistema.

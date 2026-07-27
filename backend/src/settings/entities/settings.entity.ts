@@ -61,6 +61,9 @@ export class SettingsEntity extends BaseEntity {
   @Column({ default: '' })
   global_notice_image_url: string;
 
+  @Column({ default: '' })
+  fulfillment_banner_image_url: string;
+
   @Column({
     type: 'jsonb',
     nullable: true,

@@ -2,7 +2,8 @@ import { BaseEntity } from '../../config/base.entity';
 import { OrdersEntity } from './orders.entity';
 export declare enum PackageType {
     STANDARD = "STANDARD",
-    CUSTOM = "CUSTOM"
+    CUSTOM = "CUSTOM",
+    FULFILLMENT = "FULFILLMENT"
 }
 export declare class OrderItemEntity extends BaseEntity {
     package_type: PackageType;
@@ -14,5 +15,9 @@ export declare class OrderItemEntity extends BaseEntity {
     basePrice: number;
     finalPrice: number;
     isPrincipal: boolean;
+    variationId?: string;
+    productId?: string;
+    quantity?: number;
+    fulfillmentGroupId?: string;
     order: OrdersEntity;
 }

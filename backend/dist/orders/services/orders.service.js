@@ -27,6 +27,10 @@ const date_fns_1 = require("date-fns");
 const cashManagement_service_1 = require("../../cashManagement/services/cashManagement.service");
 const settings_entity_1 = require("../../settings/entities/settings.entity");
 const order_item_entity_1 = require("../entities/order-item.entity");
+const stock_adjustment_service_1 = require("../../fulfillment/services/stock-adjustment.service");
+const kardex_service_1 = require("../../fulfillment/services/kardex.service");
+const kardex_entity_1 = require("../../fulfillment/entities/kardex.entity");
+const inventory_entity_1 = require("../../fulfillment/entities/inventory.entity");
 const EXCEL_HEADER_TO_ENTITY_KEY_MAP = {
     'TIPO DE ENVIO': 'shipment_type',
     'NOMBRE DEL DESTINATARIO': 'recipient_name',
@@ -40,19 +44,23 @@ const EXCEL_HEADER_TO_ENTITY_KEY_MAP = {
     OBSERVACION: 'observations',
 };
 let OrdersService = class OrdersService {
-    constructor(orderRepository, orderLogRepository, settingsRepository, districtsRepository, userRepository, cashManagementService) {
+    constructor(orderRepository, orderLogRepository, settingsRepository, districtsRepository, userRepository, inventoryRepository, cashManagementService, stockAdjustmentService, kardexService) {
         this.orderRepository = orderRepository;
         this.orderLogRepository = orderLogRepository;
         this.settingsRepository = settingsRepository;
         this.districtsRepository = districtsRepository;
         this.userRepository = userRepository;
+        this.inventoryRepository = inventoryRepository;
         this.cashManagementService = cashManagementService;
+        this.stockAdjustmentService = stockAdjustmentService;
+        this.kardexService = kardexService;
     }
     async updateOrderStatus(body, idUser) {
         let log;
         try {
             const currentOrder = await this.orderRepository.findOne({
                 where: { id: body.payload.orderId },
+                relations: ['company'],
             });
             if (!currentOrder)
                 throw new Error('Orden no encontrada');
@@ -62,7 +70,9 @@ let OrdersService = class OrdersService {
                     'Por favor, actualice la tabla y obtenga el registro actualizado antes de realizar cambios.');
             }
             if (body.payload.newStatus === roles_1.STATES.ANNULLED) {
-                console.log('dejar pasar');
+                if (currentOrder.status === roles_1.STATES.ANNULLED) {
+                    throw new Error('El pedido ya se encuentra anulado.');
+                }
             }
             else {
                 if (body.payload.action === 'CAMBIO DE ESTADO' &&
@@ -207,6 +217,39 @@ let OrdersService = class OrdersService {
             }
             else if (body.payload.newStatus === roles_1.STATES.ANNULLED) {
                 await this.cashManagementService.reverseAutomaticIncome(body.payload.orderId);
+                const fulfillmentItems = currentOrder.items?.filter(i => i.package_type === order_item_entity_1.PackageType.FULFILLMENT && i.variationId && i.quantity);
+                if (fulfillmentItems && fulfillmentItems.length > 0) {
+                    const mainWarehouse = await this.stockAdjustmentService.getMainWarehouse();
+                    for (const item of fulfillmentItems) {
+                        if (!item.variationId || !item.quantity)
+                            continue;
+                        const inventory = await this.inventoryRepository.findOne({
+                            where: {
+                                variation_id: item.variationId,
+                                warehouse_id: mainWarehouse.id,
+                            },
+                        });
+                        if (inventory) {
+                            const stockBefore = inventory.stock;
+                            const stockAfter = stockBefore + item.quantity;
+                            await this.inventoryRepository.update(inventory.id, { stock: stockAfter });
+                            await this.kardexService.create({
+                                movement_type: kardex_entity_1.KARDEX_MOVEMENT_TYPE.ANNUL_REVERSAL,
+                                quantity: item.quantity,
+                                stock_before: stockBefore,
+                                stock_after: stockAfter,
+                                observation: `Reversión por anulación - Pedido #${currentOrder.code}`,
+                                responsible_user_id: idUser,
+                                reference_id: currentOrder.id,
+                                reference_type: 'order',
+                                company_id: currentOrder.company?.id,
+                                product_id: item.productId,
+                                variation_id: item.variationId,
+                                warehouse_id: mainWarehouse.id,
+                            });
+                        }
+                    }
+                }
             }
             return updatedOrder;
         }
@@ -262,6 +305,10 @@ let OrdersService = class OrdersService {
                         newItem.height_cm = itemDto.height_cm;
                         newItem.weight_kg = itemDto.weight_kg;
                         newItem.basePrice = itemDto.basePrice;
+                        newItem.variationId = itemDto.variationId;
+                        newItem.productId = itemDto.productId;
+                        newItem.quantity = itemDto.quantity;
+                        newItem.fulfillmentGroupId = itemDto.fulfillmentGroupId;
                         newItem.isPrincipal = itemDto === principalItem;
                         if (isDiscountActive &&
                             !newItem.isPrincipal &&
@@ -273,7 +320,11 @@ let OrdersService = class OrdersService {
                         else {
                             newItem.finalPrice = newItem.basePrice;
                         }
-                        totalShippingCost += newItem.finalPrice;
+                        const qtyMultiplier = newItem.package_type === order_item_entity_1.PackageType.FULFILLMENT &&
+                            !newItem.fulfillmentGroupId
+                            ? (newItem.quantity || 1)
+                            : 1;
+                        totalShippingCost += newItem.finalPrice * qtyMultiplier;
                         orderItems.push(newItem);
                     }
                     const orderToCreate = new orders_entity_1.OrdersEntity();
@@ -304,6 +355,10 @@ let OrdersService = class OrdersService {
                     orderToCreate.isExpress = orderDto.isExpress || false;
                     orderToCreate.items = orderItems;
                     const savedOrder = await queryRunner.manager.save(orders_entity_1.OrdersEntity, orderToCreate);
+                    const hasFulfillmentItems = orderDto.items?.some(item => item.package_type === 'FULFILLMENT');
+                    if (hasFulfillmentItems) {
+                        await this.deductFulfillmentStock(queryRunner, orderDto, savedOrder, idUser);
+                    }
                     createdOrders.push(savedOrder);
                 }
                 catch (individualError) {
@@ -345,6 +400,50 @@ let OrdersService = class OrdersService {
         }
         finally {
             await queryRunner.release();
+        }
+    }
+    async deductFulfillmentStock(queryRunner, orderDto, savedOrder, idUser) {
+        const mainWarehouse = await this.stockAdjustmentService.getMainWarehouse();
+        for (const itemDto of orderDto.items) {
+            if (!itemDto.variationId || !itemDto.quantity)
+                continue;
+            let inventory = await queryRunner.manager.findOne(inventory_entity_1.InventoryEntity, {
+                where: {
+                    variation_id: itemDto.variationId,
+                    warehouse_id: mainWarehouse.id,
+                },
+            });
+            if (!inventory) {
+                inventory = queryRunner.manager.create(inventory_entity_1.InventoryEntity, {
+                    variation_id: itemDto.variationId,
+                    warehouse_id: mainWarehouse.id,
+                    stock: 0,
+                });
+                await queryRunner.manager.save(inventory_entity_1.InventoryEntity, inventory);
+            }
+            if (inventory.stock < itemDto.quantity) {
+                throw new Error(`Stock insuficiente para variación ${itemDto.variationId}: ` +
+                    `disponible ${inventory.stock}, solicitado ${itemDto.quantity}`);
+            }
+            const stockBefore = inventory.stock;
+            const stockAfter = stockBefore - itemDto.quantity;
+            await queryRunner.manager.update(inventory_entity_1.InventoryEntity, inventory.id, {
+                stock: stockAfter,
+            });
+            await this.kardexService.create({
+                movement_type: kardex_entity_1.KARDEX_MOVEMENT_TYPE.ORDER_OUT,
+                quantity: itemDto.quantity,
+                stock_before: stockBefore,
+                stock_after: stockAfter,
+                observation: `Pedido #${savedOrder.code}`,
+                responsible_user_id: idUser,
+                reference_id: String(savedOrder.id),
+                reference_type: 'order',
+                company_id: orderDto.company_id,
+                product_id: itemDto.productId,
+                variation_id: itemDto.variationId,
+                warehouse_id: mainWarehouse.id,
+            });
         }
     }
     async importOrdersFromExcelData(excelRows, idUser) {
@@ -1330,11 +1429,15 @@ exports.OrdersService = OrdersService = __decorate([
     __param(2, (0, typeorm_1.InjectRepository)(settings_entity_1.SettingsEntity)),
     __param(3, (0, typeorm_1.InjectRepository)(districts_entity_1.DistrictsEntity)),
     __param(4, (0, typeorm_1.InjectRepository)(users_entity_1.UsersEntity)),
+    __param(5, (0, typeorm_1.InjectRepository)(inventory_entity_1.InventoryEntity)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
-        cashManagement_service_1.CashManagementService])
+        typeorm_2.Repository,
+        cashManagement_service_1.CashManagementService,
+        stock_adjustment_service_1.StockAdjustmentService,
+        kardex_service_1.KardexService])
 ], OrdersService);
 //# sourceMappingURL=orders.service.js.map

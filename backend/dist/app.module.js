@@ -20,6 +20,7 @@ const settings_module_1 = require("./settings/settings.module");
 const orders_module_1 = require("./orders/orders.module");
 const cashManagement_module_1 = require("./cashManagement/cashManagement.module");
 const planning_events_module_1 = require("./planningEvents/planning-events.module");
+const fulfillment_module_1 = require("./fulfillment/fulfillment.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -39,6 +40,7 @@ exports.AppModule = AppModule = __decorate([
             cashManagement_module_1.CashManagementModule,
             planning_events_module_1.PlanningEventModule,
             distributor_records_module_1.DistributorRecordsModule,
+            fulfillment_module_1.FulfillmentModule,
         ],
     })
 ], AppModule);

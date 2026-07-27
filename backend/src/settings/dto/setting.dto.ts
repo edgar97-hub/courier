@@ -169,6 +169,9 @@ export class SettingUpdateDTO {
   @ApiProperty()
   global_notice_image_url: string;
 
+  @ApiProperty()
+  fulfillment_banner_image_url: string;
+
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })

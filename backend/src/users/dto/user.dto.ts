@@ -86,6 +86,11 @@ export class UserDTO {
 
   @ApiProperty()
   name_account_number_owner: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsBoolean()
+  isFulfillmentEnabled: boolean;
 }
 
 export class UserUpdateDTO {
@@ -162,6 +167,11 @@ export class UserUpdateDTO {
 
   @ApiProperty()
   name_account_number_owner: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsBoolean()
+  isFulfillmentEnabled: boolean;
 }
 
 export class UserCompanyUpdateDTO {

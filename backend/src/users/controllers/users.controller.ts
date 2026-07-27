@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   ParseUUIDPipe,
   Post,
   Put,
@@ -28,7 +29,6 @@ import { PublicAccess } from 'src/auth/decorators/public.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { ROLES } from 'src/constants/roles';
 
-@ApiTags('Users')
 @Controller('users')
 @UseGuards(AuthGuard, RolesGuard)
 export class UsersController {
@@ -58,24 +58,46 @@ export class UsersController {
   public async findUsersByRol(
     @Query('search_term') search_term: string,
     @Query('role') role: string,
+    @Query('fulfillment_enabled') fulfillment_enabled?: string,
   ) {
-    const queryParams = {
+    const queryParams: {
+      search_term?: string;
+      role?: string;
+      fulfillment_enabled?: boolean;
+    } = {
       search_term,
       role,
     };
+
+    if (fulfillment_enabled !== undefined) {
+      queryParams.fulfillment_enabled = fulfillment_enabled === 'true';
+    }
+
     return await this.usersService.findUsersByRol(queryParams);
   }
 
-  @ApiParam({
-    name: 'id',
-  })
-  @ApiHeader({
-    name: 'codrr_token',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'No se encontro resultado',
-  })
+  @PublicAccess()
+  @Get('paginated')
+  public async findUsersPaginated(
+    @Query('page_number', new ParseIntPipe({ optional: true }))
+    page_number: number = 1,
+    @Query('page_size', new ParseIntPipe({ optional: true }))
+    page_size: number = 20,
+    @Query('sort_field') sort_field: string = 'code',
+    @Query('sort_direction') sort_direction: 'ASC' | 'DESC' = 'ASC',
+    @Query('search_term') search_term: string = '',
+    @Query('role') role: string = '',
+  ) {
+    return await this.usersService.findUsersPaginated({
+      page_number,
+      page_size,
+      sort_field,
+      sort_direction,
+      search_term,
+      role,
+    });
+  }
+
   @Get(':id')
   public async findUserById(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.usersService.findUserById(id);
@@ -88,9 +110,6 @@ export class UsersController {
     return await this.usersService.findUserPerfil(req.idUser);
   }
 
-  @ApiParam({
-    name: 'id',
-  })
   @AdminAccess()
   @Roles(ROLES.RECEPCIONISTA)
   @Put('edit/:id')
@@ -101,9 +120,6 @@ export class UsersController {
     return await this.usersService.updateUser(body, id);
   }
 
-  @ApiParam({
-    name: 'id',
-  })
   @Put('edit-user-company/:id')
   public async updateUserCompany(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -112,9 +128,6 @@ export class UsersController {
     return await this.usersService.updateUserCompany(body, id);
   }
 
-  @ApiParam({
-    name: 'id',
-  })
   @Put('update-profile/:id')
   public async updateProfile(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -123,9 +136,6 @@ export class UsersController {
     return await this.usersService.updateProfile(body, id);
   }
 
-  @ApiParam({
-    name: 'id',
-  })
   @Delete('delete/:id')
   public async deleteUser(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.usersService.deleteUser(id);

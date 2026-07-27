@@ -10,6 +10,10 @@ export declare class OrderItemDTO {
     basePrice: number;
     finalPrice?: number;
     isPrincipal?: boolean;
+    variationId?: string;
+    productId?: string;
+    quantity?: number;
+    fulfillmentGroupId?: string;
 }
 export declare class OrderDTO {
     shipment_type?: string;
