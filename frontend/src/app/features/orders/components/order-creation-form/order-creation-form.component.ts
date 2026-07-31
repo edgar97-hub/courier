@@ -171,9 +171,13 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   isFulfillment = signal(false);
 
   fulfillmentBannerUrl = signal<string | null>(null);
+  selectedCompanyFulfillmentEnabled = signal(false);
 
   get isFulfillmentEnabled(): boolean {
-    return this.appStore.currentUser()?.isFulfillmentEnabled ?? false;
+    if (this.isCompany()) {
+      return this.appStore.currentUser()?.isFulfillmentEnabled ?? false;
+    }
+    return this.selectedCompanyFulfillmentEnabled();
   }
 
   @ViewChild('fulfillmentSelector')
@@ -416,12 +420,15 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     return driver && driver.username ? driver.username : '';
   }
   onDriverSelected(event: MatAutocompleteSelectedEvent): void {
-    this.orderForm.get('company_id')?.setValue(event.option.value.id);
+    const company = event.option.value as User;
+    this.orderForm.get('company_id')?.setValue(company.id);
+    this.selectedCompanyFulfillmentEnabled.set(company.isFulfillmentEnabled ?? false);
     this.orderForm.markAllAsTouched();
   }
 
   clearDriverSelection(): void {
     this.driverSearchCtrl.setValue('');
+    this.selectedCompanyFulfillmentEnabled.set(false);
     this.orderForm.markAllAsTouched();
     this.orderForm.get('company_id')?.setValue(null);
   }

@@ -110,14 +110,14 @@
         </div>
         <div
           class="summary-item"
-          *ngIf="order.stops[0]?.plannedStartTime"
+          *ngIf="latestStop?.plannedStartTime"
           style="font-weight: 700 !important"
         >
           <mat-icon>schedule</mat-icon>
           <span
             ><span>Hora Estimada:</span>
-            {{ order.stops[0]?.plannedStartTime }} -
-            {{ order.stops[0]?.plannedEndTime }}</span
+            {{ latestStop?.plannedStartTime }} -
+            {{ latestStop?.plannedEndTime }}</span
           >
         </div>
         @if(order.delivery_coordinates){

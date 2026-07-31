@@ -33,6 +33,7 @@ import {
   tap,
   map,
 } from 'rxjs/operators';
+import { v4 as uuidv4 } from 'uuid';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/services/auth.service';
 import { FulfillmentItem } from './fulfillment-product-selector.model';
@@ -405,7 +406,7 @@ export class FulfillmentProductSelectorComponent implements OnInit, OnDestroy {
     if (!districtId) return [];
 
     const info = this.principalInfo();
-    const fulfillmentGroupId = crypto.randomUUID();
+    const fulfillmentGroupId = uuidv4();
 
     const standardItems: OrderItem[] = this.standardGroupItems().map((item, i) => ({
       package_type: PackageType.FULFILLMENT,

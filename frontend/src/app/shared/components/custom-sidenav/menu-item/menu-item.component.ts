@@ -105,7 +105,7 @@ import { MatSidenav } from '@angular/material/sidenav';
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        font-weight: 600 !important;
+        font-weight: 400 !important;
         font-size: 0.85rem !important;
       }
 

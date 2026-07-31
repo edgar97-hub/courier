@@ -191,6 +191,14 @@ export class TrackingPageComponent implements OnInit, OnDestroy {
     return `status-${formattedStatus}`;
   }
 
+  get latestStop(): any {
+    const stops = this.trackedOrder()?.stops;
+    if (!stops || stops.length === 0) return null;
+    return stops.reduce((latest: any, stop: any) =>
+      stop.id > latest.id ? stop : latest,
+    );
+  }
+
   openMap(coordinates?: string): void {
     if (coordinates) {
       window.open(

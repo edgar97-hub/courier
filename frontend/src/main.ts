@@ -2,6 +2,7 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import {
   ModuleRegistry,
   ClientSideRowModelModule,
+  CellStyleModule,
   TextFilterModule,
   NumberFilterModule,
   PaginationModule,
@@ -13,6 +14,7 @@ import { AppComponent } from './app/app.component';
 
 ModuleRegistry.registerModules([
   ClientSideRowModelModule,
+  CellStyleModule,
   TextFilterModule,
   NumberFilterModule,
   PaginationModule,

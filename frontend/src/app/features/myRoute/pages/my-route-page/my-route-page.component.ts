@@ -262,6 +262,16 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
       });
   }
 
+  navigateToStartingPoint(): void {
+    if (!this.selectedRoute) return;
+
+    this.geolocationTrackingService.forceUpdateLocation();
+
+    const destination = `${this.selectedRoute.latitudeStartPoint},${this.selectedRoute.longitudeStartPoint}`;
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving&dir_action=navigate`;
+    window.open(mapsUrl, '_blank');
+  }
+
   navigateToStop(stopIndex: number): void {
     if (!this.selectedRoute || !this.selectedRoute.stops) return;
 

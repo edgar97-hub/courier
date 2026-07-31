@@ -53,11 +53,7 @@
       </google-map>
     </div>
 
-    <div
-      class="summary-item"
-      *ngIf="selectedRoute?.breakStart"
-      style="margin: 10px"
-    >
+    <div class="summary-item" style="margin: 10px">
       <div class="timeline-item">
         <br />
         <strong
@@ -69,13 +65,24 @@
           {{ selectedRoute?.vehicleStartTime || "" }}
         </small>
         <br />
-        <br />
-        <strong>Refrigerio:</strong>
-        <br />
-        <small>
-          Hora: {{ selectedRoute?.breakStart }} | Duración:
-          {{ selectedRoute?.breakDuration }}
-        </small>
+        <button
+          mat-stroked-button
+          type="button"
+          class="btn-corp-secondary"
+          style="margin-top: 8px"
+          (click)="navigateToStartingPoint()"
+        >
+          <mat-icon>navigation</mat-icon> Navegar a sucursal
+        </button>
+        <br /><br />
+        <div *ngIf="selectedRoute?.breakStart">
+          <strong>Refrigerio:</strong>
+          <br />
+          <small>
+            Hora: {{ selectedRoute?.breakStart }} | Duración:
+            {{ selectedRoute?.breakDuration }}
+          </small>
+        </div>
       </div>
     </div>
     <div class="stops-manifest" *ngIf="selectedRoute">
