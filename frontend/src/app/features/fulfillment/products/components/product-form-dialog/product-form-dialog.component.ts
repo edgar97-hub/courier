@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, inject } from '@angular/core';
+import { Component, Inject, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormArray,
@@ -157,7 +157,7 @@ import { User } from '../../../../users/models/user.model';
             </div>
             <div class="variations-container" formArrayName="variations">
               @for (
-                variation of variations.controls;
+                variation of variations.controls.slice();
                 track variation;
                 let i = $index
               ) {
@@ -647,6 +647,7 @@ export class ProductFormDialogComponent implements OnInit {
   private userService = inject(UserService);
   private snackBar = inject(MatSnackBar);
   private dialogRef = inject(MatDialogRef<ProductFormDialogComponent>);
+  private cdr = inject(ChangeDetectorRef);
   @Inject(MAT_DIALOG_DATA) private dialogData: any = inject(MAT_DIALOG_DATA);
 
   productForm!: FormGroup;
@@ -794,6 +795,7 @@ export class ProductFormDialogComponent implements OnInit {
 
   addVariation(): void {
     this.variations.push(this.createVariationForm());
+    this.cdr.detectChanges();
   }
 
   isSkuDuplicate(index: number): boolean {
