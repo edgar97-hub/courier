@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { Repository, EntityManager } from 'typeorm';
 import { KardexEntity, KARDEX_MOVEMENT_TYPE } from '../entities/kardex.entity';
 export interface PaginatedKardex {
     items: any[];
@@ -22,7 +22,7 @@ export declare class KardexService {
         product_id?: string;
         variation_id: string;
         warehouse_id?: string;
-    }): Promise<KardexEntity>;
+    }, manager?: EntityManager): Promise<KardexEntity>;
     findPaginated(options: {
         page_number: number;
         page_size: number;

@@ -33,66 +33,79 @@ let StockAdjustmentService = class StockAdjustmentService {
         this.kardexService = kardexService;
     }
     async create(dto, userId) {
-        let inventory = await this.inventoryRepository.findOne({
-            where: {
-                variation_id: dto.variation_id,
-                warehouse_id: dto.warehouse_id,
-            },
-        });
-        if (!inventory) {
-            inventory = this.inventoryRepository.create({
-                variation_id: dto.variation_id,
-                warehouse_id: dto.warehouse_id,
-                stock: 0,
+        const queryRunner = this.inventoryRepository.manager.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            let inventory = await queryRunner.manager.findOne(inventory_entity_1.InventoryEntity, {
+                where: {
+                    variation_id: dto.variation_id,
+                    warehouse_id: dto.warehouse_id,
+                },
             });
-            await this.inventoryRepository.save(inventory);
+            if (!inventory) {
+                inventory = queryRunner.manager.create(inventory_entity_1.InventoryEntity, {
+                    variation_id: dto.variation_id,
+                    warehouse_id: dto.warehouse_id,
+                    stock: 0,
+                });
+                await queryRunner.manager.save(inventory_entity_1.InventoryEntity, inventory);
+            }
+            const stockBefore = inventory.stock;
+            let stockAfter = stockBefore;
+            switch (dto.adjustment_type) {
+                case stock_adjustment_entity_1.ADJUSTMENT_TYPE.INBOUND:
+                case stock_adjustment_entity_1.ADJUSTMENT_TYPE.MANUAL_ADD:
+                    stockAfter = stockBefore + dto.quantity;
+                    break;
+                case stock_adjustment_entity_1.ADJUSTMENT_TYPE.MANUAL_SUBTRACT:
+                    if (stockBefore < dto.quantity) {
+                        throw new common_1.BadRequestException(`Stock insuficiente. Stock actual: ${stockBefore}, cantidad a restar: ${dto.quantity}`);
+                    }
+                    stockAfter = stockBefore - dto.quantity;
+                    break;
+            }
+            await queryRunner.manager.update(inventory_entity_1.InventoryEntity, inventory.id, { stock: stockAfter });
+            const adjustment = queryRunner.manager.create(stock_adjustment_entity_1.StockAdjustmentEntity, {
+                adjustment_type: dto.adjustment_type,
+                quantity: dto.quantity,
+                observation: dto.observation,
+                company_id: dto.company_id,
+                product_id: dto.product_id,
+                variation_id: dto.variation_id,
+                warehouse_id: dto.warehouse_id,
+                status: stock_adjustment_entity_1.ADJUSTMENT_STATUS.REGISTERED,
+            });
+            const saved = await queryRunner.manager.save(stock_adjustment_entity_1.StockAdjustmentEntity, adjustment);
+            const movementTypeMap = {
+                [stock_adjustment_entity_1.ADJUSTMENT_TYPE.INBOUND]: kardex_entity_1.KARDEX_MOVEMENT_TYPE.INBOUND,
+                [stock_adjustment_entity_1.ADJUSTMENT_TYPE.MANUAL_ADD]: kardex_entity_1.KARDEX_MOVEMENT_TYPE.MANUAL_ADD,
+                [stock_adjustment_entity_1.ADJUSTMENT_TYPE.MANUAL_SUBTRACT]: kardex_entity_1.KARDEX_MOVEMENT_TYPE.MANUAL_SUBTRACT,
+            };
+            await this.kardexService.create({
+                movement_type: movementTypeMap[dto.adjustment_type] || kardex_entity_1.KARDEX_MOVEMENT_TYPE.MANUAL_ADD,
+                quantity: dto.quantity,
+                stock_before: stockBefore,
+                stock_after: stockAfter,
+                observation: dto.observation,
+                responsible_user_id: userId,
+                reference_id: saved.id,
+                reference_type: 'stock_adjustment',
+                company_id: dto.company_id,
+                product_id: dto.product_id,
+                variation_id: dto.variation_id,
+                warehouse_id: dto.warehouse_id,
+            }, queryRunner.manager);
+            await queryRunner.commitTransaction();
+            return saved;
         }
-        const stockBefore = inventory.stock;
-        let stockAfter = stockBefore;
-        switch (dto.adjustment_type) {
-            case stock_adjustment_entity_1.ADJUSTMENT_TYPE.INBOUND:
-            case stock_adjustment_entity_1.ADJUSTMENT_TYPE.MANUAL_ADD:
-                stockAfter = stockBefore + dto.quantity;
-                break;
-            case stock_adjustment_entity_1.ADJUSTMENT_TYPE.MANUAL_SUBTRACT:
-                if (stockBefore < dto.quantity) {
-                    throw new common_1.BadRequestException(`Stock insuficiente. Stock actual: ${stockBefore}, cantidad a restar: ${dto.quantity}`);
-                }
-                stockAfter = stockBefore - dto.quantity;
-                break;
+        catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
         }
-        await this.inventoryRepository.update(inventory.id, { stock: stockAfter });
-        const adjustment = this.adjustmentRepository.create({
-            adjustment_type: dto.adjustment_type,
-            quantity: dto.quantity,
-            observation: dto.observation,
-            company_id: dto.company_id,
-            product_id: dto.product_id,
-            variation_id: dto.variation_id,
-            warehouse_id: dto.warehouse_id,
-            status: stock_adjustment_entity_1.ADJUSTMENT_STATUS.REGISTERED,
-        });
-        const saved = await this.adjustmentRepository.save(adjustment);
-        const movementTypeMap = {
-            [stock_adjustment_entity_1.ADJUSTMENT_TYPE.INBOUND]: kardex_entity_1.KARDEX_MOVEMENT_TYPE.INBOUND,
-            [stock_adjustment_entity_1.ADJUSTMENT_TYPE.MANUAL_ADD]: kardex_entity_1.KARDEX_MOVEMENT_TYPE.MANUAL_ADD,
-            [stock_adjustment_entity_1.ADJUSTMENT_TYPE.MANUAL_SUBTRACT]: kardex_entity_1.KARDEX_MOVEMENT_TYPE.MANUAL_SUBTRACT,
-        };
-        await this.kardexService.create({
-            movement_type: movementTypeMap[dto.adjustment_type] || kardex_entity_1.KARDEX_MOVEMENT_TYPE.MANUAL_ADD,
-            quantity: dto.quantity,
-            stock_before: stockBefore,
-            stock_after: stockAfter,
-            observation: dto.observation,
-            responsible_user_id: userId,
-            reference_id: saved.id,
-            reference_type: 'stock_adjustment',
-            company_id: dto.company_id,
-            product_id: dto.product_id,
-            variation_id: dto.variation_id,
-            warehouse_id: dto.warehouse_id,
-        });
-        return saved;
+        finally {
+            await queryRunner.release();
+        }
     }
     async findPaginated(options) {
         const { page_number, page_size, sort_field, sort_direction, search_term } = options;
@@ -153,59 +166,72 @@ let StockAdjustmentService = class StockAdjustmentService {
         return warehouse;
     }
     async annul(id, userId) {
-        const adjustment = await this.adjustmentRepository.findOne({
-            where: { id },
-        });
-        if (!adjustment) {
-            throw new common_1.BadRequestException('Ajuste de stock no encontrado');
-        }
-        if (adjustment.status === stock_adjustment_entity_1.ADJUSTMENT_STATUS.ANNULLED) {
-            throw new common_1.BadRequestException('Este ajuste ya está anulado');
-        }
-        const inventory = await this.inventoryRepository.findOne({
-            where: {
+        const queryRunner = this.adjustmentRepository.manager.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const adjustment = await queryRunner.manager.findOne(stock_adjustment_entity_1.StockAdjustmentEntity, {
+                where: { id },
+                lock: { mode: 'pessimistic_write' },
+            });
+            if (!adjustment) {
+                throw new common_1.BadRequestException('Ajuste de stock no encontrado');
+            }
+            if (adjustment.status === stock_adjustment_entity_1.ADJUSTMENT_STATUS.ANNULLED) {
+                throw new common_1.BadRequestException('Este ajuste ya está anulado');
+            }
+            const inventory = await queryRunner.manager.findOne(inventory_entity_1.InventoryEntity, {
+                where: {
+                    variation_id: adjustment.variation_id,
+                    warehouse_id: adjustment.warehouse_id,
+                },
+                lock: { mode: 'pessimistic_write' },
+            });
+            let stockBefore = 0;
+            let stockAfter = 0;
+            if (inventory) {
+                stockBefore = inventory.stock;
+                stockAfter = inventory.stock;
+                switch (adjustment.adjustment_type) {
+                    case stock_adjustment_entity_1.ADJUSTMENT_TYPE.INBOUND:
+                    case stock_adjustment_entity_1.ADJUSTMENT_TYPE.MANUAL_ADD:
+                        stockAfter = inventory.stock - adjustment.quantity;
+                        break;
+                    case stock_adjustment_entity_1.ADJUSTMENT_TYPE.MANUAL_SUBTRACT:
+                        stockAfter = inventory.stock + adjustment.quantity;
+                        break;
+                }
+                if (stockAfter < 0) {
+                    throw new common_1.BadRequestException('No se puede anular: el stock actual no permite la reversión (resultaría en stock negativo)');
+                }
+                await queryRunner.manager.update(inventory_entity_1.InventoryEntity, inventory.id, { stock: stockAfter });
+            }
+            adjustment.status = stock_adjustment_entity_1.ADJUSTMENT_STATUS.ANNULLED;
+            const saved = await queryRunner.manager.save(stock_adjustment_entity_1.StockAdjustmentEntity, adjustment);
+            await this.kardexService.create({
+                movement_type: kardex_entity_1.KARDEX_MOVEMENT_TYPE.ANNUL_REVERSAL,
+                quantity: adjustment.quantity,
+                stock_before: stockBefore,
+                stock_after: stockAfter,
+                observation: `Anulación de ajuste #${saved.code || saved.id}`,
+                responsible_user_id: userId || 'Administrador',
+                reference_id: saved.id,
+                reference_type: 'stock_adjustment_annul',
+                company_id: adjustment.company_id,
+                product_id: adjustment.product_id,
                 variation_id: adjustment.variation_id,
                 warehouse_id: adjustment.warehouse_id,
-            },
-        });
-        let stockBefore = 0;
-        let stockAfter = 0;
-        if (inventory) {
-            stockBefore = inventory.stock;
-            stockAfter = inventory.stock;
-            switch (adjustment.adjustment_type) {
-                case stock_adjustment_entity_1.ADJUSTMENT_TYPE.INBOUND:
-                case stock_adjustment_entity_1.ADJUSTMENT_TYPE.MANUAL_ADD:
-                    stockAfter = inventory.stock - adjustment.quantity;
-                    break;
-                case stock_adjustment_entity_1.ADJUSTMENT_TYPE.MANUAL_SUBTRACT:
-                    stockAfter = inventory.stock + adjustment.quantity;
-                    break;
-            }
-            if (stockAfter < 0) {
-                throw new common_1.BadRequestException('No se puede anular: el stock actual no permite la reversión (resultaría en stock negativo)');
-            }
-            await this.inventoryRepository.update(inventory.id, {
-                stock: stockAfter,
-            });
+            }, queryRunner.manager);
+            await queryRunner.commitTransaction();
+            return saved;
         }
-        adjustment.status = stock_adjustment_entity_1.ADJUSTMENT_STATUS.ANNULLED;
-        const saved = await this.adjustmentRepository.save(adjustment);
-        await this.kardexService.create({
-            movement_type: kardex_entity_1.KARDEX_MOVEMENT_TYPE.ANNUL_REVERSAL,
-            quantity: adjustment.quantity,
-            stock_before: stockBefore,
-            stock_after: stockAfter,
-            observation: `Anulación de ajuste #${saved.code || saved.id}`,
-            responsible_user_id: userId || 'Administrador',
-            reference_id: saved.id,
-            reference_type: 'stock_adjustment_annul',
-            company_id: adjustment.company_id,
-            product_id: adjustment.product_id,
-            variation_id: adjustment.variation_id,
-            warehouse_id: adjustment.warehouse_id,
-        });
-        return saved;
+        catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
 };
 exports.StockAdjustmentService = StockAdjustmentService;

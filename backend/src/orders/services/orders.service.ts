@@ -332,34 +332,48 @@ export class OrdersService {
         ) as OrderItemEntity[] | undefined;
 
         if (fulfillmentItems && fulfillmentItems.length > 0) {
-          const mainWarehouse = await this.stockAdjustmentService.getMainWarehouse();
-          for (const item of fulfillmentItems) {
-            if (!item.variationId || !item.quantity) continue;
-            const inventory = await this.inventoryRepository.findOne({
-              where: {
-                variation_id: item.variationId,
-                warehouse_id: mainWarehouse.id,
-              },
-            });
-            if (inventory) {
-              const stockBefore = inventory.stock;
-              const stockAfter = stockBefore + item.quantity;
-              await this.inventoryRepository.update(inventory.id, { stock: stockAfter });
-              await this.kardexService.create({
-                movement_type: KARDEX_MOVEMENT_TYPE.ANNUL_REVERSAL,
-                quantity: item.quantity,
-                stock_before: stockBefore,
-                stock_after: stockAfter,
-                observation: `Reversión por anulación - Pedido #${currentOrder.code}`,
-                responsible_user_id: idUser,
-                reference_id: currentOrder.id,
-                reference_type: 'order',
-                company_id: currentOrder.company?.id,
-                product_id: item.productId,
-                variation_id: item.variationId,
-                warehouse_id: mainWarehouse.id,
+          const queryRunner = this.orderRepository.manager.connection.createQueryRunner();
+          await queryRunner.connect();
+          await queryRunner.startTransaction();
+          try {
+            const mainWarehouse = await this.stockAdjustmentService.getMainWarehouse();
+            for (const item of fulfillmentItems) {
+              if (!item.variationId || !item.quantity) continue;
+              const inventory = await queryRunner.manager.findOne(InventoryEntity, {
+                where: {
+                  variation_id: item.variationId,
+                  warehouse_id: mainWarehouse.id,
+                },
               });
+              if (inventory) {
+                const stockBefore = inventory.stock;
+                const stockAfter = stockBefore + item.quantity;
+                await queryRunner.manager.update(InventoryEntity, inventory.id, { stock: stockAfter });
+                await this.kardexService.create(
+                  {
+                    movement_type: KARDEX_MOVEMENT_TYPE.ANNUL_REVERSAL,
+                    quantity: item.quantity,
+                    stock_before: stockBefore,
+                    stock_after: stockAfter,
+                    observation: `Reversión por anulación - Pedido #${currentOrder.code}`,
+                    responsible_user_id: idUser,
+                    reference_id: currentOrder.id,
+                    reference_type: 'order',
+                    company_id: currentOrder.company?.id,
+                    product_id: item.productId,
+                    variation_id: item.variationId,
+                    warehouse_id: mainWarehouse.id,
+                  },
+                  queryRunner.manager,
+                );
+              }
             }
+            await queryRunner.commitTransaction();
+          } catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+          } finally {
+            await queryRunner.release();
           }
         }
       }
@@ -635,20 +649,23 @@ export class OrdersService {
         stock: stockAfter,
       });
 
-      await this.kardexService.create({
-        movement_type: KARDEX_MOVEMENT_TYPE.ORDER_OUT,
-        quantity: itemDto.quantity,
-        stock_before: stockBefore,
-        stock_after: stockAfter,
-        observation: `Pedido #${savedOrder.code}`,
-        responsible_user_id: idUser,
-        reference_id: String(savedOrder.id),
-        reference_type: 'order',
-        company_id: orderDto.company_id,
-        product_id: itemDto.productId,
-        variation_id: itemDto.variationId,
-        warehouse_id: mainWarehouse.id,
-      });
+      await this.kardexService.create(
+        {
+          movement_type: KARDEX_MOVEMENT_TYPE.ORDER_OUT,
+          quantity: itemDto.quantity,
+          stock_before: stockBefore,
+          stock_after: stockAfter,
+          observation: `Pedido #${savedOrder.code}`,
+          responsible_user_id: idUser,
+          reference_id: String(savedOrder.id),
+          reference_type: 'order',
+          company_id: orderDto.company_id,
+          product_id: itemDto.productId,
+          variation_id: itemDto.variationId,
+          warehouse_id: mainWarehouse.id,
+        },
+        queryRunner.manager,
+      );
     }
   }
 

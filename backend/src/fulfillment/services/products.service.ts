@@ -1,6 +1,6 @@
 import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Brackets } from 'typeorm';
+import { Repository, Brackets, QueryRunner } from 'typeorm';
 import { FulfillmentProductEntity } from '../entities/fulfillment-product.entity';
 import { ProductVariationEntity } from '../entities/product-variation.entity';
 import { CreateFulfillmentProductDto } from '../dto/create-fulfillment-product.dto';
@@ -41,23 +41,47 @@ export class FulfillmentService {
       }
     }
 
-    const product = this.productRepository.create(productData);
-    const savedProduct = await this.productRepository.save(product);
+    const queryRunner: QueryRunner =
+      this.productRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    if (variations && variations.length > 0) {
-      const variationEntities = variations.map((v) =>
-        this.variationRepository.create({
-          ...v,
-          product_id: savedProduct.id,
-        }),
+    try {
+      const product = queryRunner.manager.create(
+        FulfillmentProductEntity,
+        productData,
       );
-      await this.variationRepository.save(variationEntities);
-    }
+      const savedProduct = await queryRunner.manager.save(
+        FulfillmentProductEntity,
+        product,
+      );
 
-    return this.productRepository.findOne({
-      where: { id: savedProduct.id },
-      relations: ['variations', 'company'],
-    }) as Promise<FulfillmentProductEntity>;
+      if (variations && variations.length > 0) {
+        const variationEntities = variations.map((v) =>
+          queryRunner.manager.create(ProductVariationEntity, {
+            ...v,
+            product_id: savedProduct.id,
+          }),
+        );
+        await queryRunner.manager.save(
+          ProductVariationEntity,
+          variationEntities,
+        );
+      }
+
+      await queryRunner.commitTransaction();
+
+      return this.productRepository.findOne({
+        where: { id: savedProduct.id },
+        relations: ['variations', 'company'],
+      }) as Promise<FulfillmentProductEntity>;
+    } catch (error: any) {
+      await queryRunner.rollbackTransaction();
+      this.throwFriendlyDuplicateError(error);
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async findAll(): Promise<FulfillmentProductEntity[]> {
@@ -190,29 +214,67 @@ export class FulfillmentService {
       }
     }
 
-    await this.productRepository.update(id, productData);
+    const queryRunner: QueryRunner =
+      this.productRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    if (variations) {
-      for (const v of variations) {
-        if (v.id) {
-          // Update existing variation (preserves inventory/kardex references)
-          const { id: variationId, ...updateData } = v;
-          await this.variationRepository.update(variationId, updateData);
-        } else {
-          // Create new variation
-          const newVariation = this.variationRepository.create({
-            ...v,
-            product_id: id,
-          });
-          await this.variationRepository.save(newVariation);
+    try {
+      await queryRunner.manager.update(
+        FulfillmentProductEntity,
+        id,
+        productData,
+      );
+
+      if (variations) {
+        for (const v of variations) {
+          if (v.id) {
+            // Update existing variation (preserves inventory/kardex references)
+            const { id: variationId, ...updateData } = v;
+            await queryRunner.manager.update(
+              ProductVariationEntity,
+              variationId,
+              updateData,
+            );
+          } else {
+            // Create new variation
+            const newVariation = queryRunner.manager.create(
+              ProductVariationEntity,
+              {
+                ...v,
+                product_id: id,
+              },
+            );
+            await queryRunner.manager.save(
+              ProductVariationEntity,
+              newVariation,
+            );
+          }
         }
       }
-    }
 
-    return this.productRepository.findOne({
-      where: { id },
-      relations: ['variations', 'company'],
-    }) as Promise<FulfillmentProductEntity>;
+      await queryRunner.commitTransaction();
+
+      return this.productRepository.findOne({
+        where: { id },
+        relations: ['variations', 'company'],
+      }) as Promise<FulfillmentProductEntity>;
+    } catch (error: any) {
+      await queryRunner.rollbackTransaction();
+      this.throwFriendlyDuplicateError(error);
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  private throwFriendlyDuplicateError(error: any): void {
+    // PostgreSQL unique violation code: 23505
+    if (error?.code === '23505') {
+      throw new ConflictException(
+        'El SKU ya existe en otro producto. Verifique que cada variación tenga un SKU único.',
+      );
+    }
   }
 
   async remove(id: string): Promise<void> {

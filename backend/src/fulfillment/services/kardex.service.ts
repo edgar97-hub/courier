@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Brackets } from 'typeorm';
+import { Repository, Brackets, EntityManager } from 'typeorm';
 import { KardexEntity, KARDEX_MOVEMENT_TYPE } from '../entities/kardex.entity';
 
 export interface PaginatedKardex {
@@ -17,20 +17,27 @@ export class KardexService {
     private readonly kardexRepository: Repository<KardexEntity>,
   ) {}
 
-  async create(entry: {
-    movement_type: KARDEX_MOVEMENT_TYPE;
-    quantity: number;
-    stock_before: number;
-    stock_after: number;
-    observation?: string;
-    responsible_user_id?: string;
-    reference_id?: string;
-    reference_type?: string;
-    company_id?: string;
-    product_id?: string;
-    variation_id: string;
-    warehouse_id?: string;
-  }): Promise<KardexEntity> {
+  async create(
+    entry: {
+      movement_type: KARDEX_MOVEMENT_TYPE;
+      quantity: number;
+      stock_before: number;
+      stock_after: number;
+      observation?: string;
+      responsible_user_id?: string;
+      reference_id?: string;
+      reference_type?: string;
+      company_id?: string;
+      product_id?: string;
+      variation_id: string;
+      warehouse_id?: string;
+    },
+    manager?: EntityManager,
+  ): Promise<KardexEntity> {
+    if (manager) {
+      const kardex = manager.create(KardexEntity, entry);
+      return manager.save(KardexEntity, kardex);
+    }
     const kardex = this.kardexRepository.create(entry);
     return this.kardexRepository.save(kardex);
   }

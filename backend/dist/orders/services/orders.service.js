@@ -219,35 +219,48 @@ let OrdersService = class OrdersService {
                 await this.cashManagementService.reverseAutomaticIncome(body.payload.orderId);
                 const fulfillmentItems = currentOrder.items?.filter(i => i.package_type === order_item_entity_1.PackageType.FULFILLMENT && i.variationId && i.quantity);
                 if (fulfillmentItems && fulfillmentItems.length > 0) {
-                    const mainWarehouse = await this.stockAdjustmentService.getMainWarehouse();
-                    for (const item of fulfillmentItems) {
-                        if (!item.variationId || !item.quantity)
-                            continue;
-                        const inventory = await this.inventoryRepository.findOne({
-                            where: {
-                                variation_id: item.variationId,
-                                warehouse_id: mainWarehouse.id,
-                            },
-                        });
-                        if (inventory) {
-                            const stockBefore = inventory.stock;
-                            const stockAfter = stockBefore + item.quantity;
-                            await this.inventoryRepository.update(inventory.id, { stock: stockAfter });
-                            await this.kardexService.create({
-                                movement_type: kardex_entity_1.KARDEX_MOVEMENT_TYPE.ANNUL_REVERSAL,
-                                quantity: item.quantity,
-                                stock_before: stockBefore,
-                                stock_after: stockAfter,
-                                observation: `Reversión por anulación - Pedido #${currentOrder.code}`,
-                                responsible_user_id: idUser,
-                                reference_id: currentOrder.id,
-                                reference_type: 'order',
-                                company_id: currentOrder.company?.id,
-                                product_id: item.productId,
-                                variation_id: item.variationId,
-                                warehouse_id: mainWarehouse.id,
+                    const queryRunner = this.orderRepository.manager.connection.createQueryRunner();
+                    await queryRunner.connect();
+                    await queryRunner.startTransaction();
+                    try {
+                        const mainWarehouse = await this.stockAdjustmentService.getMainWarehouse();
+                        for (const item of fulfillmentItems) {
+                            if (!item.variationId || !item.quantity)
+                                continue;
+                            const inventory = await queryRunner.manager.findOne(inventory_entity_1.InventoryEntity, {
+                                where: {
+                                    variation_id: item.variationId,
+                                    warehouse_id: mainWarehouse.id,
+                                },
                             });
+                            if (inventory) {
+                                const stockBefore = inventory.stock;
+                                const stockAfter = stockBefore + item.quantity;
+                                await queryRunner.manager.update(inventory_entity_1.InventoryEntity, inventory.id, { stock: stockAfter });
+                                await this.kardexService.create({
+                                    movement_type: kardex_entity_1.KARDEX_MOVEMENT_TYPE.ANNUL_REVERSAL,
+                                    quantity: item.quantity,
+                                    stock_before: stockBefore,
+                                    stock_after: stockAfter,
+                                    observation: `Reversión por anulación - Pedido #${currentOrder.code}`,
+                                    responsible_user_id: idUser,
+                                    reference_id: currentOrder.id,
+                                    reference_type: 'order',
+                                    company_id: currentOrder.company?.id,
+                                    product_id: item.productId,
+                                    variation_id: item.variationId,
+                                    warehouse_id: mainWarehouse.id,
+                                }, queryRunner.manager);
+                            }
                         }
+                        await queryRunner.commitTransaction();
+                    }
+                    catch (error) {
+                        await queryRunner.rollbackTransaction();
+                        throw error;
+                    }
+                    finally {
+                        await queryRunner.release();
                     }
                 }
             }
@@ -443,7 +456,7 @@ let OrdersService = class OrdersService {
                 product_id: itemDto.productId,
                 variation_id: itemDto.variationId,
                 warehouse_id: mainWarehouse.id,
-            });
+            }, queryRunner.manager);
         }
     }
     async importOrdersFromExcelData(excelRows, idUser) {

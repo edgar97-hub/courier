@@ -29,5 +29,6 @@ export declare class FulfillmentService {
     }>;
     findOne(id: string): Promise<FulfillmentProductEntity>;
     update(id: string, dto: Partial<CreateFulfillmentProductDto>): Promise<FulfillmentProductEntity>;
+    private throwFriendlyDuplicateError;
     remove(id: string): Promise<void>;
 }

@@ -36,19 +36,33 @@ let FulfillmentService = class FulfillmentService {
                 }
             }
         }
-        const product = this.productRepository.create(productData);
-        const savedProduct = await this.productRepository.save(product);
-        if (variations && variations.length > 0) {
-            const variationEntities = variations.map((v) => this.variationRepository.create({
-                ...v,
-                product_id: savedProduct.id,
-            }));
-            await this.variationRepository.save(variationEntities);
+        const queryRunner = this.productRepository.manager.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const product = queryRunner.manager.create(fulfillment_product_entity_1.FulfillmentProductEntity, productData);
+            const savedProduct = await queryRunner.manager.save(fulfillment_product_entity_1.FulfillmentProductEntity, product);
+            if (variations && variations.length > 0) {
+                const variationEntities = variations.map((v) => queryRunner.manager.create(product_variation_entity_1.ProductVariationEntity, {
+                    ...v,
+                    product_id: savedProduct.id,
+                }));
+                await queryRunner.manager.save(product_variation_entity_1.ProductVariationEntity, variationEntities);
+            }
+            await queryRunner.commitTransaction();
+            return this.productRepository.findOne({
+                where: { id: savedProduct.id },
+                relations: ['variations', 'company'],
+            });
         }
-        return this.productRepository.findOne({
-            where: { id: savedProduct.id },
-            relations: ['variations', 'company'],
-        });
+        catch (error) {
+            await queryRunner.rollbackTransaction();
+            this.throwFriendlyDuplicateError(error);
+            throw error;
+        }
+        finally {
+            await queryRunner.release();
+        }
     }
     async findAll() {
         return this.productRepository.find({
@@ -146,26 +160,45 @@ let FulfillmentService = class FulfillmentService {
                 }
             }
         }
-        await this.productRepository.update(id, productData);
-        if (variations) {
-            for (const v of variations) {
-                if (v.id) {
-                    const { id: variationId, ...updateData } = v;
-                    await this.variationRepository.update(variationId, updateData);
-                }
-                else {
-                    const newVariation = this.variationRepository.create({
-                        ...v,
-                        product_id: id,
-                    });
-                    await this.variationRepository.save(newVariation);
+        const queryRunner = this.productRepository.manager.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            await queryRunner.manager.update(fulfillment_product_entity_1.FulfillmentProductEntity, id, productData);
+            if (variations) {
+                for (const v of variations) {
+                    if (v.id) {
+                        const { id: variationId, ...updateData } = v;
+                        await queryRunner.manager.update(product_variation_entity_1.ProductVariationEntity, variationId, updateData);
+                    }
+                    else {
+                        const newVariation = queryRunner.manager.create(product_variation_entity_1.ProductVariationEntity, {
+                            ...v,
+                            product_id: id,
+                        });
+                        await queryRunner.manager.save(product_variation_entity_1.ProductVariationEntity, newVariation);
+                    }
                 }
             }
+            await queryRunner.commitTransaction();
+            return this.productRepository.findOne({
+                where: { id },
+                relations: ['variations', 'company'],
+            });
         }
-        return this.productRepository.findOne({
-            where: { id },
-            relations: ['variations', 'company'],
-        });
+        catch (error) {
+            await queryRunner.rollbackTransaction();
+            this.throwFriendlyDuplicateError(error);
+            throw error;
+        }
+        finally {
+            await queryRunner.release();
+        }
+    }
+    throwFriendlyDuplicateError(error) {
+        if (error?.code === '23505') {
+            throw new common_1.ConflictException('El SKU ya existe en otro producto. Verifique que cada variación tenga un SKU único.');
+        }
     }
     async remove(id) {
         await this.productRepository.delete(id);

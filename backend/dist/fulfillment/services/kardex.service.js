@@ -21,7 +21,11 @@ let KardexService = class KardexService {
     constructor(kardexRepository) {
         this.kardexRepository = kardexRepository;
     }
-    async create(entry) {
+    async create(entry, manager) {
+        if (manager) {
+            const kardex = manager.create(kardex_entity_1.KardexEntity, entry);
+            return manager.save(kardex_entity_1.KardexEntity, kardex);
+        }
         const kardex = this.kardexRepository.create(entry);
         return this.kardexRepository.save(kardex);
     }

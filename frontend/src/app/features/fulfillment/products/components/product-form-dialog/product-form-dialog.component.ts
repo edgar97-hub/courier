@@ -189,6 +189,9 @@ import { User } from '../../../../users/models/user.model';
                       ) {
                         <mat-error>SKU requerido</mat-error>
                       }
+                      @if (isSkuDuplicate(i)) {
+                        <mat-error>El SKU ya existe en otra variación</mat-error>
+                      }
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
@@ -773,7 +776,7 @@ export class ProductFormDialogComponent implements OnInit {
 
   private createVariationForm(): FormGroup {
     return this.fb.group({
-      sku: ['', Validators.required],
+      sku: [this.generateSku(), Validators.required],
       color: [''],
       size: [''],
       model: [''],
@@ -785,8 +788,21 @@ export class ProductFormDialogComponent implements OnInit {
     });
   }
 
+  private generateSku(): string {
+    return Math.random().toString(36).slice(2, 8).toUpperCase();
+  }
+
   addVariation(): void {
     this.variations.push(this.createVariationForm());
+  }
+
+  isSkuDuplicate(index: number): boolean {
+    const sku = this.variations.at(index)?.get('sku')?.value;
+    if (!sku) return false;
+    const count = this.variations.controls.filter(
+      c => c.get('sku')?.value === sku,
+    ).length;
+    return count > 1;
   }
 
   removeVariation(index: number): void {
