@@ -213,10 +213,9 @@ export class UserListPageComponent implements OnInit {
 
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(UserFormDialogComponent, {
-      width: '100vw',
-      height: '100vh',
-      maxWidth: '100vw',
-      panelClass: 'full-screen-dialog',
+      width: '720px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
       data: { mode: 'create' } as UserDialogData,
       disableClose: true,
     });
@@ -234,10 +233,9 @@ export class UserListPageComponent implements OnInit {
 
   openEditDialog(user: User): void {
     const dialogRef = this.dialog.open(UserFormDialogComponent, {
-      width: '100vw',
-      height: '100vh',
-      maxWidth: '100vw',
-      panelClass: 'full-screen-dialog',
+      width: '720px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
       data: { mode: 'edit', user } as UserDialogData,
       disableClose: true,
     });

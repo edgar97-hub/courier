@@ -355,7 +355,9 @@ export interface UserDialogData {
       .dialog-container {
         display: flex;
         flex-direction: column;
-        height: 100vh;
+        max-height: 90vh;
+        border-radius: 12px;
+        overflow: hidden;
         background: #f5f7fa;
       }
 
