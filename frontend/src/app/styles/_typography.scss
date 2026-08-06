@@ -2,7 +2,7 @@
 
 @font-face {
   font-family: "Avantt";
-  src: url("/assets/fonts/Montserrat/static/Montserrat-Regular.ttf")
+  src: url("/assets/fonts/Avant Italic/Avant Italic.ttf")
     format("truetype");
   font-weight: normal;
   font-style: italic;
@@ -34,7 +34,7 @@ h5,
 h6,
 .text-title-main,
 .text-title-section {
-  font-family: "Avantt", "Arial Narrow", sans-serif !important;
+  // font-family: "Avantt", "Arial Narrow", sans-serif !important;
   color: corp.$text-primary !important;
   font-weight: normal !important;
 }

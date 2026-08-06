@@ -163,7 +163,6 @@ export class ProfileEditDialogComponent implements OnInit {
           {
             duration: 4000,
             panelClass: ['error-snackbar'],
-            verticalPosition: 'top',
           }
         );
         return;

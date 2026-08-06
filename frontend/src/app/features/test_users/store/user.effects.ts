@@ -81,7 +81,6 @@ export class UserEffects {
             'OK',
             {
               duration: 3000,
-              verticalPosition: 'top',
               panelClass: ['success-snackbar'],
             }
           );
@@ -100,7 +99,6 @@ export class UserEffects {
             this.snackBar.open('User deleted successfully!', 'OK', {
               duration: 3000,
               panelClass: ['success-snackbar'],
-              verticalPosition: 'top',
             });
           }),
           map(() => UserActions.deleteUserSuccess({ userId: action.userId })), // Despacha éxito
@@ -110,7 +108,6 @@ export class UserEffects {
             this.snackBar.open(errorMessage, 'Close', {
               duration: 5000,
               panelClass: ['error-snackbar'],
-              verticalPosition: 'top',
             });
             return of(UserActions.deleteUserFailure({ error: errorMessage }));
           })

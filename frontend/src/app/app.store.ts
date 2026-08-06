@@ -51,7 +51,6 @@ export const AppStore = signalStore(
               'OK',
               {
                 duration: 3000,
-                verticalPosition: 'top',
                 panelClass: ['success-snackbar'],
               }
             );
@@ -67,7 +66,6 @@ export const AppStore = signalStore(
             patchState(store, { error: errorMessage });
             snackbar.open(errorMessage, 'Retry', {
               duration: 5000,
-              verticalPosition: 'top',
               panelClass: ['error-snackbar'],
             });
           } finally {
@@ -80,7 +78,6 @@ export const AppStore = signalStore(
           patchState(store, initialAppUiState);
           snackbar.open('Se ha cerrado la sesión.', 'OK', {
             duration: 3000,
-            verticalPosition: 'top',
           });
         },
         clearError(): void {

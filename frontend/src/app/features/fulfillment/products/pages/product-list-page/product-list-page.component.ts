@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { PageEvent } from '@angular/material/paginator';
 import { ProductTableComponent } from '../../components/product-table/product-table.component';
 import { ProductFormDialogComponent } from '../../components/product-form-dialog/product-form-dialog.component';
 import { ProductsStore } from '../../services/products.store';
@@ -57,10 +58,12 @@ import { FulfillmentProduct } from '../../models/fulfillment-product.model';
       <app-product-table
         [rowData]="store.products()"
         [pageSize]="store.page_size()"
+        [page]="store.page_number()"
+        [totalCount]="store.total_count()"
         (editProduct)="openEditDialog($event)"
         (deleteProduct)="openDeleteConfirm($event)"
-        (searchChanged)="onSearchChanged($event)"
         (sortChanged)="onSortChanged($event)"
+        (pageChanged)="onPageChanged($event)"
       >
       </app-product-table>
     </div>
@@ -161,6 +164,7 @@ export class ProductListPageComponent implements OnInit {
   private snackBar = inject(MatSnackBar);
 
   searchValue = '';
+  private searchTimeout: any;
 
   ngOnInit(): void {
     this.store.loadProducts();
@@ -170,28 +174,25 @@ export class ProductListPageComponent implements OnInit {
     this.store.loadProducts();
   }
 
-  onSearchChanged(term: string): void {
-    this.store.setSearchTerm(term);
-    this.store.loadProducts();
-  }
-
   onSortChanged(sort: { field: string; direction: 'ASC' | 'DESC' }): void {
     this.store.setSort(sort.field, sort.direction);
     this.store.loadProducts();
   }
 
-  onPageChanged(page: number): void {
-    this.store.setPage(page);
-    this.store.loadProducts();
-  }
-
-  onPageSizeChanged(pageSize: number): void {
-    this.store.setPageSize(pageSize);
+  onPageChanged(event: PageEvent): void {
+    this.store.setPage(event.pageIndex + 1);
+    if (event.pageSize !== this.store.page_size()) {
+      this.store.setPageSize(event.pageSize);
+    }
     this.store.loadProducts();
   }
 
   onSearchInput(): void {
-    // Debounced search is handled by the table component
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.store.setSearchTerm(this.searchValue);
+      this.store.loadProducts();
+    }, 300);
   }
 
   clearSearch(): void {
@@ -248,7 +249,6 @@ export class ProductListPageComponent implements OnInit {
         if (errorMsg) {
           this.snackBar.open(errorMsg, 'Cerrar', {
             duration: 6000,
-            verticalPosition: 'top',
             panelClass: ['error-snackbar'],
           });
         }

@@ -40,20 +40,38 @@ let KardexService = class KardexService {
             .leftJoinAndSelect('k.warehouse', 'warehouse')
             .leftJoinAndSelect('k.responsibleUser', 'responsibleUser');
         if (search_term) {
+            const term = `%${search_term}%`;
+            const lower = search_term.toLowerCase();
+            const matches = (word) => word.startsWith(lower);
             qb.andWhere(new typeorm_2.Brackets((innerQb) => {
                 innerQb
-                    .where('company.username ILIKE :search', {
-                    search: `%${search_term}%`,
+                    .where('company.username ILIKE :search', { search: term })
+                    .orWhere('product.name ILIKE :search', { search: term })
+                    .orWhere('variation.sku ILIKE :search', { search: term })
+                    .orWhere('k.observation ILIKE :search', { search: term })
+                    .orWhere('CAST(k.movement_type AS TEXT) ILIKE :search', {
+                    search: term,
                 })
-                    .orWhere('product.name ILIKE :search', {
-                    search: `%${search_term}%`,
+                    .orWhere('CAST(k.quantity AS TEXT) ILIKE :search', { search: term })
+                    .orWhere('CAST(k.stock_after AS TEXT) ILIKE :search', {
+                    search: term,
                 })
-                    .orWhere('variation.sku ILIKE :search', {
-                    search: `%${search_term}%`,
-                })
-                    .orWhere('k.observation ILIKE :search', {
-                    search: `%${search_term}%`,
-                });
+                    .orWhere('responsibleUser.username ILIKE :search', { search: term });
+                if (matches('ingreso')) {
+                    innerQb.orWhere(`k.movement_type = '${kardex_entity_1.KARDEX_MOVEMENT_TYPE.INBOUND}'`);
+                }
+                if (matches('salida') || matches('pedido')) {
+                    innerQb.orWhere(`k.movement_type = '${kardex_entity_1.KARDEX_MOVEMENT_TYPE.ORDER_OUT}'`);
+                }
+                if (matches('ajuste') || matches('suma')) {
+                    innerQb.orWhere(`k.movement_type = '${kardex_entity_1.KARDEX_MOVEMENT_TYPE.MANUAL_ADD}'`);
+                }
+                if (matches('resta')) {
+                    innerQb.orWhere(`k.movement_type = '${kardex_entity_1.KARDEX_MOVEMENT_TYPE.MANUAL_SUBTRACT}'`);
+                }
+                if (matches('reversion') || matches('anulacion')) {
+                    innerQb.orWhere(`k.movement_type = '${kardex_entity_1.KARDEX_MOVEMENT_TYPE.ANNUL_REVERSAL}'`);
+                }
             }));
         }
         if (filter_company) {

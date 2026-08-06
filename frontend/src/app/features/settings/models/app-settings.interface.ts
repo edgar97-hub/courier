@@ -45,6 +45,15 @@ export interface AppSettings {
   multiPackageDiscountStartDate: number | null;
   multiPackageDiscountEndDate: number | null;
   volumeDiscountRules: VolumeDiscountRule[];
+  standard_measurements_width: number | null;
+  standard_measurements_length: number | null;
+  standard_measurements_height: number | null;
+  standard_measurements_weight: number | null;
+  maximum_measurements_width: number | null;
+  maximum_measurements_length: number | null;
+  maximum_measurements_height: number | null;
+  maximum_measurements_weight: number | null;
+  volumetric_factor: number | null;
 }
 
 export const initialAppSettings: AppSettings = {
@@ -66,4 +75,13 @@ export const initialAppSettings: AppSettings = {
   multiPackageDiscountStartDate: null,
   multiPackageDiscountEndDate: null,
   volumeDiscountRules: [],
+  standard_measurements_width: null,
+  standard_measurements_length: null,
+  standard_measurements_height: null,
+  standard_measurements_weight: null,
+  maximum_measurements_width: null,
+  maximum_measurements_length: null,
+  maximum_measurements_height: null,
+  maximum_measurements_weight: null,
+  volumetric_factor: null,
 };

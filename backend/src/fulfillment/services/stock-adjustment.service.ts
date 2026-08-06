@@ -34,7 +34,10 @@ export class StockAdjustmentService {
     private readonly kardexService: KardexService,
   ) {}
 
-  async create(dto: CreateStockAdjustmentDto, userId?: string): Promise<StockAdjustmentEntity> {
+  async create(
+    dto: CreateStockAdjustmentDto,
+    userId?: string,
+  ): Promise<StockAdjustmentEntity> {
     const queryRunner: QueryRunner =
       this.inventoryRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
@@ -76,11 +79,9 @@ export class StockAdjustmentService {
           break;
       }
 
-      await queryRunner.manager.update(
-        InventoryEntity,
-        inventory.id,
-        { stock: stockAfter },
-      );
+      await queryRunner.manager.update(InventoryEntity, inventory.id, {
+        stock: stockAfter,
+      });
 
       const adjustment = queryRunner.manager.create(StockAdjustmentEntity, {
         adjustment_type: dto.adjustment_type,
@@ -107,7 +108,9 @@ export class StockAdjustmentService {
 
       await this.kardexService.create(
         {
-          movement_type: movementTypeMap[dto.adjustment_type] || KARDEX_MOVEMENT_TYPE.MANUAL_ADD,
+          movement_type:
+            movementTypeMap[dto.adjustment_type] ||
+            KARDEX_MOVEMENT_TYPE.MANUAL_ADD,
           quantity: dto.quantity,
           stock_before: stockBefore,
           stock_after: stockAfter,
@@ -157,20 +160,45 @@ export class StockAdjustmentService {
       .leftJoinAndSelect('a.warehouse', 'warehouse');
 
     if (search_term) {
+      const term = `%${search_term}%`;
+      const lower = search_term.toLowerCase();
+      const matches = (word: string) => word.startsWith(lower);
       queryBuilder.andWhere(
         new Brackets((qb) => {
-          qb.where('company.username ILIKE :search', {
-            search: `%${search_term}%`,
-          })
-            .orWhere('product.name ILIKE :search', {
-              search: `%${search_term}%`,
+          qb.where('company.username ILIKE :search', { search: term })
+            .orWhere('product.name ILIKE :search', { search: term })
+            .orWhere('CAST(variation.sku AS TEXT) ILIKE :search', {
+              search: term,
             })
-            .orWhere('variation.sku ILIKE :search', {
-              search: `%${search_term}%`,
+            .orWhere('a.observation ILIKE :search', { search: term })
+            .orWhere('CAST(a.code AS TEXT) ILIKE :search', { search: term })
+            .orWhere('CAST(a.quantity AS TEXT) ILIKE :search', { search: term })
+            .orWhere('CAST(a.adjustment_type AS TEXT) ILIKE :search', {
+              search: term,
             })
-            .orWhere('a.observation ILIKE :search', {
-              search: `%${search_term}%`,
-            });
+            .orWhere('CAST(a.status AS TEXT) ILIKE :search', { search: term });
+          if (matches('ingreso')) {
+            qb.orWhere(`a.adjustment_type = '${ADJUSTMENT_TYPE.INBOUND}'`);
+          }
+          if (matches('ajuste')) {
+            qb.orWhere(
+              `a.adjustment_type IN ('${ADJUSTMENT_TYPE.MANUAL_ADD}', '${ADJUSTMENT_TYPE.MANUAL_SUBTRACT}')`,
+            );
+          }
+          if (matches('suma')) {
+            qb.orWhere(`a.adjustment_type = '${ADJUSTMENT_TYPE.MANUAL_ADD}'`);
+          }
+          if (matches('resta')) {
+            qb.orWhere(
+              `a.adjustment_type = '${ADJUSTMENT_TYPE.MANUAL_SUBTRACT}'`,
+            );
+          }
+          if (matches('registrado')) {
+            qb.orWhere(`a.status = '${ADJUSTMENT_STATUS.REGISTERED}'`);
+          }
+          if (matches('anulado')) {
+            qb.orWhere(`a.status = '${ADJUSTMENT_STATUS.ANNULLED}'`);
+          }
         }),
       );
     }
@@ -227,10 +255,13 @@ export class StockAdjustmentService {
     await queryRunner.startTransaction();
 
     try {
-      const adjustment = await queryRunner.manager.findOne(StockAdjustmentEntity, {
-        where: { id },
-        lock: { mode: 'pessimistic_write' },
-      });
+      const adjustment = await queryRunner.manager.findOne(
+        StockAdjustmentEntity,
+        {
+          where: { id },
+          lock: { mode: 'pessimistic_write' },
+        },
+      );
 
       if (!adjustment) {
         throw new BadRequestException('Ajuste de stock no encontrado');
@@ -272,11 +303,9 @@ export class StockAdjustmentService {
           );
         }
 
-        await queryRunner.manager.update(
-          InventoryEntity,
-          inventory.id,
-          { stock: stockAfter },
-        );
+        await queryRunner.manager.update(InventoryEntity, inventory.id, {
+          stock: stockAfter,
+        });
       }
 
       adjustment.status = ADJUSTMENT_STATUS.ANNULLED;

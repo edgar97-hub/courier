@@ -5,20 +5,23 @@ import {
   EventEmitter,
   OnInit,
   OnChanges,
+  AfterViewInit,
+  OnDestroy,
   SimpleChanges,
+  ViewChild,
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { AgGridAngular } from 'ag-grid-angular';
 import {
   ColDef,
   GridApi,
   GridReadyEvent,
   CellClickedEvent,
-  SortChangedEvent,
 } from 'ag-grid-community';
 import {
   themeQuartz,
@@ -55,6 +58,7 @@ const courierGridTheme = themeQuartz
     FormsModule,
     MatIconModule,
     MatButtonModule,
+    MatPaginatorModule,
     AgGridAngular,
   ],
   template: `
@@ -64,21 +68,31 @@ const courierGridTheme = themeQuartz
       [rowData]="rowData"
       [columnDefs]="colDefs"
       [defaultColDef]="defaultColDef"
-      [pagination]="true"
-      [paginationPageSize]="pageSize"
-      [paginationPageSizeSelector]="pageSizeSelector"
       [localeText]="localeText"
       (gridReady)="onGridReady($event)"
       (cellClicked)="onCellClicked($event)"
-      (sortChanged)="onSortChanged($event)"
       domLayout="autoHeight"
     >
     </ag-grid-angular>
+    <mat-paginator
+      [length]="totalCount"
+      [pageSize]="pageSize"
+      [pageIndex]="page - 1"
+      [pageSizeOptions]="[10, 20, 50, 100]"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+      aria-label="Seleccione página de productos"
+    >
+    </mat-paginator>
   `,
   styles: [
     `
       .product-grid {
         width: 100%;
+      }
+      :host ::ng-deep .product-grid .ag-right-aligned-cell,
+      :host ::ng-deep .product-grid .ag-right-aligned-header {
+        padding-right: 24px;
       }
       .actions-cell {
         display: flex;
@@ -105,24 +119,25 @@ const courierGridTheme = themeQuartz
     `,
   ],
 })
-export class ProductTableComponent implements OnInit, OnChanges {
+export class ProductTableComponent
+  implements OnInit, OnChanges, AfterViewInit, OnDestroy
+{
+  @ViewChild(AgGridAngular) grid!: AgGridAngular;
   @Input() rowData: FulfillmentProduct[] = [];
   @Input() pageSize = 20;
+  @Input() page = 1;
+  @Input() totalCount = 0;
   @Output() editProduct = new EventEmitter<FulfillmentProduct>();
   @Output() deleteProduct = new EventEmitter<FulfillmentProduct>();
-  @Output() searchChanged = new EventEmitter<string>();
   @Output() sortChanged = new EventEmitter<{
     field: string;
     direction: 'ASC' | 'DESC';
   }>();
+  @Output() pageChanged = new EventEmitter<PageEvent>();
 
   readonly gridTheme = courierGridTheme;
   private gridApi!: GridApi;
-  searchValue = '';
-  private searchTimeout: any;
-
-  // Hide the page size selector since pagination is server-side
-  readonly pageSizeSelector: number[] | boolean = false;
+  private listenerRegistered = false;
 
   localeText: Record<string, string> = {
     pageSizeSelectorLabel: 'Filas por página:',
@@ -235,6 +250,7 @@ export class ProductTableComponent implements OnInit, OnChanges {
       field: 'code',
       headerName: 'Código',
       width: 100,
+      type: 'rightAligned',
     },
     {
       field: 'name',
@@ -256,11 +272,14 @@ export class ProductTableComponent implements OnInit, OnChanges {
       },
       flex: 0.5,
       minWidth: 100,
+      sortable: false,
     },
     {
       headerName: 'Variaciones',
       valueGetter: (params) => params.data?.variations?.length || 0,
       width: 120,
+      type: 'rightAligned',
+      sortable: false,
     },
     {
       headerName: 'Creado',
@@ -307,6 +326,19 @@ export class ProductTableComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {}
 
+  ngAfterViewInit(): void {
+    if (this.grid?.api) {
+      this.gridApi = this.grid.api;
+      this.registerSortListener();
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.listenerRegistered && this.gridApi) {
+      this.gridApi.removeEventListener('sortChanged', this.handleGridSortChanged);
+    }
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['rowData'] && this.gridApi) {
       this.gridApi.setGridOption('rowData', this.rowData);
@@ -315,23 +347,23 @@ export class ProductTableComponent implements OnInit, OnChanges {
 
   onGridReady(params: GridReadyEvent): void {
     this.gridApi = params.api;
+    this.registerSortListener();
+  }
+
+  private registerSortListener(): void {
+    if (!this.listenerRegistered && this.gridApi) {
+      this.gridApi.addEventListener('sortChanged', this.handleGridSortChanged);
+      this.listenerRegistered = true;
+    }
   }
 
   onCellClicked(event: CellClickedEvent): void {}
 
-  onSearchInput(): void {
-    clearTimeout(this.searchTimeout);
-    this.searchTimeout = setTimeout(() => {
-      this.searchChanged.emit(this.searchValue);
-    }, 300);
+  onPageChange(event: PageEvent): void {
+    this.pageChanged.emit(event);
   }
 
-  clearSearch(): void {
-    this.searchValue = '';
-    this.searchChanged.emit('');
-  }
-
-  onSortChanged(event: SortChangedEvent): void {
+  private handleGridSortChanged = (): void => {
     if (this.gridApi) {
       const columnState = this.gridApi.getColumnState();
       const sortedCol = columnState.find((col) => col.sort);
@@ -344,7 +376,7 @@ export class ProductTableComponent implements OnInit, OnChanges {
         this.sortChanged.emit({ field: 'createdAt', direction: 'DESC' });
       }
     }
-  }
+  };
 
   openContextMenu(
     event: MouseEvent,

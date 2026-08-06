@@ -8,6 +8,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { StockAdjustmentTableComponent } from '../../components/stock-adjustment-table/stock-adjustment-table.component';
 import { StockAdjustmentFormDialogComponent } from '../../components/stock-adjustment-form-dialog/stock-adjustment-form-dialog.component';
 import { StockAdjustmentsStore } from '../../services/stock-adjustments.store';
+import { PageEvent } from '@angular/material/paginator';
 import { StockAdjustment } from '../../models/stock-adjustment.model';
 
 @Component({
@@ -57,9 +58,11 @@ import { StockAdjustment } from '../../models/stock-adjustment.model';
       <app-stock-adjustment-table
         [rowData]="store.adjustments()"
         [pageSize]="store.page_size()"
+        [page]="store.page_number()"
+        [totalCount]="store.total_count()"
         (annulAdjustment)="openAnnulConfirm($event)"
-        (searchChanged)="onSearchChanged($event)"
         (sortChanged)="onSortChanged($event)"
+        (pageChanged)="onPageChanged($event)"
       >
       </app-stock-adjustment-table>
     </div>
@@ -160,6 +163,7 @@ export class StockAdjustmentListPageComponent implements OnInit {
   private snackBar = inject(MatSnackBar);
 
   searchValue = '';
+  private searchTimeout: any;
 
   ngOnInit(): void {
     this.store.loadAdjustments();
@@ -169,18 +173,25 @@ export class StockAdjustmentListPageComponent implements OnInit {
     this.store.loadAdjustments();
   }
 
-  onSearchChanged(term: string): void {
-    this.store.setSearchTerm(term);
-    this.store.loadAdjustments();
-  }
-
   onSortChanged(sort: { field: string; direction: 'ASC' | 'DESC' }): void {
     this.store.setSort(sort.field, sort.direction);
     this.store.loadAdjustments();
   }
 
+  onPageChanged(event: PageEvent): void {
+    this.store.setPage(event.pageIndex + 1);
+    if (event.pageSize !== this.store.page_size()) {
+      this.store.setPageSize(event.pageSize);
+    }
+    this.store.loadAdjustments();
+  }
+
   onSearchInput(): void {
-    // Debounced search is handled by the table component
+    clearTimeout(this.searchTimeout);
+    this.searchTimeout = setTimeout(() => {
+      this.store.setSearchTerm(this.searchValue);
+      this.store.loadAdjustments();
+    }, 300);
   }
 
   clearSearch(): void {
@@ -221,7 +232,6 @@ export class StockAdjustmentListPageComponent implements OnInit {
         if (errorMsg) {
           this.snackBar.open(errorMsg, 'Cerrar', {
             duration: 6000,
-            verticalPosition: 'top',
             panelClass: ['error-snackbar'],
           });
         }

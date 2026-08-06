@@ -1,0 +1,123 @@
+<div class="shipping-rates-page">
+  <div class="page-header">
+    <mat-icon class="card-icon">local_shipping</mat-icon>
+    <h2 class="form-section-title">Tarifas de Envío</h2>
+  </div>
+
+  <div *ngIf="isLoading" class="spinner-overlay">
+    <mat-progress-spinner mode="indeterminate" diameter="60"></mat-progress-spinner>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+    <!-- Card: Medida estándar -->
+    <div class="form-card">
+      <div class="card-header">
+        <mat-icon class="card-icon">straighten</mat-icon>
+        <h2 class="card-title">1. Configuración de medida Estándar</h2>
+      </div>
+      <form [formGroup]="standardForm" (ngSubmit)="onSubmitStandard()">
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Ancho (cm)</mat-label>
+            <input matInput formControlName="standard_measurements_width" type="number" />
+            <mat-error appFieldError></mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Largo (cm)</mat-label>
+            <input matInput formControlName="standard_measurements_length" type="number" />
+            <mat-error appFieldError></mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Alto (cm)</mat-label>
+            <input matInput formControlName="standard_measurements_height" type="number" />
+            <mat-error appFieldError></mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Peso real (kg)</mat-label>
+            <input matInput formControlName="standard_measurements_weight" type="number" />
+            <mat-error appFieldError></mat-error>
+          </mat-form-field>
+        </div>
+        <div class="card-actions">
+          <button
+            type="submit"
+            class="btn-corp-primary"
+            mat-flat-button
+            [disabled]="isSavingStandard"
+          >
+            {{ isSavingStandard ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Card: Cálculo para medida personalizada -->
+    <div class="form-card">
+      <div class="card-header">
+        <mat-icon class="card-icon">calculate</mat-icon>
+        <h2 class="card-title">2. Configuración de cálculo para medida personalizada</h2>
+      </div>
+      <form [formGroup]="maximumForm" (ngSubmit)="onSubmitMaximum()">
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Ancho máximo (cm)</mat-label>
+            <input matInput formControlName="maximum_measurements_width" type="number" />
+            <mat-error appFieldError></mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Largo máximo (cm)</mat-label>
+            <input matInput formControlName="maximum_measurements_length" type="number" />
+            <mat-error appFieldError></mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Alto máximo (cm)</mat-label>
+            <input matInput formControlName="maximum_measurements_height" type="number" />
+            <mat-error appFieldError></mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Peso máximo permitido (kg)</mat-label>
+            <input matInput formControlName="maximum_measurements_weight" type="number" />
+            <mat-error appFieldError></mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-grid single-col">
+          <mat-form-field appearance="outline">
+            <mat-label>Factor volumétrico</mat-label>
+            <input matInput formControlName="volumetric_factor" type="number" />
+            <mat-error appFieldError></mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="formula-card">
+          <ul>
+            <li>
+              El sistema calculará automáticamente el peso volumétrico con la fórmula:
+              <div class="formula">
+                Peso volumétrico = (Largo × Ancho × Alto) / Factor volumétrico
+              </div>
+            </li>
+            <li>
+              Luego compara:
+              <div class="formula">Peso cobrado = máx(Peso real, Peso volumétrico)</div>
+            </li>
+            <li>
+              Y busca entre las tablas de tarifas el precio correspondiente a ese peso cobrado.
+            </li>
+          </ul>
+        </div>
+
+        <div class="card-actions">
+          <button
+            type="submit"
+            class="btn-corp-primary"
+            mat-flat-button
+            [disabled]="isSavingMaximum"
+          >
+            {{ isSavingMaximum ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </ng-container>
+</div>

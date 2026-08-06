@@ -97,7 +97,11 @@ export const StockAdjustmentsStore = signalStore(
       },
 
       setSort(field: string, direction: 'ASC' | 'DESC'): void {
-        patchState(store, { sort_field: field, sort_direction: direction });
+        patchState(store, {
+          sort_field: field,
+          sort_direction: direction,
+          page_number: 1,
+        });
       },
 
       resetFilters(): void {
@@ -120,7 +124,6 @@ export const StockAdjustmentsStore = signalStore(
           });
           snackBar.open('Movimiento anulado correctamente', 'Cerrar', {
             duration: 3000,
-            verticalPosition: 'top',
             panelClass: ['success-snackbar'],
           });
           patchState(store, { isLoading: false });
@@ -132,7 +135,6 @@ export const StockAdjustmentsStore = signalStore(
           });
           snackBar.open(err.message || 'Error al anular movimiento', 'Cerrar', {
             duration: 5000,
-            verticalPosition: 'top',
             panelClass: ['error-snackbar'],
           });
           return false;

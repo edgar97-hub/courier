@@ -13,7 +13,7 @@
       }}</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <div style="padding-bottom: 20px" *ngIf="districtForm.get('code')?.value">
+      <div style="padding-bottom: 12px" *ngIf="districtForm.get('code')?.value">
         N°:
         <span>{{ districtForm.get("code")?.value }}</span>
       </div>
@@ -94,7 +94,6 @@
           required
           placeholder="0.00"
         />
-        <span matTextPrefix>S/ </span>
         @if (weightToCtrl?.hasError('weightOrder') && (weightToCtrl?.touched ||
         weightToCtrl?.dirty)) {
         <mat-error>{{ weightToCtrl?.errors?.['weightOrder'] }}</mat-error>

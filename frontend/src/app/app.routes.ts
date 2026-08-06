@@ -69,7 +69,10 @@ export const routes: Routes = [
       },
       {
         path: 'shipping-rates',
-        loadComponent: () => import('./features/tarifasEnvío/table.component'),
+        loadComponent: () =>
+          import('./features/settings/pages/shipping-rates-settings/shipping-rates-settings.component').then(
+            (m) => m.ShippingRatesSettingsComponent,
+          ),
       },
       {
         path: 'tarifas',

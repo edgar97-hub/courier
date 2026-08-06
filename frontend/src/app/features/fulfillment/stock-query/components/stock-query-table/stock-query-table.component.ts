@@ -5,19 +5,22 @@ import {
   EventEmitter,
   OnInit,
   OnChanges,
+  AfterViewInit,
+  OnDestroy,
   SimpleChanges,
+  ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { AgGridAngular } from 'ag-grid-angular';
 import {
   ColDef,
   GridApi,
   GridReadyEvent,
   CellClickedEvent,
-  SortChangedEvent,
 } from 'ag-grid-community';
 import {
   themeQuartz,
@@ -56,6 +59,7 @@ const courierGridTheme = themeQuartz
     FormsModule,
     MatIconModule,
     MatButtonModule,
+    MatPaginatorModule,
     AgGridAngular,
   ],
   template: `
@@ -65,16 +69,22 @@ const courierGridTheme = themeQuartz
       [rowData]="rowData"
       [columnDefs]="colDefs"
       [defaultColDef]="defaultColDef"
-      [pagination]="true"
-      [paginationPageSize]="pageSize"
-      [paginationPageSizeSelector]="pageSizeSelector"
       [localeText]="localeText"
       (gridReady)="onGridReady($event)"
       (cellClicked)="onCellClicked($event)"
-      (sortChanged)="onSortChanged($event)"
       domLayout="autoHeight"
     >
     </ag-grid-angular>
+    <mat-paginator
+      [length]="totalCount"
+      [pageSize]="pageSize"
+      [pageIndex]="page - 1"
+      [pageSizeOptions]="[10, 20, 50, 100]"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+      aria-label="Seleccione página del inventario"
+    >
+    </mat-paginator>
   `,
   styles: [
     `
@@ -86,6 +96,7 @@ const courierGridTheme = themeQuartz
       :host ::ng-deep .stock-query-grid .ag-cell.right-align {
         text-align: right !important;
         justify-content: flex-end !important;
+        padding-right: 24px;
       }
       .stock-query-grid {
         width: 100%;
@@ -108,20 +119,25 @@ const courierGridTheme = themeQuartz
     `,
   ],
 })
-export class StockQueryTableComponent implements OnInit, OnChanges {
+export class StockQueryTableComponent
+  implements OnInit, OnChanges, AfterViewInit, OnDestroy
+{
+  @ViewChild(AgGridAngular) grid!: AgGridAngular;
   @Input() rowData: StockQueryItem[] = [];
   @Input() pageSize = 20;
-  @Input() pageSizeSelector: number[] | boolean = [10, 20, 50, 100];
-  @Input() totalItems = 0;
+  @Input() page = 1;
+  @Input() totalCount = 0;
   @Input() isCompany = false;
   @Output() sortChanged = new EventEmitter<{
     field: string;
     direction: 'ASC' | 'DESC';
   }>();
   @Output() columnFilterChanged = new EventEmitter<Record<string, string>>();
+  @Output() pageChanged = new EventEmitter<PageEvent>();
 
   gridTheme = courierGridTheme;
   gridApi: GridApi | null = null;
+  private listenerRegistered = false;
   private activeFilters: Record<string, string> = {};
 
   localeText: Record<string, string> = {
@@ -316,6 +332,19 @@ export class StockQueryTableComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {}
 
+  ngAfterViewInit(): void {
+    if (this.grid?.api) {
+      this.gridApi = this.grid.api;
+      this.registerSortListener();
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.listenerRegistered && this.gridApi) {
+      this.gridApi.removeEventListener('sortChanged', this.handleGridSortChanged);
+    }
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['rowData'] && this.gridApi) {
       this.gridApi.setGridOption('rowData', this.rowData);
@@ -324,6 +353,7 @@ export class StockQueryTableComponent implements OnInit, OnChanges {
 
   onGridReady(params: GridReadyEvent): void {
     this.gridApi = params.api;
+    this.registerSortListener();
     if (this.isCompany) {
       params.api.setColumnsVisible(['company'], false);
     }
@@ -331,7 +361,18 @@ export class StockQueryTableComponent implements OnInit, OnChanges {
 
   onCellClicked(event: CellClickedEvent): void {}
 
-  onSortChanged(event: SortChangedEvent): void {
+  onPageChange(event: PageEvent): void {
+    this.pageChanged.emit(event);
+  }
+
+  private registerSortListener(): void {
+    if (!this.listenerRegistered && this.gridApi) {
+      this.gridApi.addEventListener('sortChanged', this.handleGridSortChanged);
+      this.listenerRegistered = true;
+    }
+  }
+
+  private handleGridSortChanged = (): void => {
     if (this.gridApi) {
       const columnState = this.gridApi.getColumnState();
       const sortedCol = columnState.find((col) => col.sort);
@@ -344,7 +385,7 @@ export class StockQueryTableComponent implements OnInit, OnChanges {
         this.sortChanged.emit({ field: 'createdAt', direction: 'DESC' });
       }
     }
-  }
+  };
 
   onTextFilter(colId: string, value: string): void {
     if (value) {

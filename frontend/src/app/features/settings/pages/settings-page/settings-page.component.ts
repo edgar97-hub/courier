@@ -214,7 +214,6 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
             {
               duration: 5000,
               panelClass: ['error-snackbar'],
-              verticalPosition: 'top',
             }
           );
         },
@@ -267,7 +266,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
       this.snackBar.open(
         'Se permite un máximo de 3 conjuntos promocionales.',
         'OK',
-        { duration: 3000, verticalPosition: 'top' }
+        { duration: 3000 }
       );
     }
   }
@@ -462,7 +461,6 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
             'OK',
             {
               duration: 3000,
-              verticalPosition: 'top',
               panelClass: ['error-snackbar'],
             }
           );
@@ -494,7 +492,6 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
           {
             duration: 4000,
             panelClass: ['error-snackbar'],
-            verticalPosition: 'top',
           }
         );
         this.isSaving = false;
@@ -521,7 +518,6 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
           {
             duration: 4000,
             panelClass: ['error-snackbar'],
-            verticalPosition: 'top',
           }
         );
         this.isSaving = false;
@@ -548,7 +544,6 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
           {
             duration: 4000,
             panelClass: ['error-snackbar'],
-            verticalPosition: 'top',
           }
         );
         this.isSaving = false;
@@ -575,7 +570,6 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
           {
             duration: 4000,
             panelClass: ['error-snackbar'],
-            verticalPosition: 'top',
           }
         );
         this.isSaving = false;
@@ -604,7 +598,6 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
           {
             duration: 4000,
             panelClass: ['error-snackbar'],
-            verticalPosition: 'top',
           }
         );
         this.isSaving = false;
@@ -631,7 +624,6 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
           {
             duration: 4000,
             panelClass: ['error-snackbar'],
-            verticalPosition: 'top',
           }
         );
         this.isSaving = false;
@@ -660,7 +652,6 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
           {
             duration: 4000,
             panelClass: ['error-snackbar'],
-            verticalPosition: 'top',
           }
         );
         this.isSaving = false;
@@ -679,7 +670,6 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
         next: (savedSettings) => {
           this.snackBar.open('¡Configuración guardada exitosamente!', 'OK', {
             duration: 3000,
-            verticalPosition: 'top',
             panelClass: ['success-snackbar'],
           });
           this.buildForm(savedSettings);
@@ -698,7 +688,6 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
             'Retry',
             {
               duration: 5000,
-              verticalPosition: 'top',
               panelClass: ['error-snackbar'],
             }
           );
@@ -710,7 +699,6 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     this.loadCurrentSettings();
     this.snackBar.open('Cambios descartados.', 'OK', {
       duration: 2000,
-      verticalPosition: 'top',
     });
   }
 

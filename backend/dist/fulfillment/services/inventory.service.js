@@ -31,26 +31,41 @@ let InventoryService = class InventoryService {
             .leftJoinAndSelect('product.company', 'company')
             .leftJoinAndSelect('inv.warehouse', 'warehouse');
         if (search_term) {
+            const term = `%${search_term}%`;
+            const lower = search_term.toLowerCase();
+            const matches = (word) => word.startsWith(lower);
             qb.andWhere(new typeorm_2.Brackets((innerQb) => {
                 innerQb
                     .where('company.username ILIKE :search', {
-                    search: `%${search_term}%`,
+                    search: term,
                 })
                     .orWhere('product.name ILIKE :search', {
-                    search: `%${search_term}%`,
+                    search: term,
                 })
                     .orWhere('variation.sku ILIKE :search', {
-                    search: `%${search_term}%`,
+                    search: term,
                 })
                     .orWhere('variation.color ILIKE :search', {
-                    search: `%${search_term}%`,
+                    search: term,
                 })
                     .orWhere('variation.size ILIKE :search', {
-                    search: `%${search_term}%`,
+                    search: term,
                 })
                     .orWhere('variation.model ILIKE :search', {
-                    search: `%${search_term}%`,
+                    search: term,
+                })
+                    .orWhere('CAST(inv.stock AS TEXT) ILIKE :search', {
+                    search: term,
+                })
+                    .orWhere('CAST(variation.min_stock AS TEXT) ILIKE :search', {
+                    search: term,
                 });
+                if (matches('bajo')) {
+                    innerQb.orWhere('inv.stock <= variation.min_stock');
+                }
+                if (matches('normal')) {
+                    innerQb.orWhere('inv.stock > variation.min_stock');
+                }
             }));
         }
         if (filter_company) {

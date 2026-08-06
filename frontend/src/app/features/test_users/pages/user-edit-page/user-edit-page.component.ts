@@ -120,7 +120,6 @@ export class UserEditPageComponent implements OnInit, OnDestroy {
             this.userSubject.next(savedUser);
             this.snackBar.open(`guardado exitosamente!`, 'OK', {
               duration: 3000,
-              verticalPosition: 'top',
               panelClass: ['success-snackbar'],
             });
             this.isEditMode = false;
@@ -133,7 +132,6 @@ export class UserEditPageComponent implements OnInit, OnDestroy {
               'Retry',
               {
                 duration: 5000,
-                verticalPosition: 'top',
                 panelClass: ['error-snackbar'],
               },
             );
@@ -156,7 +154,6 @@ export class UserEditPageComponent implements OnInit, OnDestroy {
             this.userSubject.next(savedUser); 
             this.snackBar.open(`¡Actualizado exitosamente!`, 'OK', {
               duration: 3000,
-              verticalPosition: 'top',
               panelClass: ['success-snackbar'],
             });
             this.isEditMode = false;
@@ -169,7 +166,6 @@ export class UserEditPageComponent implements OnInit, OnDestroy {
               'Retry',
               {
                 duration: 5000,
-                verticalPosition: 'top',
                 panelClass: ['error-snackbar'],
               },
             );

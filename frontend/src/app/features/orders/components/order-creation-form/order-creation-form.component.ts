@@ -422,7 +422,9 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
   onDriverSelected(event: MatAutocompleteSelectedEvent): void {
     const company = event.option.value as User;
     this.orderForm.get('company_id')?.setValue(company.id);
-    this.selectedCompanyFulfillmentEnabled.set(company.isFulfillmentEnabled ?? false);
+    this.selectedCompanyFulfillmentEnabled.set(
+      company.isFulfillmentEnabled ?? false,
+    );
     this.orderForm.markAllAsTouched();
   }
 
@@ -464,6 +466,10 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
         this.multiPackageDiscountPercentage.set(discount);
         this.fulfillmentBannerUrl.set(
           currentSettings.fulfillment_banner_image_url || null,
+        );
+        console.log(
+          'currentSettings.fulfillment_banner_image_url',
+          currentSettings.fulfillment_banner_image_url,
         );
       });
   }
@@ -677,30 +683,30 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     if (this.isFulfillment()) {
       const fulfillmentItems = this.fulfillmentSelector?.getOrderItems();
       if (!fulfillmentItems || fulfillmentItems.length === 0) {
-        this.snackBar.open(
-          'Agregue productos al desglose primero',
-          'Cerrar',
-          { duration: 3000 },
-        );
+        this.snackBar.open('Agregue productos al desglose primero', 'Cerrar', {
+          duration: 3000,
+        });
         return;
       }
 
       for (const item of fulfillmentItems) {
-        this.itemsFormArray.push(this.fb.group({
-          package_type: [item.package_type],
-          description: [item.description],
-          length_cm: [item.length_cm],
-          width_cm: [item.width_cm],
-          height_cm: [item.height_cm],
-          weight_kg: [item.weight_kg],
-          basePrice: [item.basePrice],
-          finalPrice: [item.finalPrice],
-          isPrincipal: [item.isPrincipal],
-          variationId: [item.variationId ?? null],
-          productId: [item.productId ?? null],
-          quantity: [item.quantity ?? null],
-          fulfillmentGroupId: [item.fulfillmentGroupId ?? null],
-        }));
+        this.itemsFormArray.push(
+          this.fb.group({
+            package_type: [item.package_type],
+            description: [item.description],
+            length_cm: [item.length_cm],
+            width_cm: [item.width_cm],
+            height_cm: [item.height_cm],
+            weight_kg: [item.weight_kg],
+            basePrice: [item.basePrice],
+            finalPrice: [item.finalPrice],
+            isPrincipal: [item.isPrincipal],
+            variationId: [item.variationId ?? null],
+            productId: [item.productId ?? null],
+            quantity: [item.quantity ?? null],
+            fulfillmentGroupId: [item.fulfillmentGroupId ?? null],
+          }),
+        );
       }
       this.itemsDataSource.data = this.itemsFormArray.controls;
       this.recalculateTotalCost(this.itemsFormArray.value);
@@ -781,12 +787,13 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const principalItem = items.length > 0
-      ? items.reduce(
-          (max, item) => (item.basePrice > max.basePrice ? item : max),
-          items[0],
-        )
-      : null;
+    const principalItem =
+      items.length > 0
+        ? items.reduce(
+            (max, item) => (item.basePrice > max.basePrice ? item : max),
+            items[0],
+          )
+        : null;
 
     let totalCost = 0;
     const updatedItems = items.map((item) => {
@@ -799,8 +806,9 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       }
 
       const multiplier =
-        item.package_type === PackageType.FULFILLMENT && !item.fulfillmentGroupId
-          ? (item.quantity || 1)
+        item.package_type === PackageType.FULFILLMENT &&
+        !item.fulfillmentGroupId
+          ? item.quantity || 1
           : 1;
       totalCost += finalPrice * multiplier;
 
@@ -837,7 +845,11 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
     if (this.isFulfillment()) {
       const fulfillmentItems = this.fulfillmentSelector?.getOrderItems();
       if (!fulfillmentItems || fulfillmentItems.length === 0) {
-        this.snackBar.open('Agregue productos Fulfillment al pedido primero', 'Cerrar', { duration: 3000 });
+        this.snackBar.open(
+          'Agregue productos Fulfillment al pedido primero',
+          'Cerrar',
+          { duration: 3000 },
+        );
         return;
       }
       for (const item of fulfillmentItems) {
@@ -856,11 +868,13 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
           let finalPrice = item.basePrice;
           if (!isPrincipal && this.multiPackageDiscountPercentage() > 0) {
             finalPrice =
-              item.basePrice * (1 - this.multiPackageDiscountPercentage() / 100);
+              item.basePrice *
+              (1 - this.multiPackageDiscountPercentage() / 100);
           }
           const multiplier =
-            item.package_type === PackageType.FULFILLMENT && !item.fulfillmentGroupId
-              ? (item.quantity || 1)
+            item.package_type === PackageType.FULFILLMENT &&
+            !item.fulfillmentGroupId
+              ? item.quantity || 1
               : 1;
           totalCost += finalPrice * multiplier;
         }
@@ -868,37 +882,40 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       }
     } else {
       const packageType = this.newItemForm.get('package_type')?.value;
-      if (packageType === PackageType.STANDARD && formValue.items.length === 0) {
-      const districtId = this.orderForm.get('delivery_district_id')?.value;
-      if (!districtId) {
-        this.snackBar.open('Por favor, seleccione un distrito.', 'Cerrar', {
-          duration: 3000,
-          panelClass: ['error-snackbar'],
-        });
-        return;
-      }
-
       if (
-        this.newItemForm.get('package_type')?.value === PackageType.STANDARD
+        packageType === PackageType.STANDARD &&
+        formValue.items.length === 0
       ) {
-        const price = this.getDistrictPrice(districtId);
-        this.orderForm.get('shipping_cost')?.setValue(price);
-      }
-      const standardItem: OrderItem = {
-        package_type: PackageType.STANDARD,
-        description: 'Paquete Estándar',
-        length_cm: this.staLengthCm(),
-        width_cm: this.staWidthCm(),
-        height_cm: this.staHeightCm(),
-        weight_kg: this.staWeightKg(),
-        basePrice: this.orderForm.get('shipping_cost')?.value,
-        finalPrice: this.orderForm.get('shipping_cost')?.value,
-        isPrincipal: true,
-      };
+        const districtId = this.orderForm.get('delivery_district_id')?.value;
+        if (!districtId) {
+          this.snackBar.open('Por favor, seleccione un distrito.', 'Cerrar', {
+            duration: 3000,
+            panelClass: ['error-snackbar'],
+          });
+          return;
+        }
 
-      formValue.items.push(standardItem);
-      formValue.shipping_cost = this.orderForm.get('shipping_cost')?.value;
-    }
+        if (
+          this.newItemForm.get('package_type')?.value === PackageType.STANDARD
+        ) {
+          const price = this.getDistrictPrice(districtId);
+          this.orderForm.get('shipping_cost')?.setValue(price);
+        }
+        const standardItem: OrderItem = {
+          package_type: PackageType.STANDARD,
+          description: 'Paquete Estándar',
+          length_cm: this.staLengthCm(),
+          width_cm: this.staWidthCm(),
+          height_cm: this.staHeightCm(),
+          weight_kg: this.staWeightKg(),
+          basePrice: this.orderForm.get('shipping_cost')?.value,
+          finalPrice: this.orderForm.get('shipping_cost')?.value,
+          isPrincipal: true,
+        };
+
+        formValue.items.push(standardItem);
+        formValue.shipping_cost = this.orderForm.get('shipping_cost')?.value;
+      }
     }
 
     if (formValue.items.length === 0) {

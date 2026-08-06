@@ -196,7 +196,11 @@ export const StockQueryStore = signalStore(
       },
 
       setSort(field: string, direction: 'ASC' | 'DESC'): void {
-        patchState(store, { sort_field: field, sort_direction: direction });
+        patchState(store, {
+          sort_field: field,
+          sort_direction: direction,
+          page_number: 1,
+        });
       },
 
       setCompanyFilter(companyId: string): void {

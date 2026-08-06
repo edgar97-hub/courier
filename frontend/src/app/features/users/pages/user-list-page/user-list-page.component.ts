@@ -30,7 +30,7 @@ import { User } from '../../models/user.model';
     <div class="page-container">
       <div class="page-header">
         <div>
-          <h1 class="page-title">Usuarios</h1>
+          <h2 class="page-title">Usuarios</h2>
           <p class="page-subtitle">
             {{ store.totalUsers() }} usuario(s) registrado(s)
           </p>
@@ -98,7 +98,7 @@ import { User } from '../../models/user.model';
         margin-bottom: 24px;
       }
       .page-title {
-        font-size: 24px;
+        font-size: 20px;
         font-weight: 600;
         color: var(--corp-blue-dark, #012147);
         margin: 0;
@@ -244,7 +244,6 @@ export class UserListPageComponent implements OnInit {
             if (errorMsg) {
               this.snackBar.open(errorMsg, 'Cerrar', {
                 duration: 6000,
-                verticalPosition: 'top',
                 panelClass: ['error-snackbar'],
               });
             }

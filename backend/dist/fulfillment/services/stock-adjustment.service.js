@@ -65,7 +65,9 @@ let StockAdjustmentService = class StockAdjustmentService {
                     stockAfter = stockBefore - dto.quantity;
                     break;
             }
-            await queryRunner.manager.update(inventory_entity_1.InventoryEntity, inventory.id, { stock: stockAfter });
+            await queryRunner.manager.update(inventory_entity_1.InventoryEntity, inventory.id, {
+                stock: stockAfter,
+            });
             const adjustment = queryRunner.manager.create(stock_adjustment_entity_1.StockAdjustmentEntity, {
                 adjustment_type: dto.adjustment_type,
                 quantity: dto.quantity,
@@ -83,7 +85,8 @@ let StockAdjustmentService = class StockAdjustmentService {
                 [stock_adjustment_entity_1.ADJUSTMENT_TYPE.MANUAL_SUBTRACT]: kardex_entity_1.KARDEX_MOVEMENT_TYPE.MANUAL_SUBTRACT,
             };
             await this.kardexService.create({
-                movement_type: movementTypeMap[dto.adjustment_type] || kardex_entity_1.KARDEX_MOVEMENT_TYPE.MANUAL_ADD,
+                movement_type: movementTypeMap[dto.adjustment_type] ||
+                    kardex_entity_1.KARDEX_MOVEMENT_TYPE.MANUAL_ADD,
                 quantity: dto.quantity,
                 stock_before: stockBefore,
                 stock_after: stockAfter,
@@ -117,19 +120,40 @@ let StockAdjustmentService = class StockAdjustmentService {
             .leftJoinAndSelect('a.variation', 'variation')
             .leftJoinAndSelect('a.warehouse', 'warehouse');
         if (search_term) {
+            const term = `%${search_term}%`;
+            const lower = search_term.toLowerCase();
+            const matches = (word) => word.startsWith(lower);
             queryBuilder.andWhere(new typeorm_2.Brackets((qb) => {
-                qb.where('company.username ILIKE :search', {
-                    search: `%${search_term}%`,
+                qb.where('company.username ILIKE :search', { search: term })
+                    .orWhere('product.name ILIKE :search', { search: term })
+                    .orWhere('CAST(variation.sku AS TEXT) ILIKE :search', {
+                    search: term,
                 })
-                    .orWhere('product.name ILIKE :search', {
-                    search: `%${search_term}%`,
+                    .orWhere('a.observation ILIKE :search', { search: term })
+                    .orWhere('CAST(a.code AS TEXT) ILIKE :search', { search: term })
+                    .orWhere('CAST(a.quantity AS TEXT) ILIKE :search', { search: term })
+                    .orWhere('CAST(a.adjustment_type AS TEXT) ILIKE :search', {
+                    search: term,
                 })
-                    .orWhere('variation.sku ILIKE :search', {
-                    search: `%${search_term}%`,
-                })
-                    .orWhere('a.observation ILIKE :search', {
-                    search: `%${search_term}%`,
-                });
+                    .orWhere('CAST(a.status AS TEXT) ILIKE :search', { search: term });
+                if (matches('ingreso')) {
+                    qb.orWhere(`a.adjustment_type = '${stock_adjustment_entity_1.ADJUSTMENT_TYPE.INBOUND}'`);
+                }
+                if (matches('ajuste')) {
+                    qb.orWhere(`a.adjustment_type IN ('${stock_adjustment_entity_1.ADJUSTMENT_TYPE.MANUAL_ADD}', '${stock_adjustment_entity_1.ADJUSTMENT_TYPE.MANUAL_SUBTRACT}')`);
+                }
+                if (matches('suma')) {
+                    qb.orWhere(`a.adjustment_type = '${stock_adjustment_entity_1.ADJUSTMENT_TYPE.MANUAL_ADD}'`);
+                }
+                if (matches('resta')) {
+                    qb.orWhere(`a.adjustment_type = '${stock_adjustment_entity_1.ADJUSTMENT_TYPE.MANUAL_SUBTRACT}'`);
+                }
+                if (matches('registrado')) {
+                    qb.orWhere(`a.status = '${stock_adjustment_entity_1.ADJUSTMENT_STATUS.REGISTERED}'`);
+                }
+                if (matches('anulado')) {
+                    qb.orWhere(`a.status = '${stock_adjustment_entity_1.ADJUSTMENT_STATUS.ANNULLED}'`);
+                }
             }));
         }
         const sortFieldMap = {
@@ -204,7 +228,9 @@ let StockAdjustmentService = class StockAdjustmentService {
                 if (stockAfter < 0) {
                     throw new common_1.BadRequestException('No se puede anular: el stock actual no permite la reversión (resultaría en stock negativo)');
                 }
-                await queryRunner.manager.update(inventory_entity_1.InventoryEntity, inventory.id, { stock: stockAfter });
+                await queryRunner.manager.update(inventory_entity_1.InventoryEntity, inventory.id, {
+                    stock: stockAfter,
+                });
             }
             adjustment.status = stock_adjustment_entity_1.ADJUSTMENT_STATUS.ANNULLED;
             const saved = await queryRunner.manager.save(stock_adjustment_entity_1.StockAdjustmentEntity, adjustment);

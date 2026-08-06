@@ -346,7 +346,6 @@ export class StockAdjustmentFormDialogComponent implements OnInit {
       error: () => {
         this.snackBar.open('Error al cargar empresas', 'Cerrar', {
           duration: 4000,
-          verticalPosition: 'top',
           panelClass: ['error-snackbar'],
         });
       },
@@ -361,7 +360,6 @@ export class StockAdjustmentFormDialogComponent implements OnInit {
       error: () => {
         this.snackBar.open('Error al cargar almacén principal', 'Cerrar', {
           duration: 4000,
-          verticalPosition: 'top',
           panelClass: ['error-snackbar'],
         });
       },
@@ -397,7 +395,6 @@ export class StockAdjustmentFormDialogComponent implements OnInit {
       error: () => {
         this.snackBar.open('Error al cargar productos', 'Cerrar', {
           duration: 4000,
-          verticalPosition: 'top',
           panelClass: ['error-snackbar'],
         });
       },
@@ -441,7 +438,6 @@ export class StockAdjustmentFormDialogComponent implements OnInit {
       error: () => {
         this.snackBar.open('Error al cargar variaciones', 'Cerrar', {
           duration: 4000,
-          verticalPosition: 'top',
           panelClass: ['error-snackbar'],
         });
       },
@@ -474,7 +470,6 @@ export class StockAdjustmentFormDialogComponent implements OnInit {
       next: () => {
         this.snackBar.open('Movimiento registrado correctamente', 'Cerrar', {
           duration: 3000,
-          verticalPosition: 'top',
           panelClass: ['success-snackbar'],
         });
         this.dialogRef.close(true);
@@ -486,7 +481,6 @@ export class StockAdjustmentFormDialogComponent implements OnInit {
           'Cerrar',
           {
             duration: 5000,
-            verticalPosition: 'top',
             panelClass: ['error-snackbar'],
           },
         );

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { PageEvent } from '@angular/material/paginator';
 import { KardexStore } from '../../services/kardex.store';
 import { KardexTableComponent } from '../../components/kardex-table/kardex-table.component';
 import { AppStore } from '../../../../../app.store';
@@ -49,9 +50,11 @@ import { UserRole } from '../../../../../common/roles.enum';
       <app-kardex-table
         [rowData]="store.items()"
         [pageSize]="store.page_size()"
-        [totalItems]="store.total_count()"
+        [page]="store.page_number()"
+        [totalCount]="store.total_count()"
         [isCompany]="isCompany"
         (sortChanged)="onSortChanged($event)"
+        (pageChanged)="onPageChanged($event)"
         (columnFilterChanged)="onColumnFilterChanged($event)"
       />
     </div>
@@ -177,6 +180,14 @@ export class KardexListPageComponent implements OnInit {
 
   onSortChanged(sort: { field: string; direction: 'ASC' | 'DESC' }): void {
     this.store.setSort(sort.field, sort.direction);
+    this.store.loadItems();
+  }
+
+  onPageChanged(event: PageEvent): void {
+    this.store.setPage(event.pageIndex + 1);
+    if (event.pageSize !== this.store.page_size()) {
+      this.store.setPageSize(event.pageSize);
+    }
     this.store.loadItems();
   }
 

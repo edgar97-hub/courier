@@ -98,7 +98,11 @@ export const ProductsStore = signalStore(
       },
 
       setSort(field: string, direction: 'ASC' | 'DESC'): void {
-        patchState(store, { sort_field: field, sort_direction: direction });
+        patchState(store, {
+          sort_field: field,
+          sort_direction: direction,
+          page_number: 1,
+        });
       },
 
       resetFilters(): void {
@@ -121,7 +125,6 @@ export const ProductsStore = signalStore(
           });
           snackBar.open('Producto creado exitosamente', 'Cerrar', {
             duration: 3000,
-            verticalPosition: 'top',
             panelClass: ['success-snackbar'],
           });
           patchState(store, { isLoading: false });
@@ -133,7 +136,6 @@ export const ProductsStore = signalStore(
           });
           snackBar.open(err.message || 'Error al crear producto', 'Cerrar', {
             duration: 5000,
-            verticalPosition: 'top',
             panelClass: ['error-snackbar'],
           });
           return false;
@@ -151,7 +153,6 @@ export const ProductsStore = signalStore(
           });
           snackBar.open('Producto actualizado exitosamente', 'Cerrar', {
             duration: 3000,
-            verticalPosition: 'top',
             panelClass: ['success-snackbar'],
           });
           patchState(store, { isLoading: false });
@@ -163,7 +164,6 @@ export const ProductsStore = signalStore(
           });
           snackBar.open(err.message || 'Error al actualizar producto', 'Cerrar', {
             duration: 5000,
-            verticalPosition: 'top',
             panelClass: ['error-snackbar'],
           });
           return false;
@@ -181,7 +181,6 @@ export const ProductsStore = signalStore(
           });
           snackBar.open('Producto eliminado exitosamente', 'Cerrar', {
             duration: 3000,
-            verticalPosition: 'top',
             panelClass: ['success-snackbar'],
           });
           patchState(store, { isLoading: false });
@@ -193,7 +192,6 @@ export const ProductsStore = signalStore(
           });
           snackBar.open(err.message || 'Error al eliminar producto', 'Cerrar', {
             duration: 5000,
-            verticalPosition: 'top',
             panelClass: ['error-snackbar'],
           });
           return false;

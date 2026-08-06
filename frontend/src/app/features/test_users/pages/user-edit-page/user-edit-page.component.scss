@@ -12,21 +12,21 @@
 //   padding: 24px;
 // }
 
-// .page-header {
-//   display: flex;
-//   align-items: center;
-//   margin-bottom: 24px;
-//   padding-bottom: 16px;
-//   border-bottom: 1px solid #e0e0e0;
+.page-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
 
-//   h1 {
-//     margin: 0 0 0 16px;
-//     font-size: 1.6em;
-//     font-weight: 500;
-//     color: #3f51b5; // Color primario de Material
-//     flex-grow: 1; // Para empujar el botón de acción a la derecha
-//   }
-// }
+  h2 {
+    margin: 0 0 0 16px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #012147; // Color primario de Material
+    flex-grow: 1; // Para empujar el botón de acción a la derecha
+  }
+}
 
 // .spinner-container {
 //   display: flex;

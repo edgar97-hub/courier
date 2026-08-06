@@ -212,7 +212,6 @@ export class RegisterPageComponent {
         if (res.message) {
           this.snackBar.open('Ya existe un usuario con ese correo', 'OK', {
             duration: 3000,
-            verticalPosition: 'top',
             panelClass: ['success-snackbar'],
           });
         } else {
@@ -221,7 +220,6 @@ export class RegisterPageComponent {
             'OK',
             {
               duration: 3000,
-              verticalPosition: 'top',
               panelClass: ['success-snackbar'],
             }
           );
@@ -232,7 +230,6 @@ export class RegisterPageComponent {
         this.isLoading = false;
         this.snackBar.open('No se pudo registrar su informacion.', 'OK', {
           duration: 3000,
-          verticalPosition: 'top',
           panelClass: ['error-snackbar'],
         });
       });

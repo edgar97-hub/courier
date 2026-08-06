@@ -126,7 +126,6 @@ export const UsersStore = signalStore(
           });
           snackBar.open('Usuario creado exitosamente', 'Cerrar', {
             duration: 3000,
-            verticalPosition: 'top',
             panelClass: ['success-snackbar'],
           });
           patchState(store, { isLoading: false });
@@ -138,7 +137,6 @@ export const UsersStore = signalStore(
           });
           snackBar.open(err.message || 'Error al crear usuario', 'Cerrar', {
             duration: 5000,
-            verticalPosition: 'top',
             panelClass: ['error-snackbar'],
           });
           return false;
@@ -156,7 +154,6 @@ export const UsersStore = signalStore(
           });
           snackBar.open('Usuario actualizado exitosamente', 'Cerrar', {
             duration: 3000,
-            verticalPosition: 'top',
             panelClass: ['success-snackbar'],
           });
           patchState(store, { isLoading: false });
@@ -168,7 +165,6 @@ export const UsersStore = signalStore(
           });
           snackBar.open(err.message || 'Error al actualizar usuario', 'Cerrar', {
             duration: 5000,
-            verticalPosition: 'top',
             panelClass: ['error-snackbar'],
           });
           return false;
@@ -186,7 +182,6 @@ export const UsersStore = signalStore(
           });
           snackBar.open('Usuario eliminado exitosamente', 'Cerrar', {
             duration: 3000,
-            verticalPosition: 'top',
             panelClass: ['success-snackbar'],
           });
           patchState(store, { isLoading: false });
@@ -198,7 +193,6 @@ export const UsersStore = signalStore(
           });
           snackBar.open(err.message || 'Error al eliminar usuario', 'Cerrar', {
             duration: 5000,
-            verticalPosition: 'top',
             panelClass: ['error-snackbar'],
           });
           return false;

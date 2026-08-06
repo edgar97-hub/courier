@@ -111,7 +111,6 @@ export class ForgotPasswordPageComponent {
         'OK',
         {
           duration: 5000,
-          verticalPosition: 'top',
           panelClass: ['success-snackbar'],
         }
       );

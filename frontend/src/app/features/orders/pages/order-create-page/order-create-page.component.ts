@@ -87,7 +87,6 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
     this.pendingOrders.update((currentOrders) => [...currentOrders, newOrder]);
     this.snackBar.open('Pedido agregado al listado.', 'OK', {
       duration: 2000,
-      verticalPosition: 'top',
     });
     // Resetear el formulario de creación de pedido individual
     if (this.orderCreationFormComponent) {
@@ -103,7 +102,6 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
     );
     this.snackBar.open('Pedido quitado del listado.', 'OK', {
       duration: 2000,
-      verticalPosition: 'top',
     });
     // this.recalculateDiscounts();
   }
@@ -153,7 +151,7 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
       this.snackBar.open(
         'No hay pedidos en el listado para enviar.',
         'Cerrar',
-        { duration: 3000, verticalPosition: 'top' },
+        { duration: 3000 },
       );
       return;
     }
@@ -161,7 +159,7 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
       this.snackBar.open(
         'Por favor, seleccione cómo se hará el traslado.',
         'Cerrar',
-        { duration: 3000, verticalPosition: 'top' },
+        { duration: 3000 },
       );
       this.pickupOptionControl.markAsTouched();
       return;
@@ -169,7 +167,6 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
     if (!this.termsAcceptedControl.value) {
       this.snackBar.open('Debe aceptar los términos y condiciones.', 'Cerrar', {
         duration: 3000,
-        verticalPosition: 'top',
       });
       this.termsAcceptedControl.markAsTouched();
       return;
@@ -210,7 +207,6 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
             'OK',
             {
               duration: 4000,
-              verticalPosition: 'top',
               panelClass: ['success-snackbar'],
             },
           );
@@ -225,7 +221,6 @@ export class OrderCreatePageComponent implements OnInit, OnDestroy {
             'Cerrar',
             {
               duration: 5000,
-              verticalPosition: 'top',
               panelClass: ['error-snackbar'],
             },
           );
