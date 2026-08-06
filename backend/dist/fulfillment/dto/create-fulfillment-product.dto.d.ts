@@ -9,6 +9,7 @@ export declare class CreateVariationDto {
     height_cm?: number;
     weight_kg?: number;
     min_stock?: number;
+    initial_stock?: number;
 }
 export declare class CreateFulfillmentProductDto {
     name: string;

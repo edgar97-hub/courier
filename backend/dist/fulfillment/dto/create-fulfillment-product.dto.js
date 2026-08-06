@@ -70,6 +70,12 @@ __decorate([
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], CreateVariationDto.prototype, "min_stock", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], CreateVariationDto.prototype, "initial_stock", void 0);
 class CreateFulfillmentProductDto {
 }
 exports.CreateFulfillmentProductDto = CreateFulfillmentProductDto;

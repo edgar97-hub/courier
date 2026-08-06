@@ -1,11 +1,7 @@
 <div class="page-container">
   <div style="display: flex; padding: 10px">
     <mat-card-header class="mat-card-header">
-      <mat-card-title
-        class="mat-card-title"
-        style="padding: 10px !important; padding-left: 0px !important"
-        >Gestión de Caja</mat-card-title
-      >
+      <h2>Gestión de Caja</h2>
     </mat-card-header>
     <!-- <button
       mat-raised-button
@@ -18,7 +14,7 @@
   </div>
   <mat-card class="mat-card summary-section">
     <mat-card-header class="mat-card-header">
-      <mat-card-title class="mat-card-title">Resumen de Saldos</mat-card-title>
+      <h2>Resumen de Saldos</h2>
     </mat-card-header>
     <mat-card-content>
       <form [formGroup]="summaryFilterForm" class="filter-form">
@@ -230,7 +226,12 @@
             <mat-icon>filter_list</mat-icon> Aplicar Filtros
           </button>
           <div
-            style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 10px"
+            style="
+              display: flex;
+              flex-direction: row;
+              flex-wrap: wrap;
+              gap: 10px;
+            "
           >
             <button
               mat-raised-button

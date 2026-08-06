@@ -154,6 +154,36 @@ import { StockAdjustment } from '../../models/stock-adjustment.model';
         background: #f97c06;
         color: #fff;
       }
+
+      /* ===== RESPONSIVE ===== */
+      @media (max-width: 600px) {
+        .stock-adjustments-container {
+          padding: 12px;
+        }
+        .page-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+        }
+        .page-header h2 {
+          font-size: 18px;
+        }
+        .table-toolbar {
+          flex-wrap: wrap;
+        }
+        .search-box {
+          max-width: 100%;
+          flex-basis: 100%;
+        }
+        .btn-refresh {
+          width: 100%;
+          justify-content: center;
+        }
+        .btn-add {
+          width: 100%;
+          justify-content: center;
+        }
+      }
     `,
   ],
 })
@@ -202,11 +232,10 @@ export class StockAdjustmentListPageComponent implements OnInit {
 
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(StockAdjustmentFormDialogComponent, {
-      width: '100vw',
-      maxWidth: '100vw',
-      height: '100vh',
+      width: '640px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
       disableClose: true,
-      panelClass: 'full-screen-dialog',
       data: {},
     });
 

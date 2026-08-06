@@ -7,4 +7,12 @@ export const USERS_ROUTES: Routes = [
     component: UserListPageComponent,
     title: 'Usuarios',
   },
+  {
+    path: 'detail',
+    loadComponent: () =>
+      import('./pages/user-detail-page/user-detail-page.component').then(
+        (m) => m.UserDetailPageComponent,
+      ),
+    title: 'Detalles del negocio',
+  },
 ];

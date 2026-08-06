@@ -13,6 +13,7 @@ import {
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { UsersStore } from '../../services/users.store';
 import { User } from '../../models/user.model';
+import { PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-user-list-page',
@@ -31,9 +32,6 @@ import { User } from '../../models/user.model';
       <div class="page-header">
         <div>
           <h2 class="page-title">Usuarios</h2>
-          <p class="page-subtitle">
-            {{ store.totalUsers() }} usuario(s) registrado(s)
-          </p>
         </div>
         <div class="header-actions">
           <button
@@ -77,10 +75,14 @@ import { User } from '../../models/user.model';
         } @else {
         <app-user-table
           [rowData]="store.users()"
+          [pageSize]="store.page_size()"
+          [page]="store.page_number()"
+          [totalCount]="store.total_count()"
           (editUser)="openEditDialog($event)"
           (deleteUser)="openDeleteConfirm($event)"
           (searchChanged)="onSearchChanged($event)"
           (sortChanged)="onSortChanged($event)"
+          (pageChanged)="onPageChanged($event)"
         />
         }
       </div>
@@ -152,6 +154,29 @@ import { User } from '../../models/user.model';
         color: #666;
         font-size: 14px;
       }
+
+      /* ===== RESPONSIVE ===== */
+      @media (max-width: 600px) {
+        .page-container {
+          padding: 16px;
+        }
+        .page-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+        }
+        .page-header h2 {
+          font-size: 18px;
+        }
+        .header-actions {
+          width: 100%;
+          flex-wrap: wrap;
+        }
+        .header-actions button {
+          flex: 1;
+          justify-content: center;
+        }
+      }
     `,
   ],
 })
@@ -175,6 +200,14 @@ export class UserListPageComponent implements OnInit {
 
   onSortChanged(sort: { field: string; direction: 'ASC' | 'DESC' }): void {
     this.store.setSort(sort.field, sort.direction);
+    this.store.loadUsers();
+  }
+
+  onPageChanged(event: PageEvent): void {
+    this.store.setPage(event.pageIndex + 1);
+    if (event.pageSize !== this.store.page_size()) {
+      this.store.setPageSize(event.pageSize);
+    }
     this.store.loadUsers();
   }
 

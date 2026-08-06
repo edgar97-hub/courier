@@ -1,9 +1,20 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Brackets, QueryRunner } from 'typeorm';
+import { Repository, Brackets, QueryRunner, DataSource } from 'typeorm';
 import { FulfillmentProductEntity } from '../entities/fulfillment-product.entity';
 import { ProductVariationEntity } from '../entities/product-variation.entity';
+import { InventoryEntity } from '../entities/inventory.entity';
+import { StockAdjustmentEntity } from '../entities/stock-adjustment.entity';
+import { KardexEntity } from '../entities/kardex.entity';
+import { ADJUSTMENT_TYPE } from '../entities/stock-adjustment.entity';
+import { OrderItemEntity } from '../../orders/entities/order-item.entity';
 import { CreateFulfillmentProductDto } from '../dto/create-fulfillment-product.dto';
+import { StockAdjustmentService } from './stock-adjustment.service';
 
 export interface PaginatedProducts {
   items: FulfillmentProductEntity[];
@@ -19,6 +30,14 @@ export class FulfillmentService {
     private readonly productRepository: Repository<FulfillmentProductEntity>,
     @InjectRepository(ProductVariationEntity)
     private readonly variationRepository: Repository<ProductVariationEntity>,
+    @InjectRepository(InventoryEntity)
+    private readonly inventoryRepository: Repository<InventoryEntity>,
+    @InjectRepository(StockAdjustmentEntity)
+    private readonly adjustmentRepository: Repository<StockAdjustmentEntity>,
+    @InjectRepository(KardexEntity)
+    private readonly kardexRepository: Repository<KardexEntity>,
+    private readonly stockAdjustmentService: StockAdjustmentService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(
@@ -57,16 +76,47 @@ export class FulfillmentService {
       );
 
       if (variations && variations.length > 0) {
-        const variationEntities = variations.map((v) =>
-          queryRunner.manager.create(ProductVariationEntity, {
-            ...v,
+        const variationEntities = variations.map((v) => {
+          const { initial_stock, ...variationData } = v;
+          return queryRunner.manager.create(ProductVariationEntity, {
+            ...variationData,
             product_id: savedProduct.id,
-          }),
-        );
-        await queryRunner.manager.save(
+          });
+        });
+        const savedVariations = await queryRunner.manager.save(
           ProductVariationEntity,
           variationEntities,
         );
+
+        const initialStockIndexes = variations.reduce<number[]>(
+          (acc, v, i) => {
+            const initialStock = Number(v.initial_stock) || 0;
+            if (initialStock > 0) acc.push(i);
+            return acc;
+          },
+          [],
+        );
+
+        if (initialStockIndexes.length > 0) {
+          const warehouse =
+            await this.stockAdjustmentService.getMainWarehouse();
+
+          for (const i of initialStockIndexes) {
+            await this.stockAdjustmentService.create(
+              {
+                adjustment_type: ADJUSTMENT_TYPE.INBOUND,
+                quantity: Number(variations[i].initial_stock),
+                observation: 'Stock inicial al crear producto',
+                company_id: productData.company_id,
+                product_id: savedProduct.id,
+                variation_id: savedVariations[i].id,
+                warehouse_id: warehouse.id,
+              },
+              undefined,
+              queryRunner.manager,
+            );
+          }
+        }
       }
 
       await queryRunner.commitTransaction();
@@ -230,7 +280,7 @@ export class FulfillmentService {
         for (const v of variations) {
           if (v.id) {
             // Update existing variation (preserves inventory/kardex references)
-            const { id: variationId, ...updateData } = v;
+            const { id: variationId, initial_stock, ...updateData } = v;
             await queryRunner.manager.update(
               ProductVariationEntity,
               variationId,
@@ -238,10 +288,11 @@ export class FulfillmentService {
             );
           } else {
             // Create new variation
+            const { initial_stock, ...variationData } = v;
             const newVariation = queryRunner.manager.create(
               ProductVariationEntity,
               {
-                ...v,
+                ...variationData,
                 product_id: id,
               },
             );
@@ -250,6 +301,43 @@ export class FulfillmentService {
               newVariation,
             );
           }
+        }
+
+        // Delete variations removed from the form, validating they can be removed
+        const existingVariations = await queryRunner.manager.find(
+          ProductVariationEntity,
+          { where: { product_id: id } },
+        );
+        const keptIds = new Set(
+          variations.filter((v) => v.id).map((v) => v.id),
+        );
+        const removed = existingVariations.filter((v) => !keptIds.has(v.id));
+
+        if (removed.length > 0) {
+          const reasons = await this.getVariationBlockReasons(
+            removed.map((v) => v.id),
+          );
+
+          if (reasons.length > 0) {
+            const labels: Record<string, string> = {
+              stock: 'tiene stock registrado',
+              movimientos: 'tiene movimientos de stock asociados',
+              ordenes: 'está vinculada a órdenes existentes',
+            };
+            const skuLabel = removed
+              .map((v) => `[${v.sku}]`)
+              .join(', ');
+            throw new BadRequestException(
+              `No se puede eliminar la variación ${skuLabel}: ${reasons
+                .map((r) => labels[r])
+                .join(', ')}.`,
+            );
+          }
+
+          await queryRunner.manager.remove(
+            ProductVariationEntity,
+            removed,
+          );
         }
       }
 
@@ -277,7 +365,88 @@ export class FulfillmentService {
     }
   }
 
+  async checkVariationDeletable(
+    variationId: string,
+  ): Promise<{ deletable: boolean; reasons: string[] }> {
+    const variation = await this.variationRepository.findOne({
+      where: { id: variationId },
+    });
+
+    if (!variation) {
+      throw new NotFoundException('Variación no encontrada');
+    }
+
+    const reasons = await this.getVariationBlockReasons([variationId]);
+    return { deletable: reasons.length === 0, reasons };
+  }
+
+  private async getVariationBlockReasons(
+    variationIds: string[],
+    productId?: string,
+  ): Promise<string[]> {
+    const reasons: string[] = [];
+    if (variationIds.length === 0) return reasons;
+
+    const stockCount = await this.inventoryRepository
+      .createQueryBuilder('inv')
+      .where('inv.variation_id IN (:...variationIds)', { variationIds })
+      .andWhere('inv.stock > 0')
+      .getCount();
+    if (stockCount > 0) reasons.push('stock');
+
+    const movementCount = await this.adjustmentRepository
+      .createQueryBuilder('sa')
+      .where('sa.product_id = :productId', { productId })
+      .orWhere('sa.variation_id IN (:...variationIds)', { variationIds })
+      .getCount();
+    const kardexCount = await this.kardexRepository
+      .createQueryBuilder('k')
+      .where('k.product_id = :productId', { productId })
+      .orWhere('k.variation_id IN (:...variationIds)', { variationIds })
+      .getCount();
+    if (movementCount > 0 || kardexCount > 0) reasons.push('movimientos');
+
+    const orderItemRepository =
+      this.dataSource.getRepository(OrderItemEntity);
+    const orderCount = await orderItemRepository
+      .createQueryBuilder('oi')
+      .where('oi.product_id = :productId', { productId })
+      .orWhere('oi.variation_id IN (:...variationIds)', { variationIds })
+      .getCount();
+    if (orderCount > 0) reasons.push('ordenes');
+
+    return reasons;
+  }
+
   async remove(id: string): Promise<void> {
+    const product = await this.productRepository.findOne({
+      where: { id },
+      relations: ['variations'],
+    });
+
+    if (!product) {
+      throw new NotFoundException('Producto no encontrado');
+    }
+
+    const variationIds = product.variations.map((v) => v.id);
+    const reasons = await this.getVariationBlockReasons(variationIds, id);
+
+    if (reasons.includes('stock')) {
+      throw new BadRequestException(
+        'No se puede eliminar el producto porque tiene stock registrado. Primero gestione su inventario.',
+      );
+    }
+    if (reasons.includes('movimientos')) {
+      throw new BadRequestException(
+        'No se puede eliminar el producto porque tiene movimientos de stock asociados.',
+      );
+    }
+    if (reasons.includes('ordenes')) {
+      throw new BadRequestException(
+        'No se puede eliminar el producto porque está vinculado a órdenes existentes.',
+      );
+    }
+
     await this.productRepository.delete(id);
   }
 }

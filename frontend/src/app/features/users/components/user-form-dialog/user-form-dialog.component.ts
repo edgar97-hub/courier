@@ -564,6 +564,48 @@ export interface UserDialogData {
         padding-top: 14px !important;
         padding-bottom: 4px !important;
       }
+
+      /* ===== RESPONSIVE ===== */
+      @media (max-width: 768px) {
+        .dialog-header {
+          padding: 12px 16px;
+        }
+        .header-left {
+          gap: 10px;
+        }
+        .header-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+        }
+        .header-title {
+          font-size: 16px;
+        }
+        .header-subtitle {
+          font-size: 11px;
+        }
+        .dialog-body {
+          padding: 12px 16px;
+        }
+        .user-form {
+          gap: 12px;
+        }
+        .form-card {
+          padding: 14px;
+        }
+        .form-grid {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+        .dialog-footer {
+          padding: 12px 16px;
+          flex-direction: column-reverse;
+          gap: 8px;
+        }
+        .dialog-footer button {
+          width: 100%;
+        }
+      }
     `,
   ],
 })

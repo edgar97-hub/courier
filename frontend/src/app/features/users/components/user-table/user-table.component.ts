@@ -10,6 +10,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { AgGridAngular } from 'ag-grid-angular';
 import {
   ColDef,
@@ -24,7 +25,13 @@ import { courierGridTheme } from '../../theme/user-grid.theme';
 @Component({
   selector: 'app-user-table',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, AgGridAngular],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatIconModule,
+    MatPaginatorModule,
+    AgGridAngular,
+  ],
   template: `
     <div class="table-toolbar">
       <div class="search-box">
@@ -51,14 +58,22 @@ import { courierGridTheme } from '../../theme/user-grid.theme';
       [columnDefs]="colDefs"
       [defaultColDef]="defaultColDef"
       [localeText]="localeText"
-      [pagination]="true"
-      [paginationPageSize]="20"
       [animateRows]="true"
       [domLayout]="'autoHeight'"
       (gridReady)="onGridReady($event)"
       (cellClicked)="onCellClicked($event)"
       (sortChanged)="onSortChanged($event)"
     />
+    <mat-paginator
+      [length]="totalCount"
+      [pageSize]="pageSize"
+      [pageIndex]="page - 1"
+      [pageSizeOptions]="[10, 20, 50, 100]"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+      aria-label="Seleccione página de usuarios"
+    >
+    </mat-paginator>
   `,
   styles: [
     `
@@ -134,14 +149,30 @@ import { courierGridTheme } from '../../theme/user-grid.theme';
         background-color: rgba(249, 124, 6, 0.15);
         color: #f97c06;
       }
+
+      /* ===== RESPONSIVE ===== */
+      @media (max-width: 600px) {
+        .table-toolbar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .search-box {
+          max-width: 100%;
+          width: 100%;
+        }
+      }
     `,
   ],
 })
 export class UserTableComponent implements OnInit, OnChanges {
   @Input() rowData: User[] = [];
+  @Input() pageSize = 20;
+  @Input() page = 1;
+  @Input() totalCount = 0;
   @Output() editUser = new EventEmitter<User>();
   @Output() deleteUser = new EventEmitter<User>();
   @Output() searchChanged = new EventEmitter<string>();
+  @Output() pageChanged = new EventEmitter<PageEvent>();
   @Output() sortChanged = new EventEmitter<{
     field: string;
     direction: 'ASC' | 'DESC';
@@ -344,6 +375,10 @@ export class UserTableComponent implements OnInit, OnChanges {
 
   onGridReady(params: GridReadyEvent): void {
     this.gridApi = params.api;
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageChanged.emit(event);
   }
 
   onCellClicked(event: CellClickedEvent): void {}

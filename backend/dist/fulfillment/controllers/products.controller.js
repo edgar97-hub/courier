@@ -31,6 +31,9 @@ let ProductsController = class ProductsController {
     async findVariationValues() {
         return this.fulfillmentService.findDistinctVariationValues();
     }
+    async checkVariationDeletable(id) {
+        return this.fulfillmentService.checkVariationDeletable(id);
+    }
     async findAll() {
         return this.fulfillmentService.findAll();
     }
@@ -73,6 +76,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ProductsController.prototype, "findVariationValues", null);
+__decorate([
+    (0, common_1.Get)('variations/:id/deletable'),
+    __param(0, (0, common_1.Param)('id', common_1.ParseUUIDPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ProductsController.prototype, "checkVariationDeletable", null);
 __decorate([
     (0, common_1.Get)('products'),
     __metadata("design:type", Function),

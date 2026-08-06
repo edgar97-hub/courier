@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { Repository, EntityManager } from 'typeorm';
 import { StockAdjustmentEntity } from '../entities/stock-adjustment.entity';
 import { InventoryEntity } from '../entities/inventory.entity';
 import { FulfillmentProductEntity } from '../entities/fulfillment-product.entity';
@@ -14,7 +14,8 @@ export declare class StockAdjustmentService {
     private readonly warehouseRepository;
     private readonly kardexService;
     constructor(adjustmentRepository: Repository<StockAdjustmentEntity>, inventoryRepository: Repository<InventoryEntity>, productRepository: Repository<FulfillmentProductEntity>, variationRepository: Repository<ProductVariationEntity>, warehouseRepository: Repository<WarehouseEntity>, kardexService: KardexService);
-    create(dto: CreateStockAdjustmentDto, userId?: string): Promise<StockAdjustmentEntity>;
+    create(dto: CreateStockAdjustmentDto, userId?: string, manager?: EntityManager): Promise<StockAdjustmentEntity>;
+    private createWithManager;
     findPaginated(options: {
         page_number: number;
         page_size: number;

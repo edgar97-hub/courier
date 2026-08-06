@@ -139,9 +139,9 @@ import { User } from '../../../../users/models/user.model';
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Tipo de Operación</mat-label>
               <mat-select formControlName="adjustment_type">
-                <mat-option [value]="'INBOUND'"
+                <!-- <mat-option [value]="'INBOUND'"
                   >Ingreso por Abastecimiento</mat-option
-                >
+                > -->
                 <mat-option [value]="'MANUAL_ADD'"
                   >Ajuste Manual - Suma</mat-option
                 >
@@ -229,7 +229,9 @@ import { User } from '../../../../users/models/user.model';
       .dialog-container {
         display: flex;
         flex-direction: column;
-        height: 100vh;
+        max-height: 90vh;
+        border-radius: 12px;
+        overflow: hidden;
         font-family: 'Inter', sans-serif;
       }
       .dialog-header {
@@ -239,6 +241,7 @@ import { User } from '../../../../users/models/user.model';
         padding: 16px 24px;
         border-bottom: 1px solid #e0e0e0;
         background: #fafafa;
+        flex-shrink: 0;
       }
       .dialog-header h2 {
         margin: 0;
@@ -271,6 +274,7 @@ import { User } from '../../../../users/models/user.model';
         padding: 16px 24px;
         border-top: 1px solid #e0e0e0;
         background: #fafafa;
+        flex-shrink: 0;
       }
       .btn-corp-primary {
         background-color: #f97c06 !important;
@@ -279,6 +283,30 @@ import { User } from '../../../../users/models/user.model';
       .btn-corp-secondary {
         border-color: #f97c06 !important;
         color: #f97c06 !important;
+      }
+
+      /* ===== RESPONSIVE ===== */
+      @media (max-width: 600px) {
+        .dialog-header {
+          padding: 12px 16px;
+        }
+        .dialog-header h2 {
+          font-size: 16px;
+        }
+        .dialog-body {
+          padding: 16px;
+        }
+        .adjustment-form {
+          gap: 12px;
+        }
+        .dialog-footer {
+          padding: 12px 16px;
+          flex-direction: column-reverse;
+          gap: 8px;
+        }
+        .dialog-footer button {
+          width: 100%;
+        }
       }
     `,
   ],

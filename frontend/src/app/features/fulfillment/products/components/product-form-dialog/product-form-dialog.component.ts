@@ -169,6 +169,7 @@ import { User } from '../../../../users/models/user.model';
                       mat-icon-button
                       color="warn"
                       class="btn-remove"
+                      [disabled]="isCheckingDelete"
                       (click)="removeVariation(i)"
                     >
                       <mat-icon>delete</mat-icon>
@@ -252,7 +253,10 @@ import { User } from '../../../../users/models/user.model';
                     </mat-form-field>
                   </div>
 
-                  <div class="form-grid three-columns">
+                  <div
+                    class="form-grid"
+                    [ngClass]="isEditing ? 'three-columns' : 'four-columns'"
+                  >
                     <mat-form-field appearance="outline">
                       <mat-label>Altura (cm)</mat-label>
                       <input
@@ -285,6 +289,24 @@ import { User } from '../../../../users/models/user.model';
                         (focus)="selectInputContent($event)"
                       />
                     </mat-form-field>
+
+                    @if (!isEditing) {
+                      <mat-form-field appearance="outline">
+                        <mat-label>Stock Inicial</mat-label>
+                        <input
+                          matInput
+                          type="number"
+                          formControlName="initial_stock"
+                          min="0"
+                          step="1"
+                          placeholder="0"
+                          (focus)="selectInputContent($event)"
+                        />
+                        @if (variation.get('initial_stock')?.hasError('min')) {
+                          <mat-error>No puede ser negativo</mat-error>
+                        }
+                      </mat-form-field>
+                    }
                   </div>
                 </div>
               }
@@ -446,6 +468,9 @@ import { User } from '../../../../users/models/user.model';
       .form-grid.three-columns {
         grid-template-columns: 1fr 1fr 1fr;
       }
+      .form-grid.four-columns {
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+      }
       .form-grid.variation-dim-row {
         grid-template-columns: 1fr 1fr 1fr 1fr;
       }
@@ -595,6 +620,9 @@ import { User } from '../../../../users/models/user.model';
         .form-grid.three-columns {
           grid-template-columns: 1fr;
         }
+        .form-grid.four-columns {
+          grid-template-columns: 1fr;
+        }
         .form-grid.variation-dim-row {
           grid-template-columns: 1fr;
         }
@@ -654,6 +682,12 @@ export class ProductFormDialogComponent implements OnInit {
   isEditing = false;
   editingProductId: string | null = null;
   isSaving = false;
+  isCheckingDelete = false;
+  private readonly variationBlockLabels: Record<string, string> = {
+    stock: 'tiene stock registrado',
+    movimientos: 'tiene movimientos de stock asociados',
+    ordenes: 'está vinculada a órdenes existentes',
+  };
   allCompanies: User[] = [];
   filteredCompanyList: User[] = [];
   companySearchControl = this.fb.control('');
@@ -765,6 +799,7 @@ export class ProductFormDialogComponent implements OnInit {
             height_cm: [v.height_cm || 0],
             weight_kg: [v.weight_kg || 0],
             min_stock: [v.min_stock || 5],
+            initial_stock: [0],
           }),
         );
       });
@@ -786,6 +821,7 @@ export class ProductFormDialogComponent implements OnInit {
       height_cm: [0],
       weight_kg: [0],
       min_stock: [5],
+      initial_stock: [0, [Validators.min(0)]],
     });
   }
 
@@ -808,7 +844,44 @@ export class ProductFormDialogComponent implements OnInit {
   }
 
   removeVariation(index: number): void {
-    this.variations.removeAt(index);
+    const variation = this.variations.at(index);
+    const id = variation.get('id')?.value;
+
+    if (!id) {
+      this.variations.removeAt(index);
+      return;
+    }
+
+    if (this.isCheckingDelete) return;
+
+    this.isCheckingDelete = true;
+    this.fulfillmentService.checkVariationDeletable(id).subscribe({
+      next: (res) => {
+        this.isCheckingDelete = false;
+        if (res.deletable) {
+          this.variations.removeAt(index);
+        } else {
+          const message = res.reasons
+            .map((r) => this.variationBlockLabels[r] || r)
+            .join(', ');
+          this.snackBar.open(
+            `No se puede eliminar la variación: ${message}.`,
+            'Cerrar',
+            {
+              duration: 5000,
+              panelClass: ['error-snackbar'],
+            },
+          );
+        }
+      },
+      error: () => {
+        this.isCheckingDelete = false;
+        this.snackBar.open('Error al validar la variación', 'Cerrar', {
+          duration: 4000,
+          panelClass: ['error-snackbar'],
+        });
+      },
+    });
   }
 
   private loadCompanies(): void {
@@ -870,8 +943,13 @@ export class ProductFormDialogComponent implements OnInit {
     const formValue = this.productForm.value;
 
     if (this.isEditing && this.editingProductId) {
+      const variations = formValue.variations?.map((v: any) => {
+        const { initial_stock, ...rest } = v;
+        return rest;
+      });
+      const payload = { ...formValue, variations };
       this.fulfillmentService
-        .updateProduct(this.editingProductId, formValue)
+        .updateProduct(this.editingProductId, payload)
         .subscribe({
           next: () => {
             this.snackBar.open('Producto actualizado exitosamente', 'Cerrar', {

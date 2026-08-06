@@ -125,6 +125,13 @@ export class UserService {
     );
   }
 
+  updateUserCompany(id: string, dto: Partial<User>): Observable<User> {
+    const headers = this.getAuthHeaders();
+    return this.http.put<User>(`${this.apiUrl}/edit-user-company/${id}`, dto, { headers }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   deleteUser(id: string): Observable<{}> {
     const headers = this.getAuthHeaders();
     return this.http.delete<{}>(`${this.apiUrl}/delete/${id}`, { headers }).pipe(

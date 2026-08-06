@@ -37,6 +37,11 @@ export class ProductsController {
     return this.fulfillmentService.findDistinctVariationValues();
   }
 
+  @Get('variations/:id/deletable')
+  async checkVariationDeletable(@Param('id', ParseUUIDPipe) id: string) {
+    return this.fulfillmentService.checkVariationDeletable(id);
+  }
+
   @Get('products')
   async findAll() {
     return this.fulfillmentService.findAll();

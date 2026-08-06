@@ -18,10 +18,21 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const fulfillment_product_entity_1 = require("../entities/fulfillment-product.entity");
 const product_variation_entity_1 = require("../entities/product-variation.entity");
+const inventory_entity_1 = require("../entities/inventory.entity");
+const stock_adjustment_entity_1 = require("../entities/stock-adjustment.entity");
+const kardex_entity_1 = require("../entities/kardex.entity");
+const stock_adjustment_entity_2 = require("../entities/stock-adjustment.entity");
+const order_item_entity_1 = require("../../orders/entities/order-item.entity");
+const stock_adjustment_service_1 = require("./stock-adjustment.service");
 let FulfillmentService = class FulfillmentService {
-    constructor(productRepository, variationRepository) {
+    constructor(productRepository, variationRepository, inventoryRepository, adjustmentRepository, kardexRepository, stockAdjustmentService, dataSource) {
         this.productRepository = productRepository;
         this.variationRepository = variationRepository;
+        this.inventoryRepository = inventoryRepository;
+        this.adjustmentRepository = adjustmentRepository;
+        this.kardexRepository = kardexRepository;
+        this.stockAdjustmentService = stockAdjustmentService;
+        this.dataSource = dataSource;
     }
     async create(dto) {
         const { variations, ...productData } = dto;
@@ -43,11 +54,34 @@ let FulfillmentService = class FulfillmentService {
             const product = queryRunner.manager.create(fulfillment_product_entity_1.FulfillmentProductEntity, productData);
             const savedProduct = await queryRunner.manager.save(fulfillment_product_entity_1.FulfillmentProductEntity, product);
             if (variations && variations.length > 0) {
-                const variationEntities = variations.map((v) => queryRunner.manager.create(product_variation_entity_1.ProductVariationEntity, {
-                    ...v,
-                    product_id: savedProduct.id,
-                }));
-                await queryRunner.manager.save(product_variation_entity_1.ProductVariationEntity, variationEntities);
+                const variationEntities = variations.map((v) => {
+                    const { initial_stock, ...variationData } = v;
+                    return queryRunner.manager.create(product_variation_entity_1.ProductVariationEntity, {
+                        ...variationData,
+                        product_id: savedProduct.id,
+                    });
+                });
+                const savedVariations = await queryRunner.manager.save(product_variation_entity_1.ProductVariationEntity, variationEntities);
+                const initialStockIndexes = variations.reduce((acc, v, i) => {
+                    const initialStock = Number(v.initial_stock) || 0;
+                    if (initialStock > 0)
+                        acc.push(i);
+                    return acc;
+                }, []);
+                if (initialStockIndexes.length > 0) {
+                    const warehouse = await this.stockAdjustmentService.getMainWarehouse();
+                    for (const i of initialStockIndexes) {
+                        await this.stockAdjustmentService.create({
+                            adjustment_type: stock_adjustment_entity_2.ADJUSTMENT_TYPE.INBOUND,
+                            quantity: Number(variations[i].initial_stock),
+                            observation: 'Stock inicial al crear producto',
+                            company_id: productData.company_id,
+                            product_id: savedProduct.id,
+                            variation_id: savedVariations[i].id,
+                            warehouse_id: warehouse.id,
+                        }, undefined, queryRunner.manager);
+                    }
+                }
             }
             await queryRunner.commitTransaction();
             return this.productRepository.findOne({
@@ -168,16 +202,37 @@ let FulfillmentService = class FulfillmentService {
             if (variations) {
                 for (const v of variations) {
                     if (v.id) {
-                        const { id: variationId, ...updateData } = v;
+                        const { id: variationId, initial_stock, ...updateData } = v;
                         await queryRunner.manager.update(product_variation_entity_1.ProductVariationEntity, variationId, updateData);
                     }
                     else {
+                        const { initial_stock, ...variationData } = v;
                         const newVariation = queryRunner.manager.create(product_variation_entity_1.ProductVariationEntity, {
-                            ...v,
+                            ...variationData,
                             product_id: id,
                         });
                         await queryRunner.manager.save(product_variation_entity_1.ProductVariationEntity, newVariation);
                     }
+                }
+                const existingVariations = await queryRunner.manager.find(product_variation_entity_1.ProductVariationEntity, { where: { product_id: id } });
+                const keptIds = new Set(variations.filter((v) => v.id).map((v) => v.id));
+                const removed = existingVariations.filter((v) => !keptIds.has(v.id));
+                if (removed.length > 0) {
+                    const reasons = await this.getVariationBlockReasons(removed.map((v) => v.id));
+                    if (reasons.length > 0) {
+                        const labels = {
+                            stock: 'tiene stock registrado',
+                            movimientos: 'tiene movimientos de stock asociados',
+                            ordenes: 'está vinculada a órdenes existentes',
+                        };
+                        const skuLabel = removed
+                            .map((v) => `[${v.sku}]`)
+                            .join(', ');
+                        throw new common_1.BadRequestException(`No se puede eliminar la variación ${skuLabel}: ${reasons
+                            .map((r) => labels[r])
+                            .join(', ')}.`);
+                    }
+                    await queryRunner.manager.remove(product_variation_entity_1.ProductVariationEntity, removed);
                 }
             }
             await queryRunner.commitTransaction();
@@ -200,7 +255,68 @@ let FulfillmentService = class FulfillmentService {
             throw new common_1.ConflictException('El SKU ya existe en otro producto. Verifique que cada variación tenga un SKU único.');
         }
     }
+    async checkVariationDeletable(variationId) {
+        const variation = await this.variationRepository.findOne({
+            where: { id: variationId },
+        });
+        if (!variation) {
+            throw new common_1.NotFoundException('Variación no encontrada');
+        }
+        const reasons = await this.getVariationBlockReasons([variationId]);
+        return { deletable: reasons.length === 0, reasons };
+    }
+    async getVariationBlockReasons(variationIds, productId) {
+        const reasons = [];
+        if (variationIds.length === 0)
+            return reasons;
+        const stockCount = await this.inventoryRepository
+            .createQueryBuilder('inv')
+            .where('inv.variation_id IN (:...variationIds)', { variationIds })
+            .andWhere('inv.stock > 0')
+            .getCount();
+        if (stockCount > 0)
+            reasons.push('stock');
+        const movementCount = await this.adjustmentRepository
+            .createQueryBuilder('sa')
+            .where('sa.product_id = :productId', { productId })
+            .orWhere('sa.variation_id IN (:...variationIds)', { variationIds })
+            .getCount();
+        const kardexCount = await this.kardexRepository
+            .createQueryBuilder('k')
+            .where('k.product_id = :productId', { productId })
+            .orWhere('k.variation_id IN (:...variationIds)', { variationIds })
+            .getCount();
+        if (movementCount > 0 || kardexCount > 0)
+            reasons.push('movimientos');
+        const orderItemRepository = this.dataSource.getRepository(order_item_entity_1.OrderItemEntity);
+        const orderCount = await orderItemRepository
+            .createQueryBuilder('oi')
+            .where('oi.product_id = :productId', { productId })
+            .orWhere('oi.variation_id IN (:...variationIds)', { variationIds })
+            .getCount();
+        if (orderCount > 0)
+            reasons.push('ordenes');
+        return reasons;
+    }
     async remove(id) {
+        const product = await this.productRepository.findOne({
+            where: { id },
+            relations: ['variations'],
+        });
+        if (!product) {
+            throw new common_1.NotFoundException('Producto no encontrado');
+        }
+        const variationIds = product.variations.map((v) => v.id);
+        const reasons = await this.getVariationBlockReasons(variationIds, id);
+        if (reasons.includes('stock')) {
+            throw new common_1.BadRequestException('No se puede eliminar el producto porque tiene stock registrado. Primero gestione su inventario.');
+        }
+        if (reasons.includes('movimientos')) {
+            throw new common_1.BadRequestException('No se puede eliminar el producto porque tiene movimientos de stock asociados.');
+        }
+        if (reasons.includes('ordenes')) {
+            throw new common_1.BadRequestException('No se puede eliminar el producto porque está vinculado a órdenes existentes.');
+        }
         await this.productRepository.delete(id);
     }
 };
@@ -209,7 +325,15 @@ exports.FulfillmentService = FulfillmentService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(fulfillment_product_entity_1.FulfillmentProductEntity)),
     __param(1, (0, typeorm_1.InjectRepository)(product_variation_entity_1.ProductVariationEntity)),
+    __param(2, (0, typeorm_1.InjectRepository)(inventory_entity_1.InventoryEntity)),
+    __param(3, (0, typeorm_1.InjectRepository)(stock_adjustment_entity_1.StockAdjustmentEntity)),
+    __param(4, (0, typeorm_1.InjectRepository)(kardex_entity_1.KardexEntity)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        typeorm_2.Repository,
+        typeorm_2.Repository,
+        typeorm_2.Repository,
+        stock_adjustment_service_1.StockAdjustmentService,
+        typeorm_2.DataSource])
 ], FulfillmentService);
 //# sourceMappingURL=products.service.js.map

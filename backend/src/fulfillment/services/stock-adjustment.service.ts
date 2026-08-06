@@ -1,10 +1,10 @@
+import { Injectable } from '@nestjs/common';
 import {
-  Injectable,
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Brackets, QueryRunner } from 'typeorm';
+import { Repository, Brackets, QueryRunner, EntityManager } from 'typeorm';
 import {
   StockAdjustmentEntity,
   ADJUSTMENT_TYPE,
@@ -37,95 +37,23 @@ export class StockAdjustmentService {
   async create(
     dto: CreateStockAdjustmentDto,
     userId?: string,
+    manager?: EntityManager,
   ): Promise<StockAdjustmentEntity> {
+    if (manager) {
+      return this.createWithManager(dto, userId, manager);
+    }
+
     const queryRunner: QueryRunner =
       this.inventoryRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      // Find or create inventory record for this variation + warehouse
-      let inventory = await queryRunner.manager.findOne(InventoryEntity, {
-        where: {
-          variation_id: dto.variation_id,
-          warehouse_id: dto.warehouse_id,
-        },
-      });
-
-      if (!inventory) {
-        inventory = queryRunner.manager.create(InventoryEntity, {
-          variation_id: dto.variation_id,
-          warehouse_id: dto.warehouse_id,
-          stock: 0,
-        });
-        await queryRunner.manager.save(InventoryEntity, inventory);
-      }
-
-      const stockBefore = inventory.stock;
-      let stockAfter = stockBefore;
-
-      switch (dto.adjustment_type) {
-        case ADJUSTMENT_TYPE.INBOUND:
-        case ADJUSTMENT_TYPE.MANUAL_ADD:
-          stockAfter = stockBefore + dto.quantity;
-          break;
-        case ADJUSTMENT_TYPE.MANUAL_SUBTRACT:
-          if (stockBefore < dto.quantity) {
-            throw new BadRequestException(
-              `Stock insuficiente. Stock actual: ${stockBefore}, cantidad a restar: ${dto.quantity}`,
-            );
-          }
-          stockAfter = stockBefore - dto.quantity;
-          break;
-      }
-
-      await queryRunner.manager.update(InventoryEntity, inventory.id, {
-        stock: stockAfter,
-      });
-
-      const adjustment = queryRunner.manager.create(StockAdjustmentEntity, {
-        adjustment_type: dto.adjustment_type,
-        quantity: dto.quantity,
-        observation: dto.observation,
-        company_id: dto.company_id,
-        product_id: dto.product_id,
-        variation_id: dto.variation_id,
-        warehouse_id: dto.warehouse_id,
-        status: ADJUSTMENT_STATUS.REGISTERED,
-      });
-
-      const saved = await queryRunner.manager.save(
-        StockAdjustmentEntity,
-        adjustment,
-      );
-
-      // Create kardex entry
-      const movementTypeMap: Record<string, KARDEX_MOVEMENT_TYPE> = {
-        [ADJUSTMENT_TYPE.INBOUND]: KARDEX_MOVEMENT_TYPE.INBOUND,
-        [ADJUSTMENT_TYPE.MANUAL_ADD]: KARDEX_MOVEMENT_TYPE.MANUAL_ADD,
-        [ADJUSTMENT_TYPE.MANUAL_SUBTRACT]: KARDEX_MOVEMENT_TYPE.MANUAL_SUBTRACT,
-      };
-
-      await this.kardexService.create(
-        {
-          movement_type:
-            movementTypeMap[dto.adjustment_type] ||
-            KARDEX_MOVEMENT_TYPE.MANUAL_ADD,
-          quantity: dto.quantity,
-          stock_before: stockBefore,
-          stock_after: stockAfter,
-          observation: dto.observation,
-          responsible_user_id: userId,
-          reference_id: saved.id,
-          reference_type: 'stock_adjustment',
-          company_id: dto.company_id,
-          product_id: dto.product_id,
-          variation_id: dto.variation_id,
-          warehouse_id: dto.warehouse_id,
-        },
+      const saved = await this.createWithManager(
+        dto,
+        userId,
         queryRunner.manager,
       );
-
       await queryRunner.commitTransaction();
       return saved;
     } catch (error) {
@@ -134,6 +62,93 @@ export class StockAdjustmentService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  private async createWithManager(
+    dto: CreateStockAdjustmentDto,
+    userId: string | undefined,
+    manager: EntityManager,
+  ): Promise<StockAdjustmentEntity> {
+    // Find or create inventory record for this variation + warehouse
+    let inventory = await manager.findOne(InventoryEntity, {
+      where: {
+        variation_id: dto.variation_id,
+        warehouse_id: dto.warehouse_id,
+      },
+    });
+
+    if (!inventory) {
+      inventory = manager.create(InventoryEntity, {
+        variation_id: dto.variation_id,
+        warehouse_id: dto.warehouse_id,
+        stock: 0,
+      });
+      await manager.save(InventoryEntity, inventory);
+    }
+
+    const stockBefore = inventory.stock;
+    let stockAfter = stockBefore;
+
+    switch (dto.adjustment_type) {
+      case ADJUSTMENT_TYPE.INBOUND:
+      case ADJUSTMENT_TYPE.MANUAL_ADD:
+        stockAfter = stockBefore + dto.quantity;
+        break;
+      case ADJUSTMENT_TYPE.MANUAL_SUBTRACT:
+        if (stockBefore < dto.quantity) {
+          throw new BadRequestException(
+            `Stock insuficiente. Stock actual: ${stockBefore}, cantidad a restar: ${dto.quantity}`,
+          );
+        }
+        stockAfter = stockBefore - dto.quantity;
+        break;
+    }
+
+    await manager.update(InventoryEntity, inventory.id, {
+      stock: stockAfter,
+    });
+
+    const adjustment = manager.create(StockAdjustmentEntity, {
+      adjustment_type: dto.adjustment_type,
+      quantity: dto.quantity,
+      observation: dto.observation,
+      company_id: dto.company_id,
+      product_id: dto.product_id,
+      variation_id: dto.variation_id,
+      warehouse_id: dto.warehouse_id,
+      status: ADJUSTMENT_STATUS.REGISTERED,
+    });
+
+    const saved = await manager.save(StockAdjustmentEntity, adjustment);
+
+    // Create kardex entry
+    const movementTypeMap: Record<string, KARDEX_MOVEMENT_TYPE> = {
+      [ADJUSTMENT_TYPE.INBOUND]: KARDEX_MOVEMENT_TYPE.INBOUND,
+      [ADJUSTMENT_TYPE.MANUAL_ADD]: KARDEX_MOVEMENT_TYPE.MANUAL_ADD,
+      [ADJUSTMENT_TYPE.MANUAL_SUBTRACT]: KARDEX_MOVEMENT_TYPE.MANUAL_SUBTRACT,
+    };
+
+    await this.kardexService.create(
+      {
+        movement_type:
+          movementTypeMap[dto.adjustment_type] ||
+          KARDEX_MOVEMENT_TYPE.MANUAL_ADD,
+        quantity: dto.quantity,
+        stock_before: stockBefore,
+        stock_after: stockAfter,
+        observation: dto.observation,
+        responsible_user_id: userId,
+        reference_id: saved.id,
+        reference_type: 'stock_adjustment',
+        company_id: dto.company_id,
+        product_id: dto.product_id,
+        variation_id: dto.variation_id,
+        warehouse_id: dto.warehouse_id,
+      },
+      manager,
+    );
+
+    return saved;
   }
 
   async findPaginated(options: {

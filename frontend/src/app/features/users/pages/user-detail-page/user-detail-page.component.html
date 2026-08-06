@@ -1,0 +1,167 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2>Detalles del negocio</h2>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading-container">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+  } @else if (user) {
+    <form class="detail-card" [formGroup]="userForm" (ngSubmit)="onSubmit()">
+      <section class="form-section">
+        <h3 class="section-title">
+          <mat-icon>person_outline</mat-icon>
+          Información Básica
+        </h3>
+        <div class="form-grid two-columns">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre de Usuario</mat-label>
+            <input matInput formControlName="username" readonly />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Correo</mat-label>
+            <input matInput formControlName="email" type="email" readonly />
+          </mat-form-field>
+        </div>
+      </section>
+
+      <mat-divider class="section-divider"></mat-divider>
+
+      <section class="form-section">
+        <h3 class="section-title">
+          <mat-icon>featured_play_list</mat-icon>
+          Característica del Negocio
+        </h3>
+        <div class="form-grid two-columns">
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de Negocio</mat-label>
+            <input matInput formControlName="business_type" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre del Negocio</mat-label>
+            <input matInput formControlName="business_name" />
+          </mat-form-field>
+        </div>
+        <mat-form-field appearance="outline" class="full-width-field">
+          <mat-label>Distrito del Negocio</mat-label>
+          <input matInput formControlName="business_district" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width-field">
+          <mat-label>Dirección del Negocio</mat-label>
+          <input matInput formControlName="business_address" />
+        </mat-form-field>
+        <div class="form-grid two-columns">
+          <mat-form-field appearance="outline">
+            <mat-label>Número de teléfono del Negocio</mat-label>
+            <input matInput formControlName="business_phone_number" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Sector del Negocio</mat-label>
+            <input matInput formControlName="business_sector" />
+          </mat-form-field>
+        </div>
+        <div class="form-grid two-columns">
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de documento del Negocio</mat-label>
+            <input matInput formControlName="business_document_type" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Correo electrónico del Negocio</mat-label>
+            <input matInput formControlName="business_email" />
+          </mat-form-field>
+        </div>
+        <div class="form-grid two-columns">
+          <mat-form-field appearance="outline">
+            <mat-label>Número de documento del Negocio</mat-label>
+            <input matInput formControlName="business_document_number" />
+          </mat-form-field>
+        </div>
+        <div class="form-field-group">
+          <label class="checkbox-group-label">Asume el 5% POS</label>
+          <mat-checkbox formControlName="assumes_5_percent_pos" color="primary">
+            Confirmar
+          </mat-checkbox>
+        </div>
+      </section>
+
+      <mat-divider class="section-divider"></mat-divider>
+
+      <section class="form-section">
+        <h3 class="section-title">
+          <mat-icon>attribution</mat-icon>
+          Información del Propietario
+        </h3>
+        <div class="form-grid two-columns">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre del propietario</mat-label>
+            <input matInput formControlName="owner_name" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Número de teléfono del propietario</mat-label>
+            <input matInput formControlName="owner_phone_number" />
+          </mat-form-field>
+        </div>
+        <div class="form-grid two-columns">
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de documento del propietario</mat-label>
+            <input matInput formControlName="owner_document_type" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Número de documento del propietario</mat-label>
+            <input matInput formControlName="owner_document_number" />
+          </mat-form-field>
+        </div>
+        <div class="form-grid two-columns">
+          <mat-form-field appearance="outline">
+            <mat-label>Dirección de correo electrónico del propietario</mat-label>
+            <input matInput formControlName="owner_email_address" />
+          </mat-form-field>
+        </div>
+      </section>
+
+      <mat-divider class="section-divider"></mat-divider>
+
+      <section class="form-section">
+        <h3 class="section-title">
+          <mat-icon>account_balance</mat-icon>
+          Cuenta bancaria
+        </h3>
+        <div class="form-grid two-columns">
+          <mat-form-field appearance="outline">
+            <mat-label>Cuenta bancaria</mat-label>
+            <input matInput formControlName="owner_bank_account" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Titular del número de cuenta</mat-label>
+            <input matInput formControlName="name_account_number_owner" />
+          </mat-form-field>
+        </div>
+      </section>
+
+      <div class="form-actions">
+        <button
+          mat-stroked-button
+          type="button"
+          class="btn-corp-secondary"
+          (click)="onCancel()"
+        >
+          Cancelar
+        </button>
+        <button
+          mat-flat-button
+          type="submit"
+          class="btn-corp-primary"
+          [disabled]="isSaving"
+        >
+          {{ isSaving ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+    </form>
+  } @else {
+    <div class="error-message">
+      <mat-icon>error_outline</mat-icon>
+      <p>No se pudieron cargar los datos del negocio.</p>
+    </div>
+  }
+</div>

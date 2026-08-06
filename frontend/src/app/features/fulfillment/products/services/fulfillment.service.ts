@@ -60,6 +60,15 @@ export class FulfillmentService {
     }>(`${this.apiUrl}/variations/values`, { headers: this.getAuthHeaders() });
   }
 
+  checkVariationDeletable(
+    variationId: string,
+  ): Observable<{ deletable: boolean; reasons: string[] }> {
+    return this.http.get<{ deletable: boolean; reasons: string[] }>(
+      `${this.apiUrl}/variations/${variationId}/deletable`,
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
   getProducts(): Observable<FulfillmentProduct[]> {
     return this.http.get<FulfillmentProduct[]>(`${this.apiUrl}/products`, {
       headers: this.getAuthHeaders(),

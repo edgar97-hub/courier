@@ -186,11 +186,12 @@ export const ProductsStore = signalStore(
           patchState(store, { isLoading: false });
           return true;
         } catch (err: any) {
+          const message = err.error?.message || 'Error al eliminar producto';
           patchState(store, {
-            error: err.message || 'Error al eliminar producto',
+            error: message,
             isLoading: false,
           });
-          snackBar.open(err.message || 'Error al eliminar producto', 'Cerrar', {
+          snackBar.open(message, 'Cerrar', {
             duration: 5000,
             panelClass: ['error-snackbar'],
           });

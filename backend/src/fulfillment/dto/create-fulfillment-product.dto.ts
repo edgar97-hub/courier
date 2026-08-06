@@ -55,6 +55,11 @@ export class CreateVariationDto {
   @IsNumber()
   @Min(0)
   min_stock?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  initial_stock?: number;
 }
 
 export class CreateFulfillmentProductDto {

@@ -10,6 +10,10 @@ export declare class ProductsController {
         sizes: string[];
         models: string[];
     }>;
+    checkVariationDeletable(id: string): Promise<{
+        deletable: boolean;
+        reasons: string[];
+    }>;
     findAll(): Promise<import("../entities/fulfillment-product.entity").FulfillmentProductEntity[]>;
     findProductsPaginated(page_number?: number, page_size?: number, sort_field?: string, sort_direction?: 'ASC' | 'DESC', search_term?: string): Promise<import("../services/products.service").PaginatedProducts>;
     findOne(id: string): Promise<import("../entities/fulfillment-product.entity").FulfillmentProductEntity>;

@@ -93,7 +93,7 @@ import { MatSidenav } from '@angular/material/sidenav';
       transition:
         background-color 0.2s ease-out,
         color 0.2s ease-out;
-      height: 38px;
+      height: 46px;
 
       .menu-item-icon {
         margin-right: 12px;
