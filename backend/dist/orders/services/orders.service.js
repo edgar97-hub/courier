@@ -1207,11 +1207,23 @@ let OrdersService = class OrdersService {
                     message: 'Order not found',
                 });
             }
+            if (updateData.updatedAt) {
+                const clientTime = new Date(updateData.updatedAt).getTime();
+                const dbTime = new Date(orderToUpdate.updatedAt).getTime();
+                if (clientTime !== dbTime) {
+                    throw new error_manager_1.ErrorManager({
+                        type: 'CONFLICT',
+                        message: 'El pedido fue modificado por otro usuario. Recargue e intente nuevamente.',
+                    });
+                }
+            }
+            const isFulfillment = orderToUpdate.items?.some((i) => i.package_type === order_item_entity_1.PackageType.FULFILLMENT);
             if (updateData.company_id) {
                 orderToUpdate.company = { id: updateData.company_id };
             }
             let updatedOrder;
-            if (orderToUpdate &&
+            if (!isFulfillment &&
+                orderToUpdate &&
                 (orderToUpdate.shipping_cost !== updateData.shipping_cost ||
                     orderToUpdate.delivery_district_name !==
                         updateData.delivery_district_name)) {
@@ -1250,6 +1262,12 @@ let OrdersService = class OrdersService {
                 }
             }
             else {
+                if (isFulfillment) {
+                    delete updateData.items;
+                    delete updateData.delivery_district_name;
+                    delete updateData.shipping_cost;
+                    delete updateData.isExpress;
+                }
                 Object.assign(orderToUpdate, updateData);
                 delete orderToUpdate.observation_shipping_cost_modification;
                 updatedOrder = await this.orderRepository.save(orderToUpdate);

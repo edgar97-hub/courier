@@ -238,6 +238,15 @@ export class KardexTableComponent
     }
   }
 
+  private formatVariation(v: any): string {
+    if (!v) return '-';
+    const parts: string[] = [`[${v.sku}]`];
+    if (v.color) parts.push(`Color: ${v.color}`);
+    if (v.size) parts.push(`Talla: ${v.size}`);
+    if (v.model) parts.push(`Modelo: ${v.model}`);
+    return parts.join(' - ');
+  }
+
   colDefs: ColDef[] = [
     {
       headerName: 'Fecha y Hora',
@@ -295,16 +304,9 @@ export class KardexTableComponent
     },
     {
       headerName: 'Variación',
-      valueGetter: (params) => {
-        const v = params.data?.variation;
-        if (!v) return '-';
-        return `[${v.sku}] - Color: ${v.color || '-'} | Talla: ${v.size || '-'}`;
-      },
-      tooltipValueGetter: (params) => {
-        const v = params.data?.variation;
-        if (!v) return '-';
-        return `[${v.sku}] - Color: ${v.color || '-'} | Talla: ${v.size || '-'}`;
-      },
+      valueGetter: (params) => this.formatVariation(params.data?.variation),
+      tooltipValueGetter: (params) =>
+        this.formatVariation(params.data?.variation),
       field: 'sku',
       flex: 0.6,
       minWidth: 160,

@@ -54,13 +54,13 @@
               </td>
               <td class="center">
                 <div class="qty-controls">
-                  <button class="qty-btn-sm" (click)="decrementQuantity(row)" [disabled]="getVariationQuantity(row.variation?.id) <= 0">−</button>
+                  <button type="button" class="qty-btn-sm" (click)="decrementQuantity(row)" [disabled]="getVariationQuantity(row.variation?.id) <= 0">−</button>
                   <span class="qty-value-sm">{{ getVariationQuantity(row.variation?.id) }}</span>
-                  <button class="qty-btn-sm" (click)="incrementQuantity(row)" [disabled]="getVariationQuantity(row.variation?.id) >= row.stock">+</button>
+                  <button type="button" class="qty-btn-sm" (click)="incrementQuantity(row)" [disabled]="getVariationQuantity(row.variation?.id) >= row.stock">+</button>
                 </div>
               </td>
               <td>
-                <button class="add-btn-sm" (click)="addVariationToItems(row)"
+                <button type="button" class="add-btn-sm" (click)="addVariationToItems(row)"
                   [disabled]="!canAddVariation(row)">+ Agregar</button>
               </td>
             </tr>
@@ -134,7 +134,7 @@
                       }
                     </td>
                     <td>
-                      <button class="delete-btn-sm" (click)="removeItem(item.tempId)">
+                      <button type="button" class="delete-btn-sm" (click)="removeItem(item.tempId)">
                         <mat-icon>delete</mat-icon>
                       </button>
                     </td>
@@ -208,7 +208,7 @@
                       }
                     </td>
                     <td>
-                      <button class="delete-btn-sm" (click)="removeItem(item.tempId)">
+                      <button type="button" class="delete-btn-sm" (click)="removeItem(item.tempId)">
                         <mat-icon>delete</mat-icon>
                       </button>
                     </td>

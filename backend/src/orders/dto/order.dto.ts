@@ -184,4 +184,9 @@ export class UpdateOrderRequestDto extends PartialType(OrderDTO) {
   @IsString()
   @IsOptional()
   observation_shipping_cost_modification?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  updatedAt?: string;
 }

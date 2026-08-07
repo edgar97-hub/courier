@@ -173,8 +173,16 @@ export class FulfillmentProductSelectorComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    clearTimeout(this.searchDebounce);
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  reset(): void {
+    this.standardGroupItems.set([]);
+    this.customItems.set([]);
+    this.selectedVariationQuantities.set({});
+    clearTimeout(this.searchDebounce);
   }
 
   private getAuthHeaders(): HttpHeaders {
@@ -458,15 +466,15 @@ export class FulfillmentProductSelectorComponent implements OnInit, OnDestroy {
     const district = this.districtsCache().find(d => d.id === districtId);
     if (!district) return 0;
 
-    const fitsStandard =
-      item.length_cm <= this.staLengthCm() &&
-      item.width_cm <= this.staWidthCm() &&
-      item.height_cm <= this.staHeightCm() &&
-      item.weight_kg <= this.staWeightKg();
+    // const fitsStandard =
+    //   item.length_cm <= this.staLengthCm() &&
+    //   item.width_cm <= this.staWidthCm() &&
+    //   item.height_cm <= this.staHeightCm() &&
+    //   item.weight_kg <= this.staWeightKg();
 
-    if (fitsStandard) {
-      return parseFloat(district.price) || 0;
-    }
+    // if (fitsStandard) {
+    //   return parseFloat(district.price) || 0;
+    // }
 
     const volumetricFactor = this.volumetricFactor();
     if (!volumetricFactor) return 0;
@@ -491,6 +499,11 @@ export class FulfillmentProductSelectorComponent implements OnInit, OnDestroy {
       }
     }
 
+    this.snackBar.open(
+      `No hay ninguna tarifa asociada con el peso (${pesoCobrado.toFixed(2)}) del distrito seleccionado.`,
+      'Cerrar',
+      { duration: 3000, panelClass: ['error-snackbar'] },
+    );
     return 0;
   }
 }

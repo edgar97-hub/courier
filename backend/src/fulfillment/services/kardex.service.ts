@@ -102,6 +102,9 @@ export class KardexService {
             .where('company.username ILIKE :search', { search: term })
             .orWhere('product.name ILIKE :search', { search: term })
             .orWhere('variation.sku ILIKE :search', { search: term })
+            .orWhere('variation.color ILIKE :search', { search: term })
+            .orWhere('variation.size ILIKE :search', { search: term })
+            .orWhere('variation.model ILIKE :search', { search: term })
             .orWhere('k.observation ILIKE :search', { search: term })
             .orWhere('CAST(k.movement_type AS TEXT) ILIKE :search', {
               search: term,

@@ -209,4 +209,5 @@ export interface UpdateOrderRequestDto {
   company_id?: string;
   observation_shipping_cost_modification?: string;
   items: OrderItem[];
+  updatedAt?: string | Date;
 }

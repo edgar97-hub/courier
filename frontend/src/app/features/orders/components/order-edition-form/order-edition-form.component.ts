@@ -154,6 +154,7 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
     'finalPrice',
     'eliminar',
   ];
+  fulfillmentDisplayedColumns: string[] = ['producto', 'cantidad', 'precio'];
   private settingsService = inject(SettingsService);
   multiPackageDiscountPercentage: WritableSignal<number> = signal(0);
   standardPackageLabel: WritableSignal<string> = signal('');
@@ -234,7 +235,10 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
 
     effect(() => {
       this.multiPackageDiscountPercentage();
-      if (this.newItemForm.get('package_type')?.value === PackageType.CUSTOM) {
+      if (
+        !this.isFulfillment &&
+        this.newItemForm.get('package_type')?.value === PackageType.CUSTOM
+      ) {
         this.recalculateTotalCost(this.itemsFormArray.value);
       }
     });
@@ -264,6 +268,22 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
   hasPermissionToEditPercentage(): boolean {
     const userRole = this.appStore.currentUser()?.role;
     return userRole === UserRole.RECEPTIONIST || userRole === UserRole.ADMIN;
+  }
+
+  get isFulfillment(): boolean {
+    if (!this.order) return false;
+    return (
+      this.order.shipment_type === 'FULFILLMENT' ||
+      this.order.items?.some((i) => i.package_type === PackageType.FULFILLMENT)
+    );
+  }
+
+  get fulfillmentItems(): OrderItem[] {
+    return (
+      this.order?.items?.filter(
+        (i) => i.package_type === PackageType.FULFILLMENT,
+      ) || []
+    );
   }
 
   get itemsFormArray(): FormArray {
@@ -309,6 +329,7 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
       .get('delivery_district_id')
       ?.valueChanges.pipe(takeUntil(this.destroy$), distinctUntilChanged())
       .subscribe((newDistrictId) => {
+        if (this.isFulfillment) return;
         this.itemsFormArray.clear();
         this.itemsDataSource.data = this.itemsFormArray.controls;
         this.orderForm.get('shipping_cost')?.setValue(0);
@@ -343,11 +364,13 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
     return district && district.name_and_price ? district.name_and_price : '';
   }
   onDistrictSelected(event: MatAutocompleteSelectedEvent): void {
+    if (this.isFulfillment) return;
     this.orderForm.get('delivery_district_id')?.setValue(event.option.value.id);
     this.orderForm.markAllAsTouched();
   }
 
   clearDistrictSelection(): void {
+    if (this.isFulfillment) return;
     this.districSearchCtrl.setValue('');
     this.orderForm.markAllAsTouched();
     this.orderForm.get('delivery_district_id')?.setValue(null);
@@ -367,6 +390,7 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
       .get('package_type')
       ?.valueChanges.pipe(takeUntil(this.destroy$))
       .subscribe((type) => {
+        if (this.isFulfillment) return;
         const deliveryDistrictId = this.orderForm.get(
           'delivery_district_id'
         )?.value;
@@ -506,10 +530,23 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
           ? PackageType.STANDARD
           : PackageType.CUSTOM
       );
-    if (this.newItemForm.get('package_type')?.value === PackageType.CUSTOM) {
+    if (
+      !this.isFulfillment &&
+      this.newItemForm.get('package_type')?.value === PackageType.CUSTOM
+    ) {
       this.recalculateTotalCost(this.itemsFormArray.value);
     }
     this.itemsDataSource.data = this.itemsFormArray.controls;
+
+    if (this.isFulfillment) {
+      this.orderForm.get('delivery_district_id')?.disable();
+      this.orderForm.get('isExpress')?.disable();
+      const obsControl = this.orderForm.get(
+        'observation_shipping_cost_modification',
+      );
+      obsControl?.disable();
+      obsControl?.clearValidators();
+    }
     // this.orderForm.get('shipping_cost')?.setValue(order.shipping_cost);
   }
 
@@ -784,7 +821,7 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
 
     const formValue = this.orderForm.getRawValue();
     const packageType = this.newItemForm.get('package_type')?.value;
-    if (packageType === PackageType.STANDARD) {
+    if (!this.isFulfillment && packageType === PackageType.STANDARD) {
       const districtId = this.orderForm.get('delivery_district_id')?.value;
       if (!districtId) {
         this.snackBar.open('Por favor, seleccione un distrito.', 'Cerrar', {
@@ -828,27 +865,29 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
       });
       return;
     }
-    formValue.item_description =
-      (formValue.items.length === 1
-        ? '1 Bulto: '
-        : formValue.items.length + ' Bultos: ') +
-      formValue.items
-        .map((item: OrderItem) => {
-          let str =
-            item.description +
-            ' Medidas L:' +
-            item.length_cm +
-            ' x An:' +
-            item.width_cm +
-            ' x Al:  ' +
-            item.height_cm +
-            ' (' +
-            item.weight_kg +
-            'kg)';
+    if (!this.isFulfillment) {
+      formValue.item_description =
+        (formValue.items.length === 1
+          ? '1 Bulto: '
+          : formValue.items.length + ' Bultos: ') +
+        formValue.items
+          .map((item: OrderItem) => {
+            let str =
+              item.description +
+              ' Medidas L:' +
+              item.length_cm +
+              ' x An:' +
+              item.width_cm +
+              ' x Al:  ' +
+              item.height_cm +
+              ' (' +
+              item.weight_kg +
+              'kg)';
 
-          return str;
-        })
-        .join(', ');
+            return str;
+          })
+          .join(', ');
+    }
 
     const updatedOrderData: UpdateOrderRequestDto = {
       isExpress: formValue.isExpress || false,
@@ -863,7 +902,17 @@ export class OrderEditionFormComponent implements OnInit, OnDestroy {
       observation_shipping_cost_modification:
         formValue.observation_shipping_cost_modification,
       items: formValue.items,
+      updatedAt: this.order.updatedAt,
     };
+
+    if (this.isFulfillment) {
+      updatedOrderData.isExpress = this.order.isExpress ?? false;
+      updatedOrderData.delivery_district_name = this.order.delivery_district_name;
+      updatedOrderData.shipping_cost = this.originalShippingCost;
+      // updatedOrderData.item_description = this.order.item_description;
+      delete (updatedOrderData as any).items;
+      delete updatedOrderData.observation_shipping_cost_modification;
+    }
 
     console.log('Submitting Updated Order Data:', updatedOrderData);
 

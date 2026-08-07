@@ -314,7 +314,7 @@
           <button
             mat-menu-item
             (click)="openChangeStatusModal(order)"
-            *ngIf="hasPermision(order)"
+            *ngIf="hasPermision(order) && order.status !== OrderStatus.ANULADO"
           >
             <mat-icon>swap_horiz</mat-icon>
             <span>Cambiar Estado General</span>

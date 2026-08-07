@@ -184,6 +184,8 @@ export class StockQueryListPageComponent implements OnInit {
   ngOnInit(): void {
     if (this.isCompany && this.companyId) {
       this.store.setCompanyFilter(this.companyId);
+    } else {
+      this.store.setCompanyFilter('');
     }
     this.store.loadItems();
   }

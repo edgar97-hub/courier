@@ -40,5 +40,6 @@ declare const UpdateOrderRequestDto_base: import("@nestjs/common").Type<Partial<
 export declare class UpdateOrderRequestDto extends UpdateOrderRequestDto_base {
     company_id?: string;
     observation_shipping_cost_modification?: string;
+    updatedAt?: string;
 }
 export {};

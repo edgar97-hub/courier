@@ -210,4 +210,10 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateOrderRequestDto.prototype, "observation_shipping_cost_modification", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateOrderRequestDto.prototype, "updatedAt", void 0);
 //# sourceMappingURL=order.dto.js.map

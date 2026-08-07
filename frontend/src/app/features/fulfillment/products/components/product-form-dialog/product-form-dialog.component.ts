@@ -108,7 +108,11 @@ import { User } from '../../../../users/models/user.model';
                   [formControl]="companySearchControl"
                   placeholder="Buscar empresa..."
                   required
+                  [disabled]="isCompanyLocked"
                 />
+                @if (isCompanyLocked) {
+                  <mat-hint>Empresa vinculada (Fulfillment deshabilitado)</mat-hint>
+                }
                 <mat-autocomplete
                   #autoCompany="matAutocomplete"
                   (optionSelected)="onCompanySelected($event)"
@@ -691,6 +695,7 @@ export class ProductFormDialogComponent implements OnInit {
   allCompanies: User[] = [];
   filteredCompanyList: User[] = [];
   companySearchControl = this.fb.control('');
+  isCompanyLocked = false;
   allProductNames: string[] = [];
   filteredProductNames: string[] = [];
   allColors: string[] = [];
@@ -888,23 +893,37 @@ export class ProductFormDialogComponent implements OnInit {
     // Load users with role EMPRESA or EMPRESA_DISTRIBUIDOR that have isFulfillmentEnabled=true
     this.userService.getUsers().subscribe({
       next: (users) => {
-        this.allCompanies = users.filter(
-          (u) =>
-            (u.role === 'EMPRESA' || u.role === 'EMPRESA_DISTRIBUIDOR') &&
-            u.isFulfillmentEnabled === true,
+        const roleCompanies = users.filter(
+          (u) => u.role === 'EMPRESA' || u.role === 'EMPRESA_DISTRIBUIDOR',
+        );
+        this.allCompanies = roleCompanies.filter(
+          (u) => u.isFulfillmentEnabled === true,
         );
         this.filteredCompanyList = this.allCompanies;
 
         // If editing, set the company search control to the selected company name
         const product = this.dialogData?.product;
         if (product?.company_id) {
-          const company = this.allCompanies.find(
+          const inList = this.allCompanies.find(
             (c) => c.id === product.company_id,
           );
-          if (company) {
-            this.companySearchControl.setValue(company.username, {
+          if (inList) {
+            this.companySearchControl.setValue(inList.username, {
               emitEvent: false,
             });
+          } else {
+            // Empresa vinculada con fulfillment deshabilitado: se muestra fija,
+            // no seleccionable, para no perder el vínculo del producto.
+            const linked = roleCompanies.find(
+              (c) => c.id === product.company_id,
+            );
+            if (linked) {
+              this.isCompanyLocked = true;
+              this.companySearchControl.setValue(linked.username, {
+                emitEvent: false,
+              });
+              this.companySearchControl.disable();
+            }
           }
         }
 

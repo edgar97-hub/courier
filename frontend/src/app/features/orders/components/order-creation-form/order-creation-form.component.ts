@@ -482,7 +482,16 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
       .get('shipment_type')
       ?.valueChanges.pipe(takeUntil(this.destroy$), distinctUntilChanged())
       .subscribe((val) => {
-        this.isFulfillment.set(val === 'FULFILLMENT');
+        const eraFulfillment = this.isFulfillment();
+        const esFulfillment = val === 'FULFILLMENT';
+        this.isFulfillment.set(esFulfillment);
+
+        if (eraFulfillment !== esFulfillment) {
+          this.itemsFormArray.clear();
+          this.itemsDataSource.data = [];
+          this.orderForm.get('shipping_cost')?.setValue(0);
+          this.fulfillmentSelector?.reset();
+        }
       });
     this.isFulfillment.set(
       this.orderForm.get('shipment_type')?.value === 'FULFILLMENT',
@@ -941,7 +950,7 @@ export class OrderCreationFormComponent implements OnInit, OnDestroy {
         .map((item: OrderItem) => {
           let str =
             item.description +
-            ' Medidas L:' +
+            ' | Medidas L:' +
             item.length_cm +
             ' x An:' +
             item.width_cm +
