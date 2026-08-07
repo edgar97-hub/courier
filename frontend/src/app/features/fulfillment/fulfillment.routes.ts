@@ -3,6 +3,7 @@ import { ProductListPageComponent } from './products/pages/product-list-page/pro
 import { StockAdjustmentListPageComponent } from './stock-adjustments/pages/stock-adjustment-list-page/stock-adjustment-list-page.component';
 import { StockQueryListPageComponent } from './stock-query/pages/stock-query-list-page/stock-query-list-page.component';
 import { KardexListPageComponent } from './kardex/pages/kardex-list-page/kardex-list-page.component';
+import { FulfillmentBannerPageComponent } from './banner-page/fulfillment-banner-page.component';
 
 export const FULFILLMENT_ROUTES: Routes = [
   {
@@ -29,5 +30,10 @@ export const FULFILLMENT_ROUTES: Routes = [
     path: 'kardex',
     component: KardexListPageComponent,
     title: 'Kardex Histórico',
+  },
+  {
+    path: 'banner',
+    component: FulfillmentBannerPageComponent,
+    title: 'Fulfillment',
   },
 ];

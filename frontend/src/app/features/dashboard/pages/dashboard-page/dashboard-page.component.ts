@@ -12,12 +12,12 @@ import { StatusDistributionChartComponent } from '../../components/status-distri
 import {
   DashboardDataService,
   DashboardSummary,
-} from '../../services/dashboard-data.service'; // KpiData y ChartDataEntry ya están en DashboardSummary
+} from '../../services/dashboard-data.service';  
 import { MatCardModule } from '@angular/material/card';
 import { environment } from '../../../../../environments/environment';
 import { PromotionalSetItem } from '../../../settings/models/app-settings.interface';
 import { HttpClient } from '@angular/common/http';
-import { ImageSliderComponent } from '../../components/image-slider/image-slider.component'; // <--- IMPORTA EL SLIDER
+import { ImageSliderComponent } from '../../components/image-slider/image-slider.component';  
 
 @Component({
   selector: 'app-dashboard-page',

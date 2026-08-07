@@ -7,6 +7,7 @@ export type MenuItem = {
   route?: string;
   subItems?: MenuItem[];
   roles?: UserRole[];
+  requiresFulfillment?: boolean;
 };
 
 export const menuItems: MenuItem[] = [
@@ -117,6 +118,7 @@ export const menuItems: MenuItem[] = [
           [UserRole.EMPRESA_DISTRIBUIDOR]: 'Mi Stock',
         },
         route: 'fulfillment/stock-query',
+        requiresFulfillment: true,
       },
       {
         icon: 'receipt_long',
@@ -127,6 +129,7 @@ export const menuItems: MenuItem[] = [
           [UserRole.EMPRESA_DISTRIBUIDOR]: 'Mis Movimientos',
         },
         route: 'fulfillment/kardex',
+        requiresFulfillment: true,
       },
     ],
   },

@@ -116,6 +116,7 @@ export class CustomSidenavComponent implements OnInit, OnDestroy {
     const currentUser = this.appStore.currentUser();
     const userRole = currentUser?.role;
     const isAuthenticated = this.appStore.isAuthenticated();
+    const isFulfillmentEnabled = currentUser?.isFulfillmentEnabled ?? false;
 
     return allItems
       .filter((item) => {
@@ -124,19 +125,29 @@ export class CustomSidenavComponent implements OnInit, OnDestroy {
         return userRole && item.roles.includes(userRole as UserRole);
       })
       .map((item) => {
-        const adapted = this.filterSubItemsRecursively(item, userRole, isAuthenticated);
+        const adapted = this.filterSubItemsRecursively(item, userRole, isAuthenticated, isFulfillmentEnabled);
         const roleLabel = adapted.labelByRole && userRole && adapted.labelByRole[userRole as UserRole];
-        if (roleLabel) {
-          return { ...adapted, label: roleLabel };
+        let result = roleLabel ? { ...adapted, label: roleLabel } : { ...adapted };
+
+        if (item.label === 'Fulfillment') {
+          const isCompany =
+            userRole === UserRole.COMPANY ||
+            userRole === UserRole.EMPRESA_DISTRIBUIDOR;
+          if (isCompany && !isFulfillmentEnabled) {
+            result = { ...result, route: 'fulfillment/banner' };
+          } else if (isCompany && isFulfillmentEnabled && result.subItems?.length) {
+            result = { ...result, route: result.subItems[0].route };
+          }
         }
-        return adapted;
+        return result;
       });
   });
 
   private filterSubItemsRecursively(
     item: MenuItem,
     userRole: string | null | undefined,
-    isAuthenticated: boolean
+    isAuthenticated: boolean,
+    isFulfillmentEnabled: boolean
   ): MenuItem {
     if (item.subItems && item.subItems.length > 0) {
       const visibleSubItems = item.subItems
@@ -145,8 +156,17 @@ export class CustomSidenavComponent implements OnInit, OnDestroy {
           if (!child.roles || child.roles.length === 0) return true;
           return userRole && child.roles.includes(userRole as UserRole);
         })
+        .filter((child) => {
+          if (
+            child.requiresFulfillment &&
+            !isFulfillmentEnabled &&
+            (userRole === UserRole.COMPANY || userRole === UserRole.EMPRESA_DISTRIBUIDOR)
+          )
+            return false;
+          return true;
+        })
         .map((child) => {
-          const adapted = this.filterSubItemsRecursively(child, userRole, isAuthenticated);
+          const adapted = this.filterSubItemsRecursively(child, userRole, isAuthenticated, isFulfillmentEnabled);
           const roleLabel = adapted.labelByRole && userRole && adapted.labelByRole[userRole as UserRole];
           if (roleLabel) {
             return { ...adapted, label: roleLabel };
