@@ -286,7 +286,7 @@ export class KardexTableComponent
         placeholder: 'Buscar...',
         onFilterChanged: (value: string) => this.onTextFilter('company', value),
       },
-    },
+    },  
     {
       headerName: 'Producto',
       valueGetter: (params) => {
