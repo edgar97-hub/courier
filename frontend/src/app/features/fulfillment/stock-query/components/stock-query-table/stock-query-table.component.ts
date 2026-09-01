@@ -193,7 +193,7 @@ export class StockQueryTableComponent
     ctrlV: 'Ctrl+V',
   };
 
-  colDefs: ColDef[] = [
+  private allColDefs: ColDef[] = [
     {
       headerName: 'Usuario (Empresa)',
       valueGetter: (params) => {
@@ -323,6 +323,8 @@ export class StockQueryTableComponent
     },
   ];
 
+  colDefs: ColDef[] = [];
+
   defaultColDef: ColDef = {
     sortable: true,
     filter: false,
@@ -330,7 +332,9 @@ export class StockQueryTableComponent
     floatingFilter: false,
   };
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.colDefs = this.buildColDefs();
+  }
 
   ngAfterViewInit(): void {
     if (this.grid?.api) {
@@ -341,11 +345,20 @@ export class StockQueryTableComponent
 
   ngOnDestroy(): void {
     if (this.listenerRegistered && this.gridApi) {
-      this.gridApi.removeEventListener('sortChanged', this.handleGridSortChanged);
+      this.gridApi.removeEventListener(
+        'sortChanged',
+        this.handleGridSortChanged,
+      );
     }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['isCompany']) {
+      this.colDefs = this.buildColDefs();
+      if (this.gridApi) {
+        this.gridApi.setGridOption('columnDefs', this.colDefs);
+      }
+    }
     if (changes['rowData'] && this.gridApi) {
       this.gridApi.setGridOption('rowData', this.rowData);
     }
@@ -354,9 +367,14 @@ export class StockQueryTableComponent
   onGridReady(params: GridReadyEvent): void {
     this.gridApi = params.api;
     this.registerSortListener();
-    if (this.isCompany) {
-      params.api.setColumnsVisible(['company'], false);
-    }
+    this.colDefs = this.buildColDefs();
+    params.api.setGridOption('columnDefs', this.colDefs);
+  }
+
+  private buildColDefs(): ColDef[] {
+    return this.isCompany
+      ? this.allColDefs.filter((col) => col.field !== 'company')
+      : [...this.allColDefs];
   }
 
   onCellClicked(event: CellClickedEvent): void {}

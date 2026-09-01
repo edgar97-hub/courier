@@ -26,7 +26,6 @@ export interface PaginatedRegistrations {
 })
 export class DistributorRegistrationService {
   private http = inject(HttpClient);
-  // Asegúrate de que el endpoint coincida con tu backend.
   private apiUrl = `${environment.apiUrl}/distributor-records`;
 
   private authService = inject(AuthService);
@@ -43,15 +42,6 @@ export class DistributorRegistrationService {
     return new HttpHeaders({ 'Content-Type': 'application/json' });
   }
 
-  /**
-   * Obtiene una lista paginada, ordenada y filtrada de registros.
-   * Este método es utilizado por la tabla inteligente (server-side).
-   * @param page El número de página a solicitar.
-   * @param limit La cantidad de registros por página.
-   * @param sortField El campo por el cual ordenar.
-   * @param sortOrder La dirección del orden ('ASC' o 'DESC').
-   * @param search El término de búsqueda a aplicar.
-   */
   getMyRegistrationsPaginated(
     page: number,
     limit: number,
@@ -59,7 +49,7 @@ export class DistributorRegistrationService {
     sortOrder: string,
     search: string,
     startDate: Date | null,
-    endDate: Date | null
+    endDate: Date | null,
   ): Observable<PaginatedRegistrations> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
@@ -84,10 +74,6 @@ export class DistributorRegistrationService {
     });
   }
 
-  /**
-   * Envía los datos de un nuevo registro manual al backend para su creación.
-   * @param dto Los datos del formulario.
-   */
   createRegistration(dto: any): Observable<DistributorRegistration> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
@@ -97,54 +83,41 @@ export class DistributorRegistrationService {
     return this.http.post<DistributorRegistration>(
       this.apiUrl + '/create',
       dto,
-      { headers }
+      { headers },
     );
   }
 
-  /**
-   * Actualiza un registro existente.
-   * @param id El ID del registro a actualizar.
-   * @param dto Los campos a modificar.
-   */
   updateRegistration(
     id: string,
-    dto: any
+    dto: any,
   ): Observable<DistributorRegistration> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
       return throwError(
-        () => new Error('No autenticado para actualizar registro.')
+        () => new Error('No autenticado para actualizar registro.'),
       );
     }
     return this.http.patch<DistributorRegistration>(
       `${this.apiUrl}/${id}`,
       dto,
-      { headers }
+      { headers },
     );
   }
 
-  /**
-   * Elimina un registro existente.
-   * @param id El ID del registro a eliminar.
-   */
   deleteRegistration(id: string): Observable<void> {
     const headers = this.getAuthHeaders();
     if (!this.authService.getAccessToken()) {
       return throwError(
-        () => new Error('No autenticado para eliminar registro.')
+        () => new Error('No autenticado para eliminar registro.'),
       );
     }
     return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers });
   }
 
-  /**
-   * Sube un archivo Excel para la creación masiva de registros.
-   * @param file El archivo seleccionado por el usuario.
-   */
   importOrdersFromParsedJson(parsedOrders: any[]): Observable<any> {
     console.log(
       'OrderService: Sending parsed JSON to backend for import',
-      parsedOrders
+      parsedOrders,
     );
 
     const headers = this.getAuthHeaders();

@@ -247,7 +247,7 @@ export class KardexTableComponent
     return parts.join(' - ');
   }
 
-  colDefs: ColDef[] = [
+  private allColDefs: ColDef[] = [
     {
       headerName: 'Fecha y Hora',
       field: 'createdAt',
@@ -423,6 +423,8 @@ export class KardexTableComponent
     },
   ];
 
+  colDefs: ColDef[] = [];
+
   defaultColDef: ColDef = {
     sortable: true,
     filter: false,
@@ -430,7 +432,9 @@ export class KardexTableComponent
     floatingFilter: false,
   };
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.colDefs = this.buildColDefs();
+  }
 
   ngAfterViewInit(): void {
     if (this.grid?.api) {
@@ -446,6 +450,12 @@ export class KardexTableComponent
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['isCompany']) {
+      this.colDefs = this.buildColDefs();
+      if (this.gridApi) {
+        this.gridApi.setGridOption('columnDefs', this.colDefs);
+      }
+    }
     if (changes['rowData'] && this.gridApi) {
       this.gridApi.setGridOption('rowData', this.rowData);
     }
@@ -454,9 +464,14 @@ export class KardexTableComponent
   onGridReady(params: GridReadyEvent): void {
     this.gridApi = params.api;
     this.registerSortListener();
-    if (this.isCompany) {
-      params.api.setColumnsVisible(['company'], false);
-    }
+    this.colDefs = this.buildColDefs();
+    params.api.setGridOption('columnDefs', this.colDefs);
+  }
+
+  private buildColDefs(): ColDef[] {
+    return this.isCompany
+      ? this.allColDefs.filter((col) => col.field !== 'company')
+      : [...this.allColDefs];
   }
 
   private registerSortListener(): void {
