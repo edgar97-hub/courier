@@ -6,7 +6,6 @@ import {
   DeepPartial,
   DeleteResult,
   FindOptionsWhere,
-  In,
   Not,
   QueryRunner,
   Repository,
@@ -328,27 +327,39 @@ export class OrdersService {
         );
 
         const fulfillmentItems = currentOrder.items?.filter(
-          i => i.package_type === PackageType.FULFILLMENT && i.variationId && i.quantity,
+          (i) =>
+            i.package_type === PackageType.FULFILLMENT &&
+            i.variationId &&
+            i.quantity,
         ) as OrderItemEntity[] | undefined;
 
         if (fulfillmentItems && fulfillmentItems.length > 0) {
-          const queryRunner = this.orderRepository.manager.connection.createQueryRunner();
+          const queryRunner =
+            this.orderRepository.manager.connection.createQueryRunner();
           await queryRunner.connect();
           await queryRunner.startTransaction();
           try {
-            const mainWarehouse = await this.stockAdjustmentService.getMainWarehouse();
+            const mainWarehouse =
+              await this.stockAdjustmentService.getMainWarehouse();
             for (const item of fulfillmentItems) {
               if (!item.variationId || !item.quantity) continue;
-              const inventory = await queryRunner.manager.findOne(InventoryEntity, {
-                where: {
-                  variation_id: item.variationId,
-                  warehouse_id: mainWarehouse.id,
+              const inventory = await queryRunner.manager.findOne(
+                InventoryEntity,
+                {
+                  where: {
+                    variation_id: item.variationId,
+                    warehouse_id: mainWarehouse.id,
+                  },
                 },
-              });
+              );
               if (inventory) {
                 const stockBefore = inventory.stock;
                 const stockAfter = stockBefore + item.quantity;
-                await queryRunner.manager.update(InventoryEntity, inventory.id, { stock: stockAfter });
+                await queryRunner.manager.update(
+                  InventoryEntity,
+                  inventory.id,
+                  { stock: stockAfter },
+                );
                 await this.kardexService.create(
                   {
                     movement_type: KARDEX_MOVEMENT_TYPE.ANNUL_REVERSAL,
@@ -484,7 +495,7 @@ export class OrdersService {
             const qtyMultiplier =
               newItem.package_type === PackageType.FULFILLMENT &&
               !newItem.fulfillmentGroupId
-                ? (newItem.quantity || 1)
+                ? newItem.quantity || 1
                 : 1;
             totalShippingCost += newItem.finalPrice * qtyMultiplier;
             orderItems.push(newItem);
@@ -511,12 +522,7 @@ export class OrdersService {
               'yyyy-MM-dd',
             );
           }
-          // orderToCreate.package_size_type = orderDto.package_size_type;
-          // orderToCreate.package_width_cm = orderDto.package_width_cm || 0;
-          // orderToCreate.package_length_cm = orderDto.package_length_cm || 0;
-          // orderToCreate.package_height_cm = orderDto.package_height_cm || 0;
-          // orderToCreate.package_weight_kg = orderDto.package_weight_kg || 0;
-          // orderToCreate.shipping_cost = orderDto.shipping_cost;
+ 
           orderToCreate.shipping_cost = totalShippingCost;
 
           orderToCreate.item_description = orderDto.item_description;
@@ -539,7 +545,7 @@ export class OrdersService {
           );
 
           const hasFulfillmentItems = orderDto.items?.some(
-            item => item.package_type === 'FULFILLMENT'
+            (item) => item.package_type === 'FULFILLMENT',
           );
           if (hasFulfillmentItems) {
             await this.deductFulfillmentStock(
@@ -613,8 +619,7 @@ export class OrdersService {
     savedOrder: OrdersEntity,
     idUser: string,
   ): Promise<void> {
-    const mainWarehouse =
-      await this.stockAdjustmentService.getMainWarehouse();
+    const mainWarehouse = await this.stockAdjustmentService.getMainWarehouse();
 
     for (const itemDto of orderDto.items) {
       if (!itemDto.variationId || !itemDto.quantity) continue;
@@ -668,6 +673,11 @@ export class OrdersService {
       );
     }
   }
+  async generateTrackingCode() {
+    const { customAlphabet } = await import('nanoid');
+    const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 10);
+    return nanoid();
+  }
 
   async importOrdersFromExcelData(
     excelRows: any[],
@@ -679,7 +689,7 @@ export class OrdersService {
 
     let importedCount = 0;
     const errors: { rowExcel: number; message: string; rowData?: any }[] = [];
-    const ordersToSave: Partial<OrdersEntity>[] = []; // Usamos Partial para construir
+    const ordersToSave: Partial<OrdersEntity>[] = [];
 
     // 1. Validar Cabeceras (opcional pero recomendado aquí)
     const firstRow = excelRows[0];
@@ -692,10 +702,10 @@ export class OrdersService {
     }
 
     for (let i = 0; i < excelRows.length; i++) {
+      const errorsBefore = errors.length;
       const excelRowData = excelRows[i];
       const excelRowNumber = i + 2; // +1 porque es 0-indexed, +1 porque la fila 1 es cabecera en Excel
       const orderEntity: Partial<OrdersEntity> = {};
-      let rowHasErrors = false;
 
       // Mapear y validar datos básicos
       for (const excelHeader in excelRowData) {
@@ -720,7 +730,6 @@ export class OrdersService {
           message: `Teléfono del destinatario inválido: '${orderEntity.recipient_phone || ''}'.`,
           rowData: excelRowData,
         });
-        rowHasErrors = true;
       }
 
       if (
@@ -733,7 +742,6 @@ export class OrdersService {
             'Dirección de entrega es requerida y debe tener al menos 5 caracteres.',
           rowData: excelRowData,
         });
-        rowHasErrors = true;
       }
       orderEntity.amount_to_collect_at_delivery =
         orderEntity.amount_to_collect_at_delivery || 0;
@@ -749,7 +757,6 @@ export class OrdersService {
             message: `Monto a cobrar inválido: '${orderEntity.amount_to_collect_at_delivery}'. Debe ser un número`,
             rowData: excelRowData,
           });
-          rowHasErrors = true;
         } else {
           orderEntity.amount_to_collect_at_delivery = amount;
         }
@@ -763,7 +770,6 @@ export class OrdersService {
             'Monto a cobrar es requerido para tipo de envío CONTRAENTREGA.',
           rowData: excelRowData,
         });
-        rowHasErrors = true;
       } else {
         orderEntity.amount_to_collect_at_delivery = 0; // Default para no contraentrega si está vacío
       }
@@ -790,7 +796,6 @@ export class OrdersService {
               message: `Fecha de entrega inválida: '${orderEntity.delivery_date}'. Usar DD/MM/AAAA.`,
               rowData: excelRowData,
             });
-            rowHasErrors = true;
           } else {
             const inputFormat = 'dd/MM/yyyy';
             const parsedDate = parse(
@@ -807,7 +812,6 @@ export class OrdersService {
             message: `Formato de fecha de entrega incorrecto: '${orderEntity.delivery_date}'. Usar DD/MM/AAAA.`,
             rowData: excelRowData,
           });
-          rowHasErrors = true;
         }
       } else {
         errors.push({
@@ -815,10 +819,8 @@ export class OrdersService {
           message: 'Fecha de entrega es requerida.',
           rowData: excelRowData,
         });
-        rowHasErrors = true;
       }
 
-      console.log('VALIDAR DISTRITO CONTRA BASE DE DATOS');
       // VALIDAR DISTRITO CONTRA BASE DE DATOS
       if (orderEntity.delivery_district_name) {
         const district = await this.districtsRepository
@@ -836,7 +838,6 @@ export class OrdersService {
             message: `Distrito '${orderEntity.delivery_district_name}' no encontrado o no válido.`,
             rowData: excelRowData,
           });
-          rowHasErrors = true;
         }
         orderEntity.shipping_cost = district?.price;
       } else {
@@ -845,7 +846,6 @@ export class OrdersService {
           message: 'Distrito es requerido.',
           rowData: excelRowData,
         });
-        rowHasErrors = true;
       }
 
       const standardItem = new OrderItemEntity();
@@ -869,21 +869,11 @@ export class OrdersService {
       // 4. Asignación (TypeORM guardará esto automáticamente gracias a cascade: true)
       orderEntity.items = [standardItem];
 
-      console.log('rowHasErrors');
-      if (!rowHasErrors) {
+      if (errors.length === errorsBefore) {
         orderEntity.status = STATES.REGISTERED;
         orderEntity.user = { id: idUser } as UsersEntity;
         orderEntity.company = { id: idUser } as UsersEntity;
-        async function generateTrackingCode() {
-          const { customAlphabet } = await import('nanoid');
-          const nanoid = customAlphabet(
-            '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-            10,
-          );
-          return nanoid();
-        }
-
-        orderEntity.tracking_code = await generateTrackingCode();
+        orderEntity.tracking_code = await this.generateTrackingCode();
         orderEntity.isExpress = false;
         ordersToSave.push(orderEntity);
       }
@@ -989,108 +979,6 @@ export class OrdersService {
     };
   }
 
-  // private async applyDiscountsToBatch(
-  //   queryRunner: QueryRunner,
-  //   newOrders: OrdersEntity[],
-  // ): Promise<void> {
-  //   // 1. Obtener configuración global de reglas una sola vez
-  //   const settings = await queryRunner.manager.findOne(SettingsEntity, {
-  //     where: {},
-  //   });
-  //   if (!settings?.volumeDiscountRules) return;
-
-  //   // 2. Identificar combinaciones únicas de Empresa + Fecha en este lote
-  //   // Formato de la llave: "companyId|deliveryDate"
-  //   const companyDatePairs = [
-  //     ...new Set(newOrders.map((o) => `${o.company.id}|${o.delivery_date}`)),
-  //   ];
-
-  //   // Cache para no consultar el estado del usuario repetidamente
-  //   const userStatusCache = new Map<string, boolean>();
-
-  //   // 3. Procesar cada grupo (Empresa + Fecha) de forma independiente
-  //   for (const pair of companyDatePairs) {
-  //     const [companyId, dateStr] = pair.split('|');
-  //     if (!dateStr || dateStr === 'null') continue;
-
-  //     // A. Verificar si esta empresa tiene el beneficio (usando cache)
-  //     if (!userStatusCache.has(companyId)) {
-  //       const user = await queryRunner.manager.findOne(UsersEntity, {
-  //         where: { id: companyId },
-  //         select: ['isVolumeDiscountEnabled'],
-  //       });
-  //       userStatusCache.set(companyId, user?.isVolumeDiscountEnabled ?? false);
-  //     }
-
-  //     if (!userStatusCache.get(companyId)) continue;
-
-  //     // B. Traer TODOS los pedidos de ese día para esa empresa específica
-  //     // Ordenamos por 'code' o 'createdAt' para determinar la secuencia real
-  //     const dailyOrders = await queryRunner.manager.find(OrdersEntity, {
-  //       where: {
-  //         company: { id: companyId },
-  //         delivery_date: dateStr,
-  //         status: Not(STATES.CANCELED),
-  //       },
-  //       order: { code: 'ASC' }, // Mantener el orden de llegada
-  //     });
-
-  //     const ordersToUpdate: OrdersEntity[] = [];
-
-  //     // C. Calcular secuencia y aplicar reglas
-  //     for (let i = 0; i < dailyOrders.length; i++) {
-  //       const order = dailyOrders[i];
-  //       const sequenceNumber = i + 1; // Posición del pedido en el día
-
-  //       // ¿Es este pedido uno de los que acabamos de insertar en este lote?
-  //       // (Solo aplicamos descuento a los nuevos para no recalcular pedidos viejos ya cerrados)
-  //       const isPartOfCurrentBatch = newOrders.some((no) => no.id === order.id);
-  //       if (!isPartOfCurrentBatch) continue;
-
-  //       // Buscar regla aplicable para este número de secuencia y fecha
-  //       const activeRule = settings.volumeDiscountRules.find((rule) => {
-  //         const isInRange =
-  //           sequenceNumber >= rule.minOrders &&
-  //           sequenceNumber <= rule.maxOrders;
-  //         // Validar fechas...
-  //         let isDateValid = true;
-  //         if (rule.startDate && isBefore(order.delivery_date, rule.startDate))
-  //           isDateValid = false;
-  //         if (rule.endDate && isAfter(order.delivery_date, rule.endDate))
-  //           isDateValid = false;
-  //         return rule.isActive && isInRange && isDateValid;
-  //       });
-
-  //       if (activeRule) {
-  //         const currentPrice = order.shipping_cost;
-  //         const discountVal =
-  //           (currentPrice * activeRule.discountPercentage) / 100;
-
-  //         order.volumeDiscountAmount = parseFloat(discountVal.toFixed(2));
-  //         order.shipping_cost = parseFloat(
-  //           (currentPrice - discountVal).toFixed(2),
-  //         );
-
-  //         // Snapshot de la regla para auditoría física
-  //         order.appliedVolumeDiscountRule = {
-  //           ruleId: activeRule.id,
-  //           percentage: activeRule.discountPercentage,
-  //           sequenceNumber: sequenceNumber,
-  //           range: `${activeRule.minOrders} - ${activeRule.maxOrders}`,
-  //           appliedAtDate: new Date().toISOString(),
-  //         };
-
-  //         ordersToUpdate.push(order);
-  //       }
-  //     }
-
-  //     // 4. Guardar cambios del grupo en la base de datos
-  //     if (ordersToUpdate.length > 0) {
-  //       await queryRunner.manager.save(OrdersEntity, ordersToUpdate);
-  //     }
-  //   }
-  // }
-
   private async applyDiscountsToBatch(
     queryRunner: QueryRunner,
     newOrders: OrdersEntity[],
@@ -1104,7 +992,6 @@ export class OrdersService {
       ...new Set(newOrders.map((o) => `${o.company.id}|${o.delivery_date}`)),
     ];
 
-    console.log('affectedGroups', affectedGroups);
 
     const userCache = new Map<string, UsersEntity | null>();
 
@@ -1130,17 +1017,20 @@ export class OrdersService {
         !currentUser.assignedVolumeDiscountRuleIds?.length
       )
         continue;
-      console.log('currentUser', currentUser);
-      // 1. Obtener todos los pedidos del día
-      const dailyOrders = await queryRunner.manager.find(OrdersEntity, {
-        where: {
-          company: { id: companyId },
-          delivery_date: dateStr,
-          status: Not(In([STATES.CANCELED])),
-        },
-        order: { code: 'ASC' },
-      });
-      console.log('dailyOrders', dailyOrders.length);
+      // 1. Obtener todos los pedidos del día (solo columnas necesarias, sin eager items)
+      const dailyOrders = await queryRunner.manager
+        .createQueryBuilder(OrdersEntity, 'o')
+        .select([
+          'o.id',
+          'o.shipping_cost',
+          'o.volumeDiscountAmount',
+          'o.appliedVolumeDiscountRule',
+        ])
+        .where('o.company_id = :companyId', { companyId })
+        .andWhere('o.delivery_date = :dateStr', { dateStr })
+        .andWhere('o.status != :canceled', { canceled: STATES.CANCELED })
+        .orderBy('o.code', 'ASC')
+        .getMany();
       if (dailyOrders.length === 0) continue;
 
       // 2. Filtrar biblioteca de reglas del usuario vigentes para este día
@@ -1150,7 +1040,6 @@ export class OrdersService {
           (!r.startDate || dateStr >= r.startDate) &&
           (!r.endDate || dateStr <= r.endDate),
       );
-      console.log('userRules', userRules);
       if (userRules.length === 0) continue;
 
       // 3. DETECTAR EL MODO DE HOY (Gracias a tu validación, todas las reglas de hoy son del mismo tipo)
@@ -1187,7 +1076,7 @@ export class OrdersService {
             sequenceNumber,
             ordersToUpdate,
           );
-          // this.updateOrderDiscount(order, bestGoal, i + 1, ordersToUpdate);
+          
         }
       }
 
@@ -1211,9 +1100,13 @@ export class OrdersService {
         }
       }
 
-      // 4. Guardado masivo
-      if (ordersToUpdate.length > 0) {
-        await queryRunner.manager.save(OrdersEntity, ordersToUpdate);
+      // 4. Guardado masivo (sin cascade a items)
+      for (const order of ordersToUpdate) {
+        await queryRunner.manager.update(OrdersEntity, order.id, {
+          shipping_cost: order.shipping_cost,
+          volumeDiscountAmount: order.volumeDiscountAmount,
+          appliedVolumeDiscountRule: order.appliedVolumeDiscountRule,
+        });
       }
     }
   }

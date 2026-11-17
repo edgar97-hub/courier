@@ -217,7 +217,9 @@ let OrdersService = class OrdersService {
             }
             else if (body.payload.newStatus === roles_1.STATES.ANNULLED) {
                 await this.cashManagementService.reverseAutomaticIncome(body.payload.orderId);
-                const fulfillmentItems = currentOrder.items?.filter(i => i.package_type === order_item_entity_1.PackageType.FULFILLMENT && i.variationId && i.quantity);
+                const fulfillmentItems = currentOrder.items?.filter((i) => i.package_type === order_item_entity_1.PackageType.FULFILLMENT &&
+                    i.variationId &&
+                    i.quantity);
                 if (fulfillmentItems && fulfillmentItems.length > 0) {
                     const queryRunner = this.orderRepository.manager.connection.createQueryRunner();
                     await queryRunner.connect();
@@ -335,7 +337,7 @@ let OrdersService = class OrdersService {
                         }
                         const qtyMultiplier = newItem.package_type === order_item_entity_1.PackageType.FULFILLMENT &&
                             !newItem.fulfillmentGroupId
-                            ? (newItem.quantity || 1)
+                            ? newItem.quantity || 1
                             : 1;
                         totalShippingCost += newItem.finalPrice * qtyMultiplier;
                         orderItems.push(newItem);
@@ -368,7 +370,7 @@ let OrdersService = class OrdersService {
                     orderToCreate.isExpress = orderDto.isExpress || false;
                     orderToCreate.items = orderItems;
                     const savedOrder = await queryRunner.manager.save(orders_entity_1.OrdersEntity, orderToCreate);
-                    const hasFulfillmentItems = orderDto.items?.some(item => item.package_type === 'FULFILLMENT');
+                    const hasFulfillmentItems = orderDto.items?.some((item) => item.package_type === 'FULFILLMENT');
                     if (hasFulfillmentItems) {
                         await this.deductFulfillmentStock(queryRunner, orderDto, savedOrder, idUser);
                     }
@@ -459,6 +461,11 @@ let OrdersService = class OrdersService {
             }, queryRunner.manager);
         }
     }
+    async generateTrackingCode() {
+        const { customAlphabet } = await Promise.resolve().then(() => require('nanoid'));
+        const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 10);
+        return nanoid();
+    }
     async importOrdersFromExcelData(excelRows, idUser) {
         if (!excelRows || excelRows.length === 0) {
             return { success: false, message: 'No data provided in the Excel file.' };
@@ -474,10 +481,10 @@ let OrdersService = class OrdersService {
             };
         }
         for (let i = 0; i < excelRows.length; i++) {
+            const errorsBefore = errors.length;
             const excelRowData = excelRows[i];
             const excelRowNumber = i + 2;
             const orderEntity = {};
-            let rowHasErrors = false;
             for (const excelHeader in excelRowData) {
                 if (excelRowData.hasOwnProperty(excelHeader)) {
                     const entityKey = EXCEL_HEADER_TO_ENTITY_KEY_MAP[excelHeader.trim().toUpperCase()];
@@ -493,7 +500,6 @@ let OrdersService = class OrdersService {
                     message: `Teléfono del destinatario inválido: '${orderEntity.recipient_phone || ''}'.`,
                     rowData: excelRowData,
                 });
-                rowHasErrors = true;
             }
             if (!orderEntity.delivery_address ||
                 orderEntity.delivery_address.length < 5) {
@@ -502,7 +508,6 @@ let OrdersService = class OrdersService {
                     message: 'Dirección de entrega es requerida y debe tener al menos 5 caracteres.',
                     rowData: excelRowData,
                 });
-                rowHasErrors = true;
             }
             orderEntity.amount_to_collect_at_delivery =
                 orderEntity.amount_to_collect_at_delivery || 0;
@@ -514,7 +519,6 @@ let OrdersService = class OrdersService {
                         message: `Monto a cobrar inválido: '${orderEntity.amount_to_collect_at_delivery}'. Debe ser un número`,
                         rowData: excelRowData,
                     });
-                    rowHasErrors = true;
                 }
                 else {
                     orderEntity.amount_to_collect_at_delivery = amount;
@@ -527,7 +531,6 @@ let OrdersService = class OrdersService {
                     message: 'Monto a cobrar es requerido para tipo de envío CONTRAENTREGA.',
                     rowData: excelRowData,
                 });
-                rowHasErrors = true;
             }
             else {
                 orderEntity.amount_to_collect_at_delivery = 0;
@@ -549,7 +552,6 @@ let OrdersService = class OrdersService {
                             message: `Fecha de entrega inválida: '${orderEntity.delivery_date}'. Usar DD/MM/AAAA.`,
                             rowData: excelRowData,
                         });
-                        rowHasErrors = true;
                     }
                     else {
                         const inputFormat = 'dd/MM/yyyy';
@@ -563,7 +565,6 @@ let OrdersService = class OrdersService {
                         message: `Formato de fecha de entrega incorrecto: '${orderEntity.delivery_date}'. Usar DD/MM/AAAA.`,
                         rowData: excelRowData,
                     });
-                    rowHasErrors = true;
                 }
             }
             else {
@@ -572,9 +573,7 @@ let OrdersService = class OrdersService {
                     message: 'Fecha de entrega es requerida.',
                     rowData: excelRowData,
                 });
-                rowHasErrors = true;
             }
-            console.log('VALIDAR DISTRITO CONTRA BASE DE DATOS');
             if (orderEntity.delivery_district_name) {
                 const district = await this.districtsRepository
                     .createQueryBuilder('d')
@@ -591,7 +590,6 @@ let OrdersService = class OrdersService {
                         message: `Distrito '${orderEntity.delivery_district_name}' no encontrado o no válido.`,
                         rowData: excelRowData,
                     });
-                    rowHasErrors = true;
                 }
                 orderEntity.shipping_cost = district?.price;
             }
@@ -601,7 +599,6 @@ let OrdersService = class OrdersService {
                     message: 'Distrito es requerido.',
                     rowData: excelRowData,
                 });
-                rowHasErrors = true;
             }
             const standardItem = new order_item_entity_1.OrderItemEntity();
             standardItem.package_type = order_item_entity_1.PackageType.STANDARD;
@@ -615,17 +612,11 @@ let OrdersService = class OrdersService {
             standardItem.finalPrice = orderEntity.shipping_cost || 0;
             standardItem.isPrincipal = true;
             orderEntity.items = [standardItem];
-            console.log('rowHasErrors');
-            if (!rowHasErrors) {
+            if (errors.length === errorsBefore) {
                 orderEntity.status = roles_1.STATES.REGISTERED;
                 orderEntity.user = { id: idUser };
                 orderEntity.company = { id: idUser };
-                async function generateTrackingCode() {
-                    const { customAlphabet } = await Promise.resolve().then(() => require('nanoid'));
-                    const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 10);
-                    return nanoid();
-                }
-                orderEntity.tracking_code = await generateTrackingCode();
+                orderEntity.tracking_code = await this.generateTrackingCode();
                 orderEntity.isExpress = false;
                 ordersToSave.push(orderEntity);
             }
@@ -723,7 +714,6 @@ let OrdersService = class OrdersService {
         const affectedGroups = [
             ...new Set(newOrders.map((o) => `${o.company.id}|${o.delivery_date}`)),
         ];
-        console.log('affectedGroups', affectedGroups);
         const userCache = new Map();
         for (const group of affectedGroups) {
             const [companyId, dateStr] = group.split('|');
@@ -744,22 +734,24 @@ let OrdersService = class OrdersService {
             if (!currentUser?.isVolumeDiscountEnabled ||
                 !currentUser.assignedVolumeDiscountRuleIds?.length)
                 continue;
-            console.log('currentUser', currentUser);
-            const dailyOrders = await queryRunner.manager.find(orders_entity_1.OrdersEntity, {
-                where: {
-                    company: { id: companyId },
-                    delivery_date: dateStr,
-                    status: (0, typeorm_2.Not)((0, typeorm_2.In)([roles_1.STATES.CANCELED])),
-                },
-                order: { code: 'ASC' },
-            });
-            console.log('dailyOrders', dailyOrders.length);
+            const dailyOrders = await queryRunner.manager
+                .createQueryBuilder(orders_entity_1.OrdersEntity, 'o')
+                .select([
+                'o.id',
+                'o.shipping_cost',
+                'o.volumeDiscountAmount',
+                'o.appliedVolumeDiscountRule',
+            ])
+                .where('o.company_id = :companyId', { companyId })
+                .andWhere('o.delivery_date = :dateStr', { dateStr })
+                .andWhere('o.status != :canceled', { canceled: roles_1.STATES.CANCELED })
+                .orderBy('o.code', 'ASC')
+                .getMany();
             if (dailyOrders.length === 0)
                 continue;
             const userRules = settings.volumeDiscountRules.filter((r) => currentUser.assignedVolumeDiscountRuleIds.includes(r.id) &&
                 (!r.startDate || dateStr >= r.startDate) &&
                 (!r.endDate || dateStr <= r.endDate));
-            console.log('userRules', userRules);
             if (userRules.length === 0)
                 continue;
             const currentMode = userRules[0].type;
@@ -788,8 +780,12 @@ let OrdersService = class OrdersService {
                     this.updateOrderDiscount(order, activeRange, sequenceNumber, ordersToUpdate);
                 }
             }
-            if (ordersToUpdate.length > 0) {
-                await queryRunner.manager.save(orders_entity_1.OrdersEntity, ordersToUpdate);
+            for (const order of ordersToUpdate) {
+                await queryRunner.manager.update(orders_entity_1.OrdersEntity, order.id, {
+                    shipping_cost: order.shipping_cost,
+                    volumeDiscountAmount: order.volumeDiscountAmount,
+                    appliedVolumeDiscountRule: order.appliedVolumeDiscountRule,
+                });
             }
         }
     }

@@ -29,6 +29,7 @@ export declare class OrdersService {
         errors?: any[];
     }>;
     private deductFulfillmentStock;
+    generateTrackingCode(): Promise<string>;
     importOrdersFromExcelData(excelRows: any[], idUser: string): Promise<ImportResult | undefined>;
     private applyDiscountsToBatch;
     private updateOrderDiscount;

@@ -190,6 +190,7 @@ __decorate([
     __metadata("design:type", Array)
 ], OrdersEntity.prototype, "items", void 0);
 exports.OrdersEntity = OrdersEntity = __decorate([
-    (0, typeorm_1.Entity)({ name: 'orders' })
+    (0, typeorm_1.Entity)({ name: 'orders' }),
+    (0, typeorm_1.Index)('idx_orders_company_delivery_date', ['company', 'delivery_date'])
 ], OrdersEntity);
 //# sourceMappingURL=orders.entity.js.map

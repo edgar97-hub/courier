@@ -2,6 +2,7 @@ import {
   Column,
   Entity,
   Generated,
+  Index,
   OneToMany,
   ManyToOne,
   JoinColumn,
@@ -15,6 +16,7 @@ import { Stop } from 'src/planningEvents/entities/stop.entity';
 import { OrderItemEntity } from './order-item.entity';
 
 @Entity({ name: 'orders' })
+@Index('idx_orders_company_delivery_date', ['company', 'delivery_date'])
 export class OrdersEntity extends BaseEntity {
   @Column({ unique: true })
   @Generated('increment')

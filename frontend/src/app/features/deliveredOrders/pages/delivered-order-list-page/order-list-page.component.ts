@@ -127,6 +127,8 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
       const allFilteredOrders = await this.getAllFilteredOrdersForExport();
       if (allFilteredOrders && allFilteredOrders.length > 0) {
         const dataForSheet = allFilteredOrders.map((order: any) => ({
+          'N° PEDIDO': order.code,
+          TRACKING: order.tracking_code,
           'TIPO DE ENVIO': order.shipment_type,
           'NOMBRE DEL DESTINATARIO': order.recipient_name,
           'TELEFONO DESTINATARIO 9 DIGITOS': order.recipient_phone,
