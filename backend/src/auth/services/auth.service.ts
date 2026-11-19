@@ -12,20 +12,10 @@ export class AuthService {
     username: string,
     password: string,
   ): Promise<UsersEntity | null> {
-    const userByUsername = await this.userService.findBy({
-      key: 'username',
-      value: username,
-    });
-
     const userByEmial = await this.userService.findBy({
       key: 'email',
       value: username,
     });
-
-    if (userByUsername) {
-      const match = await bcrypt.compare(password, userByUsername.password);
-      if (match) return userByUsername;
-    }
 
     if (userByEmial) {
       const match = await bcrypt.compare(password, userByEmial.password);
@@ -59,7 +49,6 @@ export class AuthService {
       accessToken: this.signJWT({
         payload,
         secret: process.env.JWT_SECRET ?? '',
-        // expires: '1h',
         expires: '365d',
       }),
       user,

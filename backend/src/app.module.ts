@@ -5,17 +5,15 @@ import { DistrictsModule } from './districts/districts.module';
 
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DataSourceConfig } from './config/data.source';
+import { DataSourceConfig } from '../db/datasource';
 import { AuthModule } from './auth/auth.module';
 
-import { ProvidersModule } from './providers/providers.module';
 import { SettingsModule } from './settings/settings.module';
 import { OrdersModule } from './orders/orders.module';
 import { CashManagementModule } from './cashManagement/cashManagement.module';
 import { PlanningEventModule } from './planningEvents/planning-events.module';
 import { FulfillmentModule } from './fulfillment/fulfillment.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -23,13 +21,13 @@ import { join } from 'path';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
     }),
-    TypeOrmModule.forRoot({ ...DataSourceConfig }),
+    TypeOrmModule.forRoot(DataSourceConfig),
     UsersModule,
     DistrictsModule,
     SettingsModule,
     AuthModule,
-    ProvidersModule,
     OrdersModule,
     CashManagementModule,
     PlanningEventModule,

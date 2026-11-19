@@ -116,12 +116,13 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     'pago_directo_courier_costo_servicio',
     'pago_directo_empresa_costo_servicio',
     'diferencia',
+
     // 'usuario_creacion',
     // 'recipient_phone',
     // 'delivery_address',
     // 'delivery_date',
     // 'shipping_cost',
-    // 'recipient_phone', // Puedes decidir cuáles mostrar por defecto
+    // 'recipient_phone',
     // 'createdAt',
     // 'shipping_cost',
     'actions',
@@ -267,18 +268,6 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
     this.snackBar.open('Función "Reprogramar" no implementada.', 'OK', {
       duration: 2000,
     });
-  }
-
-  isAdminOrDriver(): boolean {
-    // const userRole = this.appStore.currentUser()?.role;
-    // return userRole === 'ADMINISTRADOR' || userRole === 'MOTORIZADO';
-    return true; // Placeholder
-  }
-
-  isAdminUser(): boolean {
-    // const userRole = this.appStore.currentUser()?.role;
-    // return userRole === 'ADMINISTRADOR';
-    return true; // Placeholder
   }
 
   hasPermissionEdit(): boolean {

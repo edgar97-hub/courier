@@ -6,10 +6,10 @@ import {
   ViewChild,
   AfterViewInit,
 } from '@angular/core';
-import { Router, RouterModule } from '@angular/router'; // RouterModule si tienes links/botones de navegación
+import { Router, RouterModule } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatPaginator, PageEvent } from '@angular/material/paginator'; // Importar PageEvent
-import { MatSort, Sort } from '@angular/material/sort'; // Importar Sort
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { MatSort, Sort } from '@angular/material/sort';
 import { Subject, Observable, BehaviorSubject, firstValueFrom } from 'rxjs';
 import {
   takeUntil,
@@ -38,7 +38,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 import { ExcelExportService } from '../../services/excel-export.service';
-import { CommonModule, DatePipe } from '@angular/common'; // DatePipe aquí es solo para el tipado, no para proveerlo
+import { CommonModule, DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-order-list-page',
@@ -49,8 +49,8 @@ import { CommonModule, DatePipe } from '@angular/common'; // DatePipe aquí es s
     OrderFiltersComponent,
     OrderTableComponent,
     MatSnackBarModule,
-    MatButtonModule, // Para el botón de Acciones Masivas
-    MatIconModule, // Para iconos en botones
+    MatButtonModule,
+    MatIconModule,
     MatMenuModule,
   ],
   templateUrl: './order-list-page.component.html',
@@ -58,10 +58,10 @@ import { CommonModule, DatePipe } from '@angular/common'; // DatePipe aquí es s
 })
 export class OrderListPageComponent implements OnInit, OnDestroy {
   private orderService = inject(OrderService);
-  private router = inject(Router); // Si necesitas navegar
+  private router = inject(Router);
   private snackBar = inject(MatSnackBar);
-  private dialog = inject(MatDialog); // Inyectar MatDialog
-  private excelExportService = inject(ExcelExportService); // <--- INYECTA EL SERVICIO
+  private dialog = inject(MatDialog);
+  private excelExportService = inject(ExcelExportService);
   private datePipe = inject(DatePipe);
   orders: Order_[] = [];
   isLoading = false;
@@ -84,7 +84,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
         // debounceTime(300), // Opcional: añadir debounce si los filtros emiten muy rápido
         // distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
-        tap(() => (this.currentPageIndex = 0)) // Resetear a la primera página cuando los filtros cambian
+        tap(() => (this.currentPageIndex = 0)), // Resetear a la primera página cuando los filtros cambian
       )
       .subscribe((criteria) => {
         this.fetchOrders();
@@ -99,9 +99,9 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
           .getOrders2(
             currentFilters,
             this.currentSortField,
-            this.currentSortDirection
+            this.currentSortDirection,
           )
-          .pipe(takeUntil(this.destroy$))
+          .pipe(takeUntil(this.destroy$)),
       );
 
       return allOrders || []; // Devuelve un array vacío si la respuesta es null/undefined
@@ -120,7 +120,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
     this.snackBar.open(
       'Preparando la exportación a Excel, esto puede tardar un momento...',
       '',
-      { duration: 0 }
+      { duration: 0 },
     );
 
     try {
@@ -215,6 +215,14 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
             if (costo_servicio_pagado_cliente_al_courier === 0) {
               diferencia = monto_a_cobrar - order.shipping_cost;
             }
+
+            /**
+             * si el pedido es rechazado en punto, la diferencia debe ser 0
+             */
+            if (order.status === OrderStatus.RECHAZADO) {
+              diferencia = 0;
+            }
+
             order.diferencia = diferencia;
 
             totals.amount_to_collect_at_delivery +=
@@ -252,7 +260,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
                 order.pago_directo_empresa_costo_servicio,
               DIFERENCIA: diferencia,
             };
-          }
+          },
         );
         const separatorRow = {
           'N° PEDIDO': '',
@@ -295,7 +303,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
         this.excelExportService.exportAsExcelFile(
           dataForSheet,
           'Listado_Pedidos_Filtrados',
-          'Pedidos'
+          'Pedidos',
         );
         this.snackBar.dismiss();
         this.snackBar.open('Archivo de Excel exportado exitosamente!', 'OK', {
@@ -307,7 +315,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
         this.snackBar.open(
           'No hay datos disponibles para exportar con los filtros actuales.',
           'OK',
-          { duration: 3000 }
+          { duration: 3000 },
         );
       }
     } catch (error) {
@@ -319,7 +327,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
         {
           duration: 3000,
           panelClass: ['error-snackbar'],
-        }
+        },
       );
     } finally {
       this.isLoading = false;
@@ -336,7 +344,7 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
         this.currentPageIndex + 1,
         this.currentPageSize,
         this.currentSortField,
-        this.currentSortDirection
+        this.currentSortDirection,
       )
       .pipe(
         takeUntil(this.destroy$),
@@ -344,11 +352,11 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
           this.snackBar.open(
             error.message || 'Failed to load orders.',
             'Close',
-            { duration: 5000, panelClass: ['error-snackbar'] }
+            { duration: 5000, panelClass: ['error-snackbar'] },
           );
           this.isLoading = false;
           return [];
-        })
+        }),
       )
       .subscribe((response: PaginatedOrdersResponse) => {
         response.items.forEach((order) => {
@@ -412,6 +420,13 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
             diferencia = monto_a_cobrar - (order.shipping_cost || 0);
           }
 
+          /**
+           * si el pedido es rechazado en punto, la diferencia debe ser 0
+           */
+          if (order.status === OrderStatus.RECHAZADO) {
+            diferencia = 0;
+          }
+
           order.diferencia = diferencia;
         });
         this.orders = response.items;
@@ -438,22 +453,21 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
         // event.reason || '',
         // event.proofOfDeliveryImageUrl,
         event.shippingCostPaymentMethod,
-        event.collectionPaymentMethod
+        event.collectionPaymentMethod,
       )
       .subscribe({
         next: (updatedOrder) => {
-          this.snackBar.open(
-            `Pedido actualizado.`,
-            'OK',
-            { duration: 3000, panelClass: ['success-snackbar'] }
-          );
+          this.snackBar.open(`Pedido actualizado.`, 'OK', {
+            duration: 3000,
+            panelClass: ['success-snackbar'],
+          });
           this.fetchOrders();
         },
         error: (err) => {
           this.snackBar.open(
             `Error al actualizar estado: ${err.message || 'Intente de nuevo'}`,
             'Cerrar',
-            { duration: 5000, panelClass: ['error-snackbar'] }
+            { duration: 5000, panelClass: ['error-snackbar'] },
           );
           this.isLoading = false;
         },

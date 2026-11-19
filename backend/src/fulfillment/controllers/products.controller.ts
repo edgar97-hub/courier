@@ -13,8 +13,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
-import { AdminAccess } from '../../auth/decorators/admin.decorator';
-import { FulfillmentService } from '../services/products.service';
+ import { FulfillmentService } from '../services/products.service';
 import { CreateFulfillmentProductDto } from '../dto/create-fulfillment-product.dto';
 
 @Controller('fulfillment')

@@ -14,7 +14,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiHeader, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AdminAccess } from 'src/auth/decorators/admin.decorator';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import {
@@ -34,9 +33,7 @@ import { ROLES } from 'src/constants/roles';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @AdminAccess()
-  @Roles(ROLES.RECEPCIONISTA)
-  @AdminAccess()
+  @Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
   @Post('register')
   public async registerUser(@Body() body: UserDTO) {
     return await this.usersService.createUser(body);
@@ -49,6 +46,7 @@ export class UsersController {
   }
 
   @Get('all')
+  @Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
   public async findAllUsers() {
     return await this.usersService.findUsers();
   }
@@ -105,14 +103,11 @@ export class UsersController {
 
   @Get('/perfil/me')
   public async findUserPerfil(@Request() req) {
-    console.log('idUser', req.idUser);
-
     return await this.usersService.findUserPerfil(req.idUser);
   }
 
-  @AdminAccess()
-  @Roles(ROLES.RECEPCIONISTA)
   @Put('edit/:id')
+  @Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
   public async updateUser(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() body: UserUpdateDTO,
@@ -137,6 +132,7 @@ export class UsersController {
   }
 
   @Delete('delete/:id')
+  @Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
   public async deleteUser(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.usersService.deleteUser(id);
   }

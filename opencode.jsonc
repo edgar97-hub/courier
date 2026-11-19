@@ -1,0 +1,47 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "brave-search": {
+      "type": "local",
+      "command": ["npx", "-y", "@brave/brave-search-mcp-server"],
+      "enabled": true,
+      "environment": {
+        "BRAVE_API_KEY": "BSAX2YRAr7cg5LddBIds0y6wMM0HAC8"
+      }
+    },
+    "browser-use": {
+      "type": "remote",
+      "url": "https://api.browser-use.com/v3/mcp",
+      "enabled": true,
+      "headers": {
+        "x-browser-use-api-key": "bu_qf85mx7-P3D5nbV2RWC8I6DrcREng2JQPC1FzvijMCE"
+      }
+    },
+    "inquisitor": {
+      "type": "local",
+      "command": ["uvx", "--with", "mcp<2", "inquisitor-mcp"],
+      "enabled": true
+    }
+  },
+  "permissions": [
+    { "action": "read", "resource": "*", "effect": "allow" },
+    { "action": "edit", "resource": "*", "effect": "ask" },
+    { "action": "shell", "resource": "*", "effect": "ask" },
+    { "action": "shell", "resource": "ls *", "effect": "allow" },
+    { "action": "shell", "resource": "pwd", "effect": "allow" },
+    { "action": "shell", "resource": "which *", "effect": "allow" },
+    { "action": "shell", "resource": "find *", "effect": "allow" },
+    { "action": "shell", "resource": "locate *", "effect": "allow" },
+    { "action": "shell", "resource": "grep *", "effect": "allow" },
+    { "action": "shell", "resource": "rg *", "effect": "allow" },
+    { "action": "shell", "resource": "mysql *", "effect": "allow" },
+    { "action": "shell", "resource": "mkdir *", "effect": "allow" },
+    { "action": "shell", "resource": "cp *", "effect": "allow" },
+    { "action": "shell", "resource": "mv *", "effect": "allow" },
+    { "action": "shell", "resource": "rm -rf *", "effect": "deny" },
+    { "action": "shell", "resource": "chown *", "effect": "deny" }
+  ]
+  // "experimental": {
+  //   "todo": true
+  // }
+}

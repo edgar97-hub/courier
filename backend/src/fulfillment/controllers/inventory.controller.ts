@@ -8,8 +8,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
-import { AdminAccess } from '../../auth/decorators/admin.decorator';
-import { InventoryService } from '../services/inventory.service';
+ import { InventoryService } from '../services/inventory.service';
 
 @Controller('fulfillment/inventory')
 @UseGuards(AuthGuard, RolesGuard)

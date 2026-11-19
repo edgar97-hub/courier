@@ -18,8 +18,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { AdminAccess } from 'src/auth/decorators/admin.decorator';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
+ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { DistrictDTO, DistrictUpdateDTO } from '../dto/district.dto';
 import { DistrictsService } from '../services/districts.service';
@@ -32,8 +31,7 @@ import { ROLES } from 'src/constants/roles';
 export class DistrictsController {
   constructor(private readonly usersService: DistrictsService) {}
 
-  @AdminAccess()
-  @Roles(ROLES.RECEPCIONISTA)
+  @Roles(ROLES.RECEPCIONISTA, ROLES.ADMINISTRADOR)
   @Post('register')
   public async registerUser(@Body() body: DistrictDTO) {
     return await this.usersService.createUser(body);
@@ -74,26 +72,12 @@ export class DistrictsController {
     return await this.usersService.findDistricts2(queryParams);
   }
 
-  @ApiParam({
-    name: 'id',
-  })
-  @ApiHeader({
-    name: 'codrr_token',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'No se encontro resultado',
-  })
   @Get(':id')
   public async findUserById(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.usersService.findUserById(id);
   }
 
-  @ApiParam({
-    name: 'id',
-  })
-  @AdminAccess()
-  @Roles(ROLES.RECEPCIONISTA)
+  @Roles(ROLES.RECEPCIONISTA, ROLES.ADMINISTRADOR)
   @Put('edit/:id')
   public async updateUser(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -102,11 +86,7 @@ export class DistrictsController {
     return await this.usersService.updateUser(body, id);
   }
 
-  @ApiParam({
-    name: 'id',
-  })
-  @AdminAccess()
-  @Roles(ROLES.RECEPCIONISTA)
+  @Roles(ROLES.RECEPCIONISTA, ROLES.ADMINISTRADOR)
   @Delete('delete/:id')
   public async deleteUser(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.usersService.deleteUser(id);

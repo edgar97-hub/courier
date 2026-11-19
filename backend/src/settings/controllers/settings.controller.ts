@@ -25,8 +25,7 @@ import {
 } from '@nestjs/swagger';
 import { Response } from 'express';
 
-import { AdminAccess } from 'src/auth/decorators/admin.decorator';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
+ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { PublicAccess } from 'src/auth/decorators/public.decorator';
 import { Roles } from 'src/auth/decorators/roles.decorator';
@@ -49,8 +48,7 @@ export class SettingsController {
    * Create new settings entry.
    * Restricted to admin and recepcionista roles.
    */
-  @AdminAccess()
-  @Roles(ROLES.RECEPCIONISTA)
+  @Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
   @Post('register')
   public async createSettings(@Body(ValidationPipe) body: SettingDTO) {
     return await this.settingsService.createSettings(body);
@@ -60,6 +58,7 @@ export class SettingsController {
    * Retrieve all settings entries.
    */
   @Get('all')
+  // @Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
   public async findAllSettings() {
     return await this.settingsService.findAllSettings();
   }
@@ -68,6 +67,7 @@ export class SettingsController {
    * Get active promotional sets.
    */
   @Get('promotional-sets')
+  // @Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
   async getPromotionalSets(): Promise<PromotionalSetItem[]> {
     return this.settingsService.getPromotionalSets();
   }
@@ -76,6 +76,7 @@ export class SettingsController {
    * Get settings by ID.
    */
   @Get(':id')
+  @PublicAccess()
   public async findSettingsById(@Param('id', new ParseUUIDPipe()) id: string) {
     return await this.settingsService.findSettingsById(id);
   }
@@ -84,8 +85,7 @@ export class SettingsController {
    * Update settings by ID.
    * Restricted to admin and recepcionista roles.
    */
-  @AdminAccess()
-  @Roles(ROLES.RECEPCIONISTA)
+  @Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
   @Put('edit/:id')
   public async updateSettings(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -99,6 +99,7 @@ export class SettingsController {
    */
   @Post('upload-logo')
   @UseInterceptors(FileInterceptor('logoFile'))
+  @Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
   public async uploadLogo(
     @UploadedFile() logoFile: Express.Multer.File,
     @Req() request: Request,
@@ -111,6 +112,7 @@ export class SettingsController {
    */
   @Post('upload-terms-pdf')
   @UseInterceptors(FileInterceptor('termsPdfFile'))
+  @Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
   public async uploadTermsPdf(
     @UploadedFile() termsPdfFile: Express.Multer.File,
     @Req() request: Request,
@@ -123,6 +125,7 @@ export class SettingsController {
    */
   @Post('upload-file')
   @UseInterceptors(FileInterceptor('file'))
+  @Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
   public async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Req() request: Request,
