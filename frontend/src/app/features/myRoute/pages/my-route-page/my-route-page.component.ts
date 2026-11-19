@@ -372,7 +372,10 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
           shippingCostPaymentMethod: '',
           collectionPaymentMethod: '',
         };
-        if (result.newStatus === OrderStatus.ENTREGADO) {
+        if (
+          result.newStatus === OrderStatus.ENTREGADO ||
+          result.newStatus === OrderStatus.RECHAZADO
+        ) {
           if (result.proofOfDeliveryImageUrls) {
             updatePayload.proofOfDeliveryImageUrls =
               result.proofOfDeliveryImageUrls;

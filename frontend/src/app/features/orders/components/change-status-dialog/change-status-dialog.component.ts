@@ -324,7 +324,7 @@ export class ChangeStatusDialogComponent implements OnInit {
   }
 
   checkIfDeliveryDetailsNeeded(status: OrderStatus | undefined): void {
-    if (status === OrderStatus.ENTREGADO) {
+    if (status === OrderStatus.ENTREGADO || status === OrderStatus.RECHAZADO) {
       this.showDeliveryDetails = true;
       this.deliveryDetailsForm
         .get('shippingCostPaymentMethod')
@@ -353,7 +353,10 @@ export class ChangeStatusDialogComponent implements OnInit {
     ) {
       return true;
     }
-    if (this.selectedStatus === OrderStatus.ENTREGADO) {
+    if (
+      this.selectedStatus === OrderStatus.ENTREGADO ||
+      this.selectedStatus === OrderStatus.RECHAZADO
+    ) {
       if (!this.deliveryDetailsForm.valid) return true;
       // VALIDACIÓN: Al menos 1 foto
       if (this.evidencePhotos.length === 0) return true;
@@ -364,7 +367,10 @@ export class ChangeStatusDialogComponent implements OnInit {
   async onConfirm(): Promise<void> {
     this.formSubmitted = true;
     if (this.isConfirmDisabled()) {
-      if (this.selectedStatus === OrderStatus.ENTREGADO)
+      if (
+        this.selectedStatus === OrderStatus.ENTREGADO ||
+        this.selectedStatus === OrderStatus.RECHAZADO
+      )
         this.deliveryDetailsForm.markAllAsTouched();
       return;
     }
@@ -373,7 +379,8 @@ export class ChangeStatusDialogComponent implements OnInit {
 
     // Lógica de subida masiva
     if (
-      this.selectedStatus === OrderStatus.ENTREGADO &&
+      (this.selectedStatus === OrderStatus.ENTREGADO ||
+        this.selectedStatus === OrderStatus.RECHAZADO) &&
       this.evidencePhotos.length > 0
     ) {
       this.isUploadingImage = true;
