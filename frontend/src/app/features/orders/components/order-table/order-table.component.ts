@@ -233,7 +233,10 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
           shippingCostPaymentMethod: '',
           collectionPaymentMethod: '',
         };
-        if (result.newStatus === OrderStatus.ENTREGADO) {
+        if (
+          result.newStatus === OrderStatus.ENTREGADO ||
+          result.newStatus === OrderStatus.RECHAZADO
+        ) {
           if (result.proofOfDeliveryImageUrls) {
             updatePayload.proofOfDeliveryImageUrls =
               result.proofOfDeliveryImageUrls;
