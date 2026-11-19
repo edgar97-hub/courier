@@ -35,11 +35,13 @@ import { join } from 'path';
     FulfillmentModule,
     EventEmitterModule.forRoot(),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '../public/uploads'),
+      rootPath: join(__dirname, '../../public/uploads'),
       serveRoot: '/uploads',
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '../public/angular/browser'),
+      // rootPath: join(__dirname, '/public/angular/browser'),
+      rootPath: join(__dirname, '../../public/angular/browser'),
+
       exclude: ['/api/{*test}'],
       serveStaticOptions: {
         index: 'index.html',

@@ -49,7 +49,7 @@ exports.AppModule = AppModule = __decorate([
                 serveRoot: '/uploads',
             }),
             serve_static_1.ServeStaticModule.forRoot({
-                rootPath: (0, path_1.join)(__dirname, '../public/angular/browser'),
+                rootPath: (0, path_1.join)(__dirname, '../../public/angular/browser'),
                 exclude: ['/api/{*test}'],
                 serveStaticOptions: {
                     index: 'index.html',
