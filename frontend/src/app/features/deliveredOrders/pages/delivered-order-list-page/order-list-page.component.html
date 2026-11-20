@@ -18,6 +18,7 @@
       [pageIndex]="currentPageIndex"
       (pageChanged)="onPageChanged($event)"
       (sortChanged)="onSortChanged($event)"
+      (evidenceAdded)="fetchOrders()"
       (shippingCostChanged)="handleShippingCostChanged($event)"
     ></app-order-table>
   </div>

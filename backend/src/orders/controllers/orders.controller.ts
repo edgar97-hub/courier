@@ -16,12 +16,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { PublicAccess } from 'src/auth/decorators/public.decorator';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { ROLES } from 'src/constants/roles';
 import { UpdateOrderRequestDto } from '../dto/order.dto';
 import { OrdersService } from '../services/orders.service';
-import { Response } from 'express';
-import { ImportResult } from '../dto/import-result.dto';
+import { Response } from 'express';import { ImportResult } from '../dto/import-result.dto';
 import { OrderPdfGeneratorService } from '../services/order-pdf-generator.service';
 
 @Controller('orders')
@@ -194,6 +195,15 @@ export class OrdersController {
     return await this.ordersService.updateOrderStatus(body, req.idUser);
   }
 
+  @Post(':id/evidence')
+  @Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA, ROLES.MOTORIZADO)
+  public async addMissingEvidence(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body('evidence_photos') evidencePhotos: string[],
+  ) {
+    return this.ordersService.addMissingEvidence(id, evidencePhotos);
+  }
+
   @Put('assign-driver-to-order/:id')
   public async assignDriverToOrder(
     @Param('id', new ParseUUIDPipe()) id: string,
@@ -296,7 +306,6 @@ export class OrdersController {
     }
   }
 
-  // @PublicAccess()
   @Get('dashboard/data')
   async getDashboardSummary(@Request() req): Promise<any> {
     return this.ordersService.dashboardOrders(req);

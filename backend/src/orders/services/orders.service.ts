@@ -1,4 +1,11 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { ErrorManager } from 'src/utils/error.manager';
 import {
@@ -70,6 +77,55 @@ export class OrdersService {
     private readonly stockAdjustmentService: StockAdjustmentService,
     private readonly kardexService: KardexService,
   ) {}
+
+  public async addMissingEvidence(
+    id: string,
+    evidencePhotos: string[],
+  ): Promise<{ evidence_photos: string[] }> {
+    if (
+      !Array.isArray(evidencePhotos) ||
+      evidencePhotos.length === 0 ||
+      evidencePhotos.length > 5
+    ) {
+      throw new BadRequestException('Adjunte entre 1 y 5 fotos de evidencia.');
+    }
+    const allowedStatuses = [STATES.DELIVERED, STATES.REJECTED];
+
+    const order = await this.orderRepository.findOne({
+      where: { id },
+      select: { id: true, status: true, evidence_photos: true },
+      loadEagerRelations: false,
+    });
+    if (!order) throw new NotFoundException('Pedido no encontrado.');
+
+    if (!allowedStatuses.includes(order.status)) {
+      throw new ConflictException(
+        'Solo se puede cargar evidencia a pedidos entregados o rechazados en punto.',
+      );
+    }
+    if (
+      order.evidence_photos != null &&
+      (!Array.isArray(order.evidence_photos) || order.evidence_photos.length > 0)
+    ) {
+      throw new ConflictException('El pedido ya tiene evidencia.');
+    }
+
+    const updated = await this.orderRepository
+      .createQueryBuilder()
+      .update(OrdersEntity)
+      .set({ evidence_photos: evidencePhotos })
+      .where('id = :id', { id })
+      .andWhere('status IN (:...allowedStatuses)', { allowedStatuses })
+      .andWhere("(evidence_photos IS NULL OR evidence_photos = '[]'::jsonb)")
+      .execute();
+    if (updated.affected !== 1) {
+      throw new ConflictException(
+        'El pedido ya tiene evidencia o cambió de estado o de asignación. Actualice el listado.',
+      );
+    }
+
+    return { evidence_photos: evidencePhotos };
+  }
 
   public async updateOrderStatus(body: any, idUser: string): Promise<any> {
     let log: OrderLogEntity;

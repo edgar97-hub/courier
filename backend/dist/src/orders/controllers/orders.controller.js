@@ -15,8 +15,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrdersController = void 0;
 const common_1 = require("@nestjs/common");
 const public_decorator_1 = require("../../auth/decorators/public.decorator");
+const roles_decorator_1 = require("../../auth/decorators/roles.decorator");
 const auth_guard_1 = require("../../auth/guards/auth.guard");
 const roles_guard_1 = require("../../auth/guards/roles.guard");
+const roles_1 = require("../../constants/roles");
 const order_dto_1 = require("../dto/order.dto");
 const orders_service_1 = require("../services/orders.service");
 const order_pdf_generator_service_1 = require("../services/order-pdf-generator.service");
@@ -99,6 +101,9 @@ let OrdersController = class OrdersController {
     }
     async updateOrderStatus(body, req) {
         return await this.ordersService.updateOrderStatus(body, req.idUser);
+    }
+    async addMissingEvidence(id, evidencePhotos) {
+        return this.ordersService.addMissingEvidence(id, evidencePhotos);
     }
     async assignDriverToOrder(id, body, req) {
         return await this.ordersService.assignDriverToOrder(body, id, req.idUser);
@@ -280,6 +285,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "updateOrderStatus", null);
+__decorate([
+    (0, common_1.Post)(':id/evidence'),
+    (0, roles_decorator_1.Roles)(roles_1.ROLES.ADMINISTRADOR, roles_1.ROLES.RECEPCIONISTA, roles_1.ROLES.MOTORIZADO),
+    __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
+    __param(1, (0, common_1.Body)('evidence_photos')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Array]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "addMissingEvidence", null);
 __decorate([
     (0, common_1.Put)('assign-driver-to-order/:id'),
     __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),

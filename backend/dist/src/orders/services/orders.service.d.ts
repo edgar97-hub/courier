@@ -21,6 +21,9 @@ export declare class OrdersService {
     private readonly stockAdjustmentService;
     private readonly kardexService;
     constructor(orderRepository: Repository<OrdersEntity>, orderLogRepository: Repository<OrderLogEntity>, settingsRepository: Repository<SettingsEntity>, districtsRepository: Repository<DistrictsEntity>, userRepository: Repository<UsersEntity>, inventoryRepository: Repository<InventoryEntity>, cashManagementService: CashManagementService, stockAdjustmentService: StockAdjustmentService, kardexService: KardexService);
+    addMissingEvidence(id: string, evidencePhotos: string[]): Promise<{
+        evidence_photos: string[];
+    }>;
     updateOrderStatus(body: any, idUser: string): Promise<any>;
     batchCreateOrders(payload: any, idUser: any): Promise<{
         success: boolean;

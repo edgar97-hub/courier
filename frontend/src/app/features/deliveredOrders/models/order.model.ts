@@ -161,7 +161,7 @@ export interface Order_ {
   updatedAt?: string | Date; // Fecha de última actualización
   delivered_at?: string | Date; // Fecha real de entrega (si la tienes)
   product_delivery_photo_url?: string;
-  evidence_photos?: [];
+  evidence_photos?: string[] | null;
 }
 
 export interface Motorized {

@@ -119,7 +119,7 @@ let SettingsService = class SettingsService {
                 });
             }
             const fileName = `logo-${Date.now()}-${logoFile.originalname}`;
-            const filePath = path.join(__dirname, '..', '..', '..', 'public', 'uploads', fileName);
+            const filePath = path.join(__dirname, '..', '..', '..', '..', 'public', 'uploads', fileName);
             await fs.promises.writeFile(filePath, logoFile.buffer);
             const relativeUrl = `/uploads/${fileName}`;
             const protocol = req.protocol;
@@ -140,7 +140,7 @@ let SettingsService = class SettingsService {
                 });
             }
             const fileName = `terms-${Date.now()}-${termsPdfFile.originalname}`;
-            const filePath = path.join(__dirname, '..', '..', '..', 'public', 'uploads', fileName);
+            const filePath = path.join(__dirname, '..', '..', '..', '..', 'public', 'uploads', fileName);
             await fs.promises.writeFile(filePath, termsPdfFile.buffer);
             const relativeUrl = `/uploads/${fileName}`;
             const protocol = req.protocol;
@@ -161,7 +161,7 @@ let SettingsService = class SettingsService {
                 });
             }
             const fileName = `${Date.now()}-${file.originalname}`;
-            const filePath = path.join(__dirname, '..', '..', '..', 'public', 'uploads', fileName);
+            const filePath = path.join(__dirname, '..', '..', '..', '..', 'public', 'uploads', fileName);
             await fs.promises.writeFile(filePath, file.buffer);
             const relativeUrl = `/uploads/${fileName}`;
             const protocol = req.protocol;

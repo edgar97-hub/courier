@@ -45,6 +45,22 @@ export class OrderService {
     return new HttpHeaders({ 'Content-Type': 'application/json' });
   }
 
+  addMissingEvidence(
+    orderId: string | number,
+    photoUrls: string[],
+  ): Observable<{ evidence_photos: string[] }> {
+    const token = this.authService.getAccessToken();
+    if (!token) {
+      return throwError(() => new Error('Su sesión no está disponible.'));
+    }
+
+    return this.http.post<{ evidence_photos: string[] }>(
+      `${this.apiUrlOrders}/${orderId}/evidence`,
+      { evidence_photos: photoUrls },
+      { headers: this.getAuthHeaders() },
+    );
+  }
+
   getOrders(
     filters?: OrderFilterCriteria,
     page: number = 1, // API suele esperar page index 1-based

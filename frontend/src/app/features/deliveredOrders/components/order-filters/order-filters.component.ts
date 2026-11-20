@@ -67,10 +67,6 @@ export class OrderFiltersComponent implements OnInit, OnDestroy {
     console.log(
       'OrderFiltersComponent: ngOnInit - Instance Created/Initialized'
     );
-    this.emitSpecificFilters({
-      delivery_date: this.filterForm.get('delivery_date')?.value,
-      status: 'ENTREGADO',
-    });
 
     this.filterForm.valueChanges
       .pipe(

@@ -28,9 +28,11 @@ import { MatDividerModule } from '@angular/material/divider';
 import { Order, Order_, OrderStatus } from '../../models/order.model';
 
 import { OrderDetailDialogComponent } from '../order-detail-dialog/order-detail-dialog.component';
+import { OrderEvidenceDialogComponent } from '../order-evidence-dialog/order-evidence-dialog.component';
 import { environment } from '../../../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { AppStore } from '../../../../app.store';
+import { UserRole } from '../../../../common/roles.enum';
 import heic2any from 'heic2any';
 
 @Component({
@@ -86,6 +88,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
 
   @Output() viewPdfClicked = new EventEmitter<Order_>();
   @Output() viewDetailsClicked = new EventEmitter<Order_>();
+  @Output() evidenceAdded = new EventEmitter<void>();
   @Output() shippingCostChanged = new EventEmitter<{
     orderId: string | number;
     newShippingCost: number;
@@ -129,6 +132,36 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
   }
 
   ngAfterViewInit(): void {}
+
+  canAddEvidence(order: Order_): boolean {
+    const role = this.appStore.currentUser()?.role;
+    return (
+      (role === UserRole.ADMIN || role === UserRole.RECEPTIONIST) &&
+      (order.status === OrderStatus.ENTREGADO || order.status === OrderStatus.RECHAZADO) &&
+      (order.evidence_photos == null ||
+        (Array.isArray(order.evidence_photos) && order.evidence_photos.length === 0))
+    );
+  }
+
+  openAddEvidence(order: Order_): void {
+    if (!this.canAddEvidence(order)) return;
+
+    this.dialog
+      .open<OrderEvidenceDialogComponent, Pick<Order_, 'id' | 'code'>, boolean>(
+        OrderEvidenceDialogComponent,
+        {
+          width: '450px',
+          data: { id: order.id, code: order.code },
+        },
+      )
+      .afterClosed()
+      .subscribe((saved) => {
+        if (saved) {
+          this.snackBar.open('Evidencia guardada.', 'Cerrar', { duration: 3000 });
+          this.evidenceAdded.emit();
+        }
+      });
+  }
 
   // async onDownload(order: Order_): Promise<void> {
   //   if (order && order.product_delivery_photo_url) {

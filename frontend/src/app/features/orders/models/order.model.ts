@@ -179,6 +179,7 @@ export interface Order_ {
   updatedAt?: string | Date;
   delivered_at?: string | Date;
   product_delivery_photo_url?: string;
+  evidence_photos?: string[] | null;
   observation_shipping_cost_modification?: string;
   isExpress?: boolean;
   items: OrderItem[];

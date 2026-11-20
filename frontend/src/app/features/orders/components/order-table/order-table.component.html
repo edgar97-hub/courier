@@ -321,6 +321,14 @@
           </button>
           <button
             mat-menu-item
+            (click)="openAddEvidence(order)"
+            *ngIf="canAddEvidence(order)"
+          >
+            <mat-icon>add_a_photo</mat-icon>
+            <span>Cargar evidencia</span>
+          </button>
+          <button
+            mat-menu-item
             (click)="openRescheduleOrderModal(order)"
             *ngIf="isAdminOrReceptionist()"
           >

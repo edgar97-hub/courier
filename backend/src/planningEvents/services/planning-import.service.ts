@@ -286,10 +286,6 @@ export class PlanningImportService {
     }
 
     queryBuilder
-      // .orderBy(
-      //   `planningEvent.${sort_field}`,
-      //   sort_direction.toUpperCase() as 'DESC' | 'ASC',
-      // )
       .orderBy(`planningEvent.id`, 'DESC')
       .skip((page_number - 1) * page_size)
       .take(page_size);
@@ -322,49 +318,4 @@ export class PlanningImportService {
       },
     });
   }
-
-  // async updateStopStatus(id: number, status: StopStatus): Promise<void> {
-  //   const queryRunner = this.connection.createQueryRunner();
-  //   await queryRunner.connect();
-  //   await queryRunner.startTransaction();
-
-  //   try {
-  //     const stop = await queryRunner.manager.findOne(Stop, { where: { id } });
-  //     if (!stop) {
-  //       throw new Error('Stop not found');
-  //     }
-
-  //     stop.status = status;
-  //     await queryRunner.manager.save(stop);
-
-  //     const order = await queryRunner.manager.findOne(OrdersEntity, {
-  //       where: { tracking_code: stop.orderCode },
-  //     });
-  //     if (order) {
-  //       // Map StopStatus to OrderStatus (assuming a direct mapping or a conversion logic)
-  //       // This is a placeholder, adjust according to your actual STATES enum and logic
-  //       let newOrderStatus: STATES;
-  //       switch (status) {
-  //         case StopStatus.COMPLETED:
-  //           newOrderStatus = STATES.DELIVERED; // Assuming 'DELIVERED' is a valid status in STATES
-  //           break;
-  //         case StopStatus.SKIPPED:
-  //           newOrderStatus = STATES.CANCELED; // Assuming 'CANCELED' is a valid status in STATES
-  //           break;
-  //         default:
-  //           newOrderStatus = STATES.REGISTERED; // Or another appropriate default
-  //           break;
-  //       }
-  //       order.status = newOrderStatus;
-  //       await queryRunner.manager.save(order);
-  //     }
-
-  //     await queryRunner.commitTransaction();
-  //   } catch (err) {
-  //     await queryRunner.rollbackTransaction();
-  //     throw err;
-  //   } finally {
-  //     await queryRunner.release();
-  //   }
-  // }
 }

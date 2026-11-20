@@ -36,6 +36,7 @@ import {
   ChangeStatusDialogResult,
 } from '../change-status-dialog/change-status-dialog.component';
 import { OrderDetailDialogComponent } from '../order-detail-dialog/order-detail-dialog.component'; //
+import { OrderEvidenceDialogComponent } from '../../../deliveredOrders/components/order-evidence-dialog/order-evidence-dialog.component';
 import { environment } from '../../../../../environments/environment';
 import {
   AssignDriverDialogComponent,
@@ -115,6 +116,7 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
 
   @Output() viewPdfClicked = new EventEmitter<Order_>();
   @Output() viewDetailsClicked = new EventEmitter<Order_>();
+  @Output() evidenceAdded = new EventEmitter<void>();
   @Output() amountToCollectChanged = new EventEmitter<{
     orderId: string | number;
     newAmount: number;
@@ -399,6 +401,42 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
         console.log('Reschedule cancelled or no new date selected.');
       }
     });
+  }
+
+  canAddEvidence(order: Order_): boolean {
+    const user = this.appStore.currentUser();
+    if (!user) return false;
+
+    const canUpload =
+      user.role === UserRole.ADMIN ||
+      user.role === UserRole.RECEPTIONIST ||
+      user.role === UserRole.MOTORIZED;
+
+    return (
+      canUpload &&
+      (order.status === OrderStatus.ENTREGADO ||
+        order.status === OrderStatus.RECHAZADO) &&
+      (order.evidence_photos == null ||
+        (Array.isArray(order.evidence_photos) &&
+          order.evidence_photos.length === 0))
+    );
+  }
+
+  openAddEvidence(order: Order_): void {
+    if (!this.canAddEvidence(order)) return;
+
+    this.dialog
+      .open<OrderEvidenceDialogComponent, Pick<Order_, 'id' | 'code'>, boolean>(
+        OrderEvidenceDialogComponent,
+        { width: '450px', data: { id: order.id, code: order.code } },
+      )
+      .afterClosed()
+      .subscribe((saved) => {
+        if (saved) {
+          this.snackBar.open('Evidencia guardada.', 'Cerrar', { duration: 3000 });
+          this.evidenceAdded.emit();
+        }
+      });
   }
 
   hasPermision(order: Order_): boolean {

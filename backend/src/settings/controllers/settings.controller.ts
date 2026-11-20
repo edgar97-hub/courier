@@ -58,7 +58,6 @@ export class SettingsController {
    * Retrieve all settings entries.
    */
   @Get('all')
-  // @Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
   public async findAllSettings() {
     return await this.settingsService.findAllSettings();
   }
@@ -67,7 +66,6 @@ export class SettingsController {
    * Get active promotional sets.
    */
   @Get('promotional-sets')
-  // @Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
   async getPromotionalSets(): Promise<PromotionalSetItem[]> {
     return this.settingsService.getPromotionalSets();
   }
@@ -99,7 +97,6 @@ export class SettingsController {
    */
   @Post('upload-logo')
   @UseInterceptors(FileInterceptor('logoFile'))
-  @Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
   public async uploadLogo(
     @UploadedFile() logoFile: Express.Multer.File,
     @Req() request: Request,
@@ -112,7 +109,6 @@ export class SettingsController {
    */
   @Post('upload-terms-pdf')
   @UseInterceptors(FileInterceptor('termsPdfFile'))
-  @Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
   public async uploadTermsPdf(
     @UploadedFile() termsPdfFile: Express.Multer.File,
     @Req() request: Request,
@@ -125,7 +121,6 @@ export class SettingsController {
    */
   @Post('upload-file')
   @UseInterceptors(FileInterceptor('file'))
-  @Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
   public async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Req() request: Request,

@@ -1,6 +1,3 @@
-import {
-  SharedResizeObserver
-} from "./chunk-ITZRGJLC.js";
 import "./chunk-OIBNGD5S.js";
 import {
   CdkPortal,
@@ -8,9 +5,12 @@ import {
   TemplatePortal
 } from "./chunk-PO7YRV4Q.js";
 import {
+  SharedResizeObserver
+} from "./chunk-ITZRGJLC.js";
+import {
   MAT_RIPPLE_GLOBAL_OPTIONS,
   MatRipple
-} from "./chunk-3QGLFB6G.js";
+} from "./chunk-24ZJJGN7.js";
 import {
   _StructuralStylesLoader
 } from "./chunk-HTB7THSP.js";
@@ -26,12 +26,16 @@ import {
   MatCommonModule,
   SPACE,
   hasModifierKey
-} from "./chunk-WKBLA3K4.js";
-import "./chunk-6SVG35Q5.js";
+} from "./chunk-F5NN4S6S.js";
 import {
   _IdGenerator
 } from "./chunk-I6EXDPMO.js";
+import "./chunk-6SVG35Q5.js";
 import "./chunk-DG6N4IH3.js";
+import {
+  _CdkPrivateStyleLoader,
+  _bindEventWithOptions
+} from "./chunk-7OK4Z7HJ.js";
 import {
   CdkScrollable,
   ViewportRuler
@@ -41,10 +45,6 @@ import "./chunk-2O4WY5GE.js";
 import {
   Directionality
 } from "./chunk-G45CXVRI.js";
-import {
-  _CdkPrivateStyleLoader,
-  _bindEventWithOptions
-} from "./chunk-7OK4Z7HJ.js";
 import "./chunk-3WWPIYXK.js";
 import {
   Platform

@@ -45,7 +45,7 @@ exports.AppModule = AppModule = __decorate([
             fulfillment_module_1.FulfillmentModule,
             event_emitter_1.EventEmitterModule.forRoot(),
             serve_static_1.ServeStaticModule.forRoot({
-                rootPath: (0, path_1.join)(__dirname, '../public/uploads'),
+                rootPath: (0, path_1.join)(__dirname, '../../public/uploads'),
                 serveRoot: '/uploads',
             }),
             serve_static_1.ServeStaticModule.forRoot({

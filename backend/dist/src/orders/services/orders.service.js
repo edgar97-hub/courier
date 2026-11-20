@@ -55,6 +55,40 @@ let OrdersService = class OrdersService {
         this.stockAdjustmentService = stockAdjustmentService;
         this.kardexService = kardexService;
     }
+    async addMissingEvidence(id, evidencePhotos) {
+        if (!Array.isArray(evidencePhotos) ||
+            evidencePhotos.length === 0 ||
+            evidencePhotos.length > 5) {
+            throw new common_1.BadRequestException('Adjunte entre 1 y 5 fotos de evidencia.');
+        }
+        const allowedStatuses = [roles_1.STATES.DELIVERED, roles_1.STATES.REJECTED];
+        const order = await this.orderRepository.findOne({
+            where: { id },
+            select: { id: true, status: true, evidence_photos: true },
+            loadEagerRelations: false,
+        });
+        if (!order)
+            throw new common_1.NotFoundException('Pedido no encontrado.');
+        if (!allowedStatuses.includes(order.status)) {
+            throw new common_1.ConflictException('Solo se puede cargar evidencia a pedidos entregados o rechazados en punto.');
+        }
+        if (order.evidence_photos != null &&
+            (!Array.isArray(order.evidence_photos) || order.evidence_photos.length > 0)) {
+            throw new common_1.ConflictException('El pedido ya tiene evidencia.');
+        }
+        const updated = await this.orderRepository
+            .createQueryBuilder()
+            .update(orders_entity_1.OrdersEntity)
+            .set({ evidence_photos: evidencePhotos })
+            .where('id = :id', { id })
+            .andWhere('status IN (:...allowedStatuses)', { allowedStatuses })
+            .andWhere("(evidence_photos IS NULL OR evidence_photos = '[]'::jsonb)")
+            .execute();
+        if (updated.affected !== 1) {
+            throw new common_1.ConflictException('El pedido ya tiene evidencia o cambió de estado o de asignación. Actualice el listado.');
+        }
+        return { evidence_photos: evidencePhotos };
+    }
     async updateOrderStatus(body, idUser) {
         let log;
         try {

@@ -122,18 +122,22 @@
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #orderActionMenu="matMenu" xPosition="before">
-          <!-- cambiar de product_delivery_photo_url a evidence_photos -->
           <button
             mat-menu-item
             (click)="onViewImage(order)"
-            *ngIf="order.evidence_photos" 
-            
+            *ngIf="order.evidence_photos?.length || order.product_delivery_photo_url"
           >
             <mat-icon>photo</mat-icon>
             <span>Visualizar evidencia</span>
           </button>
-
-           
+          <button
+            mat-menu-item
+            (click)="openAddEvidence(order)"
+            *ngIf="canAddEvidence(order)"
+          >
+            <mat-icon>add_a_photo</mat-icon>
+            <span>Cargar evidencia</span>
+          </button>
         </mat-menu>
       </td>
     </ng-container>

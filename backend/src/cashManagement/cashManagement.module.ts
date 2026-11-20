@@ -9,11 +9,10 @@ import { SettingsEntity } from 'src/settings/entities/settings.entity'; // Impor
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([CashManagementEntity, SettingsEntity]), // Add SettingsEntity to TypeOrmModule
+    TypeOrmModule.forFeature([CashManagementEntity, SettingsEntity]),
     UsersModule
   ],
-  providers: [CashManagementService, CashMovementPdfGeneratorService], // Add new service to providers
-  controllers: [CashManagementController],
+  providers: [CashManagementService, CashMovementPdfGeneratorService],
   exports: [CashManagementService],
 })
 export class CashManagementModule {}

@@ -63,6 +63,7 @@
     (pageChanged)="onPageChanged($event)"
     (sortChanged)="onSortChanged($event)"
     (statusChanged)="handleStatusChanged($event)"
+    (evidenceAdded)="fetchOrders()"
     (motorizedChanged)="handleMotorizedChanged($event)"
     (rescheduleChanged)="handleRescheduleChanged($event)"
     (amountToCollectChanged)="handleAmountToCollectChanged($event)"

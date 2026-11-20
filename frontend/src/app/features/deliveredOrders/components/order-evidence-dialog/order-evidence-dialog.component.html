@@ -1,0 +1,75 @@
+<h2 mat-dialog-title>Cargar evidencia</h2>
+
+<mat-dialog-content>
+  <p>Pedido N.º {{ order.code ?? order.id }}</p>
+  <p>Adjunte hasta {{ maxPhotos }} fotos de máximo 10 MB cada una.</p>
+
+  <input
+    #photoInput
+    type="file"
+    [accept]="acceptedImages"
+    multiple
+    hidden
+    (change)="addPhotos(photoInput)"
+  />
+  <input
+    #cameraInput
+    type="file"
+    accept="image/*"
+    capture="environment"
+    hidden
+    (change)="addPhotos(cameraInput)"
+  />
+  <button
+    mat-stroked-button
+    type="button"
+    [disabled]="saving || photos.length >= maxPhotos"
+    (click)="photoInput.click()"
+  >
+    Adjuntar fotos
+  </button>
+  <button
+    mat-button
+    type="button"
+    [disabled]="saving || photos.length >= maxPhotos"
+    (click)="cameraInput.click()"
+  >
+    Tomar foto
+  </button>
+
+  @if (photos.length) {
+    <ul>
+      @for (photo of photos; track $index) {
+        <li>
+          {{ photo.name }}
+          <button
+            mat-button
+            type="button"
+            [disabled]="saving"
+            [attr.aria-label]="'Quitar foto ' + photo.name"
+            (click)="removePhoto($index)"
+          >
+            Quitar
+          </button>
+        </li>
+      }
+    </ul>
+  }
+  @if (errorMessage) {
+    <p role="alert">{{ errorMessage }}</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close type="button" [disabled]="saving">
+    Cancelar
+  </button>
+  <button
+    mat-flat-button
+    type="button"
+    [disabled]="saving || !photos.length"
+    (click)="saveEvidence()"
+  >
+    {{ saving ? "Guardando..." : "Guardar evidencia" }}
+  </button>
+</mat-dialog-actions>

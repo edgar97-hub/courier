@@ -14,7 +14,6 @@ import { Subject, Observable, BehaviorSubject, firstValueFrom } from 'rxjs';
 import {
   takeUntil,
   debounceTime,
-  distinctUntilChanged,
   switchMap,
   startWith,
   tap,
@@ -71,8 +70,12 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
   currentSortField = 'registration_date'; 
   currentSortDirection: 'asc' | 'desc' = 'desc'; 
 
-  // Subject para manejar los filtros actuales
-  private filterCriteriaSubject = new BehaviorSubject<OrderFilterCriteria>({});
+  // Subject para manejar los filtros actuales (mismos valores iniciales que el panel de filtros)
+  private filterCriteriaSubject = new BehaviorSubject<OrderFilterCriteria>({
+    delivery_date: this.datePipe.transform(new Date(), 'yyyy-MM-dd'),
+    status: 'ENTREGADO',
+    search_term: null,
+  });
   private destroy$ = new Subject<void>();
 
   constructor() {}
@@ -83,7 +86,6 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         // debounceTime(300), // Opcional: añadir debounce si los filtros emiten muy rápido
-        // distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
         tap(() => (this.currentPageIndex = 0)), // Resetear a la primera página cuando los filtros cambian
       )
       .subscribe((criteria) => {

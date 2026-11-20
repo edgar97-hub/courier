@@ -145,6 +145,7 @@ export class SettingsService {
         '..',
         '..',
         '..',
+        '..',
         'public',
         'uploads',
         fileName,
@@ -175,6 +176,7 @@ export class SettingsService {
       const fileName = `terms-${Date.now()}-${termsPdfFile.originalname}`;
       const filePath = path.join(
         __dirname,
+        '..',
         '..',
         '..',
         '..',
@@ -211,10 +213,12 @@ export class SettingsService {
         '..',
         '..',
         '..',
+        '..',
         'public',
         'uploads',
         fileName,
       );
+      
       await fs.promises.writeFile(filePath, file.buffer);
       const relativeUrl = `/uploads/${fileName}`;
       const protocol = (req as any).protocol;

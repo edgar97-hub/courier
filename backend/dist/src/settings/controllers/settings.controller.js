@@ -101,7 +101,6 @@ __decorate([
 __decorate([
     (0, common_1.Post)('upload-logo'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('logoFile')),
-    (0, roles_decorator_1.Roles)(roles_1.ROLES.ADMINISTRADOR, roles_1.ROLES.RECEPCIONISTA),
     __param(0, (0, common_1.UploadedFile)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -111,7 +110,6 @@ __decorate([
 __decorate([
     (0, common_1.Post)('upload-terms-pdf'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('termsPdfFile')),
-    (0, roles_decorator_1.Roles)(roles_1.ROLES.ADMINISTRADOR, roles_1.ROLES.RECEPCIONISTA),
     __param(0, (0, common_1.UploadedFile)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -121,7 +119,6 @@ __decorate([
 __decorate([
     (0, common_1.Post)('upload-file'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
-    (0, roles_decorator_1.Roles)(roles_1.ROLES.ADMINISTRADOR, roles_1.ROLES.RECEPCIONISTA),
     __param(0, (0, common_1.UploadedFile)()),
     __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),

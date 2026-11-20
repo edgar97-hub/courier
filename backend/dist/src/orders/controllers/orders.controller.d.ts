@@ -68,6 +68,9 @@ export declare class OrdersController {
         page_size: number;
     }>;
     updateOrderStatus(body: any, req: any): Promise<any>;
+    addMissingEvidence(id: string, evidencePhotos: string[]): Promise<{
+        evidence_photos: string[];
+    }>;
     assignDriverToOrder(id: string, body: any, req: any): Promise<any>;
     rescheduleOrder(id: string, body: any, req: any): Promise<any>;
     updateOrder(id: string, updateData: UpdateOrderRequestDto, req: any): Promise<import("../entities/orders.entity").OrdersEntity>;
