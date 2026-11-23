@@ -14,6 +14,7 @@ export declare class SettingsService {
     }): Promise<SettingsEntity>;
     getPromotionalSets(): Promise<PromotionalSetItem[] | []>;
     updateSettings(body: SettingUpdateDTO, id: string): Promise<SettingsEntity>;
+    private buildPublicUrl;
     uploadLogo(logoFile: Express.Multer.File, req: Request): Promise<{
         logo_url: string;
     }>;

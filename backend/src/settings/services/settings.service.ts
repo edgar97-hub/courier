@@ -128,6 +128,16 @@ export class SettingsService {
     }
   }
 
+  private buildPublicUrl(req: Request, relativeUrl: string): string {
+    const baseUrl = process.env.PUBLIC_BASE_URL?.trim().replace(/\/+$/, '');
+    if (baseUrl) {
+      return `${baseUrl}${relativeUrl}`;
+    }
+    const protocol = (req as any).protocol;
+    const host = (req as any).get('host');
+    return `${protocol}://${host}${relativeUrl}`;
+  }
+
   public async uploadLogo(
     logoFile: Express.Multer.File,
     req: Request,
@@ -152,10 +162,7 @@ export class SettingsService {
       );
       await fs.promises.writeFile(filePath, logoFile.buffer);
       const relativeUrl = `/uploads/${fileName}`;
-      const protocol = (req as any).protocol;
-      const host = (req as any).get('host');
-      const absoluteUrl = `${protocol}://${host}${relativeUrl}`;
-      return { logo_url: absoluteUrl };
+      return { logo_url: this.buildPublicUrl(req, relativeUrl) };
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
@@ -186,10 +193,7 @@ export class SettingsService {
       );
       await fs.promises.writeFile(filePath, termsPdfFile.buffer);
       const relativeUrl = `/uploads/${fileName}`;
-      const protocol = (req as any).protocol;
-      const host = (req as any).get('host');
-      const absoluteUrl = `${protocol}://${host}${relativeUrl}`;
-      return { terms_conditions_url: absoluteUrl };
+      return { terms_conditions_url: this.buildPublicUrl(req, relativeUrl) };
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
@@ -221,10 +225,7 @@ export class SettingsService {
       
       await fs.promises.writeFile(filePath, file.buffer);
       const relativeUrl = `/uploads/${fileName}`;
-      const protocol = (req as any).protocol;
-      const host = (req as any).get('host');
-      const absoluteUrl = `${protocol}://${host}${relativeUrl}`;
-      return { file_url: absoluteUrl };
+      return { file_url: this.buildPublicUrl(req, relativeUrl) };
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }

@@ -110,6 +110,15 @@ let SettingsService = class SettingsService {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
+    buildPublicUrl(req, relativeUrl) {
+        const baseUrl = process.env.PUBLIC_BASE_URL?.trim().replace(/\/+$/, '');
+        if (baseUrl) {
+            return `${baseUrl}${relativeUrl}`;
+        }
+        const protocol = req.protocol;
+        const host = req.get('host');
+        return `${protocol}://${host}${relativeUrl}`;
+    }
     async uploadLogo(logoFile, req) {
         try {
             if (!logoFile) {
@@ -122,10 +131,7 @@ let SettingsService = class SettingsService {
             const filePath = path.join(__dirname, '..', '..', '..', '..', 'public', 'uploads', fileName);
             await fs.promises.writeFile(filePath, logoFile.buffer);
             const relativeUrl = `/uploads/${fileName}`;
-            const protocol = req.protocol;
-            const host = req.get('host');
-            const absoluteUrl = `${protocol}://${host}${relativeUrl}`;
-            return { logo_url: absoluteUrl };
+            return { logo_url: this.buildPublicUrl(req, relativeUrl) };
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
@@ -143,10 +149,7 @@ let SettingsService = class SettingsService {
             const filePath = path.join(__dirname, '..', '..', '..', '..', 'public', 'uploads', fileName);
             await fs.promises.writeFile(filePath, termsPdfFile.buffer);
             const relativeUrl = `/uploads/${fileName}`;
-            const protocol = req.protocol;
-            const host = req.get('host');
-            const absoluteUrl = `${protocol}://${host}${relativeUrl}`;
-            return { terms_conditions_url: absoluteUrl };
+            return { terms_conditions_url: this.buildPublicUrl(req, relativeUrl) };
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
@@ -164,10 +167,7 @@ let SettingsService = class SettingsService {
             const filePath = path.join(__dirname, '..', '..', '..', '..', 'public', 'uploads', fileName);
             await fs.promises.writeFile(filePath, file.buffer);
             const relativeUrl = `/uploads/${fileName}`;
-            const protocol = req.protocol;
-            const host = req.get('host');
-            const absoluteUrl = `${protocol}://${host}${relativeUrl}`;
-            return { file_url: absoluteUrl };
+            return { file_url: this.buildPublicUrl(req, relativeUrl) };
         }
         catch (error) {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);

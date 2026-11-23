@@ -10,14 +10,21 @@ import {
   ValidationPipe,
   Get,
   Query,
-  ParseIntPipe, // Importar ParseIntPipe
-  HttpCode, // Importar HttpCode
+  ParseIntPipe,
+  HttpCode,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '../../auth/guards/auth.guard';
+import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { ROLES } from '../../constants/roles';
 import { PlanningImportService } from '../services/planning-import.service';
 import { ImportResult } from '../dto/import-result.dto';
-import { UpdateLocationDto } from '../dto/update-location.dto'; // Importar el nuevo DTO
+import { UpdateLocationDto } from '../dto/update-location.dto';
 
 @Controller('planning-events')
+@UseGuards(AuthGuard, RolesGuard)
+@Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
 export class PlanningImportController {
   constructor(private readonly planningImportService: PlanningImportService) {}
 

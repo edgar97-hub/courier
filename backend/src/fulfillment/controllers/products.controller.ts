@@ -13,11 +13,14 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { ROLES } from '../../constants/roles';
  import { FulfillmentService } from '../services/products.service';
 import { CreateFulfillmentProductDto } from '../dto/create-fulfillment-product.dto';
 
 @Controller('fulfillment')
 @UseGuards(AuthGuard, RolesGuard)
+@Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
 export class ProductsController {
   constructor(private readonly fulfillmentService: FulfillmentService) {}
 

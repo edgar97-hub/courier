@@ -8,8 +8,25 @@ const common_1 = require("@nestjs/common");
 const bodyParser = require("body-parser");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    app.set('trust proxy', 1);
     app.enableCors(constants_1.CORS);
     app.setGlobalPrefix('api');
+    app.use((req, _res, next) => {
+        const path = req.path;
+        const isApi = path.startsWith('/api');
+        const isAsset = path.includes('.');
+        if (!isApi && !isAsset) {
+            console.log(`[REQUEST] ${new Date().toISOString()} ${req.method} ${req.originalUrl}` +
+                ` ip=${req.ip} remote=${req.socket.remoteAddress}` +
+                ` xff=${req.get('x-forwarded-for') || '-'}` +
+                ` proto=${req.protocol}` +
+                ` host=${req.get('host') || '-'}` +
+                ` ua="${req.get('user-agent') || '-'}"` +
+                ` referer="${req.get('referer') || '-'}"` +
+                ` origin="${req.get('origin') || '-'}"`);
+        }
+        next();
+    });
     app.use(morgan('dev'));
     app.useGlobalPipes(new common_1.ValidationPipe({
         transformOptions: {

@@ -358,7 +358,9 @@ import { User } from '../../../../users/models/user.model';
         <button
           mat-raised-button
           class="btn-corp-primary"
-          [disabled]="productForm.invalid || isSaving"
+          [disabled]="
+            productForm.invalid || isSaving || (!isEditing && variations.length === 0)
+          "
           (click)="onSave()"
         >
           @if (isSaving) {
@@ -956,6 +958,14 @@ export class ProductFormDialogComponent implements OnInit {
   }
 
   onSave(): void {
+    if (!this.isEditing && this.variations.length === 0) {
+      this.snackBar.open(
+        'Agregue al menos una variación para crear el producto.',
+        'Cerrar',
+        { duration: 3000 },
+      );
+      return;
+    }
     if (this.productForm.invalid) return;
 
     this.isSaving = true;

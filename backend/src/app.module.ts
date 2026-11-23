@@ -39,7 +39,6 @@ import { join } from 'path';
       serveRoot: '/uploads',
     }),
     ServeStaticModule.forRoot({
-      // rootPath: join(__dirname, '../public/angular/browser'),
       rootPath: join(__dirname, '../../public/angular/browser'),
       exclude: ['/api/{*test}'],
       serveStaticOptions: {

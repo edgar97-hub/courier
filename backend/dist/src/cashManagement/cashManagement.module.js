@@ -11,6 +11,7 @@ const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const cashManagement_entity_1 = require("./entities/cashManagement.entity");
 const cashManagement_service_1 = require("./services/cashManagement.service");
+const cashManagement_controller_1 = require("./controllers/cashManagement.controller");
 const users_module_1 = require("../users/users.module");
 const cash_movement_pdf_generator_service_1 = require("./services/cash-movement-pdf-generator.service");
 const settings_entity_1 = require("../settings/entities/settings.entity");
@@ -21,9 +22,10 @@ exports.CashManagementModule = CashManagementModule = __decorate([
     (0, common_1.Module)({
         imports: [
             typeorm_1.TypeOrmModule.forFeature([cashManagement_entity_1.CashManagementEntity, settings_entity_1.SettingsEntity]),
-            users_module_1.UsersModule
+            users_module_1.UsersModule,
         ],
         providers: [cashManagement_service_1.CashManagementService, cash_movement_pdf_generator_service_1.CashMovementPdfGeneratorService],
+        controllers: [cashManagement_controller_1.CashManagementController],
         exports: [cashManagement_service_1.CashManagementService],
     })
 ], CashManagementModule);

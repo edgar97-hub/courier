@@ -1,12 +1,25 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
+import { Request } from 'express';
+import { AuthGuard } from '../../auth/guards/auth.guard';
+import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { ROLES } from '../../constants/roles';
 import { KardexService } from '../services/kardex.service';
 
 @Controller('fulfillment/kardex')
+@UseGuards(AuthGuard, RolesGuard)
+@Roles(
+  ROLES.ADMINISTRADOR,
+  ROLES.RECEPCIONISTA,
+  ROLES.EMPRESA,
+  ROLES.EMPRESA_DISTRIBUIDOR,
+)
 export class KardexController {
   constructor(private readonly kardexService: KardexService) {}
 
   @Get('query')
   async findPaginated(
+    @Req() req: Request,
     @Query('page_number') page_number: string = '1',
     @Query('page_size') page_size: string = '20',
     @Query('sort_field') sort_field: string = 'createdAt',
@@ -26,6 +39,10 @@ export class KardexController {
     @Query('filter_stock_after_from') filter_stock_after_from?: string,
     @Query('filter_stock_after_to') filter_stock_after_to?: string,
   ) {
+    const restrictToOwnCompany =
+      req.roleUser === ROLES.EMPRESA ||
+      req.roleUser === ROLES.EMPRESA_DISTRIBUIDOR;
+
     return this.kardexService.findPaginated({
       page_number: parseInt(page_number, 10) || 1,
       page_size: parseInt(page_size, 10) || 20,
@@ -33,7 +50,9 @@ export class KardexController {
       sort_direction,
       search_term,
       filter_company,
-      filter_company_id,
+      filter_company_id: restrictToOwnCompany
+        ? req.idUser
+        : filter_company_id,
       filter_product,
       filter_sku,
       filter_movement_type,

@@ -16,7 +16,7 @@ export const DataSourceConfig: DataSourceOptions = {
   database: configService.get('DB_NAME'),
   entities: ['dist/**/*.entity{.ts,.js}'],
   migrations: ['dist/db/migrations/*.js'],
-  synchronize: true,
+  // synchronize: true,
   namingStrategy: new SnakeNamingStrategy(),
 };
 export default new DataSource(DataSourceConfig);

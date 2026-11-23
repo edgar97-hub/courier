@@ -5,18 +5,29 @@ import {
   ParseIntPipe,
   UseGuards,
   Header,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { ROLES } from '../../constants/roles';
  import { InventoryService } from '../services/inventory.service';
 
 @Controller('fulfillment/inventory')
 @UseGuards(AuthGuard, RolesGuard)
+@Roles(
+  ROLES.ADMINISTRADOR,
+  ROLES.RECEPCIONISTA,
+  ROLES.EMPRESA,
+  ROLES.EMPRESA_DISTRIBUIDOR,
+)
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
   @Get('query')
   async queryInventory(
+    @Req() req: Request,
     @Query('page_number', new ParseIntPipe({ optional: true }))
     page_number: number = 1,
     @Query('page_size', new ParseIntPipe({ optional: true }))
@@ -43,6 +54,10 @@ export class InventoryController {
     const filter_stock_to = filter_stock_to_str !== undefined ? Number(filter_stock_to_str) : undefined;
     const filter_min_stock_from = filter_min_stock_from_str !== undefined ? Number(filter_min_stock_from_str) : undefined;
     const filter_min_stock_to = filter_min_stock_to_str !== undefined ? Number(filter_min_stock_to_str) : undefined;
+    const restrictToOwnCompany =
+      req.roleUser === ROLES.EMPRESA ||
+      req.roleUser === ROLES.EMPRESA_DISTRIBUIDOR;
+
     return this.inventoryService.queryInventory({
       page_number,
       page_size,
@@ -50,7 +65,7 @@ export class InventoryController {
       sort_direction,
       search_term,
       filter_company,
-      filter_company_id,
+      filter_company_id: restrictToOwnCompany ? req.idUser : filter_company_id,
       filter_product,
       filter_product_id,
       filter_variation_id,

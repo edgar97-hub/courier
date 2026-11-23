@@ -53,31 +53,6 @@ export class UserService {
     );
   }
 
-  getUsersFiltered(params: {
-    search_term?: string;
-    role?: string;
-    fulfillment_enabled?: boolean;
-  }): Observable<User[]> {
-    const headers = this.getAuthHeaders();
-    let httpParams = new HttpParams();
-    if (params.search_term) {
-      httpParams = httpParams.set('search_term', params.search_term);
-    }
-    if (params.role) {
-      httpParams = httpParams.set('role', params.role);
-    }
-    if (params.fulfillment_enabled !== undefined) {
-      httpParams = httpParams.set('fulfillment_enabled', String(params.fulfillment_enabled));
-    }
-    return this.http.get<User[]>(`${this.apiUrl}/filtered`, {
-      headers,
-      params: httpParams,
-    }).pipe(
-      map((users) => users || []),
-      catchError(this.handleError)
-    );
-  }
-
   getUsersPaginated(params: PaginatedUsersParams): Observable<PaginatedUsersResponse> {
     const headers = this.getAuthHeaders();
     let httpParams = new HttpParams();

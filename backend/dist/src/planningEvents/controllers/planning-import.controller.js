@@ -14,6 +14,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PlanningImportController = void 0;
 const common_1 = require("@nestjs/common");
+const auth_guard_1 = require("../../auth/guards/auth.guard");
+const roles_guard_1 = require("../../auth/guards/roles.guard");
+const roles_decorator_1 = require("../../auth/decorators/roles.decorator");
+const roles_1 = require("../../constants/roles");
 const planning_import_service_1 = require("../services/planning-import.service");
 let PlanningImportController = class PlanningImportController {
     constructor(planningImportService) {
@@ -70,6 +74,8 @@ __decorate([
 ], PlanningImportController.prototype, "getPlanningEventDetails", null);
 exports.PlanningImportController = PlanningImportController = __decorate([
     (0, common_1.Controller)('planning-events'),
+    (0, common_1.UseGuards)(auth_guard_1.AuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(roles_1.ROLES.ADMINISTRADOR, roles_1.ROLES.RECEPCIONISTA),
     __metadata("design:paramtypes", [planning_import_service_1.PlanningImportService])
 ], PlanningImportController);
 //# sourceMappingURL=planning-import.controller.js.map

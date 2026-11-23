@@ -29,8 +29,8 @@ import { ROLES } from '../../constants/roles';
 import { Response } from 'express';
 import { CashMovementPdfGeneratorService } from '../services/cash-movement-pdf-generator.service';
 
-@Controller('cash-management')
 @UseGuards(AuthGuard, RolesGuard)
+@Controller('cash-management')
 export class CashManagementController {
   constructor(
     private readonly cashManagementService: CashManagementService,
@@ -107,7 +107,7 @@ export class CashManagementController {
   @Roles(ROLES.RECEPCIONISTA, ROLES.ADMINISTRADOR)
   async getCashMovementPdf(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Req() req: Request, 
+    @Req() req: Request,
     @Res() res: Response,
   ): Promise<void> {
     await this.cashMovementPdfGeneratorService.streamCashMovementPdfA4ToResponse(

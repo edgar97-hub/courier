@@ -16,6 +16,8 @@ exports.ProductsController = void 0;
 const common_1 = require("@nestjs/common");
 const auth_guard_1 = require("../../auth/guards/auth.guard");
 const roles_guard_1 = require("../../auth/guards/roles.guard");
+const roles_decorator_1 = require("../../auth/decorators/roles.decorator");
+const roles_1 = require("../../constants/roles");
 const products_service_1 = require("../services/products.service");
 const create_fulfillment_product_dto_1 = require("../dto/create-fulfillment-product.dto");
 let ProductsController = class ProductsController {
@@ -125,6 +127,7 @@ __decorate([
 exports.ProductsController = ProductsController = __decorate([
     (0, common_1.Controller)('fulfillment'),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(roles_1.ROLES.ADMINISTRADOR, roles_1.ROLES.RECEPCIONISTA),
     __metadata("design:paramtypes", [products_service_1.FulfillmentService])
 ], ProductsController);
 //# sourceMappingURL=products.controller.js.map

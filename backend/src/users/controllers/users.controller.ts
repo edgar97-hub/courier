@@ -51,7 +51,6 @@ export class UsersController {
     return await this.usersService.findUsers();
   }
 
-  @PublicAccess()
   @Get('filtered')
   public async findUsersByRol(
     @Query('search_term') search_term: string,
@@ -74,7 +73,7 @@ export class UsersController {
     return await this.usersService.findUsersByRol(queryParams);
   }
 
-  @PublicAccess()
+  @Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
   @Get('paginated')
   public async findUsersPaginated(
     @Query('page_number', new ParseIntPipe({ optional: true }))

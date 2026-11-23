@@ -16,6 +16,8 @@ exports.StockAdjustmentController = void 0;
 const common_1 = require("@nestjs/common");
 const auth_guard_1 = require("../../auth/guards/auth.guard");
 const roles_guard_1 = require("../../auth/guards/roles.guard");
+const roles_decorator_1 = require("../../auth/decorators/roles.decorator");
+const roles_1 = require("../../constants/roles");
 const stock_adjustment_service_1 = require("../services/stock-adjustment.service");
 const create_stock_adjustment_dto_1 = require("../dto/create-stock-adjustment.dto");
 let StockAdjustmentController = class StockAdjustmentController {
@@ -98,6 +100,7 @@ __decorate([
 exports.StockAdjustmentController = StockAdjustmentController = __decorate([
     (0, common_1.Controller)('fulfillment/stock-adjustments'),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(roles_1.ROLES.ADMINISTRADOR, roles_1.ROLES.RECEPCIONISTA),
     __metadata("design:paramtypes", [stock_adjustment_service_1.StockAdjustmentService])
 ], StockAdjustmentController);
 //# sourceMappingURL=stock-adjustment.controller.js.map

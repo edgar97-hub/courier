@@ -98,7 +98,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findAllUsers", null);
 __decorate([
-    (0, public_decorator_1.PublicAccess)(),
     (0, common_1.Get)('filtered'),
     __param(0, (0, common_1.Query)('search_term')),
     __param(1, (0, common_1.Query)('role')),
@@ -108,7 +107,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findUsersByRol", null);
 __decorate([
-    (0, public_decorator_1.PublicAccess)(),
+    (0, roles_decorator_1.Roles)(roles_1.ROLES.ADMINISTRADOR, roles_1.ROLES.RECEPCIONISTA),
     (0, common_1.Get)('paginated'),
     __param(0, (0, common_1.Query)('page_number', new common_1.ParseIntPipe({ optional: true }))),
     __param(1, (0, common_1.Query)('page_size', new common_1.ParseIntPipe({ optional: true }))),

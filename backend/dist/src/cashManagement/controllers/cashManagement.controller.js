@@ -134,8 +134,8 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CashManagementController.prototype, "getCashMovementPdfTicket", null);
 exports.CashManagementController = CashManagementController = __decorate([
-    (0, common_1.Controller)('cash-management'),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard, roles_guard_1.RolesGuard),
+    (0, common_1.Controller)('cash-management'),
     __metadata("design:paramtypes", [cashManagement_service_1.CashManagementService,
         cash_movement_pdf_generator_service_1.CashMovementPdfGeneratorService])
 ], CashManagementController);

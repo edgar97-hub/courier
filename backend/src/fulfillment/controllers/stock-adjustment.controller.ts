@@ -13,11 +13,14 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { ROLES } from '../../constants/roles';
  import { StockAdjustmentService } from '../services/stock-adjustment.service';
 import { CreateStockAdjustmentDto } from '../dto/create-stock-adjustment.dto';
 
 @Controller('fulfillment/stock-adjustments')
 @UseGuards(AuthGuard, RolesGuard)
+@Roles(ROLES.ADMINISTRADOR, ROLES.RECEPCIONISTA)
 export class StockAdjustmentController {
   constructor(
     private readonly stockAdjustmentService: StockAdjustmentService,
