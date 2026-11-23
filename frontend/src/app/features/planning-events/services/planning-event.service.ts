@@ -43,6 +43,12 @@ export class PlanningEventService {
     sortField: string,
     sortDirection: 'asc' | 'desc'
   ): Observable<PaginatedPlanningEventsResponse> {
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(
+        () => new Error('Not authenticated to fetch planning events.')
+      );
+    }
     let params = new HttpParams()
       .set('page_number', page.toString())
       .set('page_size', pageSize.toString())
@@ -59,7 +65,7 @@ export class PlanningEventService {
     }
 
     return this.http
-      .get<PaginatedPlanningEventsResponse>(this.apiUrl, { params })
+      .get<PaginatedPlanningEventsResponse>(this.apiUrl, { params, headers })
       .pipe(catchError(this.handleError));
   }
 
