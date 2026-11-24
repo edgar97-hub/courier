@@ -99,7 +99,7 @@ let CashManagementService = class CashManagementService {
             },
         });
         if (!existingMovement) {
-            throw new common_1.NotFoundException(`Cash movement ID not found`);
+            return null;
         }
         const updatedMovement = this.cashMovementRepository.merge(existingMovement, {
             amount: amount,

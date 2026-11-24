@@ -121,7 +121,7 @@ export class CashManagementService {
     orderId: string,
     amount: number,
     paymentMethod: string,
-  ): Promise<CashManagementEntity> {
+  ): Promise<CashManagementEntity | null> {
     const existingMovement = await this.cashMovementRepository.findOne({
       where: {
         order: { id: orderId },
@@ -129,7 +129,7 @@ export class CashManagementService {
     });
 
     if (!existingMovement) {
-      throw new NotFoundException(`Cash movement ID not found`);
+      return null;
     }
     const updatedMovement = this.cashMovementRepository.merge(
       existingMovement,
