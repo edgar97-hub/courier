@@ -31,6 +31,7 @@ import { startOfDay, endOfDay, parseISO } from 'date-fns';
 import { fromZonedTime, formatInTimeZone } from 'date-fns-tz';
 import { parse, format, isBefore, isAfter, isEqual } from 'date-fns';
 import { CashManagementService } from 'src/cashManagement/services/cashManagement.service';
+import { CashManagementEntity } from 'src/cashManagement/entities/cashManagement.entity';
 import {
   DiscountRuleType,
   SettingsEntity,
@@ -1078,9 +1079,12 @@ export class OrdersService {
         .createQueryBuilder(OrdersEntity, 'o')
         .select([
           'o.id',
+          'o.status',
           'o.shipping_cost',
           'o.volumeDiscountAmount',
           'o.appliedVolumeDiscountRule',
+          'o.payment_method_for_shipping_cost',
+          'o.payment_method_for_collection',
         ])
         .where('o.company_id = :companyId', { companyId })
         .andWhere('o.delivery_date = :dateStr', { dateStr })
@@ -1107,6 +1111,10 @@ export class OrdersService {
         .orderBy('o.code', 'ASC')
         .getMany();
       if (dailyOrders.length === 0) continue;
+
+      const originalShippingCosts = new Map(
+        dailyOrders.map((order) => [order.id, order.shipping_cost]),
+      );
 
       // 2. Filtrar biblioteca de reglas del usuario vigentes para este día
       const dateKey = String(dateStr).slice(0, 10);
@@ -1211,7 +1219,57 @@ export class OrdersService {
           appliedVolumeDiscountRule: order.appliedVolumeDiscountRule ?? null,
         });
       }
+
+      // 5. Sincronizar la caja de pedidos ya entregados o rechazados
+      // cuyo costo de servicio cambió por el descuento.
+      for (const order of ordersToUpdate) {
+        const originalCost = originalShippingCosts.get(order.id);
+        if (
+          originalCost === undefined ||
+          originalCost === order.shipping_cost
+        ) {
+          continue;
+        }
+        if (
+          order.status !== STATES.DELIVERED &&
+          order.status !== STATES.REJECTED
+        ) {
+          continue;
+        }
+
+        const movement = await queryRunner.manager.findOne(
+          CashManagementEntity,
+          {
+            where: { order: { id: order.id } },
+          },
+        );
+        if (!movement) continue;
+
+        await queryRunner.manager.update(CashManagementEntity, movement.id, {
+          amount: order.shipping_cost,
+          paymentsMethod: this.getCashPaymentMethod(order),
+        });
+      }
     }
+  }
+
+  private getCashPaymentMethod(order: OrdersEntity): string {
+    if (order.payment_method_for_collection?.toLowerCase() === 'efectivo') {
+      return 'Efectivo';
+    }
+
+    const method = order.payment_method_for_shipping_cost;
+    if (method === 'Efectivo (Pago a COURIER)') {
+      return 'Efectivo';
+    }
+    if (
+      method === 'Pago directo (Pago a COURIER)' ||
+      method === 'Pago directo (Pago a EMPRESA)'
+    ) {
+      return 'Yape/Transferencia BCP';
+    }
+
+    return 'Efectivo';
   }
 
   // Helper para procesar el cálculo y verificar si realmente cambió el precio

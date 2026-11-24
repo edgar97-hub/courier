@@ -35,6 +35,7 @@ export declare class OrdersService {
     generateTrackingCode(): Promise<string>;
     importOrdersFromExcelData(excelRows: any[], idUser: string): Promise<ImportResult | undefined>;
     private applyDiscountsToBatch;
+    private getCashPaymentMethod;
     private updateOrderDiscount;
     previewVolumeDiscount(userId: string, deliveryDate: string): Promise<{
         applies: boolean;

@@ -25,6 +25,7 @@ const orderLog_entity_1 = require("../entities/orderLog.entity");
 const date_fns_tz_1 = require("date-fns-tz");
 const date_fns_1 = require("date-fns");
 const cashManagement_service_1 = require("../../cashManagement/services/cashManagement.service");
+const cashManagement_entity_1 = require("../../cashManagement/entities/cashManagement.entity");
 const settings_entity_1 = require("../../settings/entities/settings.entity");
 const order_item_entity_1 = require("../entities/order-item.entity");
 const stock_adjustment_service_1 = require("../../fulfillment/services/stock-adjustment.service");
@@ -773,9 +774,12 @@ let OrdersService = class OrdersService {
                 .createQueryBuilder(orders_entity_1.OrdersEntity, 'o')
                 .select([
                 'o.id',
+                'o.status',
                 'o.shipping_cost',
                 'o.volumeDiscountAmount',
                 'o.appliedVolumeDiscountRule',
+                'o.payment_method_for_shipping_cost',
+                'o.payment_method_for_collection',
             ])
                 .where('o.company_id = :companyId', { companyId })
                 .andWhere('o.delivery_date = :dateStr', { dateStr })
@@ -800,6 +804,7 @@ let OrdersService = class OrdersService {
                 .getMany();
             if (dailyOrders.length === 0)
                 continue;
+            const originalShippingCosts = new Map(dailyOrders.map((order) => [order.id, order.shipping_cost]));
             const dateKey = String(dateStr).slice(0, 10);
             const userRules = settings.volumeDiscountRules.filter((r) => r.isActive !== false &&
                 currentUser.assignedVolumeDiscountRuleIds.includes(r.id) &&
@@ -852,7 +857,41 @@ let OrdersService = class OrdersService {
                     appliedVolumeDiscountRule: order.appliedVolumeDiscountRule ?? null,
                 });
             }
+            for (const order of ordersToUpdate) {
+                const originalCost = originalShippingCosts.get(order.id);
+                if (originalCost === undefined ||
+                    originalCost === order.shipping_cost) {
+                    continue;
+                }
+                if (order.status !== roles_1.STATES.DELIVERED &&
+                    order.status !== roles_1.STATES.REJECTED) {
+                    continue;
+                }
+                const movement = await queryRunner.manager.findOne(cashManagement_entity_1.CashManagementEntity, {
+                    where: { order: { id: order.id } },
+                });
+                if (!movement)
+                    continue;
+                await queryRunner.manager.update(cashManagement_entity_1.CashManagementEntity, movement.id, {
+                    amount: order.shipping_cost,
+                    paymentsMethod: this.getCashPaymentMethod(order),
+                });
+            }
         }
+    }
+    getCashPaymentMethod(order) {
+        if (order.payment_method_for_collection?.toLowerCase() === 'efectivo') {
+            return 'Efectivo';
+        }
+        const method = order.payment_method_for_shipping_cost;
+        if (method === 'Efectivo (Pago a COURIER)') {
+            return 'Efectivo';
+        }
+        if (method === 'Pago directo (Pago a COURIER)' ||
+            method === 'Pago directo (Pago a EMPRESA)') {
+            return 'Yape/Transferencia BCP';
+        }
+        return 'Efectivo';
     }
     updateOrderDiscount(order, rule, seq, list) {
         const basePrice = order.shipping_cost + (order.volumeDiscountAmount || 0);
