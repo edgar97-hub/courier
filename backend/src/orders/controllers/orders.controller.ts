@@ -21,6 +21,10 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { ROLES } from 'src/constants/roles';
 import { UpdateOrderRequestDto } from '../dto/order.dto';
+import {
+  ManualApplyVolumeDiscountDto,
+  ManualDiscountReasonDto,
+} from '../dto/manual-volume-discount.dto';
 import { OrdersService } from '../services/orders.service';
 import { Response } from 'express';import { ImportResult } from '../dto/import-result.dto';
 import { OrderPdfGeneratorService } from '../services/order-pdf-generator.service';
@@ -72,6 +76,34 @@ export class OrdersController {
   @Post('batch-volume-discount-simulation')
   async simulateBatchVolumeDiscount(@Body() body: { orders: any[] }) {
     return await this.ordersService.simulateBatchVolumeDiscount(body.orders);
+  }
+
+  @Post(':id/volume-discount/manual-apply')
+  @Roles(ROLES.ADMINISTRADOR)
+  public async manualApplyVolumeDiscount(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() body: ManualApplyVolumeDiscountDto,
+    @Request() req,
+  ) {
+    return await this.ordersService.manualApplyVolumeDiscount(
+      id,
+      body,
+      req.idUser,
+    );
+  }
+
+  @Post(':id/volume-discount/manual-remove')
+  @Roles(ROLES.ADMINISTRADOR)
+  public async manualRemoveVolumeDiscount(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() body: ManualDiscountReasonDto,
+    @Request() req,
+  ) {
+    return await this.ordersService.manualRemoveVolumeDiscount(
+      id,
+      body,
+      req.idUser,
+    );
   }
 
   @Get('active-districts')

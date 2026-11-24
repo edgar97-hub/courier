@@ -20,6 +20,7 @@ const auth_guard_1 = require("../../auth/guards/auth.guard");
 const roles_guard_1 = require("../../auth/guards/roles.guard");
 const roles_1 = require("../../constants/roles");
 const order_dto_1 = require("../dto/order.dto");
+const manual_volume_discount_dto_1 = require("../dto/manual-volume-discount.dto");
 const orders_service_1 = require("../services/orders.service");
 const order_pdf_generator_service_1 = require("../services/order-pdf-generator.service");
 let OrdersController = class OrdersController {
@@ -42,6 +43,12 @@ let OrdersController = class OrdersController {
     }
     async simulateBatchVolumeDiscount(body) {
         return await this.ordersService.simulateBatchVolumeDiscount(body.orders);
+    }
+    async manualApplyVolumeDiscount(id, body, req) {
+        return await this.ordersService.manualApplyVolumeDiscount(id, body, req.idUser);
+    }
+    async manualRemoveVolumeDiscount(id, body, req) {
+        return await this.ordersService.manualRemoveVolumeDiscount(id, body, req.idUser);
     }
     async getActiveDistricts(req, startDate, endDate, status) {
         const districts = await this.ordersService.getActiveDistrictsByDateRange(req, startDate, endDate, status);
@@ -210,6 +217,26 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "simulateBatchVolumeDiscount", null);
+__decorate([
+    (0, common_1.Post)(':id/volume-discount/manual-apply'),
+    (0, roles_decorator_1.Roles)(roles_1.ROLES.ADMINISTRADOR),
+    __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, manual_volume_discount_dto_1.ManualApplyVolumeDiscountDto, Object]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "manualApplyVolumeDiscount", null);
+__decorate([
+    (0, common_1.Post)(':id/volume-discount/manual-remove'),
+    (0, roles_decorator_1.Roles)(roles_1.ROLES.ADMINISTRADOR),
+    __param(0, (0, common_1.Param)('id', new common_1.ParseUUIDPipe())),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, manual_volume_discount_dto_1.ManualDiscountReasonDto, Object]),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "manualRemoveVolumeDiscount", null);
 __decorate([
     (0, common_1.Get)('active-districts'),
     __param(0, (0, common_1.Req)()),

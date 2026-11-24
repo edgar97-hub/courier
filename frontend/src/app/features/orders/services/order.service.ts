@@ -613,6 +613,43 @@ export class OrderService {
       .pipe(catchError(this.handleError));
   }
 
+  manualApplyVolumeDiscount(
+    orderId: string | number,
+    payload: { percentage: number },
+  ): Observable<any> {
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(
+        () => new Error('Not authenticated to update discount.'),
+      );
+    }
+
+    return this.http
+      .post<any>(
+        `${this.apiUrlOrders}/${orderId}/volume-discount/manual-apply`,
+        payload,
+        { headers },
+      )
+      .pipe(catchError(this.handleError));
+  }
+
+  manualRemoveVolumeDiscount(orderId: string | number): Observable<any> {
+    const headers = this.getAuthHeaders();
+    if (!this.authService.getAccessToken()) {
+      return throwError(
+        () => new Error('Not authenticated to update discount.'),
+      );
+    }
+
+    return this.http
+      .post<any>(
+        `${this.apiUrlOrders}/${orderId}/volume-discount/manual-remove`,
+        {},
+        { headers },
+      )
+      .pipe(catchError(this.handleError));
+  }
+
   getVolumeDiscountPreview(
     deliveryDate: string,
     companyId?: string,

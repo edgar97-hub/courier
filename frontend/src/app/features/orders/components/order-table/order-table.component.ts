@@ -54,6 +54,11 @@ import {
   EditShippingCostDialogResult,
   EditShippingCostDialogData,
 } from '../edit-shipping-cost-dialog/edit-shipping-cost-dialog.component';
+import {
+  ManualVolumeDiscountDialogComponent,
+  ManualVolumeDiscountDialogData,
+  ManualVolumeDiscountDialogResult,
+} from '../manual-volume-discount-dialog/manual-volume-discount-dialog.component';
 import { Router } from '@angular/router';
 import {
   OrderEditionDialogComponent,
@@ -131,6 +136,12 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
 
   @Output() orderChanged = new EventEmitter<{
     order: UpdateOrderRequestDto;
+  }>();
+
+  @Output() volumeDiscountChanged = new EventEmitter<{
+    orderId: string | number;
+    mode: 'apply' | 'remove';
+    percentage?: number;
   }>();
 
   displayedColumns: string[] = [
@@ -588,6 +599,43 @@ export class OrderTableComponent implements AfterViewInit, OnChanges {
       } else {
         console.log('Edición de costo de envío cancelada.');
       }
+    });
+  }
+
+  openManualVolumeDiscountModal(
+    order: Order_,
+    mode: 'apply' | 'remove',
+  ): void {
+    if (!order.id) {
+      return;
+    }
+
+    const dialogRef = this.dialog.open<
+      ManualVolumeDiscountDialogComponent,
+      ManualVolumeDiscountDialogData,
+      ManualVolumeDiscountDialogResult
+    >(ManualVolumeDiscountDialogComponent, {
+      width: '480px',
+      disableClose: true,
+      data: {
+        mode,
+        orderCode: order.code ?? order.id,
+        shippingCost: order.shipping_cost || 0,
+        volumeDiscountAmount: order.volumeDiscountAmount || 0,
+        currentPercentage:
+          order.appliedVolumeDiscountRule?.percentage ?? null,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (!result) {
+        return;
+      }
+      this.volumeDiscountChanged.emit({
+        orderId: order.id,
+        mode,
+        percentage: result.percentage,
+      });
     });
   }
 }

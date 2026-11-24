@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OrdersEntity = void 0;
+exports.OrdersEntity = exports.VolumeDiscountMode = void 0;
 const typeorm_1 = require("typeorm");
 const base_entity_1 = require("../../config/base.entity");
 const users_entity_1 = require("../../users/entities/users.entity");
@@ -18,6 +18,11 @@ const orderLog_entity_1 = require("./orderLog.entity");
 const cashManagement_entity_1 = require("../../cashManagement/entities/cashManagement.entity");
 const stop_entity_1 = require("../../planningEvents/entities/stop.entity");
 const order_item_entity_1 = require("./order-item.entity");
+var VolumeDiscountMode;
+(function (VolumeDiscountMode) {
+    VolumeDiscountMode["AUTO"] = "AUTO";
+    VolumeDiscountMode["MANUAL"] = "MANUAL";
+})(VolumeDiscountMode || (exports.VolumeDiscountMode = VolumeDiscountMode = {}));
 let OrdersEntity = class OrdersEntity extends base_entity_1.BaseEntity {
 };
 exports.OrdersEntity = OrdersEntity;
@@ -96,6 +101,16 @@ __decorate([
     }),
     __metadata("design:type", Object)
 ], OrdersEntity.prototype, "appliedVolumeDiscountRule", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        name: 'volume_discount_mode',
+        type: 'varchar',
+        length: 20,
+        default: VolumeDiscountMode.AUTO,
+        comment: 'AUTO: lo calcula la regla. MANUAL: descuento forzado manualmente',
+    }),
+    __metadata("design:type", String)
+], OrdersEntity.prototype, "volumeDiscountMode", void 0);
 __decorate([
     (0, typeorm_1.Column)({ nullable: true, default: '' }),
     __metadata("design:type", String)

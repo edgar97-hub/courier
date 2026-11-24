@@ -1,4 +1,5 @@
 import { UpdateOrderRequestDto } from '../dto/order.dto';
+import { ManualApplyVolumeDiscountDto, ManualDiscountReasonDto } from '../dto/manual-volume-discount.dto';
 import { OrdersService } from '../services/orders.service';
 import { Response } from 'express';
 import { ImportResult } from '../dto/import-result.dto';
@@ -46,6 +47,20 @@ export declare class OrdersController {
         temp_id: any;
         appliedDiscount: number;
     }[]>;
+    manualApplyVolumeDiscount(id: string, body: ManualApplyVolumeDiscountDto, req: any): Promise<{
+        success: boolean;
+        code: number;
+        shipping_cost: number;
+        volume_discount_amount: number;
+        volume_discount_mode: import("../entities/orders.entity").VolumeDiscountMode;
+    }>;
+    manualRemoveVolumeDiscount(id: string, body: ManualDiscountReasonDto, req: any): Promise<{
+        success: boolean;
+        code: number;
+        shipping_cost: number;
+        volume_discount_amount: number;
+        volume_discount_mode: import("../entities/orders.entity").VolumeDiscountMode;
+    }>;
     getActiveDistricts(req: any, startDate: string, endDate: string, status?: string): Promise<{
         success: boolean;
         data: string[];

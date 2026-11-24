@@ -5,6 +5,10 @@ import { OrderLogEntity } from './orderLog.entity';
 import { CashManagementEntity } from 'src/cashManagement/entities/cashManagement.entity';
 import { Stop } from 'src/planningEvents/entities/stop.entity';
 import { OrderItemEntity } from './order-item.entity';
+export declare enum VolumeDiscountMode {
+    AUTO = "AUTO",
+    MANUAL = "MANUAL"
+}
 export declare class OrdersEntity extends BaseEntity {
     code: number;
     shipment_type: string;
@@ -22,6 +26,7 @@ export declare class OrdersEntity extends BaseEntity {
     shipping_cost: number;
     volumeDiscountAmount: number;
     appliedVolumeDiscountRule: any;
+    volumeDiscountMode: VolumeDiscountMode;
     payment_method_for_shipping_cost?: string;
     item_description?: string;
     amount_to_collect_at_delivery: number;

@@ -1,0 +1,76 @@
+<h2 mat-dialog-title>
+  <mat-icon>{{ isApply ? 'percent' : 'money_off' }}</mat-icon>
+  {{ isApply ? 'Aplicar descuento manual' : 'Quitar descuento' }}
+</h2>
+
+<mat-dialog-content>
+  <p class="order-ref">Pedido #{{ data.orderCode }}</p>
+
+  @if (isApply) {
+  <p class="description">
+    Aplica un descuento manual sobre el costo base del envío. Este pedido no
+    contará para la meta de volumen.
+  </p>
+
+  <form [formGroup]="form" class="discount-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Porcentaje de descuento</mat-label>
+      <input
+        matInput
+        type="number"
+        formControlName="percentage"
+        min="0.01"
+        max="100"
+        step="0.01"
+      />
+      <span matSuffix>%</span>
+      @if (percentageCtrl?.invalid && percentageCtrl?.touched) {
+      <mat-error>Ingresa un porcentaje entre 0.01 y 100.</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="preview">
+      <div>
+        <span>Costo base</span>
+        <strong>{{ basePrice | currency : "PEN" : "S/ " : "1.2-2" }}</strong>
+      </div>
+      <div>
+        <span>Descuento</span>
+        <strong class="discount"
+          >- {{ discountAmount | currency : "PEN" : "S/ " : "1.2-2" }}</strong
+        >
+      </div>
+      <div>
+        <span>Nuevo costo</span>
+        <strong>{{
+          newShippingCost | currency : "PEN" : "S/ " : "1.2-2"
+        }}</strong>
+      </div>
+    </div>
+
+  </form>
+  } @else {
+  <p class="description">
+    Se quitará el descuento y el pedido volverá a la regla automática.
+  </p>
+
+  <div class="warning-box">
+    <mat-icon>info</mat-icon>
+    <span>
+      Si el pedido está o estuvo reprogramado, no volverá a recibir descuento
+      automático.
+    </span>
+  </div>
+
+  <p class="description">
+    Si no está reprogramado, podría recibirlo en el próximo recálculo.
+  </p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+  <button mat-raised-button class="btn-corp-primary" (click)="onConfirm()">
+    {{ isApply ? "Aplicar descuento" : "Quitar descuento" }}
+  </button>
+</mat-dialog-actions>

@@ -185,6 +185,7 @@ export interface Order_ {
   items: OrderItem[];
   volumeDiscountAmount: number;
   appliedVolumeDiscountRule: any;
+  volumeDiscountMode?: 'AUTO' | 'MANUAL';
 }
 
 export interface Motorized {

@@ -741,6 +741,86 @@ let OrdersService = class OrdersService {
             errors: errors,
         };
     }
+    async manualApplyVolumeDiscount(orderId, dto, idUser) {
+        return this.applyManualVolumeDiscountChange(orderId, orders_entity_1.VolumeDiscountMode.MANUAL, 'DESCUENTO MANUAL APLICADO', dto.reason, idUser, dto.percentage);
+    }
+    async manualRemoveVolumeDiscount(orderId, dto, idUser) {
+        return this.applyManualVolumeDiscountChange(orderId, orders_entity_1.VolumeDiscountMode.AUTO, 'DESCUENTO QUITADO', dto?.reason, idUser);
+    }
+    async applyManualVolumeDiscountChange(orderId, mode, action, reason, idUser, percentage) {
+        const queryRunner = this.orderRepository.manager.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const order = await queryRunner.manager.findOne(orders_entity_1.OrdersEntity, {
+                where: { id: orderId },
+            });
+            if (!order) {
+                throw new common_1.NotFoundException('Pedido no encontrado.');
+            }
+            if (order.status === roles_1.STATES.ANNULLED ||
+                order.status === roles_1.STATES.CANCELED) {
+                throw new common_1.BadRequestException('No se puede modificar el descuento de un pedido anulado o cancelado.');
+            }
+            const previousCost = order.shipping_cost;
+            const basePrice = order.shipping_cost + (order.volumeDiscountAmount || 0);
+            if (percentage !== undefined) {
+                const discount = Math.round(basePrice * percentage) / 100;
+                order.volumeDiscountAmount = discount;
+                order.shipping_cost =
+                    Math.round((basePrice - discount) * 100) / 100;
+                order.appliedVolumeDiscountRule = {
+                    type: 'MANUAL',
+                    percentage,
+                    ruleLabel: 'Manual',
+                    sequenceNumber: null,
+                };
+            }
+            else {
+                order.shipping_cost = basePrice;
+                order.volumeDiscountAmount = 0;
+                order.appliedVolumeDiscountRule = null;
+            }
+            order.volumeDiscountMode = mode;
+            await queryRunner.manager.update(orders_entity_1.OrdersEntity, order.id, {
+                shipping_cost: order.shipping_cost,
+                volumeDiscountAmount: order.volumeDiscountAmount,
+                appliedVolumeDiscountRule: order.appliedVolumeDiscountRule,
+                volumeDiscountMode: order.volumeDiscountMode,
+            });
+            await this.syncCashForOrder(queryRunner, order);
+            await queryRunner.commitTransaction();
+            return {
+                success: true,
+                code: order.code,
+                shipping_cost: order.shipping_cost,
+                volume_discount_amount: order.volumeDiscountAmount,
+                volume_discount_mode: order.volumeDiscountMode,
+            };
+        }
+        catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw error;
+        }
+        finally {
+            await queryRunner.release();
+        }
+    }
+    async syncCashForOrder(queryRunner, order) {
+        if (order.status !== roles_1.STATES.DELIVERED &&
+            order.status !== roles_1.STATES.REJECTED) {
+            return;
+        }
+        const movement = await queryRunner.manager.findOne(cashManagement_entity_1.CashManagementEntity, {
+            where: { order: { id: order.id } },
+        });
+        if (!movement)
+            return;
+        await queryRunner.manager.update(cashManagement_entity_1.CashManagementEntity, movement.id, {
+            amount: order.shipping_cost,
+            paymentsMethod: this.getCashPaymentMethod(order),
+        });
+    }
     async applyDiscountsToBatch(queryRunner, newOrders) {
         const settings = await queryRunner.manager.findOne(settings_entity_1.SettingsEntity, {
             where: {},
@@ -783,6 +863,9 @@ let OrdersService = class OrdersService {
             ])
                 .where('o.company_id = :companyId', { companyId })
                 .andWhere('o.delivery_date = :dateStr', { dateStr })
+                .andWhere('o.volume_discount_mode = :autoMode', {
+                autoMode: orders_entity_1.VolumeDiscountMode.AUTO,
+            })
                 .andWhere('o.status::text != :annulled', {
                 annulled: roles_1.STATES.ANNULLED,
             })
@@ -863,19 +946,7 @@ let OrdersService = class OrdersService {
                     originalCost === order.shipping_cost) {
                     continue;
                 }
-                if (order.status !== roles_1.STATES.DELIVERED &&
-                    order.status !== roles_1.STATES.REJECTED) {
-                    continue;
-                }
-                const movement = await queryRunner.manager.findOne(cashManagement_entity_1.CashManagementEntity, {
-                    where: { order: { id: order.id } },
-                });
-                if (!movement)
-                    continue;
-                await queryRunner.manager.update(cashManagement_entity_1.CashManagementEntity, movement.id, {
-                    amount: order.shipping_cost,
-                    paymentsMethod: this.getCashPaymentMethod(order),
-                });
+                await this.syncCashForOrder(queryRunner, order);
             }
         }
     }
@@ -905,7 +976,7 @@ let OrdersService = class OrdersService {
                 ruleId: rule.id,
                 type: rule.type,
                 percentage: rule.discountPercentage,
-                range: rule.type === settings_entity_1.DiscountRuleType.GOAL
+                ruleLabel: rule.type === settings_entity_1.DiscountRuleType.GOAL
                     ? `Meta ${rule.minOrders}`
                     : `${rule.minOrders}-${rule.maxOrders ?? '∞'}`,
                 sequenceNumber: seq,
@@ -1521,7 +1592,7 @@ let OrdersService = class OrdersService {
             'COUNT(order.id) AS total_orders',
             'SUM(order.shipping_cost) AS total_invoiced',
             `MAX( ("order".applied_volume_discount_rule->>'percentage')::float ) AS max_discount`,
-            `MAX( "order".applied_volume_discount_rule->>'range' ) AS range_reached`,
+            `MAX( COALESCE("order".applied_volume_discount_rule->>'ruleLabel', "order".applied_volume_discount_rule->>'range') ) AS range_reached`,
         ])
             .where('order.status::text != :status', {
             status: roles_1.STATES.ANNULLED,

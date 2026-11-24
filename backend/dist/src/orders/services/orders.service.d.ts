@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 import { UpdateOrderRequestDto } from '../dto/order.dto';
-import { OrdersEntity } from '../entities/orders.entity';
+import { OrdersEntity, VolumeDiscountMode } from '../entities/orders.entity';
 import { DistrictsEntity } from 'src/districts/entities/districts.entity';
 import { ImportResult } from '../dto/import-result.dto';
 import { UsersEntity } from 'src/users/entities/users.entity';
@@ -34,6 +34,27 @@ export declare class OrdersService {
     private deductFulfillmentStock;
     generateTrackingCode(): Promise<string>;
     importOrdersFromExcelData(excelRows: any[], idUser: string): Promise<ImportResult | undefined>;
+    manualApplyVolumeDiscount(orderId: string, dto: {
+        percentage: number;
+        reason?: string;
+    }, idUser: string): Promise<{
+        success: boolean;
+        code: number;
+        shipping_cost: number;
+        volume_discount_amount: number;
+        volume_discount_mode: VolumeDiscountMode;
+    }>;
+    manualRemoveVolumeDiscount(orderId: string, dto: {
+        reason?: string;
+    }, idUser: string): Promise<{
+        success: boolean;
+        code: number;
+        shipping_cost: number;
+        volume_discount_amount: number;
+        volume_discount_mode: VolumeDiscountMode;
+    }>;
+    private applyManualVolumeDiscountChange;
+    private syncCashForOrder;
     private applyDiscountsToBatch;
     private getCashPaymentMethod;
     private updateOrderDiscount;

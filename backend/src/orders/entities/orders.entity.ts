@@ -15,6 +15,11 @@ import { CashManagementEntity } from 'src/cashManagement/entities/cashManagement
 import { Stop } from 'src/planningEvents/entities/stop.entity';
 import { OrderItemEntity } from './order-item.entity';
 
+export enum VolumeDiscountMode {
+  AUTO = 'AUTO',
+  MANUAL = 'MANUAL',
+}
+
 @Entity({ name: 'orders' })
 @Index('idx_orders_company_delivery_date', ['company', 'delivery_date'])
 export class OrdersEntity extends BaseEntity {
@@ -76,6 +81,15 @@ export class OrdersEntity extends BaseEntity {
     comment: 'Snapshot de la regla aplicada (Rango, %, ID) para auditoría',
   })
   appliedVolumeDiscountRule: any;
+
+  @Column({
+    name: 'volume_discount_mode',
+    type: 'varchar',
+    length: 20,
+    default: VolumeDiscountMode.AUTO,
+    comment: 'AUTO: lo calcula la regla. MANUAL: descuento forzado manualmente',
+  })
+  volumeDiscountMode: VolumeDiscountMode;
 
   @Column({ nullable: true, default: '' })
   payment_method_for_shipping_cost?: string;

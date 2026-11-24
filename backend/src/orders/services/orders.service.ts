@@ -19,7 +19,10 @@ import {
   UpdateResult,
 } from 'typeorm';
 import { OrderDTO, UpdateOrderRequestDto } from '../dto/order.dto';
-import { OrdersEntity } from '../entities/orders.entity';
+import {
+  OrdersEntity,
+  VolumeDiscountMode,
+} from '../entities/orders.entity';
 import { DistrictsService } from 'src/districts/services/districts.service';
 import { DistrictsEntity } from 'src/districts/entities/districts.entity';
 import { ImportResult } from '../dto/import-result.dto';
@@ -1037,6 +1040,153 @@ export class OrdersService {
     };
   }
 
+  public async manualApplyVolumeDiscount(
+    orderId: string,
+    dto: { percentage: number; reason?: string },
+    idUser: string,
+  ) {
+    return this.applyManualVolumeDiscountChange(
+      orderId,
+      VolumeDiscountMode.MANUAL,
+      'DESCUENTO MANUAL APLICADO',
+      dto.reason,
+      idUser,
+      dto.percentage,
+    );
+  }
+
+  public async manualRemoveVolumeDiscount(
+    orderId: string,
+    dto: { reason?: string },
+    idUser: string,
+  ) {
+    return this.applyManualVolumeDiscountChange(
+      orderId,
+      VolumeDiscountMode.AUTO,
+      'DESCUENTO QUITADO',
+      dto?.reason,
+      idUser,
+    );
+  }
+
+  private async applyManualVolumeDiscountChange(
+    orderId: string,
+    mode: VolumeDiscountMode,
+    action: string,
+    reason: string | undefined,
+    idUser: string,
+    percentage?: number,
+  ): Promise<{
+    success: boolean;
+    code: number;
+    shipping_cost: number;
+    volume_discount_amount: number;
+    volume_discount_mode: VolumeDiscountMode;
+  }> {
+    const queryRunner =
+      this.orderRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const order = await queryRunner.manager.findOne(OrdersEntity, {
+        where: { id: orderId },
+      });
+      if (!order) {
+        throw new NotFoundException('Pedido no encontrado.');
+      }
+      if (
+        order.status === STATES.ANNULLED ||
+        order.status === STATES.CANCELED
+      ) {
+        throw new BadRequestException(
+          'No se puede modificar el descuento de un pedido anulado o cancelado.',
+        );
+      }
+
+      const previousCost = order.shipping_cost;
+      const basePrice =
+        order.shipping_cost + (order.volumeDiscountAmount || 0);
+
+      if (percentage !== undefined) {
+        const discount = Math.round(basePrice * percentage) / 100;
+        order.volumeDiscountAmount = discount;
+        order.shipping_cost =
+          Math.round((basePrice - discount) * 100) / 100;
+        order.appliedVolumeDiscountRule = {
+          type: 'MANUAL',
+          percentage,
+          ruleLabel: 'Manual',
+          sequenceNumber: null,
+        };
+      } else {
+        order.shipping_cost = basePrice;
+        order.volumeDiscountAmount = 0;
+        order.appliedVolumeDiscountRule = null;
+      }
+
+      order.volumeDiscountMode = mode;
+
+      await queryRunner.manager.update(OrdersEntity, order.id, {
+        shipping_cost: order.shipping_cost,
+        volumeDiscountAmount: order.volumeDiscountAmount,
+        appliedVolumeDiscountRule: order.appliedVolumeDiscountRule,
+        volumeDiscountMode: order.volumeDiscountMode,
+      });
+
+      await this.syncCashForOrder(queryRunner, order);
+
+      // await queryRunner.manager.save(
+      //   OrderLogEntity,
+      //   queryRunner.manager.create(OrderLogEntity, {
+      //     order: { id: order.id },
+      //     performedBy: idUser ? { id: idUser } : undefined,
+      //     action,
+      //     previousValue: previousCost.toFixed(2),
+      //     newValue: order.shipping_cost.toFixed(2),
+      //     notes: reason || '',
+      //   }),
+      // );
+
+      await queryRunner.commitTransaction();
+
+      return {
+        success: true,
+        code: order.code,
+        shipping_cost: order.shipping_cost,
+        volume_discount_amount: order.volumeDiscountAmount,
+        volume_discount_mode: order.volumeDiscountMode,
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  private async syncCashForOrder(
+    queryRunner: QueryRunner,
+    order: OrdersEntity,
+  ): Promise<void> {
+    if (
+      order.status !== STATES.DELIVERED &&
+      order.status !== STATES.REJECTED
+    ) {
+      return;
+    }
+
+    const movement = await queryRunner.manager.findOne(CashManagementEntity, {
+      where: { order: { id: order.id } },
+    });
+    if (!movement) return;
+
+    await queryRunner.manager.update(CashManagementEntity, movement.id, {
+      amount: order.shipping_cost,
+      paymentsMethod: this.getCashPaymentMethod(order),
+    });
+  }
+
   private async applyDiscountsToBatch(
     queryRunner: QueryRunner,
     newOrders: OrdersEntity[],
@@ -1088,6 +1238,9 @@ export class OrdersService {
         ])
         .where('o.company_id = :companyId', { companyId })
         .andWhere('o.delivery_date = :dateStr', { dateStr })
+        .andWhere('o.volume_discount_mode = :autoMode', {
+          autoMode: VolumeDiscountMode.AUTO,
+        })
         .andWhere('o.status::text != :annulled', {
           annulled: STATES.ANNULLED,
         })
@@ -1230,25 +1383,7 @@ export class OrdersService {
         ) {
           continue;
         }
-        if (
-          order.status !== STATES.DELIVERED &&
-          order.status !== STATES.REJECTED
-        ) {
-          continue;
-        }
-
-        const movement = await queryRunner.manager.findOne(
-          CashManagementEntity,
-          {
-            where: { order: { id: order.id } },
-          },
-        );
-        if (!movement) continue;
-
-        await queryRunner.manager.update(CashManagementEntity, movement.id, {
-          amount: order.shipping_cost,
-          paymentsMethod: this.getCashPaymentMethod(order),
-        });
+        await this.syncCashForOrder(queryRunner, order);
       }
     }
   }
@@ -1287,7 +1422,7 @@ export class OrdersService {
       ruleId: string;
       type: DiscountRuleType;
       percentage: number;
-      range: string;
+      ruleLabel: string;
       sequenceNumber: number;
     } | null = null;
 
@@ -1298,7 +1433,7 @@ export class OrdersService {
         ruleId: rule.id,
         type: rule.type,
         percentage: rule.discountPercentage,
-        range:
+        ruleLabel:
           rule.type === DiscountRuleType.GOAL
             ? `Meta ${rule.minOrders}`
             : `${rule.minOrders}-${rule.maxOrders ?? '∞'}`,
@@ -2207,7 +2342,7 @@ export class OrdersService {
         'COUNT(order.id) AS total_orders',
         'SUM(order.shipping_cost) AS total_invoiced',
         `MAX( ("order".applied_volume_discount_rule->>'percentage')::float ) AS max_discount`,
-        `MAX( "order".applied_volume_discount_rule->>'range' ) AS range_reached`,
+        `MAX( COALESCE("order".applied_volume_discount_rule->>'ruleLabel', "order".applied_volume_discount_rule->>'range') ) AS range_reached`,
       ])
       .where('order.status::text != :status', {
         status: STATES.ANNULLED,

@@ -543,6 +543,47 @@ export class OrderListPageComponent implements OnInit, OnDestroy {
       });
   }
 
+  handleVolumeDiscountChanged(event: {
+    orderId: string | number;
+    mode: 'apply' | 'remove';
+    percentage?: number;
+  }): void {
+    this.isLoading = true;
+
+    const request$: Observable<any> =
+      event.mode === 'apply'
+        ? this.orderService.manualApplyVolumeDiscount(event.orderId, {
+            percentage: event.percentage ?? 0,
+          })
+        : this.orderService.manualRemoveVolumeDiscount(event.orderId);
+
+    request$.subscribe({
+      next: () => {
+        this.snackBar.open(
+          event.mode === 'apply'
+            ? 'Descuento manual aplicado correctamente.'
+            : 'Descuento quitado. El pedido volvió a la regla automática.',
+          'OK',
+          { duration: 3000, panelClass: ['success-snackbar'] },
+        );
+        this.fetchOrders();
+      },
+      error: (err: any) => {
+        this.snackBar.open(
+          err?.error?.message ||
+            err?.message ||
+            'No se pudo actualizar el descuento.',
+          'Cerrar',
+          { duration: 5000, panelClass: ['error-snackbar'] },
+        );
+        this.isLoading = false;
+      },
+      complete: () => {
+        this.isLoading = false;
+      },
+    });
+  }
+
   onFiltersChanged(filters: OrderFilterCriteria): void {
     console.log('OrderListPage: Filters changed', filters);
     this.filterCriteriaSubject.next(filters);
