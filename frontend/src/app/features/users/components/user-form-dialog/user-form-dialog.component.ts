@@ -1,8 +1,10 @@
 import { Component, Inject, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
+  AbstractControl,
   FormBuilder,
   FormGroup,
+  ValidationErrors,
   Validators,
   ReactiveFormsModule,
 } from '@angular/forms';
@@ -28,7 +30,10 @@ import {
   ROLES_LIST,
 } from '../../models/user.model';
 import { SettingsService } from '../../../settings/services/settings.service';
-import { VolumeDiscountRule } from '../../../settings/models/app-settings.interface';
+import {
+  DiscountRuleType,
+  VolumeDiscountRule,
+} from '../../../settings/models/app-settings.interface';
 
 export interface UserDialogData {
   mode: 'create' | 'edit';
@@ -275,6 +280,15 @@ export interface UserDialogData {
                     </mat-optgroup>
                   </mat-select>
                 </mat-form-field>
+                @if (userForm.get('assignedVolumeDiscountRuleIds')?.hasError('volumeDiscountConflict')) {
+                <p class="volume-discount-error">
+                  {{
+                    userForm
+                      .get('assignedVolumeDiscountRuleIds')
+                      ?.getError('volumeDiscountConflict')
+                  }}
+                </p>
+                }
                 }
               </div>
             </div>
@@ -524,6 +538,12 @@ export interface UserDialogData {
         font-weight: 600;
         color: #012147;
       }
+      .volume-discount-error {
+        margin: 4px 0 0;
+        font-size: 12px;
+        line-height: 1.4;
+        color: #dc2626;
+      }
 
       /* ===== FOOTER ===== */
       .dialog-footer {
@@ -621,6 +641,64 @@ export class UserFormDialogComponent implements OnInit {
   private settingsService = inject(SettingsService);
   private snackBar = inject(MatSnackBar);
 
+  private assignedRulesValidator = (
+    control: AbstractControl,
+  ): ValidationErrors | null => {
+    const enabled = control.parent?.get('isVolumeDiscountEnabled')?.value;
+    if (!enabled) {
+      return null;
+    }
+
+    const selectedIds: string[] = control.value || [];
+    if (selectedIds.length === 0 || this.allRules.length === 0) {
+      return null;
+    }
+
+    const selectedRules = this.allRules.filter(
+      (rule) => selectedIds.includes(rule.id) && rule.isActive !== false,
+    );
+
+    const errors: string[] = [];
+
+    for (let i = 0; i < selectedRules.length; i++) {
+      for (let j = i + 1; j < selectedRules.length; j++) {
+        const first = selectedRules[i];
+        const second = selectedRules[j];
+
+        if (!this.dateRangesOverlap(first, second)) {
+          continue;
+        }
+
+        if (
+          first.type === DiscountRuleType.GOAL &&
+          second.type === DiscountRuleType.GOAL
+        ) {
+          errors.push(
+            `Las metas ${this.volumeRuleLabel(first)} y ${this.volumeRuleLabel(second)} tienen fechas superpuestas.`,
+          );
+          continue;
+        }
+
+        if (first.type !== second.type) {
+          errors.push(
+            `${this.volumeRuleLabel(first)} y ${this.volumeRuleLabel(second)} coinciden en fechas. Deja solo una.`,
+          );
+          continue;
+        }
+
+        if (this.orderRangesOverlap(first, second)) {
+          errors.push(
+            `Los rangos ${this.volumeRuleLabel(first)} y ${this.volumeRuleLabel(second)} se superponen en cantidad de pedidos.`,
+          );
+        }
+      }
+    }
+
+    return errors.length > 0
+      ? { volumeDiscountConflict: errors.join(' ') }
+      : null;
+  };
+
   constructor(
     private fb: FormBuilder,
     public dialogRef: MatDialogRef<UserFormDialogComponent>,
@@ -655,7 +733,7 @@ export class UserFormDialogComponent implements OnInit {
       owner_bank_account: [''],
       name_account_number_owner: [''],
       isVolumeDiscountEnabled: [false],
-      assignedVolumeDiscountRuleIds: [[]],
+      assignedVolumeDiscountRuleIds: [[], [this.assignedRulesValidator]],
       isFulfillmentEnabled: [false],
     });
   }
@@ -703,6 +781,12 @@ export class UserFormDialogComponent implements OnInit {
     this.userForm.get('role')?.valueChanges.subscribe(() => {
       this.userForm.get('password')?.updateValueAndValidity();
     });
+
+    this.userForm.get('isVolumeDiscountEnabled')?.valueChanges.subscribe(() => {
+      this.userForm
+        .get('assignedVolumeDiscountRuleIds')
+        ?.updateValueAndValidity();
+    });
   }
 
   private loadAllAvailableRules(): void {
@@ -715,6 +799,9 @@ export class UserFormDialogComponent implements OnInit {
           : settings;
         if (currentSettings && currentSettings.volumeDiscountRules) {
           this.allRules = currentSettings.volumeDiscountRules;
+          this.userForm
+            .get('assignedVolumeDiscountRuleIds')
+            ?.updateValueAndValidity();
         }
       });
   }
@@ -748,5 +835,56 @@ export class UserFormDialogComponent implements OnInit {
 
       this.dialogRef.close({ data: formValue, mode: this.data.mode });
     }
+  }
+
+  private dateRangesOverlap(
+    first: VolumeDiscountRule,
+    second: VolumeDiscountRule,
+  ): boolean {
+    const firstStart = this.toDateKey(first.startDate, '0000-01-01');
+    const firstEnd = this.toDateKey(first.endDate, '9999-12-31');
+    const secondStart = this.toDateKey(second.startDate, '0000-01-01');
+    const secondEnd = this.toDateKey(second.endDate, '9999-12-31');
+
+    return firstStart <= secondEnd && secondStart <= firstEnd;
+  }
+
+  private orderRangesOverlap(
+    first: VolumeDiscountRule,
+    second: VolumeDiscountRule,
+  ): boolean {
+    const firstMax = first.maxOrders ?? Number.MAX_SAFE_INTEGER;
+    const secondMax = second.maxOrders ?? Number.MAX_SAFE_INTEGER;
+
+    return first.minOrders <= secondMax && second.minOrders <= firstMax;
+  }
+
+  private volumeRuleLabel(rule: VolumeDiscountRule): string {
+    const base =
+      rule.type === DiscountRuleType.GOAL
+        ? `meta ${rule.minOrders}`
+        : `rango ${rule.minOrders}-${rule.maxOrders ?? '∞'}`;
+    const start = this.toDateKey(rule.startDate, 'sin inicio');
+    const end = this.toDateKey(rule.endDate, 'sin fin');
+
+    return `${base} (${rule.discountPercentage}%) [${start} a ${end}]`;
+  }
+
+  private toDateKey(
+    value: Date | string | null | undefined,
+    fallback: string,
+  ): string {
+    if (!value) {
+      return fallback;
+    }
+
+    if (value instanceof Date) {
+      const year = value.getFullYear();
+      const month = String(value.getMonth() + 1).padStart(2, '0');
+      const day = String(value.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    return String(value).slice(0, 10);
   }
 }

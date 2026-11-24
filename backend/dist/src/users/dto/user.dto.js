@@ -119,6 +119,18 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], UserDTO.prototype, "isFulfillmentEnabled", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], UserDTO.prototype, "isVolumeDiscountEnabled", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], UserDTO.prototype, "assignedVolumeDiscountRuleIds", void 0);
 class UserUpdateDTO {
 }
 exports.UserUpdateDTO = UserUpdateDTO;
@@ -224,6 +236,18 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], UserUpdateDTO.prototype, "isFulfillmentEnabled", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], UserUpdateDTO.prototype, "isVolumeDiscountEnabled", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], UserUpdateDTO.prototype, "assignedVolumeDiscountRuleIds", void 0);
 class UserCompanyUpdateDTO {
 }
 exports.UserCompanyUpdateDTO = UserCompanyUpdateDTO;

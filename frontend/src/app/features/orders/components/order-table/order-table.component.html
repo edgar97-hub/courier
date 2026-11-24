@@ -197,7 +197,10 @@
 
           <!-- El Badge de Descuento (Solo si existe) -->
           <span
-            *ngIf="order.appliedVolumeDiscountRule?.percentage"
+            *ngIf="
+              order.volumeDiscountAmount > 0 &&
+              order.appliedVolumeDiscountRule?.percentage
+            "
             class="discount-badge-table"
             matTooltip="Descuento por volumen aplicado"
           >

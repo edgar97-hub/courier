@@ -1,6 +1,7 @@
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { RegistrationUserCompanyDTO, UserCompanyUpdateDTO, UserDTO, UserProfile, UserUpdateDTO } from '../dto/user.dto';
 import { UsersEntity } from '../entities/users.entity';
+import { SettingsEntity } from 'src/settings/entities/settings.entity';
 export interface PaginatedUsers {
     items: UsersEntity[];
     total_count: number;
@@ -9,7 +10,8 @@ export interface PaginatedUsers {
 }
 export declare class UsersService {
     private readonly userRepository;
-    constructor(userRepository: Repository<UsersEntity>);
+    private readonly settingsRepository;
+    constructor(userRepository: Repository<UsersEntity>, settingsRepository: Repository<SettingsEntity>);
     createUser(body: UserDTO): Promise<UsersEntity>;
     registerCompany(body: RegistrationUserCompanyDTO): Promise<UsersEntity>;
     findUsers(): Promise<UsersEntity[]>;
@@ -36,4 +38,8 @@ export declare class UsersService {
     updateUserCompany(body: UserCompanyUpdateDTO, id: string): Promise<UpdateResult | undefined>;
     updateProfile(body: UserProfile, id: string): Promise<any | undefined>;
     deleteUser(id: string): Promise<DeleteResult | undefined>;
+    private validateVolumeDiscountAssignment;
+    private dateRangesOverlap;
+    private orderRangesOverlap;
+    private volumeRuleLabel;
 }

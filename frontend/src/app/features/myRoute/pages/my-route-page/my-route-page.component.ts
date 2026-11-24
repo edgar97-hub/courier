@@ -449,7 +449,7 @@ export class MyRoutePageComponent implements OnInit, OnDestroy {
 
   startPolling(): void {
     this.stopPolling();
-    this.pollingInterval = setInterval(() => this.loadRoutesForDate(), 30000);
+    this.pollingInterval = setInterval(() => this.loadRoutesForDate(), 60000);
   }
 
   stopPolling(): void {

@@ -73,7 +73,8 @@ let OrdersService = class OrdersService {
             throw new common_1.ConflictException('Solo se puede cargar evidencia a pedidos entregados o rechazados en punto.');
         }
         if (order.evidence_photos != null &&
-            (!Array.isArray(order.evidence_photos) || order.evidence_photos.length > 0)) {
+            (!Array.isArray(order.evidence_photos) ||
+                order.evidence_photos.length > 0)) {
             throw new common_1.ConflictException('El pedido ya tiene evidencia.');
         }
         const updated = await this.orderRepository
@@ -778,39 +779,69 @@ let OrdersService = class OrdersService {
             ])
                 .where('o.company_id = :companyId', { companyId })
                 .andWhere('o.delivery_date = :dateStr', { dateStr })
-                .andWhere('o.status != :canceled', { canceled: roles_1.STATES.CANCELED })
+                .andWhere('o.status::text != :annulled', {
+                annulled: roles_1.STATES.ANNULLED,
+            })
+                .andWhere(`NOT (
+            o.status::text = :reprogrammed
+            OR EXISTS (
+              SELECT 1
+              FROM order_logs l
+              WHERE l.order_id = o.id
+                AND (
+                  l.previous_value = :reprogrammed
+                  OR l.new_value = :reprogrammed
+                )
+            )
+          )`, {
+                reprogrammed: roles_1.STATES.RESCHEDULED,
+            })
                 .orderBy('o.code', 'ASC')
                 .getMany();
             if (dailyOrders.length === 0)
                 continue;
-            const userRules = settings.volumeDiscountRules.filter((r) => currentUser.assignedVolumeDiscountRuleIds.includes(r.id) &&
-                (!r.startDate || dateStr >= r.startDate) &&
-                (!r.endDate || dateStr <= r.endDate));
+            const dateKey = String(dateStr).slice(0, 10);
+            const userRules = settings.volumeDiscountRules.filter((r) => r.isActive !== false &&
+                currentUser.assignedVolumeDiscountRuleIds.includes(r.id) &&
+                (!r.startDate || dateKey >= r.startDate.slice(0, 10)) &&
+                (!r.endDate || dateKey <= r.endDate.slice(0, 10)));
             if (userRules.length === 0)
                 continue;
-            const currentMode = userRules[0].type;
+            const goalRules = userRules.filter((rule) => rule.type === settings_entity_1.DiscountRuleType.GOAL);
+            const rangeRules = userRules.filter((rule) => rule.type === settings_entity_1.DiscountRuleType.RANGE);
             const totalCount = dailyOrders.length;
             const ordersToUpdate = [];
-            if (currentMode === settings_entity_1.DiscountRuleType.GOAL) {
-                const bestGoal = userRules
-                    .filter((r) => totalCount >= r.minOrders)
-                    .sort((a, b) => b.minOrders - a.minOrders)[0];
+            if (goalRules.length > 0 && rangeRules.length > 0) {
+                console.warn(`[volume-discount] Reglas GOAL y RANGE activas para ${companyId} el ${dateKey}. Se prioriza GOAL.`);
+            }
+            if (goalRules.length > 0) {
+                if (goalRules.length > 1) {
+                    console.warn(`[volume-discount] ${goalRules.length} metas activas para ${companyId} el ${dateKey}. Se usará la de mayor meta alcanzada.`);
+                }
+                const bestGoal = goalRules
+                    .filter((rule) => totalCount >= rule.minOrders)
+                    .sort((a, b) => b.minOrders - a.minOrders ||
+                    b.discountPercentage - a.discountPercentage)[0];
                 for (let i = 0; i < dailyOrders.length; i++) {
                     const order = dailyOrders[i];
                     const sequenceNumber = i + 1;
-                    let ruleToApply = undefined;
-                    if (bestGoal && sequenceNumber <= bestGoal.minOrders) {
-                        ruleToApply = bestGoal;
-                    }
-                    this.updateOrderDiscount(order, ruleToApply, sequenceNumber, ordersToUpdate);
+                    this.updateOrderDiscount(order, bestGoal, sequenceNumber, ordersToUpdate);
                 }
             }
-            else {
+            else if (rangeRules.length > 0) {
+                const sortedRangeRules = [...rangeRules].sort((a, b) => a.minOrders - b.minOrders);
+                for (let i = 1; i < sortedRangeRules.length; i++) {
+                    const previousMax = sortedRangeRules[i - 1].maxOrders ?? Number.MAX_SAFE_INTEGER;
+                    if (sortedRangeRules[i].minOrders <= previousMax) {
+                        console.warn(`[volume-discount] Rangos superpuestos para ${companyId} el ${dateKey}.`);
+                        break;
+                    }
+                }
                 for (let i = 0; i < dailyOrders.length; i++) {
                     const order = dailyOrders[i];
                     const sequenceNumber = i + 1;
-                    const activeRange = userRules.find((r) => sequenceNumber >= r.minOrders &&
-                        sequenceNumber <= (r.maxOrders || 999999));
+                    const activeRange = sortedRangeRules.find((rule) => sequenceNumber >= rule.minOrders &&
+                        sequenceNumber <= (rule.maxOrders ?? Number.MAX_SAFE_INTEGER));
                     this.updateOrderDiscount(order, activeRange, sequenceNumber, ordersToUpdate);
                 }
             }
@@ -818,7 +849,7 @@ let OrdersService = class OrdersService {
                 await queryRunner.manager.update(orders_entity_1.OrdersEntity, order.id, {
                     shipping_cost: order.shipping_cost,
                     volumeDiscountAmount: order.volumeDiscountAmount,
-                    appliedVolumeDiscountRule: order.appliedVolumeDiscountRule,
+                    appliedVolumeDiscountRule: order.appliedVolumeDiscountRule ?? null,
                 });
             }
         }
@@ -827,7 +858,7 @@ let OrdersService = class OrdersService {
         const basePrice = order.shipping_cost + (order.volumeDiscountAmount || 0);
         let newDiscountAmount = 0;
         let newShippingCost = basePrice;
-        let ruleSnapshot;
+        let ruleSnapshot = null;
         if (rule) {
             newDiscountAmount = (basePrice * rule.discountPercentage) / 100;
             newShippingCost = basePrice - newDiscountAmount;
@@ -837,12 +868,15 @@ let OrdersService = class OrdersService {
                 percentage: rule.discountPercentage,
                 range: rule.type === settings_entity_1.DiscountRuleType.GOAL
                     ? `Meta ${rule.minOrders}`
-                    : `${rule.minOrders}-${rule.maxOrders}`,
+                    : `${rule.minOrders}-${rule.maxOrders ?? '∞'}`,
                 sequenceNumber: seq,
             };
         }
+        const currentRuleId = order.appliedVolumeDiscountRule?.ruleId ?? null;
+        const newRuleId = ruleSnapshot?.ruleId ?? null;
         if (order.shipping_cost !== newShippingCost ||
-            order.volumeDiscountAmount !== newDiscountAmount) {
+            order.volumeDiscountAmount !== newDiscountAmount ||
+            currentRuleId !== newRuleId) {
             order.volumeDiscountAmount = newDiscountAmount;
             order.shipping_cost = newShippingCost;
             order.appliedVolumeDiscountRule = ruleSnapshot;
@@ -864,7 +898,7 @@ let OrdersService = class OrdersService {
             where: {
                 user: { id: userId },
                 delivery_date: deliveryDate,
-                status: (0, typeorm_2.Not)(roles_1.STATES.CANCELED),
+                status: (0, typeorm_2.Not)(roles_1.STATES.ANNULLED),
             },
         });
         const nextSequenceNumber = currentCount + 1;
@@ -923,7 +957,7 @@ let OrdersService = class OrdersService {
                 where: {
                     user: { id: userId },
                     delivery_date: date,
-                    status: (0, typeorm_2.Not)(roles_1.STATES.CANCELED),
+                    status: (0, typeorm_2.Not)(roles_1.STATES.ANNULLED),
                 },
             });
             dbCounts.set(key, count);
@@ -1450,7 +1484,9 @@ let OrdersService = class OrdersService {
             `MAX( ("order".applied_volume_discount_rule->>'percentage')::float ) AS max_discount`,
             `MAX( "order".applied_volume_discount_rule->>'range' ) AS range_reached`,
         ])
-            .where('order.status != :status', { status: roles_1.STATES.CANCELED })
+            .where('order.status::text != :status', {
+            status: roles_1.STATES.ANNULLED,
+        })
             .andWhere('order.delivery_date BETWEEN :startDate AND :endDate', {
             startDate,
             endDate,

@@ -91,6 +91,16 @@ export class UserDTO {
   @IsOptional()
   @IsBoolean()
   isFulfillmentEnabled: boolean;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsBoolean()
+  isVolumeDiscountEnabled?: boolean;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsArray()
+  assignedVolumeDiscountRuleIds?: string[];
 }
 
 export class UserUpdateDTO {
@@ -172,6 +182,16 @@ export class UserUpdateDTO {
   @IsOptional()
   @IsBoolean()
   isFulfillmentEnabled: boolean;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsBoolean()
+  isVolumeDiscountEnabled?: boolean;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsArray()
+  assignedVolumeDiscountRuleIds?: string[];
 }
 
 export class UserCompanyUpdateDTO {

@@ -20,16 +20,22 @@ const error_manager_1 = require("../../utils/error.manager");
 const typeorm_2 = require("typeorm");
 const users_entity_1 = require("../entities/users.entity");
 const roles_1 = require("../../constants/roles");
+const settings_entity_1 = require("../../settings/entities/settings.entity");
 let UsersService = class UsersService {
-    constructor(userRepository) {
+    constructor(userRepository, settingsRepository) {
         this.userRepository = userRepository;
+        this.settingsRepository = settingsRepository;
     }
     async createUser(body) {
         try {
+            await this.validateVolumeDiscountAssignment(body.isVolumeDiscountEnabled, body.assignedVolumeDiscountRuleIds);
             body.password = await bcrypt.hash(body.password, Number(process.env.HASH_SALT));
             return await this.userRepository.save(body);
         }
         catch (error) {
+            if (error instanceof common_1.BadRequestException) {
+                throw error;
+            }
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
@@ -37,6 +43,8 @@ let UsersService = class UsersService {
         try {
             body.password = await bcrypt.hash(body.password, Number(process.env.HASH_SALT));
             body.role = roles_1.ROLES.EMPRESA;
+            body.isVolumeDiscountEnabled = false;
+            body.assignedVolumeDiscountRuleIds = [];
             const savedUser = await this.userRepository.save(body);
             return savedUser;
         }
@@ -181,6 +189,10 @@ let UsersService = class UsersService {
     }
     async updateUser(body, id) {
         try {
+            const currentUser = await this.userRepository.findOne({
+                where: { id },
+            });
+            await this.validateVolumeDiscountAssignment(body.isVolumeDiscountEnabled, body.assignedVolumeDiscountRuleIds, currentUser);
             if (body.password) {
                 body.password = await bcrypt.hash(body.password, Number(process.env.HASH_SALT));
             }
@@ -197,6 +209,9 @@ let UsersService = class UsersService {
             return user;
         }
         catch (error) {
+            if (error instanceof common_1.BadRequestException) {
+                throw error;
+            }
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
@@ -285,11 +300,70 @@ let UsersService = class UsersService {
             throw error_manager_1.ErrorManager.createSignatureError(error.message);
         }
     }
+    async validateVolumeDiscountAssignment(isEnabled, assignedRuleIds, currentUser) {
+        const effectiveEnabled = isEnabled ?? currentUser?.isVolumeDiscountEnabled ?? false;
+        const effectiveRuleIds = assignedRuleIds ?? currentUser?.assignedVolumeDiscountRuleIds ?? [];
+        if (!effectiveEnabled || effectiveRuleIds.length === 0) {
+            return;
+        }
+        const settings = await this.settingsRepository.findOne({
+            where: {},
+        });
+        const rules = settings?.volumeDiscountRules ?? [];
+        const selectedRules = rules.filter((rule) => effectiveRuleIds.includes(rule.id) && rule.isActive !== false);
+        const errors = [];
+        for (let i = 0; i < selectedRules.length; i++) {
+            for (let j = i + 1; j < selectedRules.length; j++) {
+                const first = selectedRules[i];
+                const second = selectedRules[j];
+                if (!this.dateRangesOverlap(first, second)) {
+                    continue;
+                }
+                if (first.type === settings_entity_1.DiscountRuleType.GOAL &&
+                    second.type === settings_entity_1.DiscountRuleType.GOAL) {
+                    errors.push(`Las metas ${this.volumeRuleLabel(first)} y ${this.volumeRuleLabel(second)} tienen fechas superpuestas.`);
+                    continue;
+                }
+                if (first.type !== second.type) {
+                    errors.push(`${this.volumeRuleLabel(first)} y ${this.volumeRuleLabel(second)} coinciden en fechas. Deja solo una.`);
+                    continue;
+                }
+                if (this.orderRangesOverlap(first, second)) {
+                    errors.push(`Los rangos ${this.volumeRuleLabel(first)} y ${this.volumeRuleLabel(second)} se superponen en cantidad de pedidos.`);
+                }
+            }
+        }
+        if (errors.length > 0) {
+            throw new common_1.BadRequestException(errors.join(' '));
+        }
+    }
+    dateRangesOverlap(first, second) {
+        const firstStart = (first.startDate || '0000-01-01').slice(0, 10);
+        const firstEnd = (first.endDate || '9999-12-31').slice(0, 10);
+        const secondStart = (second.startDate || '0000-01-01').slice(0, 10);
+        const secondEnd = (second.endDate || '9999-12-31').slice(0, 10);
+        return firstStart <= secondEnd && secondStart <= firstEnd;
+    }
+    orderRangesOverlap(first, second) {
+        const firstMax = first.maxOrders ?? Number.MAX_SAFE_INTEGER;
+        const secondMax = second.maxOrders ?? Number.MAX_SAFE_INTEGER;
+        return first.minOrders <= secondMax && second.minOrders <= firstMax;
+    }
+    volumeRuleLabel(rule) {
+        const base = rule.type === settings_entity_1.DiscountRuleType.GOAL
+            ? `meta ${rule.minOrders}`
+            : `rango ${rule.minOrders}-${rule.maxOrders ?? '∞'}`;
+        const start = (rule.startDate || 'sin inicio').slice(0, 10);
+        const end = (rule.endDate || 'sin fin').slice(0, 10);
+        return `${base} (${rule.discountPercentage}%) [${start} a ${end}]`;
+    }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(users_entity_1.UsersEntity)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __param(1, (0, typeorm_1.InjectRepository)(settings_entity_1.SettingsEntity)),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map

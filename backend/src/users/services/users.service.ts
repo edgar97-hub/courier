@@ -12,6 +12,11 @@ import {
 } from '../dto/user.dto';
 import { UsersEntity } from '../entities/users.entity';
 import { ROLES } from 'src/constants/roles';
+import {
+  DiscountRuleType,
+  SettingsEntity,
+  VolumeDiscountRule,
+} from 'src/settings/entities/settings.entity';
 
 export interface PaginatedUsers {
   items: UsersEntity[];
@@ -25,16 +30,25 @@ export class UsersService {
   constructor(
     @InjectRepository(UsersEntity)
     private readonly userRepository: Repository<UsersEntity>,
+    @InjectRepository(SettingsEntity)
+    private readonly settingsRepository: Repository<SettingsEntity>,
   ) {}
 
   public async createUser(body: UserDTO): Promise<UsersEntity> {
     try {
+      await this.validateVolumeDiscountAssignment(
+        body.isVolumeDiscountEnabled,
+        body.assignedVolumeDiscountRuleIds,
+      );
       body.password = await bcrypt.hash(
         body.password,
         Number(process.env.HASH_SALT),
       );
       return await this.userRepository.save(body);
     } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       throw ErrorManager.createSignatureError(error.message);
     }
   }
@@ -48,6 +62,8 @@ export class UsersService {
         Number(process.env.HASH_SALT),
       );
       body.role = ROLES.EMPRESA;
+      body.isVolumeDiscountEnabled = false;
+      body.assignedVolumeDiscountRuleIds = [];
 
       const savedUser = await this.userRepository.save(body);
       return savedUser;
@@ -234,6 +250,15 @@ export class UsersService {
     id: string,
   ): Promise<UpdateResult | undefined> {
     try {
+      const currentUser = await this.userRepository.findOne({
+        where: { id },
+      });
+      await this.validateVolumeDiscountAssignment(
+        body.isVolumeDiscountEnabled,
+        body.assignedVolumeDiscountRuleIds,
+        currentUser,
+      );
+
       if (body.password) {
         body.password = await bcrypt.hash(
           body.password,
@@ -252,6 +277,9 @@ export class UsersService {
       }
       return user;
     } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       throw ErrorManager.createSignatureError(error.message);
     }
   }
@@ -368,5 +396,101 @@ export class UsersService {
       }
       throw ErrorManager.createSignatureError(error.message);
     }
+  }
+
+  private async validateVolumeDiscountAssignment(
+    isEnabled: boolean | undefined,
+    assignedRuleIds: string[] | undefined,
+    currentUser?: UsersEntity | null,
+  ): Promise<void> {
+    const effectiveEnabled =
+      isEnabled ?? currentUser?.isVolumeDiscountEnabled ?? false;
+    const effectiveRuleIds =
+      assignedRuleIds ?? currentUser?.assignedVolumeDiscountRuleIds ?? [];
+
+    if (!effectiveEnabled || effectiveRuleIds.length === 0) {
+      return;
+    }
+
+    const settings = await this.settingsRepository.findOne({
+      where: {},
+    });
+    const rules = settings?.volumeDiscountRules ?? [];
+    const selectedRules = rules.filter(
+      (rule) => effectiveRuleIds.includes(rule.id) && rule.isActive !== false,
+    );
+
+    const errors: string[] = [];
+
+    for (let i = 0; i < selectedRules.length; i++) {
+      for (let j = i + 1; j < selectedRules.length; j++) {
+        const first = selectedRules[i];
+        const second = selectedRules[j];
+
+        if (!this.dateRangesOverlap(first, second)) {
+          continue;
+        }
+
+        if (
+          first.type === DiscountRuleType.GOAL &&
+          second.type === DiscountRuleType.GOAL
+        ) {
+          errors.push(
+            `Las metas ${this.volumeRuleLabel(first)} y ${this.volumeRuleLabel(second)} tienen fechas superpuestas.`,
+          );
+          continue;
+        }
+
+        if (first.type !== second.type) {
+          errors.push(
+            `${this.volumeRuleLabel(first)} y ${this.volumeRuleLabel(second)} coinciden en fechas. Deja solo una.`,
+          );
+          continue;
+        }
+
+        if (this.orderRangesOverlap(first, second)) {
+          errors.push(
+            `Los rangos ${this.volumeRuleLabel(first)} y ${this.volumeRuleLabel(second)} se superponen en cantidad de pedidos.`,
+          );
+        }
+      }
+    }
+
+    if (errors.length > 0) {
+      throw new BadRequestException(errors.join(' '));
+    }
+  }
+
+  private dateRangesOverlap(
+    first: VolumeDiscountRule,
+    second: VolumeDiscountRule,
+  ): boolean {
+    const firstStart = (first.startDate || '0000-01-01').slice(0, 10);
+    const firstEnd = (first.endDate || '9999-12-31').slice(0, 10);
+    const secondStart = (second.startDate || '0000-01-01').slice(0, 10);
+    const secondEnd = (second.endDate || '9999-12-31').slice(0, 10);
+
+    return firstStart <= secondEnd && secondStart <= firstEnd;
+  }
+
+  private orderRangesOverlap(
+    first: VolumeDiscountRule,
+    second: VolumeDiscountRule,
+  ): boolean {
+    const firstMax = first.maxOrders ?? Number.MAX_SAFE_INTEGER;
+    const secondMax = second.maxOrders ?? Number.MAX_SAFE_INTEGER;
+
+    return first.minOrders <= secondMax && second.minOrders <= firstMax;
+  }
+
+  private volumeRuleLabel(rule: VolumeDiscountRule): string {
+    const base =
+      rule.type === DiscountRuleType.GOAL
+        ? `meta ${rule.minOrders}`
+        : `rango ${rule.minOrders}-${rule.maxOrders ?? '∞'}`;
+    const start = (rule.startDate || 'sin inicio').slice(0, 10);
+    const end = (rule.endDate || 'sin fin').slice(0, 10);
+
+    return `${base} (${rule.discountPercentage}%) [${start} a ${end}]`;
   }
 }
